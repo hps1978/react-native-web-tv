@@ -11,6 +11,7 @@
 'use client';
 
 import type { PressResponderConfig } from '../../modules/usePressEvents/PressResponder';
+import type { TVParallaxPropertiesType } from '../TV/types';
 import type { ViewProps } from '../View';
 
 import * as React from 'react';
@@ -39,7 +40,9 @@ export type Props = $ReadOnly<{|
   onPressIn?: $PropertyType<PressResponderConfig, 'onPressStart'>,
   onPressOut?: $PropertyType<PressResponderConfig, 'onPressEnd'>,
   rejectResponderTermination?: ?boolean,
-  testID?: $PropertyType<ViewProps, 'testID'>
+  testID?: $PropertyType<ViewProps, 'testID'>,
+  // Not used yet, probably never will be is is for iOS only
+  tvParallaxProperties?: TVParallaxPropertiesType
 |}>;
 
 const forwardPropsList = {

@@ -10,6 +10,8 @@
 
 import type { ColorValue, GenericStyleProp, LayoutEvent } from '../../types';
 
+import type { TVViewProps } from '../TV/types';
+
 import type {
   AnimationStyles,
   BorderStyles,
@@ -229,6 +231,7 @@ export type ViewStyle = {
 export type ViewProps = {
   ...AccessibilityProps,
   ...EventProps,
+  ...TVViewProps,
   children?: ?any,
   dataSet?: { ... },
   dir?: 'ltr' | 'rtl',

@@ -149,6 +149,14 @@ const createDOMProps = (elementType, props, options) => {
     style,
     tabIndex,
     testID,
+    // TV View props
+    autoFocus,
+    // destinations,
+    trapFocusDown,
+    trapFocusLeft,
+    trapFocusRight,
+    trapFocusUp,
+    tvFocusable,
     // Rest
     ...domProps
   } = props;
@@ -841,6 +849,7 @@ const createDOMProps = (elementType, props, options) => {
     if (focusable === false) {
       domProps.tabIndex = '-1';
     }
+
     if (
       // These native elements are keyboard focusable by default
       elementType === 'a' ||
@@ -892,6 +901,54 @@ const createDOMProps = (elementType, props, options) => {
   }
   if (inlineStyle) {
     domProps.style = inlineStyle;
+  }
+
+  // TV View
+  if (tvFocusable) {
+    // setup attributes and classes for tv focusable elements
+    // based on @bbc/@bbc/tv-lrud-spatial library requirements
+    // consider this element a container if tvFocusable is true
+
+    // Update tabIndex so that the container itself is not focusable
+    // This does not stop it's children to be focusable based on thier focusable prop
+    domProps.tabIndex = '-1';
+
+    // 1. add lrud-container class
+    if (domProps.className) {
+      domProps.className += ' lrud-container';
+    } else {
+      domProps.className = 'lrud-container';
+    }
+
+    // 2. setup focusable state
+    if (focusable === false) {
+      domProps.className += ' lrud-ignore';
+    }
+
+    // 3. setup data-block-exit attributes for trapFocus* props
+    const trapFocusString = `${trapFocusUp ? 'up' : ''}${
+      trapFocusDown ? ' down' : ''
+    }${trapFocusLeft ? ' left' : ''}${trapFocusRight ? ' right' : ''}`;
+    if (trapFocusString.trim().length > 0) {
+      domProps['data-block-exit'] = trapFocusString;
+    }
+
+    // 4. setup destinations attribute
+    // each destination in array is an element, extract all ids
+    // NOTE: Not done here as the ids may need to be setup
+    // if (destinations && Array.isArray(destinations)) {
+    //   const destinationIDs = destinations
+    //     .map((dest) => (dest && dest.id ? dest.id : null))
+    //     .filter((id) => id != null);
+    //   if (destinationIDs.length > 0) {
+    //     domProps['data-destinations'] = destinationIDs.join(' ');
+    //   }
+    // }
+
+    // 5. setup autoFocus
+    // Not really sure what this means at the moment as all this
+    // logic is to handle focus movement. So until I understand this better!!!
+    domProps['data-autofocus'] = autoFocus ? 'true' : 'false';
   }
 
   // OTHER

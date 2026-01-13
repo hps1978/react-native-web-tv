@@ -10,8 +10,7 @@
 
 'use client';
 
-import type { ViewProps, ViewStyle } from '../View/types';
-
+import type { ScrollViewProps } from './types';
 import Dimensions from '../Dimensions';
 import dismissKeyboard from '../../modules/dismissKeyboard';
 import invariant from 'fbjs/lib/invariant';
@@ -24,21 +23,6 @@ import UIManager from '../UIManager';
 import View from '../View';
 import React from 'react';
 import warning from 'fbjs/lib/warning';
-
-type ScrollViewProps = {
-  ...ViewProps,
-  centerContent?: boolean,
-  contentContainerStyle?: ViewStyle,
-  horizontal?: boolean,
-  keyboardDismissMode?: 'none' | 'interactive' | 'on-drag',
-  onContentSizeChange?: (e: any) => void,
-  onScroll?: (e: any) => void,
-  pagingEnabled?: boolean,
-  refreshControl?: any,
-  scrollEnabled?: boolean,
-  scrollEventThrottle?: number,
-  stickyHeaderIndices?: Array<number>
-};
 
 type Event = Object;
 

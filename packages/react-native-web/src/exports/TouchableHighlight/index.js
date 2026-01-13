@@ -13,6 +13,7 @@
 import type { ColorValue } from '../../types';
 import type { Props as TouchableWithoutFeedbackProps } from '../TouchableWithoutFeedback';
 import type { ViewProps } from '../View';
+import type { TVViewProps } from '../TV/types';
 
 import * as React from 'react';
 import { useCallback, useMemo, useState, useRef } from 'react';
@@ -26,6 +27,7 @@ type ViewStyle = $PropertyType<ViewProps, 'style'>;
 
 type Props = $ReadOnly<{|
   ...TouchableWithoutFeedbackProps,
+  ...TVViewProps,
   activeOpacity?: ?number,
   onHideUnderlay?: ?() => void,
   onShowUnderlay?: ?() => void,

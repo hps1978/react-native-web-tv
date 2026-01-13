@@ -1,0 +1,56 @@
+/**
+ * Methods to enable and disable listening for specific OS TV remote events (menu key, pan gesture)
+ *
+ * @format
+ * @flow
+ */
+
+'use strict';
+
+// import NativeTVNavigationEventEmitter from '../../../src/private/specs_DEPRECATED/modules/NativeTVNavigationEventEmitter';
+// import Platform from '../Platform';
+
+const TVEventControl = {
+  enableTVMenuKey: () => {
+    console.warn('TVEventControl.enableTVMenuKey() is not implemented on web.');
+    // Platform.isTV && NativeTVNavigationEventEmitter &&
+    //   NativeTVNavigationEventEmitter.enableTVMenuKey();
+  },
+  disableTVMenuKey: () => {
+    console.warn(
+      'TVEventControl.disableTVMenuKey() is not implemented on web.'
+    );
+    // Platform.isTV && NativeTVNavigationEventEmitter &&
+    //   NativeTVNavigationEventEmitter.disableTVMenuKey();
+  },
+  enableTVPanGesture: () => {
+    console.warn(
+      'TVEventControl.enableTVPanGesture() is not implemented on web.'
+    );
+    // Platform.isTV && NativeTVNavigationEventEmitter &&
+    //   NativeTVNavigationEventEmitter.enableTVPanGesture();
+  },
+  disableTVPanGesture: () => {
+    console.warn(
+      'TVEventControl.disableTVPanGesture() is not implemented on web.'
+    );
+    // Platform.isTV && NativeTVNavigationEventEmitter &&
+    //   NativeTVNavigationEventEmitter.disableTVPanGesture();
+  },
+  enableGestureHandlersCancelTouches: () => {
+    console.warn(
+      'TVEventControl.enableGestureHandlersCancelTouches() is not implemented on web.'
+    );
+    // Platform.isTV && NativeTVNavigationEventEmitter &&
+    //   NativeTVNavigationEventEmitter.enableGestureHandlersCancelTouches();
+  },
+  disableGestureHandlersCancelTouches: () => {
+    console.warn(
+      'TVEventControl.disableGestureHandlersCancelTouches() is not implemented on web.'
+    );
+    // Platform.isTV && NativeTVNavigationEventEmitter &&
+    //   NativeTVNavigationEventEmitter.disableGestureHandlersCancelTouches();
+  }
+};
+
+export default TVEventControl;

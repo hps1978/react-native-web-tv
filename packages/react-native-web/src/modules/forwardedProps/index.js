@@ -146,6 +146,22 @@ export const keyboardProps = {
   onKeyUpCapture: true
 };
 
+// TV props
+export const tvViewProps = {
+  tvFocusable: true
+};
+
+export const tvFocusGuideViewProps = {
+  autoFocus: true,
+  destinations: false, // SpatialManager handles this
+  // focusable: true, Very important for TVFocusGuideView but handled in defaultProps
+  trapFocusDown: true,
+  trapFocusLeft: true,
+  trapFocusRight: true,
+  trapFocusUp: true
+};
+
+// TODO: work on a solution to disable mouse/touch events on TV platforms
 export const mouseProps = {
   onMouseDown: true,
   onMouseEnter: true,

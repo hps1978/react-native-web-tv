@@ -68,3 +68,12 @@ export { default as DeviceEventEmitter } from './exports/DeviceEventEmitter';
 export { default as useColorScheme } from './exports/useColorScheme';
 export { default as useLocaleContext } from './exports/useLocaleContext';
 export { default as useWindowDimensions } from './exports/useWindowDimensions';
+
+// #region TV
+export { default as TVEventHandler } from './exports/TV/TVEventHandler';
+export { default as TVEventControl } from './exports/TV/TVEventControl';
+export { default as TVFocusGuideView } from './exports/TV/TVFocusGuideView';
+export type { TVRemoteEvent } from './exports/TV/types';
+export { default as TVTextScrollView } from './exports/TV/TVTextScrollView';
+export { default as useTVEventHandler } from './exports/TV/useTVEventHandler';
+// #endregion

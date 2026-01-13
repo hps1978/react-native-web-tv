@@ -12,6 +12,10 @@
 import type { HoverEventsConfig } from '../../modules/useHover';
 import type { PressResponderConfig } from '../../modules/usePressEvents/PressResponder';
 import type { ViewProps } from '../View';
+import type {
+  FocusEvent,
+  BlurEvent
+} from '../../vendor/react-native/Types/CoreEventTypes';
 
 import * as React from 'react';
 import { forwardRef, memo, useMemo, useState, useRef } from 'react';
@@ -61,7 +65,10 @@ type Props = {
    * Used only for documentation or testing (e.g. snapshot testing).
    */
   testOnly_hovered?: ?boolean,
-  testOnly_pressed?: ?boolean
+  testOnly_pressed?: ?boolean,
+  // Additional TV Props
+  onFocusCapture?: ?(event: FocusEvent) => void,
+  onBlurCapture?: ?(event: BlurEvent) => void
 };
 
 /**

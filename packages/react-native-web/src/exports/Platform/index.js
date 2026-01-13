@@ -10,6 +10,7 @@
 
 const Platform = {
   OS: 'web',
+  isTV: true, // TODO: detect TV platforms
   select: (obj: Object): any => ('web' in obj ? obj.web : obj.default),
   get isTesting(): boolean {
     if (process.env.NODE_ENV === 'test') {

@@ -11,6 +11,7 @@
 'use client';
 
 import type { Props as TouchableWithoutFeedbackProps } from '../TouchableWithoutFeedback';
+import type { TVViewProps } from '../TV/types';
 import type { ViewProps } from '../View';
 
 import * as React from 'react';
@@ -25,6 +26,7 @@ type ViewStyle = $PropertyType<ViewProps, 'style'>;
 
 type Props = $ReadOnly<{|
   ...TouchableWithoutFeedbackProps,
+  ...TVViewProps,
   activeOpacity?: ?number,
   style?: ?ViewStyle
 |}>;

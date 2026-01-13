@@ -24,6 +24,8 @@ import useResponderEvents from '../../modules/useResponderEvents';
 import StyleSheet from '../StyleSheet';
 import TextAncestorContext from '../Text/TextAncestorContext';
 import { useLocaleContext, getLocaleDirection } from '../../modules/useLocale';
+import Platform from '../Platform';
+import { setFocus } from '../../modules/SpatialManager';
 
 const forwardPropsList = Object.assign(
   {},
@@ -32,6 +34,8 @@ const forwardPropsList = Object.assign(
   forwardedProps.clickProps,
   forwardedProps.focusProps,
   forwardedProps.keyboardProps,
+  forwardedProps.tvViewProps,
+  forwardedProps.tvFocusGuideViewProps,
   forwardedProps.mouseProps,
   forwardedProps.touchProps,
   forwardedProps.styleProps,
@@ -67,6 +71,7 @@ const View: React.AbstractComponent<ViewProps, HTMLElement & PlatformMethods> =
       onSelectionChangeShouldSetResponderCapture,
       onStartShouldSetResponder,
       onStartShouldSetResponderCapture,
+      hasTVPreferredFocus,
       ...rest
     } = props;
 
@@ -135,8 +140,45 @@ const View: React.AbstractComponent<ViewProps, HTMLElement & PlatformMethods> =
       }
     }
 
+    const requestTVFocus = React.useCallback(() => {
+      setFocus(hostRef.current);
+    }, []);
+
+    const setLocalRef = React.useCallback(
+      (instance: /*HostInstance*/ any | null) => {
+        // $FlowExpectedError[incompatible-type]
+        hostRef.current = instance;
+
+        if (instance != null) {
+          // $FlowFixMe[prop-missing]
+          // $FlowFixMe[unsafe-object-assign]
+          Object.assign(instance, {
+            requestTVFocus
+          });
+        }
+      },
+      [requestTVFocus]
+    );
+
+    // On mount trigger focus event
+    // if hasTVPreferredFocus is set (TV platforms only)
+    React.useEffect(() => {
+      const focusable =
+        (props.tabIndex && props.tabIndex !== -1) ||
+        !(props.tvFocusable === true) ||
+        props.focusable === true;
+      if (Platform.isTV && hasTVPreferredFocus && focusable) {
+        setFocus(hostRef.current);
+      }
+    }, []);
+
     const platformMethodsRef = usePlatformMethods(supportedProps);
-    const setRef = useMergeRefs(hostRef, platformMethodsRef, forwardedRef);
+    const setRef = useMergeRefs(
+      hostRef,
+      platformMethodsRef,
+      forwardedRef,
+      setLocalRef
+    );
 
     supportedProps.ref = setRef;
 

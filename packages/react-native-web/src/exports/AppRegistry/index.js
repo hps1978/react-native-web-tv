@@ -12,6 +12,7 @@
 
 import type { Application } from './renderApplication';
 import type { ComponentType, Node } from 'react';
+import { setupSpatialNavigation } from '../../modules/SpatialManager';
 
 import invariant from 'fbjs/lib/invariant';
 import unmountComponentAtNode from '../unmountComponentAtNode';
@@ -131,7 +132,8 @@ export default class AppRegistry {
       `Application "${appKey}" has not been registered. ` +
         'This is either due to an import error during initialization or failure to call AppRegistry.registerComponent.'
     );
-
+    // TODO: Find a better place to do this
+    setupSpatialNavigation(appParameters.rootTag);
     return runnables[appKey].run(appParameters);
   }
 
