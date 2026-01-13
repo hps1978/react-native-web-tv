@@ -1,0 +1,115 @@
+/**
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ * @flow
+ * @format
+ */
+
+import type { ViewProps } from '../View/types';
+import type { ComponentOrHandleType } from './tagForComponentOrHandle';
+import Platform from '../Platform';
+import useMergeRefs from '../../modules/useMergeRefs';
+import View from '../View';
+// import {Commands} from '../View/ViewNativeComponent';
+import { setDestinations as setNavDestinations } from '../../modules/SpatialManager';
+// import tagForComponentOrHandle from './tagForComponentOrHandle';
+
+import StyleSheet from '../StyleSheet';
+import * as React from 'react';
+type TVFocusGuideViewProps = $ReadOnly<{
+  ...ViewProps,
+  /**
+   * If the view should be "visible". display "flex" if visible, otherwise "none".
+   * Useful for absolute focus guides without children
+   * Defaults to true
+   */
+  enabled?: boolean,
+  /**
+   * The views the focus should go to
+   */
+  destinations?: ComponentOrHandleType[],
+  /**
+   * @deprecated Don't use it, no longer necessary.
+   */
+  safePadding?: 'vertical' | 'horizontal' | 'both' | null,
+  autoFocus?: boolean,
+  trapFocusUp?: boolean,
+  trapFocusDown?: boolean,
+  trapFocusLeft?: boolean,
+  trapFocusRight?: boolean,
+  /**
+   * When set to false, this view and all its subviews will be NOT focusable.
+   */
+  focusable?: boolean | void,
+}>;
+export type TVFocusGuideViewImperativeMethods = $ReadOnly<{
+  setDestinations: (destinations: (ComponentOrHandleType | number)[]) => void
+}>;
+const TVFocusGuideView: React.AbstractComponent<TVFocusGuideViewProps, React.ElementRef<typeof View>> = React.forwardRef((props, ref) => {
+  const {
+    enabled = true,
+    // safePadding,
+    destinations: destinationsProp,
+    autoFocus,
+    focusable
+  } = props;
+  const focusGuideRef = React.useRef<React.ElementRef<typeof View> | null>(null);
+  const setDestinations = React.useCallback((destinations: ?HTMLElement[]) => {
+    if (Platform.isTV) {
+      // const dests: number[] = (destinations || [])
+      //   .map((destination: any) => tagForComponentOrHandle(destination))
+      //   .filter(Boolean);
+
+      if (focusGuideRef.current != null) {
+        setNavDestinations(focusGuideRef.current, destinations);
+        // Commands.setDestinations(focusGuideRef.current, dests);
+      } else {
+        console.warn('[TVFocusGuideView]: Cannot set destinations as focusGuideView ref unavailable for: ', destinations);
+      }
+    }
+  }, []);
+  const setLocalRef = React.useCallback((instance: any /*HostInstance*/ | null) => {
+    // $FlowExpectedError[incompatible-type]
+    focusGuideRef.current = instance;
+    if (instance != null) {
+      // $FlowFixMe[prop-missing]
+      // $FlowFixMe[unsafe-object-assign]
+      Object.assign(instance, {
+        setDestinations
+      });
+    }
+  }, [setDestinations]);
+  const mergedRef = useMergeRefs(setLocalRef, ref);
+  React.useEffect(() => {
+    if (focusable === false) {
+      setDestinations([]);
+    } else if (destinationsProp !== null && destinationsProp !== undefined) {
+      setDestinations(destinationsProp); // $FlowFixMe[incompatible-call]
+    }
+  }, [setDestinations, destinationsProp, focusable]);
+  const enabledStyle = {
+    display: enabled ? 'flex' : 'none'
+  };
+  const style = [styles.container, props.style, enabledStyle];
+
+  // If there are no destinations and the autoFocus is false the the default value of focusable should be false
+  // It is then properly handled by the native code
+  const tvOSSelectable = destinationsProp || autoFocus ? focusable !== false : false;
+  return (
+    // $FlowFixMe[prop-missing]
+    <View {...props} autoFocus={focusable === false ? true : autoFocus} collapsable={false}
+    // tvOS only prop
+    isTVSelectable={tvOSSelectable} ref={mergedRef} style={style} tvFocusable={true} // This is the only way to say it's a container for Web focus management
+    />
+  );
+});
+const styles = StyleSheet.create({
+  container: {
+    minWidth: 1,
+    minHeight: 1
+  }
+});
+export default TVFocusGuideView;

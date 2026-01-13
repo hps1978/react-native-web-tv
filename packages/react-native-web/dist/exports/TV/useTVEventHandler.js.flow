@@ -1,0 +1,10 @@
+/*
+ * @flow
+ */
+
+import type { TVRemoteEvent } from './types';
+import { type EventSubscription } from '../../vendor/react-native/vendor/emitter/EventEmitter';
+import TVEventHandler from './TVEventHandler';
+import * as React from 'react';
+declare var useTVEventHandler: (handleEvent: (evt: TVRemoteEvent) => void) => any;
+export default useTVEventHandler;

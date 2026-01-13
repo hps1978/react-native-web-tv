@@ -1,0 +1,30 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ * @flow strict
+ * @format
+ */
+
+// This module supports SpatialNavigation for TV platforms on web using
+// the @bbc/tv-lrud-spatial library. Currently, SpatialNavigation working
+// completely outside the React tree, i.e, it uses DOM APIs to manage
+// focus and navigation.
+
+// Currently, it only supports arrow ISO keyboard navigation.
+import { getNextFocus } from '@bbc/tv-lrud-spatial';
+import { addEventListener } from '../addEventListener';
+let isSpatialManagerReady = false;
+let spatialNavigationContainer: HTMLElement | null = null;
+let focusedElement: HTMLElement | null = null;
+let keyDownListener: ((event: any) => void) | null = null;
+const ID_LIMIT = 100000; // big enough to wrap around!
+let id = 0;
+declare function setupId(node: HTMLElement): any;
+declare function setupSpatialNavigation(container?: HTMLElement): any;
+declare function setFocus(node: HTMLElement): any;
+declare function setDestinations(host: HTMLElement, destinations: HTMLElement[]): any;
+declare function teardownSpatialNavigation(): any;
+export { setupSpatialNavigation, setFocus, teardownSpatialNavigation, setDestinations };

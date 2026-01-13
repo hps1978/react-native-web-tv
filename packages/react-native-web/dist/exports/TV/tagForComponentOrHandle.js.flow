@@ -1,0 +1,16 @@
+/*
+ * Replacement for findNodeHandle, since we need this for converting
+ * components to tags when rendering nextFocus props
+ * @flow
+ */
+
+// TODO: make this work for Fabric
+
+import * as React from 'react';
+
+// import { findNodeHandle } from '../findNodeHandle';
+
+export type ComponentOrHandleType = ?(React.ElementRef<React.ElementType> | number);
+export type TagForComponentOrHandleType = (component: ComponentOrHandleType) => ?number;
+declare var tagForComponentOrHandle: (component: any) => any;
+export default tagForComponentOrHandle;

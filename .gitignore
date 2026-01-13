@@ -1,6 +1,12 @@
 .next
 build
 coverage
-dist
+# temporary disabling dist to allow installing from this fork
+# dist
+packages/react-native-web/dist/cjs
+packages/react-native-web-docs/dist
+packages/benchmarks/dist
+# end - temporary disabling dist to allow installing from this fork
+
 node_modules
 .DS_Store
