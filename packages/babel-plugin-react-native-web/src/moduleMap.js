@@ -42,6 +42,7 @@ module.exports = {
   StatusBar: true,
   StyleSheet: true,
   Switch: true,
+  TV: true,
   Text: true,
   TextInput: true,
   Touchable: true,
