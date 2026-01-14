@@ -100,7 +100,7 @@ function setFocus(node: HTMLElement) {
     }
   } else {
     if (node && node.focus) {
-      node.setFocus();
+      node.focus();
     }
     focusedElement = node;
   }

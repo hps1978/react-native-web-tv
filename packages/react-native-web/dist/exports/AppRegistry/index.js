@@ -72,6 +72,7 @@ export default class AppRegistry {
       console.log("Running application \"" + appKey + "\" with appParams:\n", params, "\nDevelopment-level warnings: " + (isDevelopment ? 'ON' : 'OFF') + "." + ("\nPerformance optimizations: " + (isDevelopment ? 'OFF' : 'ON') + "."));
     }
     invariant(runnables[appKey] && runnables[appKey].run, "Application \"" + appKey + "\" has not been registered. " + 'This is either due to an import error during initialization or failure to call AppRegistry.registerComponent.');
+    // TODO: Find a better place to do this
     setupSpatialNavigation(appParameters.rootTag);
     return runnables[appKey].run(appParameters);
   }

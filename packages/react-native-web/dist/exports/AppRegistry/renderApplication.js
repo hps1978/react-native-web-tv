@@ -20,7 +20,6 @@ export default function renderApplication(RootComponent, WrapperComponent, callb
     rootTag = options.rootTag;
   var renderFn = shouldHydrate ? hydrate : render;
   invariant(rootTag, 'Expect to have a valid rootTag, instead got ', rootTag);
-  console.log('[renderApplication] root tag: ', rootTag);
   return renderFn(/*#__PURE__*/React.createElement(AppContainer, {
     WrapperComponent: WrapperComponent,
     ref: callback,
