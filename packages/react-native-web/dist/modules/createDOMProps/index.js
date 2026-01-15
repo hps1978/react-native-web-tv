@@ -839,8 +839,8 @@ var createDOMProps = (elementType, props, options) => {
       domProps.className = 'lrud-container';
     }
 
-    // 2. setup focusable and autoFocus state
-    if (focusable === false || autoFocus === false) {
+    // 2. setup focusable
+    if (focusable === false) {
       domProps.className += ' lrud-ignore';
     }
 
@@ -865,7 +865,7 @@ var createDOMProps = (elementType, props, options) => {
     // 5. setup autoFocus
     // Not really sure what this means at the moment as all this
     // logic is to handle focus movement. So until I understand this better!!!
-    // domProps['data-autofocus'] = autoFocus ? 'true' : 'false';
+    domProps['data-autofocus'] = autoFocus ? 'true' : 'false';
   }
 
   // OTHER
