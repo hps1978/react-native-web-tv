@@ -910,7 +910,7 @@ const createDOMProps = (elementType, props, options) => {
     // consider this element a container if tvFocusable is true
 
     // Update tabIndex so that the container itself is not focusable
-    // This does not stop it's children to be focusable based on thier focusable prop
+    // This does not stop it's children to be focusable based on their focusable prop
     domProps.tabIndex = '-1';
 
     // 1. add lrud-container class
@@ -920,8 +920,8 @@ const createDOMProps = (elementType, props, options) => {
       domProps.className = 'lrud-container';
     }
 
-    // 2. setup focusable state
-    if (focusable === false) {
+    // 2. setup focusable and autoFocus state
+    if (focusable === false || autoFocus === false) {
       domProps.className += ' lrud-ignore';
     }
 
@@ -948,7 +948,7 @@ const createDOMProps = (elementType, props, options) => {
     // 5. setup autoFocus
     // Not really sure what this means at the moment as all this
     // logic is to handle focus movement. So until I understand this better!!!
-    domProps['data-autofocus'] = autoFocus ? 'true' : 'false';
+    // domProps['data-autofocus'] = autoFocus ? 'true' : 'false';
   }
 
   // OTHER
