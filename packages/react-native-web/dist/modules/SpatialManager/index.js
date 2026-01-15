@@ -14,7 +14,7 @@
 // focus and navigation.
 
 // Currently, it only supports arrow ISO keyboard navigation.
-import { getNextFocus } from '@bbc/tv-lrud-spatial';
+import { setConfig, getNextFocus } from '@bbc/tv-lrud-spatial';
 import { addEventListener } from '../addEventListener';
 var isSpatialManagerReady = false;
 var spatialNavigationContainer = null;
@@ -36,6 +36,12 @@ function setupSpatialNavigation(container) {
   if (isSpatialManagerReady) {
     return;
   }
+
+  // Configure LRUD
+  setConfig({
+    // keyMap: TODO: Setup Keymap based on different TV platforms (get this as a config)
+    createMissingId: setupId
+  });
   spatialNavigationContainer = container || window.document.body;
 
   // Listen to keydown events on the container or document

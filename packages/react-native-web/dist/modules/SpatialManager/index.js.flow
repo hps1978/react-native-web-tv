@@ -14,7 +14,7 @@
 // focus and navigation.
 
 // Currently, it only supports arrow ISO keyboard navigation.
-import { getNextFocus } from '@bbc/tv-lrud-spatial';
+import { setConfig, getNextFocus } from '@bbc/tv-lrud-spatial';
 import { addEventListener } from '../addEventListener';
 let isSpatialManagerReady = false;
 let spatialNavigationContainer: HTMLElement | null = null;
