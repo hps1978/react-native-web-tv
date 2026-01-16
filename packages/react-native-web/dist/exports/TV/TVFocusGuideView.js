@@ -66,18 +66,20 @@ var TVFocusGuideView = /*#__PURE__*/React.forwardRef((props, ref) => {
   // If there are no destinations and the autoFocus is false the the default value of focusable should be false
   // It is then properly handled by the native code
   var tvOSSelectable = destinationsProp || autoFocus ? focusable !== false : false;
+  var isTVFocusable = destinationsProp ? true : autoFocus === true;
   return (
     /*#__PURE__*/
     // $FlowFixMe[prop-missing]
     React.createElement(View, _extends({}, props, {
-      autoFocus: focusable === false ? true : autoFocus,
+      autoFocus: focusable === false ? true : autoFocus // Why focusable is requried in this?!!
+      ,
       collapsable: false
       // tvOS only prop
       ,
       isTVSelectable: tvOSSelectable,
       ref: mergedRef,
       style: style,
-      tvFocusable: true // This is the only way to say it's a container for Web focus management
+      tvFocusable: isTVFocusable
     }))
   );
 });
