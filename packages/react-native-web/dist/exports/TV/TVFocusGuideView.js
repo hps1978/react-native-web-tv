@@ -66,7 +66,7 @@ var TVFocusGuideView = /*#__PURE__*/React.forwardRef((props, ref) => {
   // If there are no destinations and the autoFocus is false the the default value of focusable should be false
   // It is then properly handled by the native code
   var tvOSSelectable = destinationsProp || autoFocus ? focusable !== false : false;
-  var isTVFocusable = destinationsProp ? true : autoFocus === true;
+  var isTVFocusable = destinationsProp ? true : autoFocus !== undefined;
   return (
     /*#__PURE__*/
     // $FlowFixMe[prop-missing]

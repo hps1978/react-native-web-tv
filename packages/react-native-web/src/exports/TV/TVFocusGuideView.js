@@ -129,7 +129,7 @@ const TVFocusGuideView: React.AbstractComponent<
   const tvOSSelectable =
     destinationsProp || autoFocus ? focusable !== false : false;
 
-  const isTVFocusable = destinationsProp ? true : autoFocus === true;
+  const isTVFocusable = destinationsProp ? true : autoFocus !== undefined;
 
   return (
     // $FlowFixMe[prop-missing]

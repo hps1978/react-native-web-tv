@@ -98,7 +98,7 @@ const TVFocusGuideView: React.AbstractComponent<TVFocusGuideViewProps, React.Ele
   // If there are no destinations and the autoFocus is false the the default value of focusable should be false
   // It is then properly handled by the native code
   const tvOSSelectable = destinationsProp || autoFocus ? focusable !== false : false;
-  const isTVFocusable = destinationsProp ? true : autoFocus === true;
+  const isTVFocusable = destinationsProp ? true : autoFocus !== undefined;
   return (
     // $FlowFixMe[prop-missing]
     <View {...props} autoFocus={focusable === false ? true : autoFocus} // Why focusable is requried in this?!!
