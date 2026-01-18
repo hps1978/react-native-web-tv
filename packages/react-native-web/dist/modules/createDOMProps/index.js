@@ -865,10 +865,8 @@ var createDOMProps = (elementType, props, options) => {
     //   }
     // }
 
-    // 5. setup autoFocus
-    // Not really sure what this means at the moment as all this
-    // logic is to handle focus movement. So until I understand this better!!!
-    domProps['data-autofocus'] = autoFocus ? 'true' : 'false';
+    // 5. setup autoFocus: default is true
+    domProps['data-autofocus'] = autoFocus === 'false' ? 'false' : 'true';
   }
 
   // OTHER
