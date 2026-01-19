@@ -57,6 +57,15 @@ function setupSpatialNavigation(container) {
     if (keyCode !== 'ArrowUp' && keyCode !== 'ArrowDown' && keyCode !== 'ArrowLeft' && keyCode !== 'ArrowRight') {
       return;
     }
+
+    // Setup default focus: if nothing is focussed currently
+    if (!focusedElement) {
+      // Set focus to the active element
+      focusedElement = spatialNavigationContainer.ownerDocument.activeElement;
+      focusedElement.focus();
+      event.preventDefault();
+      return;
+    }
     var nextFocus = getNextFocus(currentFocus, keyCode, (container == null ? void 0 : container.ownerDocument) || window.document);
     console.log('[SpatialNavigation] Next focus element: ', nextFocus);
     if (nextFocus) {

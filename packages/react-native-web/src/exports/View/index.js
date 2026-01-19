@@ -163,11 +163,11 @@ const View: React.AbstractComponent<ViewProps, HTMLElement & PlatformMethods> =
     // On mount trigger focus event
     // if hasTVPreferredFocus is set (TV platforms only)
     React.useEffect(() => {
-      const focusable =
-        (props.tabIndex && props.tabIndex !== -1) ||
-        !(props.tvFocusable === true) ||
-        props.focusable === true;
-      if (Platform.isTV && hasTVPreferredFocus && focusable) {
+      const isFocusable =
+        props.tabIndex !== -1 &&
+        props.focusable !== false &&
+        props.tvFocusable !== true;
+      if (Platform.isTV && hasTVPreferredFocus && isFocusable) {
         setFocus(hostRef.current);
       }
     }, []);

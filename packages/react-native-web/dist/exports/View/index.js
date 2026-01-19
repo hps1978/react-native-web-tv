@@ -126,8 +126,8 @@ var View = /*#__PURE__*/React.forwardRef((props, forwardedRef) => {
   // On mount trigger focus event
   // if hasTVPreferredFocus is set (TV platforms only)
   React.useEffect(() => {
-    var focusable = props.tabIndex && props.tabIndex !== -1 || !(props.tvFocusable === true) || props.focusable === true;
-    if (Platform.isTV && hasTVPreferredFocus && focusable) {
+    var isFocusable = props.tabIndex !== -1 && props.focusable !== false && props.tvFocusable !== true;
+    if (Platform.isTV && hasTVPreferredFocus && isFocusable) {
       setFocus(hostRef.current);
     }
   }, []);

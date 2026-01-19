@@ -74,6 +74,15 @@ function setupSpatialNavigation(container?: HTMLElement) {
         return;
       }
 
+      // Setup default focus: if nothing is focussed currently
+      if (!focusedElement) {
+        // Set focus to the active element
+        focusedElement = spatialNavigationContainer.ownerDocument.activeElement;
+        focusedElement.focus();
+        event.preventDefault();
+        return;
+      }
+
       const nextFocus = getNextFocus(
         currentFocus,
         keyCode,
