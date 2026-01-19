@@ -18,7 +18,7 @@ import { setConfig, getNextFocus } from '@bbc/tv-lrud-spatial';
 import { addEventListener } from '../addEventListener';
 let isSpatialManagerReady = false;
 let spatialNavigationContainer: HTMLElement | null = null;
-let focusedElement: HTMLElement | null = null;
+let currentFocus: HTMLElement | null = null;
 let keyDownListener: ((event: any) => void) | null = null;
 const ID_LIMIT = 100000; // big enough to wrap around!
 let id = 0;

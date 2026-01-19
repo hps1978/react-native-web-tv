@@ -19,7 +19,7 @@ import { addEventListener } from '../addEventListener';
 
 let isSpatialManagerReady = false;
 let spatialNavigationContainer: HTMLElement | null = null;
-let focusedElement: HTMLElement | null = null;
+let currentFocus: HTMLElement | null = null;
 let keyDownListener: ((event: any) => void) | null = null;
 
 const ID_LIMIT = 100000; // big enough to wrap around!
@@ -48,7 +48,8 @@ function setupSpatialNavigation(container?: HTMLElement) {
     createMissingId: setupId
   });
 
-  spatialNavigationContainer = container || window.document.body;
+  spatialNavigationContainer =
+    container.ownerDocument.activeElement || window.document.body;
 
   // Listen to keydown events on the container or document
   keyDownListener = addEventListener(
@@ -56,14 +57,6 @@ function setupSpatialNavigation(container?: HTMLElement) {
     'keydown',
     (event: any) => {
       console.log('[SpatialNavigation] keydown event: ', event);
-      // Assume the focused element is the currently active element
-      const currentFocus =
-        focusedElement ||
-        spatialNavigationContainer.ownerDocument.activeElement;
-      if (!currentFocus /*|| !(focusedElement instanceof HTMLElement)*/) {
-        console.warn('No focused element found during spatial navigation.');
-        return;
-      }
       const keyCode = event.key || event.code;
       if (
         keyCode !== 'ArrowUp' &&
@@ -74,13 +67,8 @@ function setupSpatialNavigation(container?: HTMLElement) {
         return;
       }
 
-      // Setup default focus: if nothing is focussed currently
-      if (!focusedElement) {
-        // Set focus to the active element
-        focusedElement = spatialNavigationContainer.ownerDocument.activeElement;
-        focusedElement.focus();
-        event.preventDefault();
-        return;
+      if (!currentFocus) {
+        console.warn('No initial focus. Trying to set one...');
       }
 
       const nextFocus = getNextFocus(
@@ -90,7 +78,7 @@ function setupSpatialNavigation(container?: HTMLElement) {
       );
       console.log('[SpatialNavigation] Next focus element: ', nextFocus);
       if (nextFocus) {
-        focusedElement = nextFocus;
+        currentFocus = nextFocus;
         nextFocus.focus();
         event.preventDefault();
       }
@@ -112,13 +100,13 @@ function setFocus(node: HTMLElement) {
     );
     if (focusNode) {
       focusNode.focus();
-      focusedElement = focusNode;
+      currentFocus = focusNode;
     }
   } else {
     if (node && node.focus) {
       node.focus();
     }
-    focusedElement = node;
+    currentFocus = node;
   }
 }
 
@@ -149,7 +137,7 @@ function teardownSpatialNavigation() {
     keyDownListener = null;
   }
   spatialNavigationContainer = null;
-  focusedElement = null;
+  currentFocus = null;
   isSpatialManagerReady = false;
 }
 
