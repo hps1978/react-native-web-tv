@@ -33,6 +33,7 @@ function setupId(node) {
   return newId;
 }
 function setupSpatialNavigation(container) {
+  var _container$ownerDocum;
   if (isSpatialManagerReady) {
     return;
   }
@@ -42,7 +43,7 @@ function setupSpatialNavigation(container) {
     // keyMap: TODO: Setup Keymap based on different TV platforms (get this as a config)
     createMissingId: setupId
   });
-  spatialNavigationContainer = container.ownerDocument.activeElement || window.document.body;
+  spatialNavigationContainer = (container == null || (_container$ownerDocum = container.ownerDocument) == null ? void 0 : _container$ownerDocum.activeElement) || window.document.body;
 
   // Listen to keydown events on the container or document
   keyDownListener = addEventListener(spatialNavigationContainer, 'keydown', event => {

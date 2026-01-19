@@ -49,7 +49,7 @@ function setupSpatialNavigation(container?: HTMLElement) {
   });
 
   spatialNavigationContainer =
-    container.ownerDocument.activeElement || window.document.body;
+    container?.ownerDocument?.activeElement || window.document.body;
 
   // Listen to keydown events on the container or document
   keyDownListener = addEventListener(
