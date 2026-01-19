@@ -163,10 +163,11 @@ const View: React.AbstractComponent<ViewProps, HTMLElement & PlatformMethods> =
     // On mount trigger focus event
     // if hasTVPreferredFocus is set (TV platforms only)
     React.useEffect(() => {
-      const isFocusable =
-        props.tabIndex !== -1 &&
-        props.focusable !== false &&
-        props.tvFocusable !== true;
+      // The only possible way to (accurately) get this is from the tabindex
+      // attribute, as the current code in CreateDOMProps uses the other props
+      // to finally derive whether an element can be focussed or not.
+      const isFocusable = hostRef.current?.getAttribute('tabindex') === '0';
+
       if (Platform.isTV && hasTVPreferredFocus && isFocusable) {
         setFocus(hostRef.current);
       }
