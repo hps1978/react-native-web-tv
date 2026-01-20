@@ -137,6 +137,7 @@ const TVFocusGuideView: React.AbstractComponent<
       {...props}
       autoFocus={focusable === false ? true : autoFocus} // Why focusable is requried in this?!!
       collapsable={false}
+      isContainer={true} // Sneek this through to allow setting correct DOM props as tvFocusable may be false
       // tvOS only prop
       isTVSelectable={tvOSSelectable}
       ref={mergedRef}

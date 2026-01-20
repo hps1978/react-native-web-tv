@@ -102,7 +102,7 @@ const TVFocusGuideView: React.AbstractComponent<TVFocusGuideViewProps, React.Ele
   return (
     // $FlowFixMe[prop-missing]
     <View {...props} autoFocus={focusable === false ? true : autoFocus} // Why focusable is requried in this?!!
-    collapsable={false}
+    collapsable={false} isContainer={true} // Sneek this through to allow setting correct DOM props as tvFocusable may be false
     // tvOS only prop
     isTVSelectable={tvOSSelectable} ref={mergedRef} style={style} tvFocusable={isTVFocusable} />
   );

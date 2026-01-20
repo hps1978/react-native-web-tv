@@ -142,6 +142,7 @@ const View: React.AbstractComponent<ViewProps, HTMLElement & PlatformMethods> = 
   const platformMethodsRef = usePlatformMethods(supportedProps);
   const setRef = useMergeRefs(hostRef, platformMethodsRef, forwardedRef, setLocalRef);
   supportedProps.ref = setRef;
+  supportedProps.isContainer = props.isContainer === true;
   return createElement(component, supportedProps, {
     writingDirection
   });

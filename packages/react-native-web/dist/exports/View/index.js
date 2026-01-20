@@ -138,6 +138,7 @@ var View = /*#__PURE__*/React.forwardRef((props, forwardedRef) => {
   var platformMethodsRef = usePlatformMethods(supportedProps);
   var setRef = useMergeRefs(hostRef, platformMethodsRef, forwardedRef, setLocalRef);
   supportedProps.ref = setRef;
+  supportedProps.isContainer = props.isContainer === true;
   return createElement(component, supportedProps, {
     writingDirection
   });

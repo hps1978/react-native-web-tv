@@ -73,7 +73,8 @@ var TVFocusGuideView = /*#__PURE__*/React.forwardRef((props, ref) => {
     React.createElement(View, _extends({}, props, {
       autoFocus: focusable === false ? true : autoFocus // Why focusable is requried in this?!!
       ,
-      collapsable: false
+      collapsable: false,
+      isContainer: true // Sneek this through to allow setting correct DOM props as tvFocusable may be false
       // tvOS only prop
       ,
       isTVSelectable: tvOSSelectable,

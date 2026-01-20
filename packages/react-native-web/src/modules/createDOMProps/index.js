@@ -157,6 +157,7 @@ const createDOMProps = (elementType, props, options) => {
     trapFocusRight,
     trapFocusUp,
     tvFocusable,
+    isContainer, // This may be a container
     // Rest
     ...domProps
   } = props;
@@ -950,6 +951,18 @@ const createDOMProps = (elementType, props, options) => {
 
     // 5. setup autoFocus: default is true
     domProps['data-autofocus'] = autoFocus === 'false' ? 'false' : 'true';
+  } else if (isContainer) {
+    // This is a TVFocusGuideView created without destinations
+    // and autoFocus. Atleast treat it as a container for now
+    // to help with navigation
+    domProps.tabIndex = '-1';
+
+    // 1. add lrud-container class
+    if (domProps.className) {
+      domProps.className += ' lrud-container';
+    } else {
+      domProps.className = 'lrud-container';
+    }
   }
 
   // OTHER
