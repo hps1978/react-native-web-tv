@@ -30,7 +30,7 @@ let keyDownListener: ((event: any) => void) | null = null;
 declare function triggerFocus(nextFocus: {
   elem: HTMLElement | null,
   parentHasAutofocus: boolean,
-}): any;
+}): boolean;
 declare function setupSpatialNavigation(container?: HTMLElement): any;
 declare function setFocus(node: HTMLElement): any;
 declare function setDestinations(host: HTMLElement, destinations: HTMLElement[]): any;

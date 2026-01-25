@@ -33,9 +33,9 @@ let keyDownListener: ((event: any) => void) | null = null;
 function triggerFocus(nextFocus: {
   elem: HTMLElement | null,
   parentHasAutofocus: boolean
-}) {
-  currentFocus = nextFocus;
+}): boolean {
   if (nextFocus && nextFocus.elem) {
+    currentFocus = nextFocus;
     // Set data-focus attribute if needed for autoFocus handling
     if (nextFocus.parentHasAutofocus) {
       // Assume that parent attributes are already checked for .lrud-container and data-autofocus
@@ -46,6 +46,7 @@ function triggerFocus(nextFocus: {
       );
     }
     nextFocus.elem.focus();
+    return true;
   }
 }
 
@@ -88,8 +89,9 @@ function setupSpatialNavigation(container?: HTMLElement) {
         container?.ownerDocument || window.document
       );
       console.log('[SpatialNavigation] Next focus element: ', nextFocus);
-      triggerFocus(nextFocus);
-      event.preventDefault();
+      if (triggerFocus(nextFocus) === true) {
+        event.preventDefault();
+      }
     },
     { passive: false }
   );

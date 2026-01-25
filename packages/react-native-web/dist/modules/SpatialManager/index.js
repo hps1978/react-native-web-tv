@@ -25,8 +25,8 @@ var currentFocus = {
 };
 var keyDownListener = null;
 function triggerFocus(nextFocus) {
-  currentFocus = nextFocus;
   if (nextFocus && nextFocus.elem) {
+    currentFocus = nextFocus;
     // Set data-focus attribute if needed for autoFocus handling
     if (nextFocus.parentHasAutofocus) {
       // Assume that parent attributes are already checked for .lrud-container and data-autofocus
@@ -34,6 +34,7 @@ function triggerFocus(nextFocus) {
       parent == null || parent.setAttribute('data-focus', nextFocus.elem.id || setupNodeId(nextFocus.elem));
     }
     nextFocus.elem.focus();
+    return true;
   }
 }
 function setupSpatialNavigation(container) {
@@ -60,8 +61,9 @@ function setupSpatialNavigation(container) {
     }
     var nextFocus = getNextFocus(currentFocus.elem, keyCode, (container == null ? void 0 : container.ownerDocument) || window.document);
     console.log('[SpatialNavigation] Next focus element: ', nextFocus);
-    triggerFocus(nextFocus);
-    event.preventDefault();
+    if (triggerFocus(nextFocus) === true) {
+      event.preventDefault();
+    }
   }, {
     passive: false
   });
