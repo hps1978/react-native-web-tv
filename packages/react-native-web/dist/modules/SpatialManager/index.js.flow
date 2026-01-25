@@ -14,15 +14,23 @@
 // focus and navigation.
 
 // Currently, it only supports arrow ISO keyboard navigation.
-import { setConfig, getNextFocus } from '@bbc/tv-lrud-spatial';
+import { setConfig, getNextFocus, getParentContainer } from '@bbc/tv-lrud-spatial';
 import { addEventListener } from '../addEventListener';
+import { setupNodeId } from '../../exports/TV/utils';
 let isSpatialManagerReady = false;
 let spatialNavigationContainer: HTMLElement | null = null;
-let currentFocus: HTMLElement | null = null;
+let currentFocus: {
+  elem: HTMLElement | null,
+  parentHasAutofocus: boolean,
+} = {
+  elem: null,
+  parentHasAutofocus: false
+};
 let keyDownListener: ((event: any) => void) | null = null;
-const ID_LIMIT = 100000; // big enough to wrap around!
-let id = 0;
-declare function setupId(node: HTMLElement): any;
+declare function triggerFocus(nextFocus: {
+  elem: HTMLElement | null,
+  parentHasAutofocus: boolean,
+}): any;
 declare function setupSpatialNavigation(container?: HTMLElement): any;
 declare function setFocus(node: HTMLElement): any;
 declare function setDestinations(host: HTMLElement, destinations: HTMLElement[]): any;

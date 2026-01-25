@@ -14,23 +14,27 @@
 // focus and navigation.
 
 // Currently, it only supports arrow ISO keyboard navigation.
-import { setConfig, getNextFocus } from '@bbc/tv-lrud-spatial';
+import { setConfig, getNextFocus, getParentContainer } from '@bbc/tv-lrud-spatial';
 import { addEventListener } from '../addEventListener';
+import { setupNodeId } from '../../exports/TV/utils';
 var isSpatialManagerReady = false;
 var spatialNavigationContainer = null;
-var currentFocus = null;
+var currentFocus = {
+  elem: null,
+  parentHasAutofocus: false
+};
 var keyDownListener = null;
-var ID_LIMIT = 100000; // big enough to wrap around!
-var id = 0;
-function setupId(node) {
-  var newId = null;
-  if (node) {
-    // Use a simple incremented number as id
-    newId = "lrud-" + (id > ID_LIMIT ? 0 : ++id);
-    node.id = newId;
-    return newId;
+function triggerFocus(nextFocus) {
+  currentFocus = nextFocus;
+  if (nextFocus && nextFocus.elem) {
+    // Set data-focus attribute if needed for autoFocus handling
+    if (nextFocus.parentHasAutofocus) {
+      // Assume that parent attributes are already checked for .lrud-container and data-autofocus
+      var parent = getParentContainer(nextFocus.elem);
+      parent == null || parent.setAttribute('data-focus', nextFocus.elem.id || setupNodeId(nextFocus.elem));
+    }
+    nextFocus.elem.focus();
   }
-  return newId;
 }
 function setupSpatialNavigation(container) {
   var _container$ownerDocum;
@@ -41,7 +45,6 @@ function setupSpatialNavigation(container) {
   // Configure LRUD
   setConfig({
     // keyMap: TODO: Setup Keymap based on different TV platforms (get this as a config)
-    createMissingId: setupId
   });
   spatialNavigationContainer = (container == null || (_container$ownerDocum = container.ownerDocument) == null ? void 0 : _container$ownerDocum.activeElement) || window.document.body;
 
@@ -55,13 +58,10 @@ function setupSpatialNavigation(container) {
     if (!currentFocus) {
       console.warn('No initial focus. Trying to set one...');
     }
-    var nextFocus = getNextFocus(currentFocus, keyCode, (container == null ? void 0 : container.ownerDocument) || window.document);
+    var nextFocus = getNextFocus(currentFocus.elem, keyCode, (container == null ? void 0 : container.ownerDocument) || window.document);
     console.log('[SpatialNavigation] Next focus element: ', nextFocus);
-    if (nextFocus) {
-      currentFocus = nextFocus;
-      nextFocus.focus();
-      event.preventDefault();
-    }
+    triggerFocus(nextFocus);
+    event.preventDefault();
   }, {
     passive: false
   });
@@ -72,27 +72,34 @@ function setFocus(node) {
     // It's a container trigger spatial logic to find an focus
     // TODO: Add another function which triggers the spatial logic based on the container
     // and without the need to pass the keyCode
-    var focusNode = getNextFocus(null,
+    var nextFocus = getNextFocus(null,
     // use this as starting point
     'ArrowDown', node // this is the scope as well for now!
     );
-    if (focusNode) {
-      focusNode.focus();
-      currentFocus = focusNode;
-    }
+    triggerFocus(nextFocus);
   } else {
     if (node && node.focus) {
-      node.focus();
+      var _getParentContainer;
+      var parentHasAutofocus = ((_getParentContainer = getParentContainer(node)) == null ? void 0 : _getParentContainer.getAttribute('data-autofocus')) === 'true';
+      triggerFocus({
+        elem: node,
+        parentHasAutofocus
+      });
     }
-    currentFocus = node;
   }
 }
 function setDestinations(host, destinations) {
   // Get ids from destinations, and if id not set, generate a new one and set all of them into 'data-destinations' attribute in the host element
   if (destinations && Array.isArray(destinations)) {
-    var destinationIDs = destinations.map(dest => dest && dest.id ? dest.id : setupId(dest)).filter(id => id != null);
+    var destinationIDs = destinations.map(dest => dest && dest.id ? dest.id : setupNodeId(dest)).filter(id => id != null);
     if (destinationIDs.length > 0) {
+      var _host$className;
       host.setAttribute('data-destinations', destinationIDs.join(' '));
+      // Side effect: If this container has not been set with lrud-container class, do it now
+      // to allow collapsable/expandable containers to work properly for LRUD navigation
+      if (!((_host$className = host.className) != null && _host$className.includes('lrud-container'))) {
+        host.className += ' lrud-container';
+      }
     } else {
       host.setAttribute('data-destinations', '');
     }

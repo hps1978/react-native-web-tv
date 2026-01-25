@@ -10,6 +10,7 @@
 import AccessibilityUtil from '../AccessibilityUtil';
 import StyleSheet from '../../exports/StyleSheet';
 import { warnOnce } from '../warnOnce';
+import { setupNodeId } from '../../exports/TV/utils';
 
 const emptyObject = {};
 const hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -151,7 +152,7 @@ const createDOMProps = (elementType, props, options) => {
     testID,
     // TV View props
     autoFocus,
-    // destinations,
+    destinations,
     trapFocusDown,
     trapFocusLeft,
     trapFocusRight,
@@ -904,29 +905,30 @@ const createDOMProps = (elementType, props, options) => {
     domProps.style = inlineStyle;
   }
 
-  // TV View
-  if (tvFocusable) {
+  if (isContainer) {
+    // TV View
     // setup attributes and classes for tv focusable elements
     // based on @bbc/@bbc/tv-lrud-spatial library requirements
-    // consider this element a container if tvFocusable is true
 
     // Update tabIndex so that the container itself is not focusable
     // This does not stop it's children to be focusable based on their focusable prop
     domProps.tabIndex = '-1';
 
-    // 1. add lrud-container class
-    if (domProps.className) {
-      domProps.className += ' lrud-container';
-    } else {
-      domProps.className = 'lrud-container';
+    // Consider this container as a TV Focusable container for LRUD navigation only if:
+    // 1. tvFocusable is true OR 2. destinations are defined OR 3. autoFocus is defined
+    if (
+      tvFocusable === true ||
+      autoFocus === true ||
+      destinations?.length > 0
+    ) {
+      if (domProps.className) {
+        domProps.className += ' lrud-container';
+      } else {
+        domProps.className = 'lrud-container';
+      }
     }
 
-    // 2. setup focusable
-    if (focusable === false) {
-      domProps.className += ' lrud-ignore';
-    }
-
-    // 3. setup data-block-exit attributes for trapFocus* props
+    // 2. setup data-block-exit attributes for trapFocus* props
     const trapFocusString = `${trapFocusUp ? 'up' : ''}${
       trapFocusDown ? ' down' : ''
     }${trapFocusLeft ? ' left' : ''}${trapFocusRight ? ' right' : ''}`;
@@ -937,31 +939,22 @@ const createDOMProps = (elementType, props, options) => {
       domProps['data-lrud-prioritise-children'] = 'false';
     }
 
-    // 4. setup destinations attribute
-    // each destination in array is an element, extract all ids
-    // NOTE: Not done here as the ids may need to be setup
-    // if (destinations && Array.isArray(destinations)) {
-    //   const destinationIDs = destinations
-    //     .map((dest) => (dest && dest.id ? dest.id : null))
-    //     .filter((id) => id != null);
-    //   if (destinationIDs.length > 0) {
-    //     domProps['data-destinations'] = destinationIDs.join(' ');
-    //   }
-    // }
+    // 3. setup autoFocus: default is true
+    domProps['data-autofocus'] = autoFocus === false ? 'false' : 'true';
 
-    // 5. setup autoFocus: default is true
-    domProps['data-autofocus'] = autoFocus === 'false' ? 'false' : 'true';
-  } else if (isContainer) {
-    // This is a TVFocusGuideView created without destinations
-    // and autoFocus. Atleast treat it as a container for now
-    // to help with navigation
-    domProps.tabIndex = '-1';
+    // 4. setup destinations: get ids of destination elements
+    if (destinations && destinations.length > 0) {
+      const destinationString = destinations
+        .map((dest) => (dest && dest.id ? dest.id : setupNodeId(dest)))
+        .filter((id) => id != null)
+        .join(' ');
+      domProps['data-destinations'] = destinationString;
+    }
 
-    // 1. add lrud-container class
-    if (domProps.className) {
-      domProps.className += ' lrud-container';
-    } else {
-      domProps.className = 'lrud-container';
+    // 5. setup lrud-ignore class if tvFocusable is false
+    if (tvFocusable === false) {
+      // this also means focusable is false
+      domProps.className += ' lrud-ignore';
     }
   }
 

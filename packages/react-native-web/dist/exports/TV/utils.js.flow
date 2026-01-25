@@ -1,0 +1,14 @@
+/**
+ * Copyright (c) Douglas Lowder.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ * @format
+ * @flow
+ */
+
+const ID_LIMIT = 100000; // big enough to wrap around!
+let nextId = 0;
+declare function setupNodeId(node: HTMLElement): any;
+export { setupNodeId };
