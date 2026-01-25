@@ -1551,7 +1551,7 @@
 
 "@bbc/tv-lrud-spatial@https://github.com/hps1978/lrud-spatial-rnw":
   version "0.0.16"
-  resolved "https://github.com/hps1978/lrud-spatial-rnw#5c207f2f8d537ae3e22cff6b6e42ebd7599dc76b"
+  resolved "https://github.com/hps1978/lrud-spatial-rnw#7d68651137d2a9e65a6ce245ab200433a1a6e696"
   dependencies:
     "@babel/cli" "^7.23.9"
     "@babel/core" "^7.23.9"
