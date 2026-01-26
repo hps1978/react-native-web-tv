@@ -17,7 +17,8 @@
 import {
   setConfig,
   getNextFocus,
-  getParentContainer
+  getParentContainer,
+  updateAncestorsAutoFocus
 } from '@bbc/tv-lrud-spatial';
 import { addEventListener } from '../addEventListener';
 import { setupNodeId } from '../../exports/TV/utils';
@@ -36,18 +37,11 @@ function triggerFocus(nextFocus: {
 }): boolean {
   if (nextFocus && nextFocus.elem) {
     currentFocus = nextFocus;
-    // Set data-focus attribute if needed for autoFocus handling
-    if (nextFocus.parentHasAutofocus) {
-      // Assume that parent attributes are already checked for .lrud-container and data-autofocus
-      const parent = getParentContainer(nextFocus.elem);
-      parent?.setAttribute(
-        'data-focus',
-        nextFocus.elem.id || setupNodeId(nextFocus.elem)
-      );
-    }
+    updateAncestorsAutoFocus(nextFocus.elem, spatialNavigationContainer);
     nextFocus.elem.focus();
     return true;
   }
+  return false;
 }
 
 function setupSpatialNavigation(container?: HTMLElement) {

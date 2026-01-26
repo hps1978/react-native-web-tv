@@ -14,7 +14,7 @@
 // focus and navigation.
 
 // Currently, it only supports arrow ISO keyboard navigation.
-import { setConfig, getNextFocus, getParentContainer } from '@bbc/tv-lrud-spatial';
+import { setConfig, getNextFocus, getParentContainer, updateAncestorsAutoFocus } from '@bbc/tv-lrud-spatial';
 import { addEventListener } from '../addEventListener';
 import { setupNodeId } from '../../exports/TV/utils';
 var isSpatialManagerReady = false;
@@ -27,15 +27,11 @@ var keyDownListener = null;
 function triggerFocus(nextFocus) {
   if (nextFocus && nextFocus.elem) {
     currentFocus = nextFocus;
-    // Set data-focus attribute if needed for autoFocus handling
-    if (nextFocus.parentHasAutofocus) {
-      // Assume that parent attributes are already checked for .lrud-container and data-autofocus
-      var parent = getParentContainer(nextFocus.elem);
-      parent == null || parent.setAttribute('data-focus', nextFocus.elem.id || setupNodeId(nextFocus.elem));
-    }
+    updateAncestorsAutoFocus(nextFocus.elem, spatialNavigationContainer);
     nextFocus.elem.focus();
     return true;
   }
+  return false;
 }
 function setupSpatialNavigation(container) {
   var _container$ownerDocum;

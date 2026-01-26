@@ -148,7 +148,6 @@ const TVFocusGuideView: React.AbstractComponent<
 
 const styles = StyleSheet.create({
   container: {
-    display: 'flex', // Ensure that it grows to contain its children, for LRUD calculations
     minWidth: 1,
     minHeight: 1
   }
