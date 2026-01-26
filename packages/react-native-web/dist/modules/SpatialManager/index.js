@@ -27,6 +27,8 @@ var keyDownListener = null;
 function triggerFocus(nextFocus) {
   if (nextFocus && nextFocus.elem) {
     currentFocus = nextFocus;
+    // set id first
+    setupNodeId(nextFocus.elem);
     updateAncestorsAutoFocus(nextFocus.elem, spatialNavigationContainer);
     nextFocus.elem.focus();
     return true;
