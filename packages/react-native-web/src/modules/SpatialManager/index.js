@@ -125,10 +125,24 @@ function setDestinations(host: HTMLElement, destinations: HTMLElement[]) {
       // Side effect: If this container has not been set with lrud-container class, do it now
       // to allow collapsable/expandable containers to work properly for LRUD navigation
       if (!host.className?.includes('lrud-container')) {
-        host.className += ' lrud-container';
+        if (host.className?.length > 0) {
+          host.className += ' lrud-container';
+        } else {
+          host.className = 'lrud-container';
+        }
       }
     } else {
       host.setAttribute('data-destinations', '');
+      // Side effect: If there are no destinations and auto-focus is false, we can remove the lrud-container class
+      const isContainer = host.className?.includes('lrud-container');
+      const isAutoFocus = host.getAttribute('data-autofocus') === 'true';
+      if (isContainer && !isAutoFocus) {
+        if (host.className?.length > 14) {
+          host.className = host.className.replace(' lrud-container', '');
+        } else {
+          host.className = host.className.replace('lrud-container', '');
+        }
+      }
     }
     console.log(
       'SpatialManager: setDestinations ',
