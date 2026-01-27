@@ -91,7 +91,7 @@ function setFocus(node) {
 function setDestinations(host, destinations) {
   // Get ids from destinations, and if id not set, generate a new one and set all of them into 'data-destinations' attribute in the host element
   if (destinations && Array.isArray(destinations)) {
-    var destinationIDs = destinations.map(dest => dest != null && dest.id ? dest.id : setupNodeId(dest)).filter(id => id != null);
+    var destinationIDs = destinations.map(dest => dest ? setupNodeId(dest) : null).filter(id => id != null);
     if (destinationIDs.length > 0) {
       host.setAttribute('data-destinations', destinationIDs.join(' '));
       // Side effect: If this container has not been set with lrud-container class, do it now
