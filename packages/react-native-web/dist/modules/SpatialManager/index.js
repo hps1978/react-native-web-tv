@@ -93,12 +93,13 @@ function setDestinations(host, destinations) {
   if (destinations && Array.isArray(destinations)) {
     var destinationIDs = destinations.map(dest => dest ? setupNodeId(dest) : null).filter(id => id != null);
     if (destinationIDs.length > 0) {
+      var _host$className;
       host.setAttribute('data-destinations', destinationIDs.join(' '));
       // Side effect: If this container has not been set with lrud-container class, do it now
       // to allow collapsable/expandable containers to work properly for LRUD navigation
-      // if (!host.className?.includes('lrud-container')) {
-      //   host.className += ' lrud-container';
-      // }
+      if (!((_host$className = host.className) != null && _host$className.includes('lrud-container'))) {
+        host.className += ' lrud-container';
+      }
     } else {
       host.setAttribute('data-destinations', '');
     }

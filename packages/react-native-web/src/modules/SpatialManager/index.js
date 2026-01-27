@@ -124,9 +124,9 @@ function setDestinations(host: HTMLElement, destinations: HTMLElement[]) {
       host.setAttribute('data-destinations', destinationIDs.join(' '));
       // Side effect: If this container has not been set with lrud-container class, do it now
       // to allow collapsable/expandable containers to work properly for LRUD navigation
-      // if (!host.className?.includes('lrud-container')) {
-      //   host.className += ' lrud-container';
-      // }
+      if (!host.className?.includes('lrud-container')) {
+        host.className += ' lrud-container';
+      }
     } else {
       host.setAttribute('data-destinations', '');
     }
