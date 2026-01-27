@@ -118,7 +118,16 @@ function setDestinations(host: HTMLElement, destinations: HTMLElement[]) {
   // Get ids from destinations, and if id not set, generate a new one and set all of them into 'data-destinations' attribute in the host element
   if (destinations && Array.isArray(destinations)) {
     const destinationIDs = destinations
-      .map((dest) => (dest ? setupNodeId(dest) : null))
+      .map((dest) => {
+        if (!(dest instanceof HTMLElement)) {
+          console.error(
+            'Error: Argument appears to not be a ReactComponent',
+            dest
+          );
+          return null;
+        }
+        return dest ? setupNodeId(dest) : null;
+      })
       .filter((id) => id != null);
     if (destinationIDs.length > 0) {
       host.setAttribute('data-destinations', destinationIDs.join(' '));
