@@ -119,7 +119,7 @@ function setDestinations(host: HTMLElement, destinations: HTMLElement[]) {
   if (destinations && Array.isArray(destinations)) {
     const destinationIDs = destinations
       .map((dest) => {
-        if (!(dest instanceof HTMLElement)) {
+        if (dest && !(dest instanceof HTMLElement)) {
           console.error(
             'Error: Argument appears to not be a ReactComponent',
             dest
