@@ -1,0 +1,108 @@
+/**
+ * Copyright (c) Nicolas Gallagher.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ * @flow
+ */
+
+'use client';
+
+import * as React from 'react';
+import { RecyclerListView, DataProvider as RLVDataProvider, LayoutProvider as RLVLayoutProvider } from 'recyclerlistview';
+import View from '../../../exports/View';
+import StyleSheet from '../../../exports/StyleSheet';
+import ViewabilityHelper from '../ViewabilityHelper';
+import memoizeOne from 'memoize-one';
+type Props = any; // VirtualizedList props
+type State = {
+  contentLength: number,
+  visibleLength: number,
+  offset: number,
+  timestamp: number,
+};
+const DEFAULT_RENDER_AHEAD_OFFSET = 0;
+const DEFAULT_MAX_TO_RENDER_PER_BATCH = 10;
+const DEFAULT_INITIAL_NUM_TO_RENDER = 10;
+const DEFAULT_WINDOW_SIZE = 21;
+
+/**
+ * Normalizes RecyclerListView scroll events to React Native Web format
+ */
+declare function normalizeScrollEvent(offset: any, contentSize: any, visibleSize: any): any;
+/**
+ * DataProvider wrapper that bridges RNW data to RLV DataProvider
+ */
+declare class RNWDataProvider {
+  _data: any,
+  _rowHasChanged: (r1: any, r2: any) => boolean,
+  _rlvDataProvider: RLVDataProvider,
+  constructor(data: any, rowHasChanged: any): any,
+  _updateData(data: any): any,
+  _getArrayData(): any,
+  getSize(): any,
+  getItem(index: any): any,
+  getRLVDataProvider(): any,
+  cloneWithRows(data: any, rowHasChanged: any): any,
+}
+/**
+ * LayoutProvider wrapper for converting RNW getItemLayout to RLV format
+ */
+declare class RNWLayoutProvider extends RLVLayoutProvider {
+  _getItemLayout: any,
+  _getCount: () => number,
+  _horizontal: boolean,
+  _estimatedItemHeight: number,
+  _estimatedItemWidth: number,
+  _layoutCache: Map<number, any>,
+  constructor(getItemLayout: any, getCount: any, horizontal: any, estimatedItemHeight: any, estimatedItemWidth: any): any,
+  getLayoutForIndex(index: any): any,
+  clearCache(): any,
+}
+const __DEV__ = process.env.NODE_ENV !== 'production';
+
+/**
+ * VirtualizedListRLVAdapter: Bridges React Native Web's VirtualizedList API
+ * to RecyclerListView for superior virtualization performance on web
+ */
+declare class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
+  _listRef: any,
+  _dataProvider: RNWDataProvider,
+  _layoutProvider: RNWLayoutProvider,
+  _scrollEventLastTick: number,
+  _viewabilityHelper: any,
+  _onViewableItemsChanged: any,
+  _hasInteracted: boolean,
+  state: any,
+  constructor(props: Props): any,
+  componentDidUpdate(prevProps: Props): any,
+  scrollToIndex: any,
+  scrollToOffset: any,
+  scrollToEnd: any,
+  recordInteraction: any,
+  flashScrollIndicators: any,
+  getScrollResponder: any,
+  getNativeScrollRef: any,
+  getScrollableNode: any,
+  _handleScroll: any,
+  _rowRenderer: any,
+  _captureRef: any,
+  render(): React.Node,
+}
+const styles = StyleSheet.create({
+  container: {
+    flex: 1
+  },
+  listContainer: {
+    flex: 1
+  },
+  cellContainer: {
+    width: '100%'
+  },
+  separator: {
+    width: '100%'
+  }
+});
+export default VirtualizedListRLVAdapter;

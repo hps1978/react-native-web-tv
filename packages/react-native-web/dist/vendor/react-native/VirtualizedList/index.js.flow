@@ -30,6 +30,7 @@ import { computeWindowedRenderLimits, keyExtractor as defaultKeyExtractor } from
 import invariant from 'fbjs/lib/invariant';
 import nullthrows from 'nullthrows';
 import * as React from 'react';
+import VirtualizedListRLVAdapter from './VirtualizedListRLVAdapter';
 export type { RenderItemProps, RenderItemType, Separators };
 const __DEV__ = process.env.NODE_ENV !== 'production';
 const ON_EDGE_REACHED_EPSILON = 0.001;
