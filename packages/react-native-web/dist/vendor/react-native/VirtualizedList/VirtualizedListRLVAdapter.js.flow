@@ -38,30 +38,37 @@ const DEFAULT_WINDOW_SIZE = 21;
 declare function normalizeScrollEvent(offset: any, contentSize: any, visibleSize: any): any;
 /**
  * DataProvider wrapper that bridges RNW data to RLV DataProvider
+ * Wraps data with synthetic header and footer items for unified virtualization
  */
 declare class RNWDataProvider {
   _data: any,
   _rowHasChanged: (r1: any, r2: any) => boolean,
   _rlvDataProvider: any,
-  constructor(data: any, rowHasChanged: any): any,
+  _hasHeader: boolean,
+  _hasFooter: boolean,
+  _wrappedData: any,
+  constructor(data: any, rowHasChanged: any, hasHeader: any, hasFooter: any): any,
+  _wrapData(data: any): any,
   _updateData(data: any): any,
-  _getArrayData(): any,
   getSize(): any,
   getItem(index: any): any,
+  getAllData(): any,
   getRLVDataProvider(): any,
   cloneWithRows(data: any, rowHasChanged: any): any,
+  setHasHeader(hasHeader: any): any,
+  setHasFooter(hasFooter: any): any,
 }
 /**
  * LayoutProvider wrapper for converting RNW getItemLayout to RLV format
+ * Supports multiple layout types: 'header', 'item', 'footer'
  * Properly extends RLVLayoutProvider to work with RecyclerListView
  */
 declare class RNWLayoutProvider {
   _getItemLayout: any,
-  _getCount: () => number,
+  _getOriginalDataCount: () => number,
   _horizontal: boolean,
   _estimatedItemHeight: number,
   _estimatedItemWidth: number,
-  _layoutCache: Map<number, any>,
   _rlvLayoutProvider: any,
   _containerSize: {
     width: number,
@@ -69,11 +76,17 @@ declare class RNWLayoutProvider {
   },
   _layoutDimensions: Map<string, any>,
   _isLayoutProviderFormat: boolean,
+  _hasHeader: boolean,
+  _hasFooter: boolean,
   _dimensionCallback: any,
-  constructor(getItemLayout: any, getCount: any, horizontal: any, estimatedItemHeight: any, estimatedItemWidth: any, containerSize: any, isLayoutProviderFormat: any): any,
+  _dataProvider: any,
+  constructor(getItemLayout: any, getOriginalDataCount: any, horizontal: any, estimatedItemHeight: any, estimatedItemWidth: any, containerSize: any, isLayoutProviderFormat: any, hasHeader: any, hasFooter: any, dataProvider: any, headerHeight: any, footerHeight: any): any,
+  getLayoutTypeForIndex(index: any): any,
+  getDimensionForType(type: any): any,
   setContainerSize(width: number, height: number): any,
-  getLayoutForIndex(index: any): any,
-  clearCache(): any,
+  setHasHeader(hasHeader: boolean): any,
+  setHasFooter(hasFooter: boolean): any,
+  setDataProvider(dataProvider: any): any,
   _getItemLayoutProvider(): any,
 }
 /**
@@ -93,6 +106,18 @@ declare class VirtualizedListRLVAdapter extends React.PureComponent<Props, State
     width: number,
     height: number,
   },
+  _scrollMetrics: {
+    contentLength: number,
+    visibleLength: number,
+    offset: number,
+    timestamp: number,
+  },
+  _headerRef: any,
+  _footerRef: any,
+  _headerHeight: number,
+  _footerHeight: number,
+  _headerMeasured: boolean,
+  _footerMeasured: boolean,
   state: any,
   constructor(props: Props): any,
   _ensureProvidersInitialized(): any,
@@ -111,6 +136,7 @@ declare class VirtualizedListRLVAdapter extends React.PureComponent<Props, State
   _captureRef: any,
   _captureContainerRef: any,
   _handleContainerLayout: any,
+  _measureHeaderFooterHeights: any,
   _measureContainer: any,
   render(): React.Node,
 }
@@ -126,6 +152,14 @@ const styles = StyleSheet.create({
   },
   separator: {
     width: '100%'
+  },
+  measurementContainer: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    opacity: 0,
+    pointerEvents: 'none',
+    zIndex: -1000
   }
 });
 export default VirtualizedListRLVAdapter;
