@@ -430,6 +430,16 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
     if (itemCount === 0 && ListEmptyComponent) {
       return typeof ListEmptyComponent === 'function' ? /*#__PURE__*/React.createElement(ListEmptyComponent, null) : ListEmptyComponent;
     }
+
+    // Ensure container has flex: 1 for proper sizing
+    var containerStyle = [styles.container, style];
+
+    // Ensure listContainer has flex: 1 and merges with contentContainerStyle carefully
+    // to avoid contentContainerStyle overriding the flex: 1
+    var listContainerStyle = [styles.listContainer, contentContainerStyle, {
+      flex: 1
+    } // Force flex: 1 to ensure RecyclerListView gets space
+    ];
     var scrollProps = {
       scrollEnabled,
       horizontal,
@@ -439,7 +449,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
       nestedScrollEnabled
     };
     return /*#__PURE__*/React.createElement(View, {
-      style: [styles.container, style]
+      style: containerStyle
     }, ListHeaderComponent ? typeof ListHeaderComponent === 'function' ? /*#__PURE__*/React.createElement(ListHeaderComponent, null) : ListHeaderComponent : null, /*#__PURE__*/React.createElement(RecyclerListView, {
       ref: this._captureRef,
       dataProvider: dataProvider,
@@ -448,7 +458,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
       onScroll: this._handleScroll,
       scrollViewProps: scrollProps,
       extendedState: this.props.extraData,
-      style: [styles.listContainer, contentContainerStyle],
+      style: listContainerStyle,
       canChangeSize: false,
       renderAheadOffset: DEFAULT_RENDER_AHEAD_OFFSET,
       isHorizontal: horizontal

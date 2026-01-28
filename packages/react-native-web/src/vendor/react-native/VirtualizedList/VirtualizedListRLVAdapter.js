@@ -524,6 +524,17 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
       );
     }
 
+    // Ensure container has flex: 1 for proper sizing
+    const containerStyle = [styles.container, style];
+    
+    // Ensure listContainer has flex: 1 and merges with contentContainerStyle carefully
+    // to avoid contentContainerStyle overriding the flex: 1
+    const listContainerStyle = [
+      styles.listContainer,
+      contentContainerStyle,
+      { flex: 1 }, // Force flex: 1 to ensure RecyclerListView gets space
+    ];
+
     const scrollProps = {
       scrollEnabled,
       horizontal,
@@ -534,7 +545,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
     };
 
     return (
-      <View style={[styles.container, style]}>
+      <View style={containerStyle}>
         {ListHeaderComponent ? (
           typeof ListHeaderComponent === 'function' ? (
             <ListHeaderComponent />
@@ -551,7 +562,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
           onScroll={this._handleScroll}
           scrollViewProps={scrollProps}
           extendedState={this.props.extraData}
-          style={[styles.listContainer, contentContainerStyle]}
+          style={listContainerStyle}
           canChangeSize={false}
           renderAheadOffset={DEFAULT_RENDER_AHEAD_OFFSET}
           isHorizontal={horizontal}
