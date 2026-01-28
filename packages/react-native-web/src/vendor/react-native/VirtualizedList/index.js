@@ -48,6 +48,7 @@ import {
 import invariant from 'fbjs/lib/invariant';
 import nullthrows from 'nullthrows';
 import * as React from 'react';
+import VirtualizedListRLVAdapter from './VirtualizedListRLVAdapter';
 
 export type {RenderItemProps, RenderItemType, Separators};
 
@@ -906,6 +907,12 @@ class VirtualizedList extends StateSafePureComponent<Props, State> {
   }
 
   render(): React.Node {
+    // Use RLV adapter if layoutProvider prop is provided or if env var enables it
+    const useRLVEngine = this.props.layoutProvider || process.env.RNW_USE_RLV_ENGINE === 'true';
+    if (useRLVEngine) {
+      return <VirtualizedListRLVAdapter {...this.props} />;
+    }
+
     this._checkProps(this.props);
     const {ListEmptyComponent, ListFooterComponent, ListHeaderComponent} =
       this.props;
