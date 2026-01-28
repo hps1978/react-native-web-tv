@@ -171,7 +171,7 @@ const View: React.AbstractComponent<ViewProps, HTMLElement & PlatformMethods> =
       if (Platform.isTV && hasTVPreferredFocus && isFocusable) {
         setFocus(hostRef.current);
       }
-    }, []);
+    }, [hasTVPreferredFocus]);
 
     const platformMethodsRef = usePlatformMethods(supportedProps);
     const setRef = useMergeRefs(
