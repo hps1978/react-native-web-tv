@@ -11,15 +11,33 @@
 'use client';
 
 import * as React from 'react';
-import {
-  RecyclerListView,
-  DataProvider as RLVDataProvider,
-  LayoutProvider as RLVLayoutProvider,
-} from 'recyclerlistview';
 import View from '../../../exports/View';
 import StyleSheet from '../../../exports/StyleSheet';
 import ViewabilityHelper from '../ViewabilityHelper';
 import memoizeOne from 'memoize-one';
+
+// Lazy imports - only loaded when needed to support SSR/Next.js
+let RecyclerListView, RLVDataProvider, RLVLayoutProvider;
+
+const __DEV__ = process.env.NODE_ENV !== 'production';
+
+function ensureRLVLoaded() {
+  if (RecyclerListView) return;
+  
+  try {
+    const rlv = require('recyclerlistview');
+    RecyclerListView = rlv.RecyclerListView;
+    RLVDataProvider = rlv.DataProvider;
+    RLVLayoutProvider = rlv.LayoutProvider;
+  } catch (e) {
+    if (__DEV__) {
+      console.warn('[RNW-RLV] Failed to load RecyclerListView:', e.message);
+    }
+    throw new Error(
+      'RecyclerListView failed to load. This component requires recyclerlistview package.'
+    );
+  }
+}
 
 type Props = any; // VirtualizedList props
 type State = {
@@ -63,9 +81,11 @@ function normalizeScrollEvent(offset, contentSize, visibleSize) {
 class RNWDataProvider {
   _data: any;
   _rowHasChanged: (r1: any, r2: any) => boolean;
-  _rlvDataProvider: RLVDataProvider;
+  _rlvDataProvider: any;
 
   constructor(data, rowHasChanged) {
+    ensureRLVLoaded();
+    
     this._data = data || [];
     this._rowHasChanged = rowHasChanged || ((r1, r2) => r1 !== r2);
 
@@ -116,13 +136,14 @@ class RNWDataProvider {
 /**
  * LayoutProvider wrapper for converting RNW getItemLayout to RLV format
  */
-class RNWLayoutProvider extends RLVLayoutProvider {
+class RNWLayoutProvider {
   _getItemLayout: any;
   _getCount: () => number;
   _horizontal: boolean;
   _estimatedItemHeight: number;
   _estimatedItemWidth: number;
   _layoutCache: Map<number, any>;
+  _rlvLayoutProvider: any;
 
   constructor(
     getItemLayout,
@@ -131,8 +152,10 @@ class RNWLayoutProvider extends RLVLayoutProvider {
     estimatedItemHeight = 50,
     estimatedItemWidth = 50,
   ) {
-    // Call parent constructor with dummy function
-    super(
+    ensureRLVLoaded();
+    
+    // Create parent RLV LayoutProvider with dummy function
+    this._rlvLayoutProvider = new RLVLayoutProvider(
       () => 0,
       () => 0,
     );
@@ -189,9 +212,12 @@ class RNWLayoutProvider extends RLVLayoutProvider {
   clearCache() {
     this._layoutCache.clear();
   }
-}
 
-const __DEV__ = process.env.NODE_ENV !== 'production';
+  // Delegate to RLV layout provider if needed
+  _getItemLayoutProvider() {
+    return this._rlvLayoutProvider;
+  }
+}
 
 /**
  * VirtualizedListRLVAdapter: Bridges React Native Web's VirtualizedList API
@@ -216,6 +242,18 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
   constructor(props: Props) {
     super(props);
 
+    // Initialize providers lazily - only on client side
+    this._dataProvider = null;
+    this._layoutProvider = null;
+    this._scrollEventLastTick = 0;
+    this._viewabilityHelper = null;
+    this._onViewableItemsChanged = null;
+    this._hasInteracted = false;
+  }
+
+  _ensureProvidersInitialized() {
+    if (this._dataProvider) return; // Already initialized
+    
     const {
       data,
       rowHasChanged,
@@ -224,7 +262,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
       viewabilityConfig,
       viewabilityConfigCallbackPairs,
       horizontal,
-    } = props;
+    } = this.props;
 
     // Initialize data provider
     this._dataProvider = new RNWDataProvider(data, rowHasChanged);
@@ -232,7 +270,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
     // Initialize layout provider
     this._layoutProvider = new RNWLayoutProvider(
       getItemLayout,
-      () => this._dataProvider.getSize(),
+      () => this._dataProvider && this._dataProvider.getSize(),
       horizontal,
     );
 
@@ -449,6 +487,16 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
   };
 
   render(): React.Node {
+    // Don't render on server side - RecyclerListView only works in browser
+    if (typeof window === 'undefined') {
+      // Return a simple placeholder for SSR - this will be hydrated on client
+      return <View style={this.props.style} />;
+    }
+    
+    // Ensure providers are initialized (only on client)
+    this._ensureProvidersInitialized();
+    ensureRLVLoaded();
+    
     const {
       style,
       contentContainerStyle,

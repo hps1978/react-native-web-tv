@@ -11,11 +11,15 @@
 'use client';
 
 import * as React from 'react';
-import { RecyclerListView, DataProvider as RLVDataProvider, LayoutProvider as RLVLayoutProvider } from 'recyclerlistview';
 import View from '../../../exports/View';
 import StyleSheet from '../../../exports/StyleSheet';
 import ViewabilityHelper from '../ViewabilityHelper';
 import memoizeOne from 'memoize-one';
+
+// Lazy imports - only loaded when needed to support SSR/Next.js
+let RecyclerListView, RLVDataProvider, RLVLayoutProvider;
+const __DEV__ = process.env.NODE_ENV !== 'production';
+declare function ensureRLVLoaded(): any;
 type Props = any; // VirtualizedList props
 type State = {
   contentLength: number,
@@ -38,7 +42,7 @@ declare function normalizeScrollEvent(offset: any, contentSize: any, visibleSize
 declare class RNWDataProvider {
   _data: any,
   _rowHasChanged: (r1: any, r2: any) => boolean,
-  _rlvDataProvider: RLVDataProvider,
+  _rlvDataProvider: any,
   constructor(data: any, rowHasChanged: any): any,
   _updateData(data: any): any,
   _getArrayData(): any,
@@ -50,19 +54,19 @@ declare class RNWDataProvider {
 /**
  * LayoutProvider wrapper for converting RNW getItemLayout to RLV format
  */
-declare class RNWLayoutProvider extends RLVLayoutProvider {
+declare class RNWLayoutProvider {
   _getItemLayout: any,
   _getCount: () => number,
   _horizontal: boolean,
   _estimatedItemHeight: number,
   _estimatedItemWidth: number,
   _layoutCache: Map<number, any>,
+  _rlvLayoutProvider: any,
   constructor(getItemLayout: any, getCount: any, horizontal: any, estimatedItemHeight: any, estimatedItemWidth: any): any,
   getLayoutForIndex(index: any): any,
   clearCache(): any,
+  _getItemLayoutProvider(): any,
 }
-const __DEV__ = process.env.NODE_ENV !== 'production';
-
 /**
  * VirtualizedListRLVAdapter: Bridges React Native Web's VirtualizedList API
  * to RecyclerListView for superior virtualization performance on web
@@ -77,6 +81,7 @@ declare class VirtualizedListRLVAdapter extends React.PureComponent<Props, State
   _hasInteracted: boolean,
   state: any,
   constructor(props: Props): any,
+  _ensureProvidersInitialized(): any,
   componentDidUpdate(prevProps: Props): any,
   scrollToIndex: any,
   scrollToOffset: any,

@@ -11,11 +11,28 @@
 'use client';
 
 import * as React from 'react';
-import { RecyclerListView, DataProvider as RLVDataProvider, LayoutProvider as RLVLayoutProvider } from 'recyclerlistview';
 import View from '../../../exports/View';
 import StyleSheet from '../../../exports/StyleSheet';
 import ViewabilityHelper from '../ViewabilityHelper';
 import memoizeOne from 'memoize-one';
+
+// Lazy imports - only loaded when needed to support SSR/Next.js
+var RecyclerListView, RLVDataProvider, RLVLayoutProvider;
+var __DEV__ = process.env.NODE_ENV !== 'production';
+function ensureRLVLoaded() {
+  if (RecyclerListView) return;
+  try {
+    var rlv = require('recyclerlistview');
+    RecyclerListView = rlv.RecyclerListView;
+    RLVDataProvider = rlv.DataProvider;
+    RLVLayoutProvider = rlv.LayoutProvider;
+  } catch (e) {
+    if (__DEV__) {
+      console.warn('[RNW-RLV] Failed to load RecyclerListView:', e.message);
+    }
+    throw new Error('RecyclerListView failed to load. This component requires recyclerlistview package.');
+  }
+}
 
 // VirtualizedList props
 
@@ -52,6 +69,7 @@ function normalizeScrollEvent(offset, contentSize, visibleSize) {
  */
 class RNWDataProvider {
   constructor(data, rowHasChanged) {
+    ensureRLVLoaded();
     this._data = data || [];
     this._rowHasChanged = rowHasChanged || ((r1, r2) => r1 !== r2);
 
@@ -93,7 +111,7 @@ class RNWDataProvider {
 /**
  * LayoutProvider wrapper for converting RNW getItemLayout to RLV format
  */
-class RNWLayoutProvider extends RLVLayoutProvider {
+class RNWLayoutProvider {
   constructor(getItemLayout, getCount, horizontal, estimatedItemHeight, estimatedItemWidth) {
     if (horizontal === void 0) {
       horizontal = false;
@@ -104,8 +122,10 @@ class RNWLayoutProvider extends RLVLayoutProvider {
     if (estimatedItemWidth === void 0) {
       estimatedItemWidth = 50;
     }
-    // Call parent constructor with dummy function
-    super(() => 0, () => 0);
+    ensureRLVLoaded();
+
+    // Create parent RLV LayoutProvider with dummy function
+    this._rlvLayoutProvider = new RLVLayoutProvider(() => 0, () => 0);
     this._getItemLayout = getItemLayout;
     this._getCount = getCount;
     this._horizontal = horizontal;
@@ -150,8 +170,12 @@ class RNWLayoutProvider extends RLVLayoutProvider {
   clearCache() {
     this._layoutCache.clear();
   }
+
+  // Delegate to RLV layout provider if needed
+  _getItemLayoutProvider() {
+    return this._rlvLayoutProvider;
+  }
 }
-var __DEV__ = process.env.NODE_ENV !== 'production';
 
 /**
  * VirtualizedListRLVAdapter: Bridges React Native Web's VirtualizedList API
@@ -160,6 +184,7 @@ var __DEV__ = process.env.NODE_ENV !== 'production';
 class VirtualizedListRLVAdapter extends React.PureComponent {
   constructor(props) {
     var _this;
+    // Initialize providers lazily - only on client side
     super(props);
     _this = this;
     this._scrollEventLastTick = 0;
@@ -306,19 +331,30 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
     this._captureRef = ref => {
       this._listRef = ref;
     };
-    var data = props.data,
-      rowHasChanged = props.rowHasChanged,
-      getItemLayout = props.getItemLayout,
-      onViewableItemsChanged = props.onViewableItemsChanged,
-      viewabilityConfig = props.viewabilityConfig,
-      viewabilityConfigCallbackPairs = props.viewabilityConfigCallbackPairs,
-      _horizontal = props.horizontal;
+    this._dataProvider = null;
+    this._layoutProvider = null;
+    this._scrollEventLastTick = 0;
+    this._viewabilityHelper = null;
+    this._onViewableItemsChanged = null;
+    this._hasInteracted = false;
+  }
+  _ensureProvidersInitialized() {
+    if (this._dataProvider) return; // Already initialized
+
+    var _this$props3 = this.props,
+      data = _this$props3.data,
+      rowHasChanged = _this$props3.rowHasChanged,
+      getItemLayout = _this$props3.getItemLayout,
+      onViewableItemsChanged = _this$props3.onViewableItemsChanged,
+      viewabilityConfig = _this$props3.viewabilityConfig,
+      viewabilityConfigCallbackPairs = _this$props3.viewabilityConfigCallbackPairs,
+      horizontal = _this$props3.horizontal;
 
     // Initialize data provider
     this._dataProvider = new RNWDataProvider(data, rowHasChanged);
 
     // Initialize layout provider
-    this._layoutProvider = new RNWLayoutProvider(getItemLayout, () => this._dataProvider.getSize(), _horizontal);
+    this._layoutProvider = new RNWLayoutProvider(getItemLayout, () => this._dataProvider && this._dataProvider.getSize(), horizontal);
 
     // Initialize viewability helper if needed
     if (onViewableItemsChanged || viewabilityConfigCallbackPairs) {
@@ -334,12 +370,12 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
     }
   }
   componentDidUpdate(prevProps) {
-    var _this$props3 = this.props,
-      data = _this$props3.data,
-      rowHasChanged = _this$props3.rowHasChanged,
-      onViewableItemsChanged = _this$props3.onViewableItemsChanged,
-      viewabilityConfig = _this$props3.viewabilityConfig,
-      viewabilityConfigCallbackPairs = _this$props3.viewabilityConfigCallbackPairs;
+    var _this$props4 = this.props,
+      data = _this$props4.data,
+      rowHasChanged = _this$props4.rowHasChanged,
+      onViewableItemsChanged = _this$props4.onViewableItemsChanged,
+      viewabilityConfig = _this$props4.viewabilityConfig,
+      viewabilityConfigCallbackPairs = _this$props4.viewabilityConfigCallbackPairs;
 
     // Update data provider if data changed
     if (data !== prevProps.data || rowHasChanged !== prevProps.rowHasChanged) {
@@ -357,25 +393,36 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
     }
   }
   render() {
-    var _this$props4 = this.props,
-      style = _this$props4.style,
-      contentContainerStyle = _this$props4.contentContainerStyle,
-      _this$props4$scrollEn = _this$props4.scrollEnabled,
-      scrollEnabled = _this$props4$scrollEn === void 0 ? true : _this$props4$scrollEn,
-      _this$props4$horizont = _this$props4.horizontal,
-      horizontal = _this$props4$horizont === void 0 ? false : _this$props4$horizont,
-      _this$props4$inverted = _this$props4.inverted,
-      inverted = _this$props4$inverted === void 0 ? false : _this$props4$inverted,
-      ListHeaderComponent = _this$props4.ListHeaderComponent,
-      ListFooterComponent = _this$props4.ListFooterComponent,
-      ListEmptyComponent = _this$props4.ListEmptyComponent,
-      _this$props4$showsHor = _this$props4.showsHorizontalScrollIndicator,
-      showsHorizontalScrollIndicator = _this$props4$showsHor === void 0 ? true : _this$props4$showsHor,
-      _this$props4$showsVer = _this$props4.showsVerticalScrollIndicator,
-      showsVerticalScrollIndicator = _this$props4$showsVer === void 0 ? true : _this$props4$showsVer,
-      _this$props4$nestedSc = _this$props4.nestedScrollEnabled,
-      nestedScrollEnabled = _this$props4$nestedSc === void 0 ? true : _this$props4$nestedSc,
-      scrollEventThrottle = _this$props4.scrollEventThrottle;
+    // Don't render on server side - RecyclerListView only works in browser
+    if (typeof window === 'undefined') {
+      // Return a simple placeholder for SSR - this will be hydrated on client
+      return /*#__PURE__*/React.createElement(View, {
+        style: this.props.style
+      });
+    }
+
+    // Ensure providers are initialized (only on client)
+    this._ensureProvidersInitialized();
+    ensureRLVLoaded();
+    var _this$props5 = this.props,
+      style = _this$props5.style,
+      contentContainerStyle = _this$props5.contentContainerStyle,
+      _this$props5$scrollEn = _this$props5.scrollEnabled,
+      scrollEnabled = _this$props5$scrollEn === void 0 ? true : _this$props5$scrollEn,
+      _this$props5$horizont = _this$props5.horizontal,
+      horizontal = _this$props5$horizont === void 0 ? false : _this$props5$horizont,
+      _this$props5$inverted = _this$props5.inverted,
+      inverted = _this$props5$inverted === void 0 ? false : _this$props5$inverted,
+      ListHeaderComponent = _this$props5.ListHeaderComponent,
+      ListFooterComponent = _this$props5.ListFooterComponent,
+      ListEmptyComponent = _this$props5.ListEmptyComponent,
+      _this$props5$showsHor = _this$props5.showsHorizontalScrollIndicator,
+      showsHorizontalScrollIndicator = _this$props5$showsHor === void 0 ? true : _this$props5$showsHor,
+      _this$props5$showsVer = _this$props5.showsVerticalScrollIndicator,
+      showsVerticalScrollIndicator = _this$props5$showsVer === void 0 ? true : _this$props5$showsVer,
+      _this$props5$nestedSc = _this$props5.nestedScrollEnabled,
+      nestedScrollEnabled = _this$props5$nestedSc === void 0 ? true : _this$props5$nestedSc,
+      scrollEventThrottle = _this$props5.scrollEventThrottle;
     var dataProvider = this._dataProvider.getRLVDataProvider();
     var itemCount = this._dataProvider.getSize();
 
