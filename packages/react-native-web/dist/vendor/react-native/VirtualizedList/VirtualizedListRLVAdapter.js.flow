@@ -53,6 +53,7 @@ declare class RNWDataProvider {
 }
 /**
  * LayoutProvider wrapper for converting RNW getItemLayout to RLV format
+ * Properly extends RLVLayoutProvider to work with RecyclerListView
  */
 declare class RNWLayoutProvider {
   _getItemLayout: any,
@@ -66,7 +67,10 @@ declare class RNWLayoutProvider {
     width: number,
     height: number,
   },
-  constructor(getItemLayout: any, getCount: any, horizontal: any, estimatedItemHeight: any, estimatedItemWidth: any, containerSize: any): any,
+  _layoutDimensions: Map<string, any>,
+  _isLayoutProviderFormat: boolean,
+  _dimensionCallback: any,
+  constructor(getItemLayout: any, getCount: any, horizontal: any, estimatedItemHeight: any, estimatedItemWidth: any, containerSize: any, isLayoutProviderFormat: any): any,
   setContainerSize(width: number, height: number): any,
   getLayoutForIndex(index: any): any,
   clearCache(): any,
@@ -92,6 +96,7 @@ declare class VirtualizedListRLVAdapter extends React.PureComponent<Props, State
   state: any,
   constructor(props: Props): any,
   _ensureProvidersInitialized(): any,
+  componentDidMount(): any,
   componentDidUpdate(prevProps: Props): any,
   scrollToIndex: any,
   scrollToOffset: any,

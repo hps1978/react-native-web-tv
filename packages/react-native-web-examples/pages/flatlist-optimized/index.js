@@ -157,6 +157,8 @@ function OptimizedFlatListExample() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    width: '100%',
+    height: '100vh',
     backgroundColor: '#f5f5f5'
   },
   header: {
@@ -209,13 +211,17 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
     height: ITEM_HEIGHT,
-    justifyContent: 'center'
+    justifyContent: 'center',
+    width: '100%',
+    overflow: 'hidden',
+    flexDirection: 'column'
   },
   itemTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 4
+    marginBottom: 4,
+    numberOfLines: 1
   },
   itemDescription: {
     fontSize: 13,
@@ -225,7 +231,8 @@ const styles = StyleSheet.create({
   },
   itemTimestamp: {
     fontSize: 12,
-    color: '#999'
+    color: '#999',
+    numberOfLines: 1
   },
   emptyContainer: {
     flex: 1,

@@ -110,9 +110,14 @@ class RNWDataProvider {
 
 /**
  * LayoutProvider wrapper for converting RNW getItemLayout to RLV format
+ * Properly extends RLVLayoutProvider to work with RecyclerListView
  */
 class RNWLayoutProvider {
-  constructor(getItemLayout, getCount, horizontal, estimatedItemHeight, estimatedItemWidth, containerSize) {
+  // True if using layoutProvider format (width, height)
+  // Reference to the dimension callback for updates
+
+  constructor(getItemLayout, getCount, horizontal, estimatedItemHeight, estimatedItemWidth, containerSize, isLayoutProviderFormat // NEW: Flag for layoutProvider format
+  ) {
     if (horizontal === void 0) {
       horizontal = false;
     }
@@ -128,10 +133,10 @@ class RNWLayoutProvider {
         height: 600
       };
     }
+    if (isLayoutProviderFormat === void 0) {
+      isLayoutProviderFormat = false;
+    }
     ensureRLVLoaded();
-
-    // Create parent RLV LayoutProvider with dummy function
-    this._rlvLayoutProvider = new RLVLayoutProvider(() => 0, () => 0);
     this._getItemLayout = getItemLayout;
     this._getCount = getCount;
     this._horizontal = horizontal;
@@ -139,6 +144,175 @@ class RNWLayoutProvider {
     this._estimatedItemWidth = estimatedItemWidth;
     this._layoutCache = new Map();
     this._containerSize = containerSize;
+    this._layoutDimensions = new Map(); // Store dimensions by type
+    this._isLayoutProviderFormat = isLayoutProviderFormat;
+    this._dimensionCallback = null; // Initialize dimension callback reference
+
+    var self = this;
+
+    // Create CustomRLVLayoutProvider subclass that extends RLVLayoutProvider
+    // Define it here (not at module level) because RLVLayoutProvider is loaded dynamically
+    class CustomRLVLayoutProvider extends RLVLayoutProvider {
+      constructor(layoutType, dimension) {
+        super(layoutType, dimension);
+        if (__DEV__) {
+          console.log('[RNW-RLV] CustomRLVLayoutProvider constructor called');
+        }
+      }
+
+      // Override getLayoutForIndex to use our custom layout logic
+      // This is called by RecyclerListView during initialization and rendering
+      getLayoutForIndex(index) {
+        if (__DEV__) {
+          console.log('[RNW-RLV] CustomRLVLayoutProvider.getLayoutForIndex called for index:', index);
+        }
+        return self.getLayoutForIndex(index);
+      }
+
+      // RecyclerListView might call getLayout instead
+      getLayout(index) {
+        if (__DEV__) {
+          console.log('[RNW-RLV] CustomRLVLayoutProvider.getLayout called for index:', index);
+        }
+        if (super.getLayout) {
+          return super.getLayout(index);
+        }
+        return this.getLayoutForIndex(index);
+      }
+
+      // Check if RLV calls getLayoutTypeForIndex
+      getLayoutTypeForIndex(index) {
+        if (__DEV__ && index < 3) {
+          console.log('[RNW-RLV] CustomRLVLayoutProvider.getLayoutTypeForIndex called for index:', index);
+        }
+        return super.getLayoutTypeForIndex ? super.getLayoutTypeForIndex(index) : '0';
+      }
+
+      // Try to override methods that might provide dimensions
+      getDimensionForType(type) {
+        if (__DEV__) {
+          console.log('[RNW-RLV] CustomRLVLayoutProvider.getDimensionForType called for type:', type);
+        }
+        if (super.getDimensionForType) {
+          return super.getDimensionForType(type);
+        }
+        // If this is called, return dimensions for the type
+        return {
+          width: self._containerSize.width,
+          height: 50
+        };
+      }
+
+      // Override getLayouts (batch method)
+      getLayouts(startIndex, endIndex) {
+        if (__DEV__) {
+          console.log('[RNW-RLV] getLayouts called for range:', startIndex, '-', endIndex);
+        }
+        if (super.getLayouts) {
+          return super.getLayouts(startIndex, endIndex);
+        }
+        return undefined;
+      }
+
+      // Check all own properties that might store dimensions
+      //getLayoutDimensions(index)
+    }
+
+    // Create instance of custom subclass
+    this._rlvLayoutProvider = new CustomRLVLayoutProvider(() => '0',
+    // All items use layout type '0'
+    (type, dim) => {
+      // This is the dimension callback - RLV passes a dimension object for us to populate
+      var incomingHeight = dim.height;
+
+      // Get the real layout for the first item to determine dimensions
+      if (self._getItemLayout) {
+        try {
+          var result = self._getItemLayout(null, 0);
+          if (result) {
+            var width = self._containerSize.width || 50;
+            var height = 50;
+            if (self._isLayoutProviderFormat) {
+              if (result.width !== undefined) {
+                if (typeof result.width === 'string' && result.width === '100%') {
+                  width = self._containerSize.width;
+                } else if (typeof result.width === 'number') {
+                  width = result.width;
+                }
+              }
+              if (result.height !== undefined) {
+                height = result.height;
+              }
+            } else {
+              if (result.length !== undefined) {
+                height = result.length;
+              } else if (result.height !== undefined) {
+                height = result.height;
+              }
+            }
+
+            // IMPORTANT: Modify the dimension object passed in!
+            // RecyclerListView expects us to populate width and height
+            dim.width = Math.max(width, 1);
+            dim.height = Math.max(height, 1);
+            if (__DEV__ && incomingHeight === 0) {
+              console.log('[RNW-RLV] Dimensions populated: width=' + dim.width + 'px, height=' + dim.height + 'px');
+            }
+          }
+        } catch (e) {
+          if (__DEV__) {
+            console.warn('[RNW-RLV] Error in dimension callback:', e.message);
+          }
+        }
+      }
+
+      // Store dimensions for this type
+      self._layoutDimensions.set(type, {
+        width: dim.width,
+        height: dim.height
+      });
+    });
+
+    // Wrap the layout provider to log all method calls
+    if (__DEV__) {
+      var originalLayoutProvider = this._rlvLayoutProvider;
+      var handler = {
+        get: (target, prop) => {
+          var value = target[prop];
+          if (typeof value === 'function') {
+            return function () {
+              for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+                args[_key] = arguments[_key];
+              }
+              if (![' constructor', 'constructor'].includes(prop)) {
+                console.log("[RNW-RLV] LayoutProvider." + prop + " called with:", args);
+              }
+              return value.apply(target, args);
+            };
+          }
+          return value;
+        }
+      };
+
+      // Note: Proxy may not work as expected here, so let's just add logging to key methods
+      var orig_getDimension = originalLayoutProvider.getDimension;
+      if (orig_getDimension) {
+        originalLayoutProvider.getDimension = function (type) {
+          console.log('[RNW-RLV] getDimension called for type:', type);
+          return orig_getDimension.call(this, type);
+        };
+      }
+    }
+    if (__DEV__) {
+      console.log('[RNW-RLV] Layout provider created:', {
+        hasGetLayoutForIndex: typeof this._rlvLayoutProvider.getLayoutForIndex === 'function',
+        hasDimension: !!this._rlvLayoutProvider.getDimension,
+        isLayoutProviderFormat,
+        containerSize,
+        isCustomSubclass: this._rlvLayoutProvider instanceof RLVLayoutProvider,
+        providerMethods: Object.getOwnPropertyNames(Object.getPrototypeOf(this._rlvLayoutProvider))
+      });
+    }
   }
   setContainerSize(width, height) {
     if (this._containerSize.width !== width || this._containerSize.height !== height) {
@@ -147,6 +321,52 @@ class RNWLayoutProvider {
         height
       };
       this._layoutCache.clear(); // Clear cache when container size changes
+
+      // Update the layout provider's stored dimensions for layout type '0'
+      // Call the dimension callback with the new dimensions so RLV knows about them
+      if (this._rlvLayoutProvider && this._getItemLayout) {
+        try {
+          var result = this._getItemLayout(null, 0);
+          if (result) {
+            var newWidth = width;
+            var newHeight = 50;
+            if (this._isLayoutProviderFormat) {
+              if (result.width !== undefined) {
+                if (typeof result.width === 'string' && result.width === '100%') {
+                  newWidth = width;
+                } else if (typeof result.width === 'number') {
+                  newWidth = result.width;
+                }
+              }
+              if (result.height !== undefined) {
+                newHeight = result.height;
+              }
+            } else {
+              if (result.length !== undefined) {
+                newHeight = result.length;
+              } else if (result.height !== undefined) {
+                newHeight = result.height;
+              }
+            }
+
+            // Try to update dimensions in the layout provider
+            if (this._rlvLayoutProvider.setDimensionForType) {
+              if (__DEV__) {
+                console.log('[RNW-RLV] Calling setDimensionForType with:', {
+                  type: '0',
+                  width: newWidth,
+                  height: newHeight
+                });
+              }
+              this._rlvLayoutProvider.setDimensionForType('0', newWidth, newHeight);
+            }
+          }
+        } catch (e) {
+          if (__DEV__) {
+            console.warn('[RNW-RLV] Error updating container size in layout provider:', e);
+          }
+        }
+      }
     }
   }
   getLayoutForIndex(index) {
@@ -154,29 +374,65 @@ class RNWLayoutProvider {
     if (this._layoutCache.has(index)) {
       return this._layoutCache.get(index);
     }
-    var layout;
+    var width = this._containerSize.width || this._estimatedItemWidth;
+    var height = this._estimatedItemHeight;
+    if (__DEV__ && index === 0) {
+      console.log('[RNW-RLV Debug] getLayoutForIndex(0):', {
+        containerSize: this._containerSize,
+        isLayoutProviderFormat: this._isLayoutProviderFormat,
+        hasGetItemLayout: !!this._getItemLayout
+      });
+    }
     if (this._getItemLayout) {
       try {
-        var frameMetrics = this._getItemLayout(null, index);
-        if (frameMetrics && frameMetrics.length) {
-          var width = this._estimatedItemWidth;
-
-          // Convert width - handle '100%' or percentage strings
-          if (typeof frameMetrics.width === 'string') {
-            if (frameMetrics.width === '100%') {
-              width = this._containerSize.width;
-            } else if (frameMetrics.width.includes('%')) {
-              var percent = parseFloat(frameMetrics.width) / 100;
-              width = this._containerSize.width * percent;
+        var result = this._getItemLayout(null, index);
+        if (__DEV__ && index === 0) {
+          console.log('[RNW-RLV Debug] layoutProvider result:', result);
+        }
+        if (result) {
+          if (this._isLayoutProviderFormat) {
+            // layoutProvider format: { width, height }
+            // width can be string like '100%' or a number
+            if (result.width !== undefined) {
+              if (typeof result.width === 'string') {
+                if (result.width === '100%') {
+                  width = this._containerSize.width;
+                } else if (result.width.includes('%')) {
+                  var percent = parseFloat(result.width) / 100;
+                  width = this._containerSize.width * percent;
+                }
+              } else if (typeof result.width === 'number') {
+                width = result.width;
+              }
             }
-          } else if (typeof frameMetrics.width === 'number') {
-            width = frameMetrics.width;
+            if (result.height !== undefined) {
+              height = result.height;
+            }
+          } else {
+            // Standard getItemLayout format: { length, offset, index }
+            // length = height for vertical, width for horizontal
+
+            // Handle width
+            if (result.width !== undefined) {
+              if (typeof result.width === 'string') {
+                if (result.width === '100%') {
+                  width = this._containerSize.width;
+                } else if (result.width.includes('%')) {
+                  var _percent = parseFloat(result.width) / 100;
+                  width = this._containerSize.width * _percent;
+                }
+              } else if (typeof result.width === 'number') {
+                width = result.width;
+              }
+            }
+
+            // Handle height
+            if (result.length !== undefined) {
+              height = result.length;
+            } else if (result.height !== undefined) {
+              height = result.height;
+            }
           }
-          layout = {
-            width: Math.max(width, 1),
-            // Ensure minimum width of 1px
-            height: this._horizontal ? this._estimatedItemHeight : frameMetrics.length
-          };
         }
       } catch (e) {
         if (__DEV__) {
@@ -185,12 +441,15 @@ class RNWLayoutProvider {
       }
     }
 
-    // Fallback to estimated dimensions (in pixels from container size)
-    if (!layout) {
-      layout = {
-        width: this._containerSize.width || this._estimatedItemWidth,
-        height: this._horizontal ? this._estimatedItemHeight : this._estimatedItemHeight
-      };
+    // Ensure minimum dimensions (RecyclerListView needs positive dimensions)
+    width = Math.max(width, 1);
+    height = Math.max(height, 1);
+    var layout = {
+      width,
+      height
+    };
+    if (__DEV__ && index === 0) {
+      console.log('[RNW-RLV Debug] final layout for index 0:', layout);
     }
 
     // Cache the layout
@@ -228,7 +487,8 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
       contentLength: 0,
       visibleLength: 0,
       offset: 0,
-      timestamp: 0
+      timestamp: 0,
+      hasContainerSize: false // NEW: Track if we have measured container dimensions
     };
     // Public ref methods
     this.scrollToIndex = params => {
@@ -334,6 +594,9 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
         renderItem = _this$props2.renderItem,
         ListItemComponent = _this$props2.ListItemComponent,
         ItemSeparatorComponent = _this$props2.ItemSeparatorComponent;
+      if (__DEV__ && index === 0) {
+        console.log('[RNW-RLV] _rowRenderer called for index 0');
+      }
       var horizontal = this.props.horizontal;
       var separatorComponent = ItemSeparatorComponent && index < this._dataProvider.getSize() - 1 ? /*#__PURE__*/React.createElement(ItemSeparatorComponent, {
         highlighted: false
@@ -368,8 +631,6 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
     };
     this._captureContainerRef = ref => {
       this._containerRef = ref;
-      // Measure container immediately
-      this._measureContainer();
     };
     this._handleContainerLayout = event => {
       var _event$nativeEvent$la = event.nativeEvent.layout,
@@ -379,10 +640,23 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
         width,
         height
       };
+      if (__DEV__) {
+        console.log('[RNW-RLV] Container layout:', {
+          width,
+          height
+        });
+      }
 
-      // Update layout provider if it exists
+      // Update layout provider if dimensions changed
       if (this._layoutProvider) {
         this._layoutProvider.setContainerSize(width, height);
+      }
+
+      // Mark that we have container size
+      if (!this.state.hasContainerSize && width > 0 && height > 0) {
+        this.setState({
+          hasContainerSize: true
+        });
       }
     };
     this._measureContainer = () => {
@@ -398,6 +672,19 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
             };
             if (this._layoutProvider) {
               this._layoutProvider.setContainerSize(rect.width, rect.height);
+            }
+            if (__DEV__) {
+              console.log('[RNW-RLV] Container measured:', {
+                width: rect.width,
+                height: rect.height
+              });
+            }
+
+            // Mark that we have container size
+            if (!this.state.hasContainerSize) {
+              this.setState({
+                hasContainerSize: true
+              });
             }
           }
         }
@@ -421,6 +708,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
       data = _this$props3.data,
       rowHasChanged = _this$props3.rowHasChanged,
       getItemLayout = _this$props3.getItemLayout,
+      layoutProvider = _this$props3.layoutProvider,
       onViewableItemsChanged = _this$props3.onViewableItemsChanged,
       viewabilityConfig = _this$props3.viewabilityConfig,
       viewabilityConfigCallbackPairs = _this$props3.viewabilityConfigCallbackPairs,
@@ -430,7 +718,11 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
     this._dataProvider = new RNWDataProvider(data, rowHasChanged);
 
     // Initialize layout provider with container size
-    this._layoutProvider = new RNWLayoutProvider(getItemLayout, () => this._dataProvider && this._dataProvider.getSize(), horizontal, 50, 50, this._containerSize);
+    // Pass either getItemLayout or layoutProvider to the layout provider wrapper
+    this._layoutProvider = new RNWLayoutProvider(getItemLayout || layoutProvider,
+    // layoutProvider or getItemLayout
+    () => this._dataProvider && this._dataProvider.getSize(), horizontal, 50, 50, this._containerSize, layoutProvider ? true : false) // Flag if using layoutProvider format
+    ;
 
     // Initialize viewability helper if needed
     if (onViewableItemsChanged || viewabilityConfigCallbackPairs) {
@@ -444,6 +736,11 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
         this._onViewableItemsChanged = viewabilityConfigCallbackPairs[0].onViewableItemsChanged;
       }
     }
+  }
+  componentDidMount() {
+    // Measure container dimensions on mount
+    if (typeof window === 'undefined') return;
+    this._measureContainer();
   }
   componentDidUpdate(prevProps) {
     var _this$props4 = this.props,
@@ -476,10 +773,20 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
         style: this.props.style
       });
     }
+    if (__DEV__) {
+      console.log('[RNW-RLV] VirtualizedListRLVAdapter.render() starting');
+    }
 
     // Ensure providers are initialized (only on client)
     this._ensureProvidersInitialized();
     ensureRLVLoaded();
+    if (__DEV__) {
+      var _RecyclerListView;
+      console.log('[RNW-RLV] RecyclerListView loaded:', {
+        hasRecyclerListView: !!RecyclerListView,
+        RecyclerListViewName: (_RecyclerListView = RecyclerListView) == null ? void 0 : _RecyclerListView.name
+      });
+    }
     var _this$props5 = this.props,
       style = _this$props5.style,
       contentContainerStyle = _this$props5.contentContainerStyle,
@@ -501,21 +808,32 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
       scrollEventThrottle = _this$props5.scrollEventThrottle;
     var dataProvider = this._dataProvider.getRLVDataProvider();
     var itemCount = this._dataProvider.getSize();
+    if (__DEV__) {
+      var _this$_layoutProvider, _this$_layoutProvider2;
+      console.log('[RNW-RLV] render() called with:', {
+        itemCount,
+        hasLayoutProvider: !!this._layoutProvider,
+        hasRLVLayoutProvider: !!((_this$_layoutProvider = this._layoutProvider) != null && _this$_layoutProvider._rlvLayoutProvider),
+        hasContainerSize: this.state.hasContainerSize,
+        containerSize: this._containerSize,
+        layoutProviderType: typeof ((_this$_layoutProvider2 = this._layoutProvider) == null ? void 0 : _this$_layoutProvider2._rlvLayoutProvider)
+      });
+    }
 
     // Show empty component if no items
     if (itemCount === 0 && ListEmptyComponent) {
       return typeof ListEmptyComponent === 'function' ? /*#__PURE__*/React.createElement(ListEmptyComponent, null) : ListEmptyComponent;
     }
 
-    // Ensure container has flex: 1 for proper sizing
+    // Container style with flex: 1 (parent must provide bounded dimensions)
     var containerStyle = [styles.container, style];
 
-    // Ensure listContainer has flex: 1 and merges with contentContainerStyle carefully
-    // to avoid contentContainerStyle overriding the flex: 1
-    var listContainerStyle = [styles.listContainer, contentContainerStyle, {
+    // Merge listContainerStyle into a single object instead of array
+    // RecyclerListView requires style to be object or number, not array
+    var listContainerStyle = Object.assign({}, styles.listContainer, contentContainerStyle, {
       flex: 1
     } // Force flex: 1 to ensure RecyclerListView gets space
-    ];
+    );
     var scrollProps = {
       scrollEnabled,
       horizontal,
@@ -528,10 +846,18 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
       ref: this._captureContainerRef,
       onLayout: this._handleContainerLayout,
       style: containerStyle
-    }, ListHeaderComponent ? typeof ListHeaderComponent === 'function' ? /*#__PURE__*/React.createElement(ListHeaderComponent, null) : ListHeaderComponent : null, /*#__PURE__*/React.createElement(RecyclerListView, {
+    }, ListHeaderComponent ? typeof ListHeaderComponent === 'function' ? /*#__PURE__*/React.createElement(ListHeaderComponent, null) : ListHeaderComponent : null, !this.state.hasContainerSize ?
+    /*#__PURE__*/
+    // Don't render RecyclerListView until we have container dimensions
+    React.createElement(View, {
+      style: {
+        flex: 1
+      }
+    }) : /*#__PURE__*/React.createElement(RecyclerListView, {
+      key: "rlv-with-size",
       ref: this._captureRef,
       dataProvider: dataProvider,
-      layoutProvider: this._layoutProvider,
+      layoutProvider: this._layoutProvider._rlvLayoutProvider,
       rowRenderer: this._rowRenderer,
       onScroll: this._handleScroll,
       scrollViewProps: scrollProps,
