@@ -144,6 +144,7 @@ class RNWLayoutProvider {
   _estimatedItemWidth: number;
   _layoutCache: Map<number, any>;
   _rlvLayoutProvider: any;
+  _containerSize: { width: number, height: number };
 
   constructor(
     getItemLayout,
@@ -151,6 +152,7 @@ class RNWLayoutProvider {
     horizontal = false,
     estimatedItemHeight = 50,
     estimatedItemWidth = 50,
+    containerSize = { width: 800, height: 600 },
   ) {
     ensureRLVLoaded();
     
@@ -166,6 +168,14 @@ class RNWLayoutProvider {
     this._estimatedItemHeight = estimatedItemHeight;
     this._estimatedItemWidth = estimatedItemWidth;
     this._layoutCache = new Map();
+    this._containerSize = containerSize;
+  }
+
+  setContainerSize(width: number, height: number) {
+    if (this._containerSize.width !== width || this._containerSize.height !== height) {
+      this._containerSize = { width, height };
+      this._layoutCache.clear(); // Clear cache when container size changes
+    }
   }
 
   getLayoutForIndex(index) {
@@ -180,8 +190,22 @@ class RNWLayoutProvider {
       try {
         const frameMetrics = this._getItemLayout(null, index);
         if (frameMetrics && frameMetrics.length) {
+          let width = this._estimatedItemWidth;
+          
+          // Convert width - handle '100%' or percentage strings
+          if (typeof frameMetrics.width === 'string') {
+            if (frameMetrics.width === '100%') {
+              width = this._containerSize.width;
+            } else if (frameMetrics.width.includes('%')) {
+              const percent = parseFloat(frameMetrics.width) / 100;
+              width = this._containerSize.width * percent;
+            }
+          } else if (typeof frameMetrics.width === 'number') {
+            width = frameMetrics.width;
+          }
+          
           layout = {
-            width: this._horizontal ? frameMetrics.length : this._estimatedItemWidth,
+            width: Math.max(width, 1), // Ensure minimum width of 1px
             height: this._horizontal ? this._estimatedItemHeight : frameMetrics.length,
           };
         }
@@ -196,10 +220,10 @@ class RNWLayoutProvider {
       }
     }
 
-    // Fallback to estimated dimensions
+    // Fallback to estimated dimensions (in pixels from container size)
     if (!layout) {
       layout = {
-        width: this._horizontal ? 100 : this._estimatedItemWidth,
+        width: this._containerSize.width || this._estimatedItemWidth,
         height: this._horizontal ? this._estimatedItemHeight : this._estimatedItemHeight,
       };
     }
@@ -231,6 +255,8 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
   _viewabilityHelper: any;
   _onViewableItemsChanged: any;
   _hasInteracted: boolean = false;
+  _containerRef: any = null;
+  _containerSize: { width: number, height: number } = { width: 0, height: 0 };
   
   state = {
     contentLength: 0,
@@ -267,11 +293,14 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
     // Initialize data provider
     this._dataProvider = new RNWDataProvider(data, rowHasChanged);
 
-    // Initialize layout provider
+    // Initialize layout provider with container size
     this._layoutProvider = new RNWLayoutProvider(
       getItemLayout,
       () => this._dataProvider && this._dataProvider.getSize(),
       horizontal,
+      50,
+      50,
+      this._containerSize,
     );
 
     // Initialize viewability helper if needed
@@ -486,6 +515,43 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
     this._listRef = ref;
   };
 
+  _captureContainerRef = (ref: any) => {
+    this._containerRef = ref;
+    // Measure container immediately
+    this._measureContainer();
+  };
+
+  _handleContainerLayout = (event: any) => {
+    const { width, height } = event.nativeEvent.layout;
+    this._containerSize = { width, height };
+    
+    // Update layout provider if it exists
+    if (this._layoutProvider) {
+      this._layoutProvider.setContainerSize(width, height);
+    }
+  };
+
+  _measureContainer = () => {
+    if (!this._containerRef || typeof window === 'undefined') return;
+    
+    try {
+      const node = this._containerRef;
+      if (node && node.getBoundingClientRect) {
+        const rect = node.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          this._containerSize = { width: rect.width, height: rect.height };
+          if (this._layoutProvider) {
+            this._layoutProvider.setContainerSize(rect.width, rect.height);
+          }
+        }
+      }
+    } catch (e) {
+      if (__DEV__) {
+        console.warn('[RNW-RLV] Failed to measure container:', e);
+      }
+    }
+  };
+
   render(): React.Node {
     // Don't render on server side - RecyclerListView only works in browser
     if (typeof window === 'undefined') {
@@ -545,7 +611,11 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
     };
 
     return (
-      <View style={containerStyle}>
+      <View 
+        ref={this._captureContainerRef}
+        onLayout={this._handleContainerLayout}
+        style={containerStyle}
+      >
         {ListHeaderComponent ? (
           typeof ListHeaderComponent === 'function' ? (
             <ListHeaderComponent />

@@ -112,7 +112,7 @@ class RNWDataProvider {
  * LayoutProvider wrapper for converting RNW getItemLayout to RLV format
  */
 class RNWLayoutProvider {
-  constructor(getItemLayout, getCount, horizontal, estimatedItemHeight, estimatedItemWidth) {
+  constructor(getItemLayout, getCount, horizontal, estimatedItemHeight, estimatedItemWidth, containerSize) {
     if (horizontal === void 0) {
       horizontal = false;
     }
@@ -121,6 +121,12 @@ class RNWLayoutProvider {
     }
     if (estimatedItemWidth === void 0) {
       estimatedItemWidth = 50;
+    }
+    if (containerSize === void 0) {
+      containerSize = {
+        width: 800,
+        height: 600
+      };
     }
     ensureRLVLoaded();
 
@@ -132,6 +138,16 @@ class RNWLayoutProvider {
     this._estimatedItemHeight = estimatedItemHeight;
     this._estimatedItemWidth = estimatedItemWidth;
     this._layoutCache = new Map();
+    this._containerSize = containerSize;
+  }
+  setContainerSize(width, height) {
+    if (this._containerSize.width !== width || this._containerSize.height !== height) {
+      this._containerSize = {
+        width,
+        height
+      };
+      this._layoutCache.clear(); // Clear cache when container size changes
+    }
   }
   getLayoutForIndex(index) {
     // Check cache first
@@ -143,8 +159,22 @@ class RNWLayoutProvider {
       try {
         var frameMetrics = this._getItemLayout(null, index);
         if (frameMetrics && frameMetrics.length) {
+          var width = this._estimatedItemWidth;
+
+          // Convert width - handle '100%' or percentage strings
+          if (typeof frameMetrics.width === 'string') {
+            if (frameMetrics.width === '100%') {
+              width = this._containerSize.width;
+            } else if (frameMetrics.width.includes('%')) {
+              var percent = parseFloat(frameMetrics.width) / 100;
+              width = this._containerSize.width * percent;
+            }
+          } else if (typeof frameMetrics.width === 'number') {
+            width = frameMetrics.width;
+          }
           layout = {
-            width: this._horizontal ? frameMetrics.length : this._estimatedItemWidth,
+            width: Math.max(width, 1),
+            // Ensure minimum width of 1px
             height: this._horizontal ? this._estimatedItemHeight : frameMetrics.length
           };
         }
@@ -155,10 +185,10 @@ class RNWLayoutProvider {
       }
     }
 
-    // Fallback to estimated dimensions
+    // Fallback to estimated dimensions (in pixels from container size)
     if (!layout) {
       layout = {
-        width: this._horizontal ? 100 : this._estimatedItemWidth,
+        width: this._containerSize.width || this._estimatedItemWidth,
         height: this._horizontal ? this._estimatedItemHeight : this._estimatedItemHeight
       };
     }
@@ -189,6 +219,11 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
     _this = this;
     this._scrollEventLastTick = 0;
     this._hasInteracted = false;
+    this._containerRef = null;
+    this._containerSize = {
+      width: 0,
+      height: 0
+    };
     this.state = {
       contentLength: 0,
       visibleLength: 0,
@@ -331,6 +366,47 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
     this._captureRef = ref => {
       this._listRef = ref;
     };
+    this._captureContainerRef = ref => {
+      this._containerRef = ref;
+      // Measure container immediately
+      this._measureContainer();
+    };
+    this._handleContainerLayout = event => {
+      var _event$nativeEvent$la = event.nativeEvent.layout,
+        width = _event$nativeEvent$la.width,
+        height = _event$nativeEvent$la.height;
+      this._containerSize = {
+        width,
+        height
+      };
+
+      // Update layout provider if it exists
+      if (this._layoutProvider) {
+        this._layoutProvider.setContainerSize(width, height);
+      }
+    };
+    this._measureContainer = () => {
+      if (!this._containerRef || typeof window === 'undefined') return;
+      try {
+        var node = this._containerRef;
+        if (node && node.getBoundingClientRect) {
+          var rect = node.getBoundingClientRect();
+          if (rect.width > 0 && rect.height > 0) {
+            this._containerSize = {
+              width: rect.width,
+              height: rect.height
+            };
+            if (this._layoutProvider) {
+              this._layoutProvider.setContainerSize(rect.width, rect.height);
+            }
+          }
+        }
+      } catch (e) {
+        if (__DEV__) {
+          console.warn('[RNW-RLV] Failed to measure container:', e);
+        }
+      }
+    };
     this._dataProvider = null;
     this._layoutProvider = null;
     this._scrollEventLastTick = 0;
@@ -353,8 +429,8 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
     // Initialize data provider
     this._dataProvider = new RNWDataProvider(data, rowHasChanged);
 
-    // Initialize layout provider
-    this._layoutProvider = new RNWLayoutProvider(getItemLayout, () => this._dataProvider && this._dataProvider.getSize(), horizontal);
+    // Initialize layout provider with container size
+    this._layoutProvider = new RNWLayoutProvider(getItemLayout, () => this._dataProvider && this._dataProvider.getSize(), horizontal, 50, 50, this._containerSize);
 
     // Initialize viewability helper if needed
     if (onViewableItemsChanged || viewabilityConfigCallbackPairs) {
@@ -449,6 +525,8 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
       nestedScrollEnabled
     };
     return /*#__PURE__*/React.createElement(View, {
+      ref: this._captureContainerRef,
+      onLayout: this._handleContainerLayout,
       style: containerStyle
     }, ListHeaderComponent ? typeof ListHeaderComponent === 'function' ? /*#__PURE__*/React.createElement(ListHeaderComponent, null) : ListHeaderComponent : null, /*#__PURE__*/React.createElement(RecyclerListView, {
       ref: this._captureRef,

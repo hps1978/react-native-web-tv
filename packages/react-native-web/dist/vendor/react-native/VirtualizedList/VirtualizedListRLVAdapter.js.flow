@@ -62,7 +62,12 @@ declare class RNWLayoutProvider {
   _estimatedItemWidth: number,
   _layoutCache: Map<number, any>,
   _rlvLayoutProvider: any,
-  constructor(getItemLayout: any, getCount: any, horizontal: any, estimatedItemHeight: any, estimatedItemWidth: any): any,
+  _containerSize: {
+    width: number,
+    height: number,
+  },
+  constructor(getItemLayout: any, getCount: any, horizontal: any, estimatedItemHeight: any, estimatedItemWidth: any, containerSize: any): any,
+  setContainerSize(width: number, height: number): any,
   getLayoutForIndex(index: any): any,
   clearCache(): any,
   _getItemLayoutProvider(): any,
@@ -79,6 +84,11 @@ declare class VirtualizedListRLVAdapter extends React.PureComponent<Props, State
   _viewabilityHelper: any,
   _onViewableItemsChanged: any,
   _hasInteracted: boolean,
+  _containerRef: any,
+  _containerSize: {
+    width: number,
+    height: number,
+  },
   state: any,
   constructor(props: Props): any,
   _ensureProvidersInitialized(): any,
@@ -94,6 +104,9 @@ declare class VirtualizedListRLVAdapter extends React.PureComponent<Props, State
   _handleScroll: any,
   _rowRenderer: any,
   _captureRef: any,
+  _captureContainerRef: any,
+  _handleContainerLayout: any,
+  _measureContainer: any,
   render(): React.Node,
 }
 const styles = StyleSheet.create({

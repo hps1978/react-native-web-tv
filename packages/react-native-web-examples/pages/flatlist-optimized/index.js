@@ -132,8 +132,7 @@ function OptimizedFlatListExample() {
     ListHeaderComponent,
     ListEmptyComponent,
     scrollEventThrottle: 50,
-    initialNumToRender: 10,
-    style: { flex: 1 } // Ensure FlatList has bounded size
+    initialNumToRender: 10
   };
 
   // In optimized mode, add RLV-specific props
