@@ -20,12 +20,7 @@ import memoizeOne from 'memoize-one';
 let RecyclerListView, RLVDataProvider, RLVLayoutProvider;
 declare function ensureRLVLoaded(): any;
 type Props = any; // VirtualizedList props
-type State = {
-  contentLength: number,
-  visibleLength: number,
-  offset: number,
-  timestamp: number,
-};
+type State = {};
 const DEFAULT_RENDER_AHEAD_OFFSET = 0;
 const DEFAULT_MAX_TO_RENDER_PER_BATCH = 10;
 const DEFAULT_INITIAL_NUM_TO_RENDER = 10;
@@ -138,6 +133,8 @@ declare class VirtualizedListRLVAdapter extends React.PureComponent<Props, State
   _captureRef: any,
   _captureContainerRef: any,
   _handleContainerLayout: any,
+  _headerRefCallback: any,
+  _footerRefCallback: any,
   _measureHeaderFooterHeights: any,
   _measureContainer: any,
   render(): React.Node,

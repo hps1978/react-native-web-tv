@@ -35,12 +35,7 @@ function ensureRLVLoaded() {
 }
 
 type Props = any; // VirtualizedList props
-type State = {
-  contentLength: number,
-  visibleLength: number,
-  offset: number,
-  timestamp: number,
-};
+type State = {};
 
 const DEFAULT_RENDER_AHEAD_OFFSET = 0;
 const DEFAULT_MAX_TO_RENDER_PER_BATCH = 10;
@@ -466,9 +461,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
   _headerMeasured: boolean = false;
   _footerMeasured: boolean = false;
   
-  state = {
-    hasContainerSize: false, // Track if we have measured container dimensions
-  };
+  state = {};
 
   constructor(props: Props) {
     super(props);
@@ -544,6 +537,21 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
     // Measure container dimensions on mount
     if (typeof window === 'undefined') return;
     this._measureContainer();
+    
+    // Measure header/footer after DOM is laid out
+    const hasHeader = this._layoutProvider && this._layoutProvider._hasHeader;
+    const hasFooter = this._layoutProvider && this._layoutProvider._hasFooter;
+    
+    if (hasHeader || hasFooter) {
+      // Use requestAnimationFrame to ensure DOM has been painted and laid out
+      requestAnimationFrame(() => {
+        this._measureHeaderFooterHeights(hasHeader, hasFooter);
+        // Update layout provider with measured dimensions
+        if (this._layoutProvider && (this._headerMeasured || this._footerMeasured)) {
+          this.forceUpdate();
+        }
+      });
+    }
   }
 
   componentDidUpdate(prevProps: Props) {
@@ -803,15 +811,18 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
     const { width, height } = event.nativeEvent.layout;
     this._containerSize = { width, height };
 
-    // Update layout provider if dimensions changed
+    // Update layout provider with measured dimensions
     if (this._layoutProvider) {
       this._layoutProvider.setContainerSize(width, height);
     }
-    
-    // Mark that we have container size
-    if (!this.state.hasContainerSize && width > 0 && height > 0) {
-      this.setState({ hasContainerSize: true });
-    }
+  };
+
+  _headerRefCallback = (ref: any) => {
+    this._headerRef = ref;
+  };
+
+  _footerRefCallback = (ref: any) => {
+    this._footerRef = ref;
   };
 
   _measureHeaderFooterHeights = (hasHeader: boolean, hasFooter: boolean) => {
@@ -819,8 +830,15 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
       try {
         const node = this._headerRef;
         if (node && node.getBoundingClientRect) {
-          this._headerHeight = node.getBoundingClientRect().height;
-          this._headerMeasured = true;
+          const height = node.getBoundingClientRect().height;
+          if (height > 0) {
+            this._headerHeight = height;
+            this._headerMeasured = true;
+            // Update layout provider immediately with actual measurement
+            if (this._layoutProvider) {
+              this._layoutProvider._headerHeight = height;
+            }
+          }
         }
       } catch (e) {
       }
@@ -830,8 +848,15 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
       try {
         const node = this._footerRef;
         if (node && node.getBoundingClientRect) {
-          this._footerHeight = node.getBoundingClientRect().height;
-          this._footerMeasured = true;
+          const height = node.getBoundingClientRect().height;
+          if (height > 0) {
+            this._footerHeight = height;
+            this._footerMeasured = true;
+            // Update layout provider immediately with actual measurement
+            if (this._layoutProvider) {
+              this._layoutProvider._footerHeight = height;
+            }
+          }
         }
       } catch (e) {
       }
@@ -849,11 +874,6 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
           this._containerSize = { width: rect.width, height: rect.height };
           if (this._layoutProvider) {
             this._layoutProvider.setContainerSize(rect.width, rect.height);
-          }
-
-          // Mark that we have container size
-          if (!this.state.hasContainerSize) {
-            this.setState({ hasContainerSize: true });
           }
         }
       }
@@ -874,11 +894,6 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
     
     const hasHeader = this._layoutProvider._hasHeader;
     const hasFooter = this._layoutProvider._hasFooter;
-    
-    // Measure header/footer if needed  
-    if ((hasHeader || hasFooter) && this.state.hasContainerSize) {
-      this._measureHeaderFooterHeights(hasHeader, hasFooter);
-    }
     
     const {
       style,
@@ -933,7 +948,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
         {/* Offscreen header/footer for measurement - only render once until measured */}
         {hasHeader && ListHeaderComponent && !this._headerMeasured && (
           <View 
-            ref={(ref) => { this._headerRef = ref; }}
+            ref={this._headerRefCallback}
             style={styles.measurementContainer}
           >
             {typeof ListHeaderComponent === 'function' ? (
@@ -945,7 +960,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
         )}
         {hasFooter && ListFooterComponent && !this._footerMeasured && (
           <View 
-            ref={(ref) => { this._footerRef = ref; }}
+            ref={this._footerRefCallback}
             style={styles.measurementContainer}
           >
             {typeof ListFooterComponent === 'function' ? (
@@ -956,25 +971,19 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
           </View>
         )}
         
-        {!this.state.hasContainerSize ? (
-          // Don't render RecyclerListView until we have container dimensions
-          <View style={{ flex: 1 }} />
-        ) : (
-          <RecyclerListView
-            key="rlv-with-size"
-            ref={this._captureRef}
-            dataProvider={dataProvider}
-            layoutProvider={this._layoutProvider._rlvLayoutProvider}
-            rowRenderer={this._rowRenderer}
-            onScroll={this._handleScroll}
-            scrollViewProps={scrollProps}
-            extendedState={this.props.extraData}
-            style={listContainerStyle}
-            canChangeSize={false}
-            renderAheadOffset={DEFAULT_RENDER_AHEAD_OFFSET}
-            isHorizontal={horizontal}
-          />
-        )}
+        <RecyclerListView
+          ref={this._captureRef}
+          dataProvider={dataProvider}
+          layoutProvider={this._layoutProvider._rlvLayoutProvider}
+          rowRenderer={this._rowRenderer}
+          onScroll={this._handleScroll}
+          scrollViewProps={scrollProps}
+          extendedState={this.props.extraData}
+          style={listContainerStyle}
+          canChangeSize={false}
+          renderAheadOffset={DEFAULT_RENDER_AHEAD_OFFSET}
+          isHorizontal={horizontal}
+        />
       </View>
     );
   }
