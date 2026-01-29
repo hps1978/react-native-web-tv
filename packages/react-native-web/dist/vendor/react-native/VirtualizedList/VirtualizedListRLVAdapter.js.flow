@@ -18,7 +18,6 @@ import memoizeOne from 'memoize-one';
 
 // Lazy imports - only loaded when needed to support SSR/Next.js
 let RecyclerListView, RLVDataProvider, RLVLayoutProvider;
-const __DEV__ = process.env.NODE_ENV !== 'production';
 declare function ensureRLVLoaded(): any;
 type Props = any; // VirtualizedList props
 type State = {
@@ -36,9 +35,11 @@ const DEFAULT_WINDOW_SIZE = 21;
  * Normalizes RecyclerListView scroll events to React Native Web format
  */
 declare function normalizeScrollEvent(offset: any, contentSize: any, visibleSize: any): any;
+declare function getTotalSize(dataLength: any, hasHeader: any, hasFooter: any): any;
+declare function getItemMetaForIndex(index: any, dataLength: any, hasHeader: any, hasFooter: any): any;
 /**
  * DataProvider wrapper that bridges RNW data to RLV DataProvider
- * Wraps data with synthetic header and footer items for unified virtualization
+ * Uses index mapping for header/footer/items (no per-item wrapping)
  */
 declare class RNWDataProvider {
   _data: any,
@@ -46,13 +47,16 @@ declare class RNWDataProvider {
   _rlvDataProvider: any,
   _hasHeader: boolean,
   _hasFooter: boolean,
-  _wrappedData: any,
+  _dataLength: number,
+  _prevData: any,
+  _prevDataLength: number,
+  _prevHasHeader: boolean,
+  _prevHasFooter: boolean,
+  _indexRows: any,
   constructor(data: any, rowHasChanged: any, hasHeader: any, hasFooter: any): any,
-  _wrapData(data: any): any,
   _updateData(data: any): any,
   getSize(): any,
   getItem(index: any): any,
-  getAllData(): any,
   getRLVDataProvider(): any,
   cloneWithRows(data: any, rowHasChanged: any): any,
   setHasHeader(hasHeader: any): any,
@@ -79,14 +83,12 @@ declare class RNWLayoutProvider {
   _hasHeader: boolean,
   _hasFooter: boolean,
   _dimensionCallback: any,
-  _dataProvider: any,
-  constructor(getItemLayout: any, getOriginalDataCount: any, horizontal: any, estimatedItemHeight: any, estimatedItemWidth: any, containerSize: any, isLayoutProviderFormat: any, hasHeader: any, hasFooter: any, dataProvider: any, headerHeight: any, footerHeight: any): any,
+  constructor(getItemLayout: any, getOriginalDataCount: any, horizontal: any, estimatedItemHeight: any, estimatedItemWidth: any, containerSize: any, isLayoutProviderFormat: any, hasHeader: any, hasFooter: any, headerHeight: any, footerHeight: any): any,
   getLayoutTypeForIndex(index: any): any,
   getDimensionForType(type: any): any,
   setContainerSize(width: number, height: number): any,
   setHasHeader(hasHeader: boolean): any,
   setHasFooter(hasFooter: boolean): any,
-  setDataProvider(dataProvider: any): any,
   _getItemLayoutProvider(): any,
 }
 /**

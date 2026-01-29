@@ -48,13 +48,10 @@ const rowHasChanged = (prevItem, nextItem) => {
 
 // Performance tracking hook
 const usePerformanceMetrics = (renderMode, dataLength) => {
-  const [metrics, setMetrics] = useState({
-    renderTime: 0,
-    domNodes: 0,
-    fps: 60,
-    itemRenderCount: 0,
-    lastUpdate: Date.now()
-  });
+  const [renderTime, setRenderTime] = useState(0);
+  const [domNodes, setDomNodes] = useState(0);
+  const [fps] = useState(60);
+  const [itemRenderCount, setItemRenderCount] = useState(0);
 
   // const frameTimesRef = useRef([]);
   // const lastFrameTimeRef = useRef(0);
@@ -69,27 +66,26 @@ const usePerformanceMetrics = (renderMode, dataLength) => {
     // Measure after initial render completes
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        const renderTime = performance.now() - renderStartRef.current;
-        setMetrics((prev) => ({ ...prev, renderTime }));
+        const nextRenderTime = performance.now() - renderStartRef.current;
+        setRenderTime(nextRenderTime);
       });
     });
   }, [renderMode, dataLength]);
 
   // Count DOM nodes
   // TEMPORARILY DISABLED FOR TESTING - to check if this causes re-renders during scroll
-  /*
   useEffect(() => {
     const measureDOMNodes = () => {
-      const container = document.querySelector('[data-testid="flatlist-container"]') 
-        || document.body;
+      const container =
+        document.querySelector('[data-testid="flatlist-container"]') ||
+        document.body;
       const allNodes = container.querySelectorAll('*').length;
-      setMetrics(prev => ({ ...prev, domNodes: allNodes }));
+      setDomNodes(allNodes);
     };
 
     const timeoutId = setTimeout(measureDOMNodes, 500);
     return () => clearTimeout(timeoutId);
   }, [renderMode, dataLength]);
-  */
 
   // Update item render count periodically (not during render!)
   // TEMPORARILY DISABLED FOR TESTING - to check if this timer causes container layout re-renders
@@ -97,7 +93,6 @@ const usePerformanceMetrics = (renderMode, dataLength) => {
   useEffect(() => {
     const intervalId = setInterval(() => {
       if (itemRenderCountRef.current !== metrics.itemRenderCount) {
-        console.log('[EXAMPLE] Updating metrics - itemRenderCount:', itemRenderCountRef.current, 'was:', metrics.itemRenderCount);
         setMetrics(prev => ({ 
           ...prev, 
           itemRenderCount: itemRenderCountRef.current,
@@ -177,10 +172,17 @@ const usePerformanceMetrics = (renderMode, dataLength) => {
 
   const resetItemRenderCount = useCallback(() => {
     itemRenderCountRef.current = 0;
-    setMetrics((prev) => ({ ...prev, itemRenderCount: 0 }));
+    setItemRenderCount(0);
   }, []);
 
-  return { metrics, incrementItemRenderCount, resetItemRenderCount };
+  return {
+    renderTime,
+    domNodes,
+    fps,
+    itemRenderCount,
+    incrementItemRenderCount,
+    resetItemRenderCount
+  };
 };
 
 function OptimizedFlatListExample() {
@@ -188,15 +190,14 @@ function OptimizedFlatListExample() {
   const [filter, setFilter] = useState('');
   const [renderMode, setRenderMode] = useState('optimized'); // 'optimized' or 'legacy'
 
-  const { metrics, incrementItemRenderCount, resetItemRenderCount } =
-    usePerformanceMetrics(renderMode, listData.length);
-
-  console.log(
-    '[EXAMPLE] OptimizedFlatListExample rendering, mode:',
-    renderMode,
-    'metrics.itemRenderCount:',
-    metrics.itemRenderCount
-  );
+  const {
+    renderTime,
+    domNodes,
+    fps,
+    itemRenderCount,
+    incrementItemRenderCount,
+    resetItemRenderCount
+  } = usePerformanceMetrics(renderMode, listData.length);
 
   const filteredDataArray = useCallback(() => {
     if (!filter) return listData;
@@ -228,9 +229,6 @@ function OptimizedFlatListExample() {
   const renderItem = useCallback(
     ({ item, index }) => {
       incrementItemRenderCount();
-      if (index < 3 || index % 100 === 0) {
-        console.log(`[EXAMPLE] renderItem called for index: ${index}`);
-      }
 
       return (
         <View style={styles.itemContainer}>
@@ -249,7 +247,6 @@ function OptimizedFlatListExample() {
   }, [renderMode, resetItemRenderCount]);
 
   const ListHeaderComponent = useCallback(() => {
-    console.log('[EXAMPLE] ListHeaderComponent rendered');
     return (
       <View style={styles.header}>
         <View style={styles.instructionsBox}>
@@ -298,13 +295,6 @@ function OptimizedFlatListExample() {
       layoutProvider,
       rowHasChanged
     }) => {
-      console.log(
-        '[EXAMPLE] FlatListMemo rendering, mode:',
-        renderMode,
-        'dataLength:',
-        filteredData.length
-      );
-
       const flatListProps = {
         data: filteredData,
         renderItem,
@@ -335,17 +325,6 @@ function OptimizedFlatListExample() {
         prevProps.renderItem === nextProps.renderItem &&
         prevProps.ListHeaderComponent === nextProps.ListHeaderComponent;
 
-      if (!shouldSkipRender) {
-        console.log('[EXAMPLE] FlatListMemo will re-render', {
-          lengthChanged:
-            prevProps.filteredData.length !== nextProps.filteredData.length,
-          modeChanged: prevProps.renderMode !== nextProps.renderMode,
-          callbackChanged: prevProps.renderItem !== nextProps.renderItem,
-          headerChanged:
-            prevProps.ListHeaderComponent !== nextProps.ListHeaderComponent
-        });
-      }
-
       return shouldSkipRender;
     }
   );
@@ -369,18 +348,20 @@ function OptimizedFlatListExample() {
           <View style={styles.metricsGrid}>
             <View style={styles.metricBox}>
               <Text style={styles.metricLabel}>Initial Render</Text>
-              <Text style={styles.metricValue}>
-                {metrics.renderTime.toFixed(1)}ms
-              </Text>
+              <Text style={styles.metricValue}>{renderTime.toFixed(1)}ms</Text>
               <Text style={styles.metricSubtext}>
-                {renderMode === 'optimized' ? '✓ Fast' : '⚠ Slower'}
+                {renderTime < 100
+                  ? '✓ Fast'
+                  : renderTime < 500
+                  ? '⚠ Moderate'
+                  : '⚠ Slow'}
               </Text>
             </View>
             <View style={styles.metricBox}>
               <Text style={styles.metricLabel}>DOM Nodes</Text>
-              <Text style={styles.metricValue}>{metrics.domNodes}</Text>
+              <Text style={styles.metricValue}>{domNodes}</Text>
               <Text style={styles.metricSubtext}>
-                {metrics.domNodes < 200 ? '✓ Light' : '⚠ Heavy'}
+                {domNodes < 200 ? '✓ Light' : '⚠ Heavy'}
               </Text>
             </View>
             <View style={styles.metricBox}>
@@ -388,22 +369,22 @@ function OptimizedFlatListExample() {
               <Text
                 style={[
                   styles.metricValue,
-                  metrics.fps >= 55
+                  fps >= 55
                     ? styles.metricGood
-                    : metrics.fps >= 45
+                    : fps >= 45
                     ? styles.metricWarning
                     : styles.metricBad
                 ]}
               >
-                {metrics.fps}
+                {fps}
               </Text>
               <Text style={styles.metricSubtext}>
-                {metrics.fps >= 55 ? '✓ Smooth' : '⚠ Laggy'}
+                {fps >= 55 ? '✓ Smooth' : '⚠ Laggy'}
               </Text>
             </View>
             <View style={styles.metricBox}>
               <Text style={styles.metricLabel}>Item Renders</Text>
-              <Text style={styles.metricValue}>{metrics.itemRenderCount}</Text>
+              <Text style={styles.metricValue}>{itemRenderCount}</Text>
               <Text style={styles.metricSubtext}>
                 {renderMode === 'optimized' ? '✓ Minimal' : '⚠ Many'}
               </Text>

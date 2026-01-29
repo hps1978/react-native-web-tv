@@ -19,8 +19,6 @@ import memoizeOne from 'memoize-one';
 // Lazy imports - only loaded when needed to support SSR/Next.js
 let RecyclerListView, RLVDataProvider, RLVLayoutProvider;
 
-const __DEV__ = process.env.NODE_ENV !== 'production';
-
 function ensureRLVLoaded() {
   if (RecyclerListView) return;
   
@@ -30,9 +28,6 @@ function ensureRLVLoaded() {
     RLVDataProvider = rlv.DataProvider;
     RLVLayoutProvider = rlv.LayoutProvider;
   } catch (e) {
-    if (__DEV__) {
-      console.warn('[RNW-RLV] Failed to load RecyclerListView:', e.message);
-    }
     throw new Error(
       'RecyclerListView failed to load. This component requires recyclerlistview package.'
     );
@@ -75,9 +70,52 @@ function normalizeScrollEvent(offset, contentSize, visibleSize) {
   };
 }
 
+function getTotalSize(dataLength, hasHeader, hasFooter) {
+  const hasData = dataLength > 0;
+  let size = dataLength;
+  if (hasHeader) size += 1;
+  if (hasFooter) size += 1;
+  if (!hasData) size += 1; // Empty placeholder
+  return size;
+}
+
+function getItemMetaForIndex(index, dataLength, hasHeader, hasFooter) {
+  const hasData = dataLength > 0;
+
+  if (hasHeader && index === 0) {
+    return { type: 'header', dataIndex: null };
+  }
+
+  if (hasData) {
+    const dataStartIndex = hasHeader ? 1 : 0;
+    const dataEndIndex = dataStartIndex + dataLength;
+
+    if (index >= dataStartIndex && index < dataEndIndex) {
+      return { type: 'item', dataIndex: index - dataStartIndex };
+    }
+
+    if (hasFooter && index === dataEndIndex) {
+      return { type: 'footer', dataIndex: null };
+    }
+
+    return { type: 'empty', dataIndex: null };
+  }
+
+  const emptyIndex = hasHeader ? 1 : 0;
+  if (index === emptyIndex) {
+    return { type: 'empty', dataIndex: null };
+  }
+
+  if (hasFooter && index === emptyIndex + 1) {
+    return { type: 'footer', dataIndex: null };
+  }
+
+  return { type: 'empty', dataIndex: null };
+}
+
 /**
  * DataProvider wrapper that bridges RNW data to RLV DataProvider
- * Wraps data with synthetic header and footer items for unified virtualization
+ * Uses index mapping for header/footer/items (no per-item wrapping)
  */
 class RNWDataProvider {
   _data: any;
@@ -85,74 +123,96 @@ class RNWDataProvider {
   _rlvDataProvider: any;
   _hasHeader: boolean;
   _hasFooter: boolean;
-  _wrappedData: any;
+  _dataLength: number;
+  _prevData: any;
+  _prevDataLength: number;
+  _prevHasHeader: boolean;
+  _prevHasFooter: boolean;
+  _indexRows: any;
 
-  constructor(data, rowHasChanged, hasHeader = false, hasFooter = false) {
+  constructor(data, rowHasChanged, hasHeader, hasFooter) {
     ensureRLVLoaded();
-    
+
     this._data = data || [];
     this._rowHasChanged = rowHasChanged || ((r1, r2) => r1 !== r2);
     this._hasHeader = hasHeader;
     this._hasFooter = hasFooter;
-    this._wrappedData = [];
+    this._dataLength = Array.isArray(this._data) ? this._data.length : 0;
+    this._prevData = this._data;
+    this._prevDataLength = this._dataLength;
+    this._prevHasHeader = hasHeader;
+    this._prevHasFooter = hasFooter;
+    this._indexRows = [];
 
-    // Create RLV DataProvider with comparator that handles synthetic items
     this._rlvDataProvider = new RLVDataProvider((r1, r2) => {
-      // empty items never change (they're constant)
-      if (r1.type === 'header' || r1.type === 'footer' || r1.type === 'empty') return false;
-      if (r2.type === 'header' || r2.type === 'footer' || r2.type === 'empty') return false;
-      // Real items use provided comparator
-      return this._rowHasChanged(r1.data || r1, r2.data || r2);
+      const index = typeof r2 === 'number' ? r2 : r1;
+      if (typeof index !== 'number') return false;
+
+      const prevMeta = getItemMetaForIndex(
+        index,
+        this._prevDataLength,
+        this._prevHasHeader,
+        this._prevHasFooter,
+      );
+
+      const nextMeta = getItemMetaForIndex(
+        index,
+        this._dataLength,
+        this._hasHeader,
+        this._hasFooter,
+      );
+
+      if (prevMeta.type !== nextMeta.type) return true;
+      if (nextMeta.type !== 'item') return false;
+
+      const prevItem = Array.isArray(this._prevData)
+        ? this._prevData[prevMeta.dataIndex]
+        : undefined;
+      const nextItem = Array.isArray(this._data)
+        ? this._data[nextMeta.dataIndex]
+        : undefined;
+
+      return this._rowHasChanged(prevItem, nextItem);
     });
 
-    // Initialize with data
     this._updateData(data);
   }
 
-  _wrapData(data) {
-    const wrapped = [];
-    
-    // Always add synthetic header item at index 0 if present
-    if (this._hasHeader) {
-      wrapped.push({ type: 'header', data: null });
-    }
-    
-    // Add real items or empty placeholder
-    if (Array.isArray(data) && data.length > 0) {
-      // Add all real items
-      data.forEach((item) => {
-        wrapped.push({ type: 'item', data: item });
-      });
-    } else {
-      // Always add empty row when data is empty, regardless of ListEmptyComponent
-      wrapped.push({ type: 'empty', data: null });
-    }
-    
-    // Always add synthetic footer item at end if present
-    if (this._hasFooter) {
-      wrapped.push({ type: 'footer', data: null });
-    }
-    
-    return wrapped;
-  }
-
   _updateData(data) {
+    this._prevData = this._data;
+    this._prevDataLength = this._dataLength;
+    this._prevHasHeader = this._hasHeader;
+    this._prevHasFooter = this._hasFooter;
+
     this._data = data || [];
-    this._wrappedData = this._wrapData(this._data);
-    // $FlowFixMe
-    this._rlvDataProvider = this._rlvDataProvider.cloneWithRows(this._wrappedData);
+    this._dataLength = Array.isArray(this._data) ? this._data.length : 0;
+
+    const size = getTotalSize(this._dataLength, this._hasHeader, this._hasFooter);
+    this._indexRows = new Array(size);
+    for (let i = 0; i < size; i += 1) {
+      this._indexRows[i] = i;
+    }
+
+    this._rlvDataProvider = this._rlvDataProvider.cloneWithRows(this._indexRows);
   }
 
   getSize() {
-    return this._wrappedData.length;
+    return getTotalSize(this._dataLength, this._hasHeader, this._hasFooter);
   }
 
   getItem(index) {
-    return this._wrappedData[index];
-  }
+    const meta = getItemMetaForIndex(
+      index,
+      this._dataLength,
+      this._hasHeader,
+      this._hasFooter,
+    );
 
-  getAllData() {
-    return this._wrappedData;
+    if (meta.type === 'item') {
+      return this._data[meta.dataIndex];
+    }
+
+    return { __rnwRLVType: meta.type };
   }
 
   getRLVDataProvider() {
@@ -202,7 +262,6 @@ class RNWLayoutProvider {
   _hasHeader: boolean;
   _hasFooter: boolean;
   _dimensionCallback: any;
-  _dataProvider: any;
 
   constructor(
     getItemLayout,
@@ -214,7 +273,6 @@ class RNWLayoutProvider {
     isLayoutProviderFormat = false,
     hasHeader = false,
     hasFooter = false,
-    dataProvider = null,
     headerHeight = 250,
     footerHeight = 60,
   ) {
@@ -231,7 +289,6 @@ class RNWLayoutProvider {
     this._hasHeader = hasHeader;
     this._hasFooter = hasFooter;
     this._dimensionCallback = null;
-    this._dataProvider = dataProvider;
     this._headerHeight = headerHeight;
     this._footerHeight = footerHeight;
 
@@ -241,22 +298,13 @@ class RNWLayoutProvider {
     class CustomRLVLayoutProvider extends RLVLayoutProvider {
       constructor(layoutType, dimension) {
         super(layoutType, dimension);
-        if (__DEV__) {
-          console.log('[RNW-RLV] CustomRLVLayoutProvider constructor called');
-        }
       }
 
       getLayoutForIndex(index) {
-        if (__DEV__) {
-          console.log('[RNW-RLV] CustomRLVLayoutProvider.getLayoutForIndex called for index:', index);
-        }
         return self.getLayoutForIndex(index);
       }
 
       getLayout(index) {
-        if (__DEV__) {
-          console.log('[RNW-RLV] CustomRLVLayoutProvider.getLayout called for index:', index);
-        }
         if (super.getLayout) {
           return super.getLayout(index);
         }
@@ -264,16 +312,10 @@ class RNWLayoutProvider {
       }
 
       getLayoutTypeForIndex(index) {
-        if (__DEV__ && index < 3) {
-          console.log('[RNW-RLV] CustomRLVLayoutProvider.getLayoutTypeForIndex called for index:', index);
-        }
         return super.getLayoutTypeForIndex ? super.getLayoutTypeForIndex(index) : self.getLayoutTypeForIndex(index);
       }
 
       getDimensionForType(type) {
-        if (__DEV__) {
-          console.log('[RNW-RLV] CustomRLVLayoutProvider.getDimensionForType called for type:', type);
-        }
         if (super.getDimensionForType) {
           return super.getDimensionForType(type);
         }
@@ -281,9 +323,6 @@ class RNWLayoutProvider {
       }
 
       getLayouts(startIndex, endIndex) {
-        if (__DEV__) {
-          console.log('[RNW-RLV] getLayouts called for range:', startIndex, '-', endIndex);
-        }
         if (super.getLayouts) {
           return super.getLayouts(startIndex, endIndex);
         }
@@ -299,47 +338,15 @@ class RNWLayoutProvider {
         const dimensions = self.getDimensionForType(type);
         dim.width = dimensions.width;
         dim.height = dimensions.height;
-        
-        if (__DEV__) {
-          console.log('[RNW-RLV] Dimensions set for type:', type, '->', { width: dim.width, height: dim.height });
-        }
       }
     );
-
-    if (__DEV__) {
-      console.log('[RNW-RLV] Layout provider created:', {
-        isLayoutProviderFormat,
-        containerSize,
-        hasHeader,
-        hasFooter,
-      });
-    }
   }
 
-  // Determine layout type based on index and header/footer flags
+  // Determine layout type based on index mapping
   getLayoutTypeForIndex(index) {
-    // Check the wrapped data directly to determine type
-    const wrappedData = this._dataProvider.getAllData();
-    if (index >= 0 && index < wrappedData.length) {
-      const wrappedItem = wrappedData[index];
-      if (wrappedItem && wrappedItem.type) {
-        return wrappedItem.type; // 'header', 'footer', 'item', or 'empty'
-      }
-    }
-    
-    // Fallback to old logic for compatibility
-    if (this._hasHeader && index === 0) {
-      return 'header';
-    }
-    
-    const originalCount = this._getOriginalDataCount();
-    const totalWrappedCount = (this._hasHeader ? 1 : 0) + originalCount + (this._hasFooter ? 1 : 0);
-    
-    if (this._hasFooter && index === totalWrappedCount - 1) {
-      return 'footer';
-    }
-    
-    return 'item';
+    const dataLength = this._getOriginalDataCount();
+    const meta = getItemMetaForIndex(index, dataLength, this._hasHeader, this._hasFooter);
+    return meta.type;
   }
 
   // Return dimensions for a given layout type
@@ -391,9 +398,6 @@ class RNWLayoutProvider {
           }
         }
       } catch (e) {
-        if (__DEV__) {
-          console.warn('[RNW-RLV] Error in getItemLayout:', e.message);
-        }
       }
     }
 
@@ -415,10 +419,6 @@ class RNWLayoutProvider {
   setContainerSize(width: number, height: number) {
     if (this._containerSize.width !== width || this._containerSize.height !== height) {
       this._containerSize = { width, height };
-      
-      if (__DEV__) {
-        console.log('[RNW-RLV] Container size updated:', { width, height });
-      }
     }
   }
 
@@ -433,12 +433,6 @@ class RNWLayoutProvider {
       this._hasFooter = hasFooter;
     }
   }
-
-  setDataProvider(dataProvider: any) {
-    this._dataProvider = dataProvider;
-  }
-
-
 
   _getItemLayoutProvider() {
     return this._rlvLayoutProvider;
@@ -515,7 +509,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
     // Initialize layout provider with ORIGINAL data count (not wrapped)
     this._layoutProvider = new RNWLayoutProvider(
       getItemLayout || layoutProvider,
-      () => (data && Array.isArray(data) ? data.length : 0),  // Original data count only
+      () => (this._dataProvider ? this._dataProvider._dataLength : 0),
       horizontal,
       50,
       50,
@@ -523,7 +517,6 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
       layoutProvider ? true : false,
       hasHeader,
       hasFooter,
-      this._dataProvider,  // Pass data provider reference
       this._headerHeight || 250,  // Measured or fallback
       this._footerHeight || 60,   // Measured or fallback
     );
@@ -568,10 +561,6 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
         data,
         rowHasChanged,
       );
-      // Update layout provider's data provider reference
-      if (this._layoutProvider) {
-        this._layoutProvider.setDataProvider(this._dataProvider);
-      }
     }
 
     // Update viewability if callbacks changed
@@ -701,23 +690,23 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
     }
   };
 
-  _rowRenderer = (type: any, wrappedItem: any, rlvIndex: any) => {
+  _rowRenderer = (type: any, rowData: any, rlvIndex: any) => {
     const {
       renderItem,
       ListItemComponent,
       ItemSeparatorComponent,
       ListHeaderComponent,
       ListFooterComponent,
+      ListEmptyComponent,
     } = this.props;
 
-    if (__DEV__) {
-      if (rlvIndex === 0 || rlvIndex === this._dataProvider.getSize() - 1) {
-        console.log('[RNW-RLV] _rowRenderer called for rlvIndex:', rlvIndex, 'type:', wrappedItem.type);
-      }
-    }
+    const dataLength = this._dataProvider._dataLength || 0;
+    const hasHeader = this._layoutProvider._hasHeader;
+    const hasFooter = this._layoutProvider._hasFooter;
+    const meta = getItemMetaForIndex(rlvIndex, dataLength, hasHeader, hasFooter);
 
     // Handle synthetic header item
-    if (wrappedItem.type === 'header') {
+    if (meta.type === 'header') {
       return (
         <View style={styles.cellContainer}>
           {typeof ListHeaderComponent === 'function' ? (
@@ -730,7 +719,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
     }
 
     // Handle synthetic footer item
-    if (wrappedItem.type === 'footer') {
+    if (meta.type === 'footer') {
       return (
         <View style={styles.cellContainer}>
           {typeof ListFooterComponent === 'function' ? (
@@ -742,9 +731,8 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
       );
     }
 
-    // Handle empty list indicator (always rendered when data is empty)
-    const { ListEmptyComponent } = this.props;
-    if (wrappedItem.type === 'empty') {
+    // Handle empty list indicator
+    if (meta.type === 'empty') {
       return (
         <View style={styles.cellContainer}>
           {ListEmptyComponent ? (
@@ -762,13 +750,13 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
     }
 
     // Handle real data items
-    // Calculate original item index: subtract 1 for header if present
-    const hasHeader = this._layoutProvider._hasHeader;
-    const originalItemIndex = hasHeader ? rlvIndex - 1 : rlvIndex;
-    const item = wrappedItem.data;
+    const originalItemIndex = meta.dataIndex;
+    const item = Array.isArray(this._dataProvider._data)
+      ? this._dataProvider._data[originalItemIndex]
+      : null;
 
     // Only render separator before items (not before header)
-    const originalDataLength = item && this._dataProvider._data ? this._dataProvider._data.length : 0;
+    const originalDataLength = this._dataProvider._dataLength || 0;
     const shouldRenderSeparator = ItemSeparatorComponent && originalItemIndex < originalDataLength - 1;
 
     let content = null;
@@ -814,11 +802,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
   _handleContainerLayout = (event: any) => {
     const { width, height } = event.nativeEvent.layout;
     this._containerSize = { width, height };
-    
-    if (__DEV__) {
-      console.log('[RNW-RLV] Container layout:', { width, height });
-    }
-    
+
     // Update layout provider if dimensions changed
     if (this._layoutProvider) {
       this._layoutProvider.setContainerSize(width, height);
@@ -837,14 +821,8 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
         if (node && node.getBoundingClientRect) {
           this._headerHeight = node.getBoundingClientRect().height;
           this._headerMeasured = true;
-          if (__DEV__) {
-            console.log('[RNW-RLV] Measured header height:', this._headerHeight);
-          }
         }
       } catch (e) {
-        if (__DEV__) {
-          console.warn('[RNW-RLV] Failed to measure header:', e);
-        }
       }
     }
 
@@ -854,14 +832,8 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
         if (node && node.getBoundingClientRect) {
           this._footerHeight = node.getBoundingClientRect().height;
           this._footerMeasured = true;
-          if (__DEV__) {
-            console.log('[RNW-RLV] Measured footer height:', this._footerHeight);
-          }
         }
       } catch (e) {
-        if (__DEV__) {
-          console.warn('[RNW-RLV] Failed to measure footer:', e);
-        }
       }
     }
   };
@@ -878,14 +850,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
           if (this._layoutProvider) {
             this._layoutProvider.setContainerSize(rect.width, rect.height);
           }
-          
-          if (__DEV__) {
-            console.log('[RNW-RLV] Container measured:', { 
-              width: rect.width, 
-              height: rect.height 
-            });
-          }
-          
+
           // Mark that we have container size
           if (!this.state.hasContainerSize) {
             this.setState({ hasContainerSize: true });
@@ -893,9 +858,6 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
         }
       }
     } catch (e) {
-      if (__DEV__) {
-        console.warn('[RNW-RLV] Failed to measure container:', e);
-      }
     }
   };
 
@@ -906,10 +868,6 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
       return <View style={this.props.style} />;
     }
     
-    if (__DEV__) {
-      console.log('[RNW-RLV] VirtualizedListRLVAdapter.render() starting');
-    }
-
     // Ensure providers are initialized (only on client)
     this._ensureProvidersInitialized();
     ensureRLVLoaded();
@@ -920,13 +878,6 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
     // Measure header/footer if needed  
     if ((hasHeader || hasFooter) && this.state.hasContainerSize) {
       this._measureHeaderFooterHeights(hasHeader, hasFooter);
-    }
-    
-    if (__DEV__) {
-      console.log('[RNW-RLV] RecyclerListView loaded:', {
-        hasRecyclerListView: !!RecyclerListView,
-        RecyclerListViewName: RecyclerListView?.name,
-      });
     }
     
     const {
@@ -946,16 +897,6 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
 
     const dataProvider = this._dataProvider.getRLVDataProvider();
     const itemCount = this._dataProvider.getSize();
-
-    if (__DEV__) {
-      console.log('[RNW-RLV] render() called with:', {
-        itemCount,
-        hasLayoutProvider: !!this._layoutProvider,
-        hasRLVLayoutProvider: !!this._layoutProvider?._rlvLayoutProvider,
-        hasContainerSize: this.state.hasContainerSize,
-        containerSize: this._containerSize,
-      });
-    }
 
     // Show empty component if no items (only if no header/footer)
     // In RLV mode with header/footer, always render the list even if empty
