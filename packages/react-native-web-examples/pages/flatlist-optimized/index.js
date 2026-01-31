@@ -12,7 +12,8 @@ import {
   View,
   StyleSheet,
   TextInput,
-  Button
+  Button,
+  Dimensions
 } from 'react-native-web';
 
 // Fixed item height example data
@@ -28,13 +29,17 @@ const generateListData = (size = 100) => {
 
 // Item height is constant for this example
 const ITEM_HEIGHT = 80;
+const WINDOW_WIDTH = Dimensions.get('window').width;
 
-// LayoutProvider function for RecyclerListView optimization
+// LayoutProvider for RecyclerListView optimization
 // Only handles regular items - header/footer heights are measured automatically
-const layoutProvider = (index) => ({
-  width: '100%',
-  height: ITEM_HEIGHT
-});
+const layoutProvider = {
+  getLayoutTypeForIndex: () => 'item',
+  getDimensionForType: () => ({
+    width: WINDOW_WIDTH,
+    height: ITEM_HEIGHT
+  })
+};
 
 // Row change detection for optimized re-renders
 const rowHasChanged = (prevItem, nextItem) => {
@@ -46,21 +51,71 @@ const rowHasChanged = (prevItem, nextItem) => {
   );
 };
 
+const FlatListMemo = React.memo(
+  ({
+    filteredData,
+    renderItem,
+    ListHeaderComponent,
+    ListEmptyComponent,
+    renderMode,
+    layoutProvider,
+    rowHasChanged
+  }) => {
+    const flatListProps = {
+      data: filteredData,
+      renderItem,
+      keyExtractor: (item) => item.key,
+      ListHeaderComponent,
+      ListEmptyComponent,
+      scrollEventThrottle: 50,
+      initialNumToRender: 10
+    };
+
+    // In optimized mode, add RLV-specific props
+    if (renderMode === 'optimized') {
+      flatListProps.layoutProvider = layoutProvider;
+      flatListProps.rowHasChanged = rowHasChanged;
+    }
+
+    return <FlatList {...flatListProps} />;
+  },
+  (prevProps, nextProps) => {
+    // Return TRUE if props are equal (DON'T re-render)
+    // Return FALSE if props are different (DO re-render)
+
+    // Only compare: data length, renderMode, renderItem callback
+    // Do NOT compare ListHeaderComponent because it may change when parent re-renders
+    const shouldSkipRender =
+      prevProps.filteredData.length === nextProps.filteredData.length &&
+      prevProps.renderMode === nextProps.renderMode &&
+      prevProps.renderItem === nextProps.renderItem &&
+      prevProps.ListHeaderComponent === nextProps.ListHeaderComponent;
+
+    return shouldSkipRender;
+  }
+);
+
 // Performance tracking hook
-const usePerformanceMetrics = (renderMode, dataLength) => {
+const usePerformanceMetrics = (renderMode, dataLength, enabled) => {
   const [renderTime, setRenderTime] = useState(0);
   const [domNodes, setDomNodes] = useState(0);
-  const [fps] = useState(60);
+  const [fps, setFps] = useState(0);
   const [itemRenderCount, setItemRenderCount] = useState(0);
 
-  // const frameTimesRef = useRef([]);
-  // const lastFrameTimeRef = useRef(0);
+  const frameTimesRef = useRef([]);
+  const lastFrameTimeRef = useRef(0);
+  const lastFpsUpdateRef = useRef(0);
   const renderStartRef = useRef(0);
   const itemRenderCountRef = useRef(0);
-  // const rafIdRef = useRef(null);
+  const rafIdRef = useRef(null);
 
   // Measure initial render time
   useEffect(() => {
+    if (!enabled) {
+      setRenderTime(0);
+      return;
+    }
+
     renderStartRef.current = performance.now();
 
     // Measure after initial render completes
@@ -70,11 +125,16 @@ const usePerformanceMetrics = (renderMode, dataLength) => {
         setRenderTime(nextRenderTime);
       });
     });
-  }, [renderMode, dataLength]);
+  }, [renderMode, dataLength, enabled]);
 
   // Count DOM nodes
   // TEMPORARILY DISABLED FOR TESTING - to check if this causes re-renders during scroll
   useEffect(() => {
+    if (!enabled) {
+      setDomNodes(0);
+      return;
+    }
+
     const measureDOMNodes = () => {
       const container =
         document.querySelector('[data-testid="flatlist-container"]') ||
@@ -85,38 +145,80 @@ const usePerformanceMetrics = (renderMode, dataLength) => {
 
     const timeoutId = setTimeout(measureDOMNodes, 500);
     return () => clearTimeout(timeoutId);
-  }, [renderMode, dataLength]);
+  }, [renderMode, dataLength, enabled]);
 
   // Update item render count periodically (not during render!)
-  // TEMPORARILY DISABLED FOR TESTING - to check if this timer causes container layout re-renders
-  /*
   useEffect(() => {
+    if (!enabled) {
+      setItemRenderCount(0);
+      return;
+    }
+
     const intervalId = setInterval(() => {
-      if (itemRenderCountRef.current !== metrics.itemRenderCount) {
-        setMetrics(prev => ({ 
-          ...prev, 
-          itemRenderCount: itemRenderCountRef.current,
-          lastUpdate: Date.now(),
-        }));
+      const nextCount = itemRenderCountRef.current;
+      if (nextCount !== itemRenderCount) {
+        setItemRenderCount(nextCount);
       }
     }, 500); // Update every 500ms
 
     return () => clearInterval(intervalId);
-  }, [metrics.itemRenderCount]);
-  */
+  }, [itemRenderCount, enabled]);
 
-  // FPS tracking during scroll
-  // TEMPORARILY DISABLED FOR TESTING - this updates state during scroll causing re-renders
-  /*
+  // Reset metrics when render mode changes
   useEffect(() => {
+    setRenderTime(0);
+    setDomNodes(0);
+    setFps(0);
+    setItemRenderCount(0);
+    itemRenderCountRef.current = 0;
+    frameTimesRef.current = [];
+  }, [renderMode]);
+
+  // FPS tracking during scroll (throttled)
+  useEffect(() => {
+    if (!enabled) {
+      setFps(0);
+      return;
+    }
+
     let scrolling = false;
     let scrollTimeout;
+
+    const measureFPS = () => {
+      const now = performance.now();
+      const delta = now - lastFrameTimeRef.current;
+
+      if (delta > 0) {
+        frameTimesRef.current.push(delta);
+
+        // Keep last 30 frames
+        if (frameTimesRef.current.length > 30) {
+          frameTimesRef.current.shift();
+        }
+
+        // Calculate average FPS, throttle updates to avoid re-renders
+        if (frameTimesRef.current.length >= 5) {
+          const avgDelta =
+            frameTimesRef.current.reduce((a, b) => a + b) /
+            frameTimesRef.current.length;
+          const nextFps = Math.round(1000 / avgDelta);
+          if (now - lastFpsUpdateRef.current > 500) {
+            lastFpsUpdateRef.current = now;
+            setFps(nextFps);
+          }
+        }
+      }
+
+      lastFrameTimeRef.current = now;
+      rafIdRef.current = requestAnimationFrame(measureFPS);
+    };
 
     const handleScroll = () => {
       if (!scrolling) {
         scrolling = true;
         frameTimesRef.current = [];
         lastFrameTimeRef.current = performance.now();
+        lastFpsUpdateRef.current = 0;
         measureFPS();
       }
 
@@ -127,31 +229,8 @@ const usePerformanceMetrics = (renderMode, dataLength) => {
           cancelAnimationFrame(rafIdRef.current);
           rafIdRef.current = null;
         }
+        // Don't reset FPS - let it naturally return to 60 when idle
       }, 200);
-    };
-
-    const measureFPS = () => {
-      const now = performance.now();
-      const delta = now - lastFrameTimeRef.current;
-      
-      if (delta > 0) {
-        frameTimesRef.current.push(delta);
-        
-        // Keep last 30 frames
-        if (frameTimesRef.current.length > 30) {
-          frameTimesRef.current.shift();
-        }
-        
-        // Calculate average FPS
-        if (frameTimesRef.current.length >= 5) {
-          const avgDelta = frameTimesRef.current.reduce((a, b) => a + b) / frameTimesRef.current.length;
-          const fps = Math.round(1000 / avgDelta);
-          setMetrics(prev => ({ ...prev, fps: Math.min(fps, 60) }));
-        }
-      }
-      
-      lastFrameTimeRef.current = now;
-      rafIdRef.current = requestAnimationFrame(measureFPS);
     };
 
     window.addEventListener('scroll', handleScroll, true);
@@ -162,8 +241,7 @@ const usePerformanceMetrics = (renderMode, dataLength) => {
       }
       clearTimeout(scrollTimeout);
     };
-  }, []);
-  */
+  }, [enabled]);
 
   // Safe increment that doesn't trigger setState during render
   const incrementItemRenderCount = useCallback(() => {
@@ -189,6 +267,7 @@ function OptimizedFlatListExample() {
   const [listData, setListData] = useState(() => generateListData(500));
   const [filter, setFilter] = useState('');
   const [renderMode, setRenderMode] = useState('optimized'); // 'optimized' or 'legacy'
+  const [metricsEnabled, setMetricsEnabled] = useState(true);
 
   const {
     renderTime,
@@ -197,7 +276,7 @@ function OptimizedFlatListExample() {
     itemRenderCount,
     incrementItemRenderCount,
     resetItemRenderCount
-  } = usePerformanceMetrics(renderMode, listData.length);
+  } = usePerformanceMetrics(renderMode, listData.length, metricsEnabled);
 
   const filteredDataArray = useCallback(() => {
     if (!filter) return listData;
@@ -282,51 +361,6 @@ function OptimizedFlatListExample() {
       </View>
     ),
     []
-  );
-
-  // Memoized separate component to prevent metrics updates from re-rendering FlatList
-  const FlatListMemo = React.memo(
-    ({
-      filteredData,
-      renderItem,
-      ListHeaderComponent,
-      ListEmptyComponent,
-      renderMode,
-      layoutProvider,
-      rowHasChanged
-    }) => {
-      const flatListProps = {
-        data: filteredData,
-        renderItem,
-        keyExtractor: (item) => item.key,
-        ListHeaderComponent,
-        ListEmptyComponent,
-        scrollEventThrottle: 50,
-        initialNumToRender: 10
-      };
-
-      // In optimized mode, add RLV-specific props
-      if (renderMode === 'optimized') {
-        flatListProps.layoutProvider = layoutProvider;
-        flatListProps.rowHasChanged = rowHasChanged;
-      }
-
-      return <FlatList {...flatListProps} />;
-    },
-    (prevProps, nextProps) => {
-      // Return TRUE if props are equal (DON'T re-render)
-      // Return FALSE if props are different (DO re-render)
-
-      // Only compare: data length, renderMode, renderItem callback
-      // Do NOT compare ListHeaderComponent because it may change when parent re-renders
-      const shouldSkipRender =
-        prevProps.filteredData.length === nextProps.filteredData.length &&
-        prevProps.renderMode === nextProps.renderMode &&
-        prevProps.renderItem === nextProps.renderItem &&
-        prevProps.ListHeaderComponent === nextProps.ListHeaderComponent;
-
-      return shouldSkipRender;
-    }
   );
 
   return (
@@ -419,6 +453,10 @@ function OptimizedFlatListExample() {
           />
           <Button onPress={handleRefresh} title="Refresh (500)" />
           <Button onPress={handleStressTest} title="Stress Test (2000)" />
+          <Button
+            onPress={() => setMetricsEnabled((enabled) => !enabled)}
+            title={metricsEnabled ? 'Disable Metrics' : 'Enable Metrics'}
+          />
         </View>
       </View>
 

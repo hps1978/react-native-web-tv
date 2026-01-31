@@ -76,33 +76,26 @@ function getTotalSize(dataLength, hasHeader, hasFooter) {
 
 function getItemMetaForIndex(index, dataLength, hasHeader, hasFooter) {
   const hasData = dataLength > 0;
+  const headerIndex = hasHeader ? 0 : -1;
+  const dataStartIndex = hasHeader ? 1 : 0;
+  const dataEndIndex = dataStartIndex + dataLength;
+  const footerIndex = hasFooter ? dataEndIndex : -1;
+  const emptyIndex = hasData ? -1 : dataStartIndex;
 
-  if (hasHeader && index === 0) {
+  if (index === headerIndex) {
     return { type: 'header', dataIndex: null };
   }
 
-  if (hasData) {
-    const dataStartIndex = hasHeader ? 1 : 0;
-    const dataEndIndex = dataStartIndex + dataLength;
-
-    if (index >= dataStartIndex && index < dataEndIndex) {
-      return { type: 'item', dataIndex: index - dataStartIndex };
-    }
-
-    if (hasFooter && index === dataEndIndex) {
-      return { type: 'footer', dataIndex: null };
-    }
-
-    return { type: 'empty', dataIndex: null };
+  if (index >= dataStartIndex && index < dataEndIndex) {
+    return { type: 'item', dataIndex: index - dataStartIndex };
   }
 
-  const emptyIndex = hasHeader ? 1 : 0;
+  if (index === footerIndex) {
+    return { type: 'footer', dataIndex: null };
+  }
+
   if (index === emptyIndex) {
     return { type: 'empty', dataIndex: null };
-  }
-
-  if (hasFooter && index === emptyIndex + 1) {
-    return { type: 'footer', dataIndex: null };
   }
 
   return { type: 'empty', dataIndex: null };
@@ -246,6 +239,8 @@ class RNWDataProvider {
  */
 class RNWLayoutProvider {
   _getItemLayout: any;
+  _appLayoutProvider: any;
+  _getData: () => any;
   _getOriginalDataCount: () => number;
   _horizontal: boolean;
   _estimatedItemHeight: number;
@@ -260,6 +255,7 @@ class RNWLayoutProvider {
 
   constructor(
     getItemLayout,
+    getData,
     getOriginalDataCount,
     horizontal = false,
     estimatedItemHeight = 50,
@@ -274,6 +270,8 @@ class RNWLayoutProvider {
     ensureRLVLoaded();
     
     this._getItemLayout = getItemLayout;
+    this._appLayoutProvider = isLayoutProviderFormat ? getItemLayout : null;
+    this._getData = getData;
     this._getOriginalDataCount = getOriginalDataCount;
     this._horizontal = horizontal;
     this._estimatedItemHeight = estimatedItemHeight;
@@ -341,74 +339,117 @@ class RNWLayoutProvider {
   getLayoutTypeForIndex(index) {
     const dataLength = this._getOriginalDataCount();
     const meta = getItemMetaForIndex(index, dataLength, this._hasHeader, this._hasFooter);
+    if (meta.type === 'item') {
+      if (this._isLayoutProviderFormat && this._appLayoutProvider) {
+        if (typeof this._appLayoutProvider.getLayoutTypeForIndex !== 'function') {
+          throw new Error(
+            'VirtualizedList: layoutProvider must implement getLayoutTypeForIndex(index).'
+          );
+        }
+        return this._appLayoutProvider.getLayoutTypeForIndex(meta.dataIndex);
+      }
+      return `item-${index}`;
+    }
     return meta.type;
   }
 
   // Return dimensions for a given layout type
   getDimensionForType(type) {
-    let width = this._containerSize.width || 50;
-    let height = 50;
-
-    // Header/footer heights come from measured components
-    if (type === 'header') {
-      return { width: this._containerSize.width, height: this._headerHeight };
-    }
-    if (type === 'footer') {
-      return { width: this._containerSize.width, height: this._footerHeight };
-    }
-
-    // For regular items, use getItemLayout with index 0 (first real item)
-    if (this._getItemLayout) {
-      try {
-        // For layoutProvider format: layoutProvider(index)
-        // For getItemLayout format: getItemLayout(data, index)
-        const result = this._isLayoutProviderFormat 
-          ? this._getItemLayout(0)
-          : this._getItemLayout(null, 0);
-        if (result) {
-          if (this._isLayoutProviderFormat) {
-            if (result.width !== undefined) {
-              if (typeof result.width === 'string' && result.width === '100%') {
-                width = this._containerSize.width;
-              } else if (typeof result.width === 'number') {
-                width = result.width;
-              }
-            }
-            if (result.height !== undefined) {
-              height = result.height;
-            }
-          } else {
-            if (result.width !== undefined) {
-              if (typeof result.width === 'string' && result.width === '100%') {
-                width = this._containerSize.width;
-              } else if (typeof result.width === 'number') {
-                width = result.width;
-              }
-            }
-            if (result.length !== undefined) {
-              height = result.length;
-            } else if (result.height !== undefined) {
-              height = result.height;
-            }
-          }
+    if (this._isLayoutProviderFormat) {
+      // App-provided RLV LayoutProvider handles item types directly
+      if (type !== 'header' && type !== 'footer' && type !== 'empty') {
+        if (!this._appLayoutProvider) {
+          throw new Error(
+            'VirtualizedList: No layout provider available. ' +
+            'Must provide either layoutProvider or getItemLayout prop.'
+          );
         }
-      } catch (e) {
+        if (typeof this._appLayoutProvider.getDimensionForType !== 'function') {
+          throw new Error(
+            'VirtualizedList: layoutProvider must implement getDimensionForType(type).'
+          );
+        }
+        return this._appLayoutProvider.getDimensionForType(type);
       }
     }
 
-    // For empty state, calculate height to fill remaining space after header/footer
+    if (type.startsWith('item-')) {
+      const rlvIndex = Number(type.slice(5));
+      if (!Number.isFinite(rlvIndex)) {
+        throw new Error('Invalid item layout type index.');
+      }
+
+      const dataLength = this._getOriginalDataCount();
+      const meta = getItemMetaForIndex(rlvIndex, dataLength, this._hasHeader, this._hasFooter);
+      if (meta.type !== 'item') {
+        throw new Error('Invalid item layout type for non-item index.');
+      }
+
+      if (!this._getItemLayout) {
+        throw new Error(
+          'VirtualizedList: No layout provider available. ' +
+          'Must provide either layoutProvider or getItemLayout prop.'
+        );
+      }
+
+      try {
+        // Legacy React Native format: getItemLayout(data, index) => { length, offset, index }
+        // length represents size along scroll axis:
+        // - vertical (default): length = height
+        // - horizontal: length = width
+        const data = this._getData();
+        const result = this._getItemLayout(data, meta.dataIndex);
+
+        let width, height;
+        if (this._horizontal) {
+          // Horizontal: length is width along scroll axis, height defaults to container height
+          width = result.length;
+          height = this._containerSize.height;
+        } else {
+          // Vertical: length is height along scroll axis, width defaults to container width
+          height = result.length;
+          width = this._containerSize.width;
+        }
+
+        return {
+          width: Math.max(width, 1),
+          height: Math.max(height, 1),
+        };
+      } catch (e) {
+        throw new Error(
+          `Failed to compute dimensions for item: ${e.message}`
+        );
+      }
+    }
+
+    // Header/footer heights come from measured components
+    if (type === 'header') {
+      if (this._headerHeight <= 0) {
+        throw new Error(
+          'Header height not measured. Header component must render with measurable dimensions.'
+        );
+      }
+      return { width: this._containerSize.width, height: this._headerHeight };
+    }
+    if (type === 'footer') {
+      if (this._footerHeight <= 0) {
+        throw new Error(
+          'Footer height not measured. Footer component must render with measurable dimensions.'
+        );
+      }
+      return { width: this._containerSize.width, height: this._footerHeight };
+    }
+
+    // Empty rows fill remaining space after header/footer
     if (type === 'empty') {
       const headerHeight = this._headerHeight || 0;
       const footerHeight = this._footerHeight || 0;
-      const containerHeight = this._containerSize.height || 50;
-      const emptyHeight = Math.max(containerHeight - headerHeight - footerHeight, 50);
+      const containerHeight = this._containerSize.height || 0;
+      const emptyHeight = Math.max(containerHeight - headerHeight - footerHeight, 1);
       return { width: this._containerSize.width, height: emptyHeight };
     }
 
-    return { 
-      width: Math.max(width, 1), 
-      height: Math.max(height, 1) 
-    };
+    throw new Error(`Unknown layout type: ${type}`);
   }
 
   setContainerSize(width: number, height: number) {
@@ -491,6 +532,15 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
       ListFooterComponent,
     } = this.props;
 
+    // STRICT VALIDATION: Cannot provide both layoutProvider and getItemLayout
+    if (layoutProvider && getItemLayout) {
+      console.warn(
+        'VirtualizedList: Both layoutProvider and getItemLayout provided. ' +
+        'Using layoutProvider and ignoring getItemLayout. ' +
+        'Please provide only layoutProvider for optimal performance.'
+      );
+    }
+
     // Check if we have header/footer components to virtualize
     const hasHeader = !!ListHeaderComponent;
     const hasFooter = !!ListFooterComponent;
@@ -499,15 +549,20 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
     // Always virtualize header/footer; empty rows are always added when data is empty
     this._dataProvider = new RNWDataProvider(data, rowHasChanged, hasHeader, hasFooter);
 
-    // Initialize layout provider with ORIGINAL data count (not wrapped)
+    // Determine which format we're using (layoutProvider is preferred)
+    const layoutProviderToUse = layoutProvider || getItemLayout;
+    const isLayoutProviderFormat = !!layoutProvider;
+
+    // Initialize layout provider with callbacks for data and data count
     this._layoutProvider = new RNWLayoutProvider(
-      getItemLayout || layoutProvider,
+      layoutProviderToUse,
+      () => (this._dataProvider ? this._dataProvider._data : null),
       () => (this._dataProvider ? this._dataProvider._dataLength : 0),
       horizontal,
       50,
       50,
       this._containerSize,
-      layoutProvider ? true : false,
+      isLayoutProviderFormat,
       hasHeader,
       hasFooter,
       this._headerHeight || 250,  // Measured or fallback

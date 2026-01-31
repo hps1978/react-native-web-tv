@@ -64,6 +64,8 @@ declare class RNWDataProvider {
  */
 declare class RNWLayoutProvider {
   _getItemLayout: any,
+  _appLayoutProvider: any,
+  _getData: () => any,
   _getOriginalDataCount: () => number,
   _horizontal: boolean,
   _estimatedItemHeight: number,
@@ -78,7 +80,7 @@ declare class RNWLayoutProvider {
   _hasHeader: boolean,
   _hasFooter: boolean,
   _dimensionCallback: any,
-  constructor(getItemLayout: any, getOriginalDataCount: any, horizontal: any, estimatedItemHeight: any, estimatedItemWidth: any, containerSize: any, isLayoutProviderFormat: any, hasHeader: any, hasFooter: any, headerHeight: any, footerHeight: any): any,
+  constructor(getItemLayout: any, getData: any, getOriginalDataCount: any, horizontal: any, estimatedItemHeight: any, estimatedItemWidth: any, containerSize: any, isLayoutProviderFormat: any, hasHeader: any, hasFooter: any, headerHeight: any, footerHeight: any): any,
   getLayoutTypeForIndex(index: any): any,
   getDimensionForType(type: any): any,
   setContainerSize(width: number, height: number): any,
