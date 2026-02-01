@@ -29,6 +29,7 @@ import { computeWindowedRenderLimits, keyExtractor as defaultKeyExtractor } from
 import invariant from 'fbjs/lib/invariant';
 import nullthrows from 'nullthrows';
 import * as React from 'react';
+import VirtualizedListRLVAdapter from './VirtualizedListRLVAdapter';
 var __DEV__ = process.env.NODE_ENV !== 'production';
 var ON_EDGE_REACHED_EPSILON = 0.001;
 var _usedIndexForKey = false;
@@ -1011,6 +1012,11 @@ class VirtualizedList extends StateSafePureComponent {
     return key;
   }
   render() {
+    // Use RLV adapter if layoutProvider prop is provided or if env var enables it
+    var useRLVEngine = this.props.layoutProvider || process.env.RNW_USE_RLV_ENGINE === 'true';
+    if (useRLVEngine) {
+      return /*#__PURE__*/React.createElement(VirtualizedListRLVAdapter, this.props);
+    }
     this._checkProps(this.props);
     var _this$props5 = this.props,
       ListEmptyComponent = _this$props5.ListEmptyComponent,

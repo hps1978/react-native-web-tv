@@ -134,7 +134,7 @@ var View = /*#__PURE__*/React.forwardRef((props, forwardedRef) => {
     if (Platform.isTV && hasTVPreferredFocus && isFocusable) {
       setFocus(hostRef.current);
     }
-  }, []);
+  }, [hasTVPreferredFocus]);
   var platformMethodsRef = usePlatformMethods(supportedProps);
   var setRef = useMergeRefs(hostRef, platformMethodsRef, forwardedRef, setLocalRef);
   supportedProps.ref = setRef;

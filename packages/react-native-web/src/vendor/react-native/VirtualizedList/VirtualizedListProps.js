@@ -286,6 +286,17 @@ type OptionalProps = {|
    * The legacy implementation is no longer supported.
    */
   legacyImplementation?: empty,
+  /**
+   * RecyclerListView optimization: Provide explicit layout for items upfront.
+   * Enables RLV adapter for better performance. Format: (index) => {width, height}
+   */
+  layoutProvider?: ?(index: number) => {width: number, height: number},
+  /**
+   * RecyclerListView optimization: Per-row change detection for better performance.
+   * Replaces reliance on extraData for finer-grained update control.
+   * Format: (prevRow, nextRow) => boolean (return true if rows are different)
+   */
+  rowHasChanged?: ?(prevRow: Item, nextRow: Item) => boolean,
 |};
 
 export type Props = {|

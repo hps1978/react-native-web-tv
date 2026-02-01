@@ -1,0 +1,169 @@
+/**
+ * Copyright (c) Nicolas Gallagher.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ * @flow
+ */
+
+'use client';
+
+import * as React from 'react';
+import View from '../../../exports/View';
+import StyleSheet from '../../../exports/StyleSheet';
+import ViewabilityHelper from '../ViewabilityHelper';
+import memoizeOne from 'memoize-one';
+
+// Lazy imports - only loaded when needed to support SSR/Next.js
+let RecyclerListView, RLVDataProvider, RLVLayoutProvider, RLVGridLayoutProvider;
+declare function ensureRLVLoaded(): any;
+type Props = any; // VirtualizedList props
+type State = {};
+const DEFAULT_RENDER_AHEAD_OFFSET = 0;
+// const DEFAULT_MAX_TO_RENDER_PER_BATCH = 10;
+// const DEFAULT_INITIAL_NUM_TO_RENDER = 10;
+const DEFAULT_WINDOW_SIZE = 21;
+
+/**
+ * Normalizes RecyclerListView scroll events to React Native Web format
+ */
+declare function normalizeScrollEvent(offset: any, contentSize: any, visibleSize: any): any;
+declare function getTotalSize(dataLength: any, hasHeader: any, hasFooter: any): any;
+declare function getItemMetaForIndex(index: any, dataLength: any, hasHeader: any, hasFooter: any): any;
+/**
+ * DataProvider wrapper that bridges RNW data to RLV DataProvider
+ * Uses index mapping for header/footer/items (no per-item wrapping)
+ */
+declare class RNWDataProvider {
+  _data: any,
+  _rowHasChanged: (r1: any, r2: any) => boolean,
+  _rlvDataProvider: any,
+  _hasHeader: boolean,
+  _hasFooter: boolean,
+  _dataLength: number,
+  _prevData: any,
+  _prevDataLength: number,
+  _prevHasHeader: boolean,
+  _prevHasFooter: boolean,
+  _indexRows: any,
+  constructor(data: any, rowHasChanged: any, hasHeader: any, hasFooter: any): any,
+  _updateData(data: any): any,
+  getSize(): any,
+  getItem(index: any): any,
+  getRLVDataProvider(): any,
+  cloneWithRows(data: any, rowHasChanged: any): any,
+  setHasHeader(hasHeader: any): any,
+  setHasFooter(hasFooter: any): any,
+}
+/**
+ * LayoutProvider wrapper for converting RNW getItemLayout to RLV format
+ * Supports multiple layout types: 'header', 'item', 'footer'
+ * Properly extends RLVLayoutProvider to work with RecyclerListView
+ */
+declare class RNWLayoutProvider {
+  _getItemLayout: any,
+  _appLayoutProvider: any,
+  _getData: () => any,
+  _getOriginalDataCount: () => number,
+  _horizontal: boolean,
+  _estimatedItemHeight: number,
+  _estimatedItemWidth: number,
+  _rlvLayoutProvider: any,
+  _containerSize: {
+    width: number,
+    height: number,
+  },
+  _layoutDimensions: Map<string, any>,
+  _isLayoutProviderFormat: boolean,
+  _hasHeader: boolean,
+  _hasFooter: boolean,
+  _dimensionCallback: any,
+  _isGridMode: boolean,
+  _numColumns: number,
+  constructor(getItemLayout: any, getData: any, getOriginalDataCount: any, horizontal: any, estimatedItemHeight: any, estimatedItemWidth: any, containerSize: any, isLayoutProviderFormat: any, hasHeader: any, hasFooter: any, headerHeight: any, footerHeight: any, isGridMode: any, numColumns: any): any,
+  getLayoutTypeForIndex(index: any): any,
+  getDimensionForType(type: any): any,
+  setContainerSize(width: number, height: number): any,
+  setHasHeader(hasHeader: boolean): any,
+  setHasFooter(hasFooter: boolean): any,
+  _getItemLayoutProvider(): any,
+}
+/**
+ * VirtualizedListRLVAdapter: Bridges React Native Web's VirtualizedList API
+ * to RecyclerListView for superior virtualization performance on web
+ */
+declare class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
+  _listRef: any,
+  _dataProvider: RNWDataProvider,
+  _layoutProvider: RNWLayoutProvider,
+  _scrollEventLastTick: number,
+  _viewabilityHelper: any,
+  _onViewableItemsChanged: any,
+  _hasInteracted: boolean,
+  _containerRef: any,
+  _containerSize: {
+    width: number,
+    height: number,
+  },
+  _scrollMetrics: {
+    contentLength: number,
+    visibleLength: number,
+    offset: number,
+    timestamp: number,
+  },
+  _headerRef: any,
+  _footerRef: any,
+  _headerHeight: number,
+  _footerHeight: number,
+  _headerMeasured: boolean,
+  _footerMeasured: boolean,
+  _isGridMode: boolean,
+  state: any,
+  constructor(props: Props): any,
+  _ensureProvidersInitialized(): any,
+  componentDidMount(): any,
+  componentDidUpdate(prevProps: Props): any,
+  scrollToIndex: any,
+  scrollToOffset: any,
+  scrollToEnd: any,
+  recordInteraction: any,
+  flashScrollIndicators: any,
+  getScrollResponder: any,
+  getNativeScrollRef: any,
+  getScrollableNode: any,
+  _handleScroll: any,
+  _rowRenderer: any,
+  _captureRef: any,
+  _captureContainerRef: any,
+  _handleContainerLayout: any,
+  _headerRefCallback: any,
+  _footerRefCallback: any,
+  _measureHeaderFooterHeights: any,
+  _measureContainer: any,
+  render(): React.Node,
+}
+const styles = StyleSheet.create({
+  container: {
+    flex: 1
+  },
+  listContainer: {
+    flex: 1
+  },
+  cellContainer: {
+    width: '100%'
+  },
+  separator: {
+    width: '100%'
+  },
+  measurementContainer: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    opacity: 0,
+    pointerEvents: 'none',
+    zIndex: -1000
+  }
+});
+export default VirtualizedListRLVAdapter;
