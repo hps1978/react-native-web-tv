@@ -636,9 +636,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
         });
       }
       return /*#__PURE__*/React.createElement(View, {
-        key: "item-" + originalItemIndex
-        // data-rnw-focusable={item?.isTVSelectable ? 'true' : undefined}
-        ,
+        key: "item-" + originalItemIndex,
         style: styles.cellContainer
       }, content, shouldRenderSeparator && /*#__PURE__*/React.createElement(View, {
         style: styles.separator

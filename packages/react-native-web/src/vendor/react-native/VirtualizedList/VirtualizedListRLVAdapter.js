@@ -884,7 +884,6 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
     return (
       <View
         key={`item-${originalItemIndex}`}
-        // data-rnw-focusable={item?.isTVSelectable ? 'true' : undefined}
         style={styles.cellContainer}
       >
         {content}
