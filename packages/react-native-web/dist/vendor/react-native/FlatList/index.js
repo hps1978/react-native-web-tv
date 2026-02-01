@@ -430,7 +430,10 @@ class FlatList extends React.PureComponent {
         keyExtractor: this._keyExtractor,
         ref: this._captureRef,
         viewabilityConfigCallbackPairs: this._virtualizedListPairs,
-        removeClippedSubviews: removeClippedSubviewsOrDefault(_removeClippedSubviews)
+        removeClippedSubviews: removeClippedSubviewsOrDefault(_removeClippedSubviews),
+        _originalRenderItem: this.props.renderItem,
+        _numColumns: numColumnsOrDefault(numColumns),
+        _columnWrapperStyle: columnWrapperStyle
       }, renderer(this.props.ListItemComponent, this.props.renderItem, columnWrapperStyle, numColumns, this.props.extraData)))
     );
   }

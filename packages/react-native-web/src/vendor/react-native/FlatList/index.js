@@ -688,6 +688,9 @@ class FlatList<ItemT> extends React.PureComponent<Props<ItemT>, void> {
         removeClippedSubviews={removeClippedSubviewsOrDefault(
           _removeClippedSubviews,
         )}
+        _originalRenderItem={this.props.renderItem}
+        _numColumns={numColumnsOrDefault(numColumns)}
+        _columnWrapperStyle={columnWrapperStyle}
         {...renderer(
           this.props.ListItemComponent,
           this.props.renderItem,

@@ -17,7 +17,7 @@ import ViewabilityHelper from '../ViewabilityHelper';
 import memoizeOne from 'memoize-one';
 
 // Lazy imports - only loaded when needed to support SSR/Next.js
-var RecyclerListView, RLVDataProvider, RLVLayoutProvider;
+var RecyclerListView, RLVDataProvider, RLVLayoutProvider, RLVGridLayoutProvider;
 function ensureRLVLoaded() {
   if (RecyclerListView) return;
   try {
@@ -25,6 +25,7 @@ function ensureRLVLoaded() {
     RecyclerListView = rlv.RecyclerListView;
     RLVDataProvider = rlv.DataProvider;
     RLVLayoutProvider = rlv.LayoutProvider;
+    RLVGridLayoutProvider = rlv.GridLayoutProvider;
   } catch (e) {
     throw new Error('RecyclerListView failed to load. This component requires recyclerlistview package.');
   }
@@ -33,8 +34,6 @@ function ensureRLVLoaded() {
 // VirtualizedList props
 
 var DEFAULT_RENDER_AHEAD_OFFSET = 0;
-var DEFAULT_MAX_TO_RENDER_PER_BATCH = 10;
-var DEFAULT_INITIAL_NUM_TO_RENDER = 10;
 var DEFAULT_WINDOW_SIZE = 21;
 
 /**
@@ -187,7 +186,7 @@ class RNWDataProvider {
  * Properly extends RLVLayoutProvider to work with RecyclerListView
  */
 class RNWLayoutProvider {
-  constructor(getItemLayout, getData, getOriginalDataCount, horizontal, estimatedItemHeight, estimatedItemWidth, containerSize, isLayoutProviderFormat, hasHeader, hasFooter, headerHeight, footerHeight) {
+  constructor(getItemLayout, getData, getOriginalDataCount, horizontal, estimatedItemHeight, estimatedItemWidth, containerSize, isLayoutProviderFormat, hasHeader, hasFooter, headerHeight, footerHeight, isGridMode, numColumns) {
     if (horizontal === void 0) {
       horizontal = false;
     }
@@ -218,6 +217,12 @@ class RNWLayoutProvider {
     if (footerHeight === void 0) {
       footerHeight = 60;
     }
+    if (isGridMode === void 0) {
+      isGridMode = false;
+    }
+    if (numColumns === void 0) {
+      numColumns = 1;
+    }
     ensureRLVLoaded();
     this._getItemLayout = getItemLayout;
     this._appLayoutProvider = isLayoutProviderFormat ? getItemLayout : null;
@@ -234,48 +239,82 @@ class RNWLayoutProvider {
     this._dimensionCallback = null;
     this._headerHeight = headerHeight;
     this._footerHeight = footerHeight;
+    this._isGridMode = isGridMode;
+    this._numColumns = numColumns;
     var self = this;
 
-    // Create CustomRLVLayoutProvider subclass that extends RLVLayoutProvider
-    class CustomRLVLayoutProvider extends RLVLayoutProvider {
-      constructor(layoutType, dimension) {
-        super(layoutType, dimension);
-      }
-      getLayoutForIndex(index) {
-        return self.getLayoutForIndex(index);
-      }
-      getLayout(index) {
-        if (super.getLayout) {
-          return super.getLayout(index);
-        }
-        return this.getLayoutForIndex(index);
-      }
-      getLayoutTypeForIndex(index) {
-        return super.getLayoutTypeForIndex ? super.getLayoutTypeForIndex(index) : self.getLayoutTypeForIndex(index);
-      }
-      getDimensionForType(type) {
-        if (super.getDimensionForType) {
-          return super.getDimensionForType(type);
-        }
-        return self.getDimensionForType(type);
-      }
-      getLayouts(startIndex, endIndex) {
-        if (super.getLayouts) {
-          return super.getLayouts(startIndex, endIndex);
-        }
-        return undefined;
-      }
-    }
+    // If grid mode, use GridLayoutProvider for high-performance grid rendering
+    if (isGridMode && RLVGridLayoutProvider) {
+      console.log('[RNWLayoutProvider] Creating GridLayoutProvider', {
+        isGridMode,
+        numColumns,
+        containerWidth: containerSize.width
+      });
 
-    // Create instance with layoutTypeFunction that handles 3 types
-    this._rlvLayoutProvider = new CustomRLVLayoutProvider(index => self.getLayoutTypeForIndex(index),
-    // Return 'header', 'item', or 'footer'
-    (type, dim) => {
-      // Dimension callback for each layout type
-      var dimensions = self.getDimensionForType(type);
-      dim.width = dimensions.width;
-      dim.height = dimensions.height;
-    });
+      // GridLayoutProvider(maxSpan, getLayoutType, getSpan, getHeightOrWidth, acceptableRelayoutDelta)
+      // - maxSpan: number of columns in the grid
+      // - getLayoutType: function(index) => string (layout type for the item)
+      // - getSpan: function(index) => number (how many columns this item spans, 1 = single column)
+      // - getHeightOrWidth: function(index, maxSpan, containerSize) => number (dimension perpendicular to scroll direction)
+      this._rlvLayoutProvider = new RLVGridLayoutProvider(numColumns,
+      // maxSpan
+      index => self.getLayoutTypeForIndex(index),
+      // getLayoutType
+      index => 1,
+      // getSpan: each item takes 1 column in the grid
+      index => {
+        // getHeightOrWidth: return the height of the item
+        // For uniform grid, use estimatedItemHeight
+        var type = self.getLayoutTypeForIndex(index);
+        if (type === 'header' || type === 'footer') {
+          return type === 'header' ? self._headerHeight : self._footerHeight;
+        }
+        return self.getDimensionForType(type).height;
+      }, 1 // acceptableRelayoutDelta
+      );
+    } else {
+      // Non-grid mode: use standard layout provider
+      // Create CustomRLVLayoutProvider subclass that extends RLVLayoutProvider
+      class CustomRLVLayoutProvider extends RLVLayoutProvider {
+        constructor(layoutType, dimension) {
+          super(layoutType, dimension);
+        }
+        getLayoutForIndex(index) {
+          return self.getLayoutForIndex(index);
+        }
+        getLayout(index) {
+          if (super.getLayout) {
+            return super.getLayout(index);
+          }
+          return this.getLayoutForIndex(index);
+        }
+        getLayoutTypeForIndex(index) {
+          return super.getLayoutTypeForIndex ? super.getLayoutTypeForIndex(index) : self.getLayoutTypeForIndex(index);
+        }
+        getDimensionForType(type) {
+          if (super.getDimensionForType) {
+            return super.getDimensionForType(type);
+          }
+          return self.getDimensionForType(type);
+        }
+        getLayouts(startIndex, endIndex) {
+          if (super.getLayouts) {
+            return super.getLayouts(startIndex, endIndex);
+          }
+          return undefined;
+        }
+      }
+
+      // Create instance with layoutTypeFunction that handles 3 types
+      this._rlvLayoutProvider = new CustomRLVLayoutProvider(index => self.getLayoutTypeForIndex(index),
+      // Return 'header', 'item', or 'footer'
+      (type, dim) => {
+        // Dimension callback for each layout type
+        var dimensions = self.getDimensionForType(type);
+        dim.width = dimensions.width;
+        dim.height = dimensions.height;
+      });
+    }
   }
 
   // Determine layout type based on index mapping
@@ -432,7 +471,16 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
     this._footerHeight = 0;
     this._headerMeasured = false;
     this._footerMeasured = false;
+    this._isGridMode = false;
     this.state = {};
+    this._onScroll = () => {
+      console.log('[RLV ScrollViewer] div scroll');
+      // ...existing code...
+    };
+    this._windowOnScroll = () => {
+      console.log('[RLV ScrollViewer] window scroll');
+      // ...existing code...
+    };
     // Public ref methods
     this.scrollToIndex = params => {
       var _ref = params || {},
@@ -492,6 +540,10 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
         horizontal = _this$props.horizontal;
       var offset = horizontal ? offsetX : offsetY;
       var now = Date.now();
+      console.log('[RLVAdapter] onScroll offsets', {
+        offsetX,
+        offsetY
+      });
 
       // Update scroll metrics using ref (not state) to avoid re-renders
       this._scrollMetrics.offset = offset;
@@ -537,7 +589,8 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
         ItemSeparatorComponent = _this$props2.ItemSeparatorComponent,
         ListHeaderComponent = _this$props2.ListHeaderComponent,
         ListFooterComponent = _this$props2.ListFooterComponent,
-        ListEmptyComponent = _this$props2.ListEmptyComponent;
+        ListEmptyComponent = _this$props2.ListEmptyComponent,
+        _originalRenderItem = _this$props2._originalRenderItem;
       var dataLength = this._dataProvider._dataLength || 0;
       var hasHeader = this._layoutProvider._hasHeader;
       var hasFooter = this._layoutProvider._hasFooter;
@@ -579,8 +632,11 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
       var originalDataLength = this._dataProvider._dataLength || 0;
       var shouldRenderSeparator = ItemSeparatorComponent && originalItemIndex < originalDataLength - 1;
       var content = null;
-      if (renderItem) {
-        content = renderItem({
+
+      // In grid mode, use original unwrapped renderItem (not FlatList's wrapped version)
+      var renderItemToUse = this._isGridMode && _originalRenderItem ? _originalRenderItem : renderItem;
+      if (renderItemToUse) {
+        content = renderItemToUse({
           item,
           index: originalItemIndex,
           separators: {
@@ -596,8 +652,9 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
         });
       }
       return /*#__PURE__*/React.createElement(View, {
-        key: "item-" + originalItemIndex,
-        "data-rnw-focusable": item != null && item.isTVSelectable ? 'true' : undefined,
+        key: "item-" + originalItemIndex
+        // data-rnw-focusable={item?.isTVSelectable ? 'true' : undefined}
+        ,
         style: styles.cellContainer
       }, content, shouldRenderSeparator && /*#__PURE__*/React.createElement(View, {
         style: styles.separator
@@ -619,7 +676,10 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
         width,
         height
       };
-
+      console.log('[RLVAdapter] container onLayout', {
+        width,
+        height
+      });
       // Update layout provider with measured dimensions
       if (this._layoutProvider) {
         this._layoutProvider.setContainerSize(width, height);
@@ -671,6 +731,10 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
         var node = this._containerRef;
         if (node && node.getBoundingClientRect) {
           var rect = node.getBoundingClientRect();
+          console.log('[RLVAdapter] container getBoundingClientRect', {
+            width: rect.width,
+            height: rect.height
+          });
           if (rect.width > 0 && rect.height > 0) {
             this._containerSize = {
               width: rect.width,
@@ -698,12 +762,15 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
       rowHasChanged = _this$props3.rowHasChanged,
       getItemLayout = _this$props3.getItemLayout,
       layoutProvider = _this$props3.layoutProvider,
+      getItem = _this$props3.getItem,
+      getItemCount = _this$props3.getItemCount,
       onViewableItemsChanged = _this$props3.onViewableItemsChanged,
       viewabilityConfig = _this$props3.viewabilityConfig,
       viewabilityConfigCallbackPairs = _this$props3.viewabilityConfigCallbackPairs,
       horizontal = _this$props3.horizontal,
       ListHeaderComponent = _this$props3.ListHeaderComponent,
-      ListFooterComponent = _this$props3.ListFooterComponent;
+      ListFooterComponent = _this$props3.ListFooterComponent,
+      _numColumns = _this$props3._numColumns;
 
     // STRICT VALIDATION: Cannot provide both layoutProvider and getItemLayout
     if (layoutProvider && getItemLayout) {
@@ -713,8 +780,12 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
     // Check if we have header/footer components to virtualize
     var hasHeader = !!ListHeaderComponent;
     var hasFooter = !!ListFooterComponent;
+    var numColumns = _numColumns || 1;
+    this._isGridMode = _numColumns > 1;
+    ;
+    console.log("[VirtualizedListRLVAdapter] isGridMode=" + this._isGridMode + " numColumns=" + numColumns + ", datalength " + data.length + " items");
 
-    // Initialize data provider with header/footer flags
+    // Initialize data provider with flattened data (if grid mode) or original data, plus header/footer flags
     // Always virtualize header/footer; empty rows are always added when data is empty
     this._dataProvider = new RNWDataProvider(data, rowHasChanged, hasHeader, hasFooter);
 
@@ -725,7 +796,11 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
     // Initialize layout provider with callbacks for data and data count
     this._layoutProvider = new RNWLayoutProvider(layoutProviderToUse, () => this._dataProvider ? this._dataProvider._data : null, () => this._dataProvider ? this._dataProvider._dataLength : 0, horizontal, 50, 50, this._containerSize, isLayoutProviderFormat, hasHeader, hasFooter, this._headerHeight || 250,
     // Measured or fallback
-    this._footerHeight || 60) // Measured or fallback
+    this._footerHeight || 60,
+    // Measured or fallback
+    this._isGridMode,
+    // Pass grid mode flag
+    numColumns) // Pass numColumns
     ;
 
     // Initialize viewability helper if needed
@@ -740,6 +815,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
         this._onViewableItemsChanged = viewabilityConfigCallbackPairs[0].onViewableItemsChanged;
       }
     }
+    console.log('[RLVAdapter] layoutProvider created with containerSize', this._containerSize);
   }
   componentDidMount() {
     // Measure container dimensions on mount
@@ -794,11 +870,11 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
     // Ensure providers are initialized (only on client)
     this._ensureProvidersInitialized();
     ensureRLVLoaded();
+    console.log('[RLVAdapter] render containerSize', this._containerSize);
     var hasHeader = this._layoutProvider._hasHeader;
     var hasFooter = this._layoutProvider._hasFooter;
     var _this$props5 = this.props,
       style = _this$props5.style,
-      contentContainerStyle = _this$props5.contentContainerStyle,
       _this$props5$scrollEn = _this$props5.scrollEnabled,
       scrollEnabled = _this$props5$scrollEn === void 0 ? true : _this$props5$scrollEn,
       _this$props5$horizont = _this$props5.horizontal,
@@ -827,7 +903,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
 
     // Container style with flex: 1
     var containerStyle = [styles.container, style];
-    var listContainerStyle = Object.assign({}, styles.listContainer, contentContainerStyle, {
+    var listContainerStyle = Object.assign({}, styles.listContainer, {
       flex: 1
     });
     var scrollProps = {

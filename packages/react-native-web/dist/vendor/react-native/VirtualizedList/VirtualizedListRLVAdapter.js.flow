@@ -17,13 +17,13 @@ import ViewabilityHelper from '../ViewabilityHelper';
 import memoizeOne from 'memoize-one';
 
 // Lazy imports - only loaded when needed to support SSR/Next.js
-let RecyclerListView, RLVDataProvider, RLVLayoutProvider;
+let RecyclerListView, RLVDataProvider, RLVLayoutProvider, RLVGridLayoutProvider;
 declare function ensureRLVLoaded(): any;
 type Props = any; // VirtualizedList props
 type State = {};
 const DEFAULT_RENDER_AHEAD_OFFSET = 0;
-const DEFAULT_MAX_TO_RENDER_PER_BATCH = 10;
-const DEFAULT_INITIAL_NUM_TO_RENDER = 10;
+// const DEFAULT_MAX_TO_RENDER_PER_BATCH = 10;
+// const DEFAULT_INITIAL_NUM_TO_RENDER = 10;
 const DEFAULT_WINDOW_SIZE = 21;
 
 /**
@@ -80,7 +80,9 @@ declare class RNWLayoutProvider {
   _hasHeader: boolean,
   _hasFooter: boolean,
   _dimensionCallback: any,
-  constructor(getItemLayout: any, getData: any, getOriginalDataCount: any, horizontal: any, estimatedItemHeight: any, estimatedItemWidth: any, containerSize: any, isLayoutProviderFormat: any, hasHeader: any, hasFooter: any, headerHeight: any, footerHeight: any): any,
+  _isGridMode: boolean,
+  _numColumns: number,
+  constructor(getItemLayout: any, getData: any, getOriginalDataCount: any, horizontal: any, estimatedItemHeight: any, estimatedItemWidth: any, containerSize: any, isLayoutProviderFormat: any, hasHeader: any, hasFooter: any, headerHeight: any, footerHeight: any, isGridMode: any, numColumns: any): any,
   getLayoutTypeForIndex(index: any): any,
   getDimensionForType(type: any): any,
   setContainerSize(width: number, height: number): any,
@@ -117,11 +119,14 @@ declare class VirtualizedListRLVAdapter extends React.PureComponent<Props, State
   _footerHeight: number,
   _headerMeasured: boolean,
   _footerMeasured: boolean,
+  _isGridMode: boolean,
   state: any,
   constructor(props: Props): any,
   _ensureProvidersInitialized(): any,
   componentDidMount(): any,
   componentDidUpdate(prevProps: Props): any,
+  _onScroll: any,
+  _windowOnScroll: any,
   scrollToIndex: any,
   scrollToOffset: any,
   scrollToEnd: any,

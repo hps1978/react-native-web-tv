@@ -17,7 +17,7 @@ import ViewabilityHelper from '../ViewabilityHelper';
 import memoizeOne from 'memoize-one';
 
 // Lazy imports - only loaded when needed to support SSR/Next.js
-let RecyclerListView, RLVDataProvider, RLVLayoutProvider;
+let RecyclerListView, RLVDataProvider, RLVLayoutProvider, RLVGridLayoutProvider;
 
 function ensureRLVLoaded() {
   if (RecyclerListView) return;
@@ -27,6 +27,7 @@ function ensureRLVLoaded() {
     RecyclerListView = rlv.RecyclerListView;
     RLVDataProvider = rlv.DataProvider;
     RLVLayoutProvider = rlv.LayoutProvider;
+    RLVGridLayoutProvider = rlv.GridLayoutProvider;
   } catch (e) {
     throw new Error(
       'RecyclerListView failed to load. This component requires recyclerlistview package.'
@@ -38,8 +39,8 @@ type Props = any; // VirtualizedList props
 type State = {};
 
 const DEFAULT_RENDER_AHEAD_OFFSET = 0;
-const DEFAULT_MAX_TO_RENDER_PER_BATCH = 10;
-const DEFAULT_INITIAL_NUM_TO_RENDER = 10;
+// const DEFAULT_MAX_TO_RENDER_PER_BATCH = 10;
+// const DEFAULT_INITIAL_NUM_TO_RENDER = 10;
 const DEFAULT_WINDOW_SIZE = 21;
 
 /**
@@ -252,6 +253,8 @@ class RNWLayoutProvider {
   _hasHeader: boolean;
   _hasFooter: boolean;
   _dimensionCallback: any;
+  _isGridMode: boolean;
+  _numColumns: number;
 
   constructor(
     getItemLayout,
@@ -266,6 +269,8 @@ class RNWLayoutProvider {
     hasFooter = false,
     headerHeight = 250,
     footerHeight = 60,
+    isGridMode = false,
+    numColumns = 1,
   ) {
     ensureRLVLoaded();
     
@@ -284,55 +289,88 @@ class RNWLayoutProvider {
     this._dimensionCallback = null;
     this._headerHeight = headerHeight;
     this._footerHeight = footerHeight;
+    this._isGridMode = isGridMode;
+    this._numColumns = numColumns;
 
     const self = this;
 
-    // Create CustomRLVLayoutProvider subclass that extends RLVLayoutProvider
-    class CustomRLVLayoutProvider extends RLVLayoutProvider {
-      constructor(layoutType, dimension) {
-        super(layoutType, dimension);
-      }
+    // If grid mode, use GridLayoutProvider for high-performance grid rendering
+    if (isGridMode && RLVGridLayoutProvider) {
+      console.log('[RNWLayoutProvider] Creating GridLayoutProvider', {
+        isGridMode,
+        numColumns,
+        containerWidth: containerSize.width,
+      });
 
-      getLayoutForIndex(index) {
-        return self.getLayoutForIndex(index);
-      }
-
-      getLayout(index) {
-        if (super.getLayout) {
-          return super.getLayout(index);
+      // GridLayoutProvider(maxSpan, getLayoutType, getSpan, getHeightOrWidth, acceptableRelayoutDelta)
+      // - maxSpan: number of columns in the grid
+      // - getLayoutType: function(index) => string (layout type for the item)
+      // - getSpan: function(index) => number (how many columns this item spans, 1 = single column)
+      // - getHeightOrWidth: function(index, maxSpan, containerSize) => number (dimension perpendicular to scroll direction)
+      this._rlvLayoutProvider = new RLVGridLayoutProvider(
+        numColumns, // maxSpan
+        (index) => self.getLayoutTypeForIndex(index), // getLayoutType
+        (index) => 1, // getSpan: each item takes 1 column in the grid
+        (index) => {
+          // getHeightOrWidth: return the height of the item
+          // For uniform grid, use estimatedItemHeight
+          const type = self.getLayoutTypeForIndex(index);
+          if (type === 'header' || type === 'footer') {
+            return type === 'header' ? self._headerHeight : self._footerHeight;
+          }
+          return self.getDimensionForType(type).height;
+        },
+        1 // acceptableRelayoutDelta
+      );
+    } else {
+      // Non-grid mode: use standard layout provider
+      // Create CustomRLVLayoutProvider subclass that extends RLVLayoutProvider
+      class CustomRLVLayoutProvider extends RLVLayoutProvider {
+        constructor(layoutType, dimension) {
+          super(layoutType, dimension);
         }
-        return this.getLayoutForIndex(index);
-      }
 
-      getLayoutTypeForIndex(index) {
-        return super.getLayoutTypeForIndex ? super.getLayoutTypeForIndex(index) : self.getLayoutTypeForIndex(index);
-      }
-
-      getDimensionForType(type) {
-        if (super.getDimensionForType) {
-          return super.getDimensionForType(type);
+        getLayoutForIndex(index) {
+          return self.getLayoutForIndex(index);
         }
-        return self.getDimensionForType(type);
+
+        getLayout(index) {
+          if (super.getLayout) {
+            return super.getLayout(index);
+          }
+          return this.getLayoutForIndex(index);
+        }
+
+        getLayoutTypeForIndex(index) {
+          return super.getLayoutTypeForIndex ? super.getLayoutTypeForIndex(index) : self.getLayoutTypeForIndex(index);
+        }
+
+        getDimensionForType(type) {
+          if (super.getDimensionForType) {
+            return super.getDimensionForType(type);
+          }
+          return self.getDimensionForType(type);
+        }
+
+        getLayouts(startIndex, endIndex) {
+          if (super.getLayouts) {
+            return super.getLayouts(startIndex, endIndex);
+          }
+          return undefined;
+        }
       }
 
-      getLayouts(startIndex, endIndex) {
-        if (super.getLayouts) {
-          return super.getLayouts(startIndex, endIndex);
+      // Create instance with layoutTypeFunction that handles 3 types
+      this._rlvLayoutProvider = new CustomRLVLayoutProvider(
+        (index) => self.getLayoutTypeForIndex(index),  // Return 'header', 'item', or 'footer'
+        (type, dim) => {
+          // Dimension callback for each layout type
+          const dimensions = self.getDimensionForType(type);
+          dim.width = dimensions.width;
+          dim.height = dimensions.height;
         }
-        return undefined;
-      }
+      );
     }
-
-    // Create instance with layoutTypeFunction that handles 3 types
-    this._rlvLayoutProvider = new CustomRLVLayoutProvider(
-      (index) => self.getLayoutTypeForIndex(index),  // Return 'header', 'item', or 'footer'
-      (type, dim) => {
-        // Dimension callback for each layout type
-        const dimensions = self.getDimensionForType(type);
-        dim.width = dimensions.width;
-        dim.height = dimensions.height;
-      }
-    );
   }
 
   // Determine layout type based on index mapping
@@ -501,6 +539,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
   _footerHeight: number = 0;
   _headerMeasured: boolean = false;
   _footerMeasured: boolean = false;
+  _isGridMode: boolean = false;
   
   state = {};
 
@@ -524,12 +563,15 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
       rowHasChanged,
       getItemLayout,
       layoutProvider,
+      getItem,
+      getItemCount,
       onViewableItemsChanged,
       viewabilityConfig,
       viewabilityConfigCallbackPairs,
       horizontal,
       ListHeaderComponent,
       ListFooterComponent,
+      _numColumns,
     } = this.props;
 
     // STRICT VALIDATION: Cannot provide both layoutProvider and getItemLayout
@@ -545,7 +587,15 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
     const hasHeader = !!ListHeaderComponent;
     const hasFooter = !!ListFooterComponent;
 
-    // Initialize data provider with header/footer flags
+    let numColumns = _numColumns || 1;
+    this._isGridMode = _numColumns > 1;;
+    
+    console.log(
+      `[VirtualizedListRLVAdapter] isGridMode=${this._isGridMode} numColumns=${numColumns}, datalength ${data.length} items`
+    );
+
+
+    // Initialize data provider with flattened data (if grid mode) or original data, plus header/footer flags
     // Always virtualize header/footer; empty rows are always added when data is empty
     this._dataProvider = new RNWDataProvider(data, rowHasChanged, hasHeader, hasFooter);
 
@@ -567,6 +617,8 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
       hasFooter,
       this._headerHeight || 250,  // Measured or fallback
       this._footerHeight || 60,   // Measured or fallback
+      this._isGridMode,  // Pass grid mode flag
+      numColumns,  // Pass numColumns
     );
 
     // Initialize viewability helper if needed
@@ -586,6 +638,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
         this._onViewableItemsChanged = viewabilityConfigCallbackPairs[0].onViewableItemsChanged;
       }
     }
+    console.log('[RLVAdapter] layoutProvider created with containerSize', this._containerSize);
   }
 
   componentDidMount() {
@@ -643,7 +696,15 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
     }
   }
 
+  _onScroll = (): void => {
+    console.log('[RLV ScrollViewer] div scroll');
+    // ...existing code...
+  }
 
+  _windowOnScroll = (): void => {
+    console.log('[RLV ScrollViewer] window scroll');
+    // ...existing code...
+  }
 
   // Public ref methods
   scrollToIndex = (params: any) => {
@@ -712,6 +773,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
 
     const offset = horizontal ? offsetX : offsetY;
     const now = Date.now();
+    console.log('[RLVAdapter] onScroll offsets', { offsetX, offsetY });
 
     // Update scroll metrics using ref (not state) to avoid re-renders
     this._scrollMetrics.offset = offset;
@@ -761,6 +823,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
       ListHeaderComponent,
       ListFooterComponent,
       ListEmptyComponent,
+      _originalRenderItem,
     } = this.props;
 
     const dataLength = this._dataProvider._dataLength || 0;
@@ -824,8 +887,11 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
 
     let content = null;
 
-    if (renderItem) {
-      content = renderItem({
+    // In grid mode, use original unwrapped renderItem (not FlatList's wrapped version)
+    const renderItemToUse = this._isGridMode && _originalRenderItem ? _originalRenderItem : renderItem;
+
+    if (renderItemToUse) {
+      content = renderItemToUse({
         item,
         index: originalItemIndex,
         separators: {
@@ -841,7 +907,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
     return (
       <View
         key={`item-${originalItemIndex}`}
-        data-rnw-focusable={item?.isTVSelectable ? 'true' : undefined}
+        // data-rnw-focusable={item?.isTVSelectable ? 'true' : undefined}
         style={styles.cellContainer}
       >
         {content}
@@ -865,7 +931,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
   _handleContainerLayout = (event: any) => {
     const { width, height } = event.nativeEvent.layout;
     this._containerSize = { width, height };
-
+    console.log('[RLVAdapter] container onLayout', { width, height });
     // Update layout provider with measured dimensions
     if (this._layoutProvider) {
       this._layoutProvider.setContainerSize(width, height);
@@ -925,6 +991,10 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
       const node = this._containerRef;
       if (node && node.getBoundingClientRect) {
         const rect = node.getBoundingClientRect();
+        console.log('[RLVAdapter] container getBoundingClientRect', {
+          width: rect.width,
+          height: rect.height,
+        });
         if (rect.width > 0 && rect.height > 0) {
           this._containerSize = { width: rect.width, height: rect.height };
           if (this._layoutProvider) {
@@ -946,13 +1016,13 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
     // Ensure providers are initialized (only on client)
     this._ensureProvidersInitialized();
     ensureRLVLoaded();
-    
+    console.log('[RLVAdapter] render containerSize', this._containerSize);
+
     const hasHeader = this._layoutProvider._hasHeader;
     const hasFooter = this._layoutProvider._hasFooter;
     
     const {
       style,
-      contentContainerStyle,
       scrollEnabled = true,
       horizontal = false,
       inverted = false,
@@ -981,7 +1051,6 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
     const listContainerStyle = Object.assign(
       {},
       styles.listContainer,
-      contentContainerStyle,
       { flex: 1 },
     );
 
