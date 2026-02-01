@@ -296,12 +296,6 @@ class RNWLayoutProvider {
 
     // If grid mode, use GridLayoutProvider for high-performance grid rendering
     if (isGridMode && RLVGridLayoutProvider) {
-      console.log('[RNWLayoutProvider] Creating GridLayoutProvider', {
-        isGridMode,
-        numColumns,
-        containerWidth: containerSize.width,
-      });
-
       // GridLayoutProvider(maxSpan, getLayoutType, getSpan, getHeightOrWidth, acceptableRelayoutDelta)
       // - maxSpan: number of columns in the grid
       // - getLayoutType: function(index) => string (layout type for the item)
@@ -589,11 +583,6 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
 
     let numColumns = _numColumns || 1;
     this._isGridMode = _numColumns > 1;;
-    
-    console.log(
-      `[VirtualizedListRLVAdapter] isGridMode=${this._isGridMode} numColumns=${numColumns}, datalength ${data.length} items`
-    );
-
 
     // Initialize data provider with flattened data (if grid mode) or original data, plus header/footer flags
     // Always virtualize header/footer; empty rows are always added when data is empty
@@ -638,7 +627,6 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
         this._onViewableItemsChanged = viewabilityConfigCallbackPairs[0].onViewableItemsChanged;
       }
     }
-    console.log('[RLVAdapter] layoutProvider created with containerSize', this._containerSize);
   }
 
   componentDidMount() {
@@ -694,16 +682,6 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
           viewabilityConfigCallbackPairs[0].onViewableItemsChanged;
       }
     }
-  }
-
-  _onScroll = (): void => {
-    console.log('[RLV ScrollViewer] div scroll');
-    // ...existing code...
-  }
-
-  _windowOnScroll = (): void => {
-    console.log('[RLV ScrollViewer] window scroll');
-    // ...existing code...
   }
 
   // Public ref methods
@@ -773,7 +751,6 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
 
     const offset = horizontal ? offsetX : offsetY;
     const now = Date.now();
-    console.log('[RLVAdapter] onScroll offsets', { offsetX, offsetY });
 
     // Update scroll metrics using ref (not state) to avoid re-renders
     this._scrollMetrics.offset = offset;
@@ -931,7 +908,6 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
   _handleContainerLayout = (event: any) => {
     const { width, height } = event.nativeEvent.layout;
     this._containerSize = { width, height };
-    console.log('[RLVAdapter] container onLayout', { width, height });
     // Update layout provider with measured dimensions
     if (this._layoutProvider) {
       this._layoutProvider.setContainerSize(width, height);
@@ -991,10 +967,6 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
       const node = this._containerRef;
       if (node && node.getBoundingClientRect) {
         const rect = node.getBoundingClientRect();
-        console.log('[RLVAdapter] container getBoundingClientRect', {
-          width: rect.width,
-          height: rect.height,
-        });
         if (rect.width > 0 && rect.height > 0) {
           this._containerSize = { width: rect.width, height: rect.height };
           if (this._layoutProvider) {
@@ -1016,7 +988,6 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
     // Ensure providers are initialized (only on client)
     this._ensureProvidersInitialized();
     ensureRLVLoaded();
-    console.log('[RLVAdapter] render containerSize', this._containerSize);
 
     const hasHeader = this._layoutProvider._hasHeader;
     const hasFooter = this._layoutProvider._hasFooter;

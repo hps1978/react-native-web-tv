@@ -125,8 +125,6 @@ declare class VirtualizedListRLVAdapter extends React.PureComponent<Props, State
   _ensureProvidersInitialized(): any,
   componentDidMount(): any,
   componentDidUpdate(prevProps: Props): any,
-  _onScroll: any,
-  _windowOnScroll: any,
   scrollToIndex: any,
   scrollToOffset: any,
   scrollToEnd: any,
