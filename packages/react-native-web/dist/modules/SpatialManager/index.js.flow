@@ -34,6 +34,12 @@ type SpatialScrollConfig = {
   scrollAnimationDurationMsVertical?: number,
   scrollAnimationDurationMsHorizontal?: number,
 };
+type SpatialNavigationConfig = {
+  keyMap?: {
+    [key: string]: string
+  },
+  scrollConfig?: SpatialScrollConfig,
+};
 const DEFAULT_SPATIAL_SCROLL_CONFIG: SpatialScrollConfig = {
   edgeThresholdPx: 128,
   scrollThrottleMs: 80,
@@ -57,15 +63,17 @@ let spatialScrollConfig: SpatialScrollConfig = {
 };
 let lastScrollAt: number = 0;
 let scrollAnimationFrame: number | null = null;
+declare function loadGlobalConfig(): SpatialNavigationConfig | null; // Setup configuration for Spatial Navigation
+// User provided through global configs or defaults
+declare function setSpatialNavigationConfig(): any;
 declare function animateScrollTo(scrollable: any, isVertical: boolean, nextOffset: number, durationMs: number): any;
-declare function setSpatialNavigationConfig(config: SpatialScrollConfig): any;
 declare function findScrollableAncestor(elem: HTMLElement | null, direction: 'vertical' | 'horizontal'): HTMLElement | null;
 declare function maybeScrollOnFocus(elem: HTMLElement | null, keyCode: string): any;
 declare function triggerFocus(nextFocus: {
   elem: HTMLElement | null,
   parentHasAutofocus: boolean,
 }, keyCode?: string): boolean;
-declare function setupSpatialNavigation(container?: HTMLElement, config?: SpatialScrollConfig): any;
+declare function setupSpatialNavigation(container?: HTMLElement): any;
 declare function setFocus(node: HTMLElement): any;
 declare function setDestinations(host: HTMLElement, destinations: HTMLElement[]): any;
 declare function teardownSpatialNavigation(): any;

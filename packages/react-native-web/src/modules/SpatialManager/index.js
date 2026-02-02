@@ -63,6 +63,11 @@ type SpatialScrollConfig = {
   scrollAnimationDurationMsHorizontal?: number
 };
 
+type SpatialNavigationConfig = {
+  keyMap?: { [key: string]: string },
+  scrollConfig?: SpatialScrollConfig
+};
+
 const DEFAULT_SPATIAL_SCROLL_CONFIG: SpatialScrollConfig = {
   edgeThresholdPx: 128,
   scrollThrottleMs: 80,
@@ -84,6 +89,36 @@ let spatialScrollConfig: SpatialScrollConfig = {
 };
 let lastScrollAt: number = 0;
 let scrollAnimationFrame: number | null = null;
+
+function loadGlobalConfig(): SpatialNavigationConfig | null {
+  // Check for window.appConfig.spatialNav (cross-platform pattern)
+  if (typeof window !== 'undefined' && window.appConfig && window.appConfig) {
+    return (window.appConfig: any);
+  }
+  return null;
+}
+
+// Setup configuration for Spatial Navigation
+// User provided through global configs or defaults
+function setSpatialNavigationConfig() {
+  // Auto-initialize from global config on first arrow key press if not already initialized
+  if (!isSpatialManagerReady) {
+    const globalConfig: SpatialNavigationConfig | null = loadGlobalConfig();
+    if (globalConfig) {
+      // Setup LRUD Keys if provided
+      if (globalConfig?.keyMap) {
+        setConfig({
+          keyMap: globalConfig.keyMap
+        });
+      }
+
+      spatialScrollConfig = {
+        ...DEFAULT_SPATIAL_SCROLL_CONFIG,
+        ...(globalConfig?.scrollConfig || {})
+      };
+    }
+  }
+}
 
 function animateScrollTo(
   scrollable: any,
@@ -136,13 +171,6 @@ function animateScrollTo(
   scrollAnimationFrame = scheduleAnimationFrame(() =>
     step(hasPerformance ? performance.now() : Date.now())
   );
-}
-
-function setSpatialNavigationConfig(config: SpatialScrollConfig) {
-  spatialScrollConfig = {
-    ...DEFAULT_SPATIAL_SCROLL_CONFIG,
-    ...(config || {})
-  };
 }
 
 function findScrollableAncestor(
@@ -379,20 +407,12 @@ function triggerFocus(
   return false;
 }
 
-function setupSpatialNavigation(
-  container?: HTMLElement,
-  config?: SpatialScrollConfig
-) {
+function setupSpatialNavigation(container?: HTMLElement) {
   if (isSpatialManagerReady) {
     return;
   }
 
-  setSpatialNavigationConfig(config);
-
-  // Configure LRUD
-  setConfig({
-    // keyMap: TODO: Setup Keymap based on different TV platforms (get this as a config)
-  });
+  setSpatialNavigationConfig();
 
   spatialNavigationContainer = container?.ownerDocument || window.document;
 

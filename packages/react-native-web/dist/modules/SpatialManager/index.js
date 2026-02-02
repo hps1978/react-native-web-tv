@@ -59,6 +59,31 @@ var keyDownListener = null;
 var spatialScrollConfig = _objectSpread({}, DEFAULT_SPATIAL_SCROLL_CONFIG);
 var lastScrollAt = 0;
 var scrollAnimationFrame = null;
+function loadGlobalConfig() {
+  // Check for window.appConfig.spatialNav (cross-platform pattern)
+  if (typeof window !== 'undefined' && window.appConfig && window.appConfig) {
+    return window.appConfig;
+  }
+  return null;
+}
+
+// Setup configuration for Spatial Navigation
+// User provided through global configs or defaults
+function setSpatialNavigationConfig() {
+  // Auto-initialize from global config on first arrow key press if not already initialized
+  if (!isSpatialManagerReady) {
+    var globalConfig = loadGlobalConfig();
+    if (globalConfig) {
+      // Setup LRUD Keys if provided
+      if (globalConfig != null && globalConfig.keyMap) {
+        setConfig({
+          keyMap: globalConfig.keyMap
+        });
+      }
+      spatialScrollConfig = _objectSpread(_objectSpread({}, DEFAULT_SPATIAL_SCROLL_CONFIG), (globalConfig == null ? void 0 : globalConfig.scrollConfig) || {});
+    }
+  }
+}
 function animateScrollTo(scrollable, isVertical, nextOffset, durationMs) {
   var startOffset = isVertical ? scrollable.scrollTop : scrollable.scrollLeft;
   var delta = nextOffset - startOffset;
@@ -96,9 +121,6 @@ function animateScrollTo(scrollable, isVertical, nextOffset, durationMs) {
     }
   };
   scrollAnimationFrame = scheduleAnimationFrame(() => step(hasPerformance ? performance.now() : Date.now()));
-}
-function setSpatialNavigationConfig(config) {
-  spatialScrollConfig = _objectSpread(_objectSpread({}, DEFAULT_SPATIAL_SCROLL_CONFIG), config || {});
 }
 function findScrollableAncestor(elem, direction) {
   var current = elem ? elem.parentElement : null;
@@ -279,16 +301,11 @@ function triggerFocus(nextFocus, keyCode) {
   }
   return false;
 }
-function setupSpatialNavigation(container, config) {
+function setupSpatialNavigation(container) {
   if (isSpatialManagerReady) {
     return;
   }
-  setSpatialNavigationConfig(config);
-
-  // Configure LRUD
-  setConfig({
-    // keyMap: TODO: Setup Keymap based on different TV platforms (get this as a config)
-  });
+  setSpatialNavigationConfig();
   spatialNavigationContainer = (container == null ? void 0 : container.ownerDocument) || window.document;
 
   // Listen to keydown events on the container or document

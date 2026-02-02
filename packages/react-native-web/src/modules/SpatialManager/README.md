@@ -65,12 +65,49 @@ The SpatialManager includes **one-time API capability detection at module load**
 - The module degrades gracefully: core scrolling functionality is always available, even if some APIs are missing
 
 ## Configuration summary
+
+Spatial navigation reads configuration from `window.appConfig` at runtime. The config object supports two top-level keys:
+
+- `keyMap`: Optional LRUD key mapping overrides.
+- `scrollConfig`: Scroll behavior settings (listed below).
+
+`scrollConfig` fields:
 - `edgeThresholdPx`: Padding around the container edge to keep focused items from hugging the boundary.
 - `scrollThrottleMs`: Minimum time between scrolls to avoid rapid repeat scrolling.
 - `smoothScrollEnabled`: Enables native smooth behavior when not using manual animation.
 - `scrollAnimationDurationMs`: Global animation duration (ms).
 - `scrollAnimationDurationMsVertical`: Vertical-only animation duration (ms).
 - `scrollAnimationDurationMsHorizontal`: Horizontal-only animation duration (ms).
+
+## Usage Patterns
+
+### Pattern 1: Global Config
+
+```html
+<!-- Add before app bundle -->
+<script>
+  window.appConfig = {
+    keyMap: {
+        'ArrowLeft': 'left',
+        'ArrowRight': 'right',
+        'ArrowUp': 'up',
+        'ArrowDown': 'down'
+    },
+    scrollConfig: {
+      edgeThresholdPx: 50,
+      scrollThrottleMs: 80,
+      smoothScrollEnabled: true,
+      scrollAnimationDurationMsVertical: 600,
+      scrollAnimationDurationMsHorizontal: 200
+    }
+  };
+</script>
+<script src="app-bundle.js"></script>
+```
+
+### Priority Order
+1. `window.appConfig` (if present)
+2. Default config (fallback)
 
 ## Notes
 - The scroll logic runs before `focus()` to avoid browser `scrollIntoView()` interference.

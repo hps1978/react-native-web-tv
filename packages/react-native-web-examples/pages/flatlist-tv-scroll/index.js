@@ -43,13 +43,16 @@ function FlatListTVScrollExample() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    setupSpatialNavigation(document.body, {
-      edgeThresholdPx: 50,
-      scrollThrottleMs: 80,
-      smoothScrollEnabled: true,
-      scrollAnimationDurationMsVertical: 600,
-      scrollAnimationDurationMsHorizontal: 200
-    });
+    window.appConfig = {
+      // scrollConfig: {
+      //     edgeThresholdPx: 50,
+      //     scrollThrottleMs: 80,
+      //     smoothScrollEnabled: true,
+      //     scrollAnimationDurationMsVertical: 600,
+      //     scrollAnimationDurationMsHorizontal: 200
+      // }
+    };
+    setupSpatialNavigation(document.body);
   }, []);
 
   const renderItemForRow = useCallback(
