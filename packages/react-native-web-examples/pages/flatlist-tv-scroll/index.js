@@ -19,7 +19,7 @@ import { setupSpatialNavigation } from 'react-native-web/dist/modules/SpatialMan
 
 const ROW_COUNT = 10;
 const ITEM_COUNT = 15;
-const ITEM_SIZE = 250;
+const ITEM_SIZE = 170; //250;
 const ITEM_SPACING = 16;
 const ROW_TITLE_HEIGHT = 28;
 const ITEM_TEXT_HEIGHT = 24;
@@ -44,13 +44,13 @@ function FlatListTVScrollExample() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     window.appConfig = {
-      // scrollConfig: {
-      //     edgeThresholdPx: 50,
-      //     scrollThrottleMs: 80,
-      //     smoothScrollEnabled: true,
-      //     scrollAnimationDurationMsVertical: 600,
-      //     scrollAnimationDurationMsHorizontal: 200
-      // }
+      scrollConfig: {
+        edgeThresholdPx: 50,
+        scrollThrottleMs: 80,
+        smoothScrollEnabled: true,
+        scrollAnimationDurationMsVertical: 800,
+        scrollAnimationDurationMsHorizontal: 0
+      }
     };
     setupSpatialNavigation(document.body);
   }, []);
@@ -110,9 +110,8 @@ function FlatListTVScrollExample() {
 
 const styles = StyleSheet.create({
   screen: {
-    flex: 1,
     width: '100%',
-    minHeight: '100vh',
+    height: '100vh',
     backgroundColor: '#0f172a'
   },
   header: {
@@ -134,7 +133,8 @@ const styles = StyleSheet.create({
     color: '#cbd5f5'
   },
   verticalScroll: {
-    flex: 1
+    flex: 1,
+    minHeight: 0
   },
   verticalContent: {
     paddingBottom: 24

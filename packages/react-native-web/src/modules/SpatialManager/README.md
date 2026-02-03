@@ -98,7 +98,7 @@ Spatial navigation reads configuration from `window.appConfig` at runtime. The c
       scrollThrottleMs: 80,
       smoothScrollEnabled: true,
       scrollAnimationDurationMsVertical: 600,
-      scrollAnimationDurationMsHorizontal: 200
+      scrollAnimationDurationMsHorizontal: 400
     }
   };
 </script>

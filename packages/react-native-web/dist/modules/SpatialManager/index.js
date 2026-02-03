@@ -59,6 +59,27 @@ var keyDownListener = null;
 var spatialScrollConfig = _objectSpread({}, DEFAULT_SPATIAL_SCROLL_CONFIG);
 var lastScrollAt = 0;
 var scrollAnimationFrame = null;
+
+// Scroll event tracking for debugging
+var scrollEventLog = [];
+var MAX_SCROLL_EVENTS = 50;
+function logScrollEvent(source, details) {
+  var timestamp = getCurrentTime();
+  scrollEventLog.push(_objectSpread({
+    timestamp,
+    source,
+    windowScrollY: window.scrollY,
+    windowScrollX: window.scrollX
+  }, details));
+  if (scrollEventLog.length > MAX_SCROLL_EVENTS) {
+    scrollEventLog.shift();
+  }
+  console.log("[SpatialManager][scroll-event] " + source, _objectSpread({
+    timestamp: timestamp.toFixed(2),
+    windowScrollY: window.scrollY,
+    windowScrollX: window.scrollX
+  }, details));
+}
 function loadGlobalConfig() {
   // Check for window.appConfig.spatialNav (cross-platform pattern)
   if (typeof window !== 'undefined' && window.appConfig && window.appConfig) {
@@ -187,6 +208,24 @@ function maybeScrollOnFocus(elem, keyCode) {
         window.scroll ? window.scroll(scrollParam) : window.scrollTo(scrollParam);
       }
     };
+  } else {
+    // Setup scroll event listener on the scrollable container for debugging
+    var originalScrollListener = scrollable.__spatialScrollListener;
+    if (!originalScrollListener) {
+      var listener = event => {
+        logScrollEvent("container-scroll-" + direction, {
+          cause: 'container scroll event',
+          scrollTop: scrollable.scrollTop,
+          scrollLeft: scrollable.scrollLeft,
+          scrollHeight: scrollable.scrollHeight,
+          scrollWidth: scrollable.scrollWidth,
+          clientHeight: scrollable.clientHeight,
+          clientWidth: scrollable.clientWidth
+        });
+      };
+      scrollable.addEventListener('scroll', listener, true);
+      scrollable.__spatialScrollListener = listener;
+    }
   }
   if (!scrollable) return;
   var containerRect;
@@ -210,19 +249,24 @@ function maybeScrollOnFocus(elem, keyCode) {
     };
   }
   var edgeThreshold = spatialScrollConfig.edgeThresholdPx || 0;
-
-  // Clamp container bounds to actual viewport to handle containers extending beyond viewport edges
-  var visibleContainerRect = {
-    top: Math.max(containerRect.top, 0),
-    bottom: Math.min(containerRect.bottom, window.innerHeight),
-    left: Math.max(containerRect.left, 0),
-    right: Math.min(containerRect.right, window.innerWidth)
+  var viewportRect = {
+    top: 0,
+    bottom: window.innerHeight,
+    left: 0,
+    right: window.innerWidth
+  };
+  var visibleContainerRect = isWindowScroll ? viewportRect : {
+    top: Math.max(containerRect.top, viewportRect.top),
+    bottom: Math.min(containerRect.bottom, viewportRect.bottom),
+    left: Math.max(containerRect.left, viewportRect.left),
+    right: Math.min(containerRect.right, viewportRect.right)
   };
   var currentOffset = isVertical ? scrollable.scrollTop : scrollable.scrollLeft;
   var maxOffset = isVertical ? Math.max(0, scrollable.scrollHeight - scrollable.clientHeight) : Math.max(0, scrollable.scrollWidth - scrollable.clientWidth);
 
   // Calculate the exact scroll offset needed to bring the focused element fully into view
   var nextOffset = currentOffset;
+  var scrollDelta = 0;
   var needsScroll = false;
   if (isVertical) {
     var padding = edgeThreshold; // Use edge threshold as padding
@@ -230,12 +274,16 @@ function maybeScrollOnFocus(elem, keyCode) {
     // Element is below viewport - scroll down to show it
     if (targetRect.bottom > visibleContainerRect.bottom - padding) {
       var delta = targetRect.bottom - (visibleContainerRect.bottom - padding);
-      nextOffset = Math.min(currentOffset + delta, maxOffset);
+      // KEY FIX: For virtualized containers (maxOffset === 0), allow the offset to be calculated
+      // The virtualization will load more content as we scroll
+      scrollDelta = delta;
+      nextOffset = isWindowScroll ? Math.min(currentOffset + delta, maxOffset) : currentOffset + delta;
       needsScroll = true;
     }
     // Element is above viewport - scroll up to show it
     else if (targetRect.top < visibleContainerRect.top + padding) {
       var _delta = visibleContainerRect.top + padding - targetRect.top;
+      scrollDelta = -_delta;
       nextOffset = Math.max(currentOffset - _delta, 0);
       needsScroll = true;
     }
@@ -245,12 +293,14 @@ function maybeScrollOnFocus(elem, keyCode) {
     // Element is to the right of viewport
     if (targetRect.right > visibleContainerRect.right - _padding) {
       var _delta2 = targetRect.right - (visibleContainerRect.right - _padding);
-      nextOffset = Math.min(currentOffset + _delta2, maxOffset);
+      scrollDelta = _delta2;
+      nextOffset = isWindowScroll ? Math.min(currentOffset + _delta2, maxOffset) : currentOffset + _delta2;
       needsScroll = true;
     }
     // Element is to the left of viewport
     else if (targetRect.left < visibleContainerRect.left + _padding) {
       var _delta3 = visibleContainerRect.left + _padding - targetRect.left;
+      scrollDelta = -_delta3;
       nextOffset = Math.max(currentOffset - _delta3, 0);
       needsScroll = true;
     }
@@ -262,28 +312,31 @@ function maybeScrollOnFocus(elem, keyCode) {
 
   // Defer scroll to next event loop to avoid blocking the keydown handler
   Promise.resolve().then(() => {
+    var liveOffset = isVertical ? scrollable.scrollTop : scrollable.scrollLeft;
+    var liveNextOffset = isWindowScroll ? Math.min(Math.max(liveOffset + scrollDelta, 0), maxOffset) : Math.max(liveOffset + scrollDelta, 0);
     var directionDurationMs = isVertical ? spatialScrollConfig.scrollAnimationDurationMsVertical : spatialScrollConfig.scrollAnimationDurationMsHorizontal;
     var durationMs = directionDurationMs != null ? directionDurationMs : spatialScrollConfig.scrollAnimationDurationMs || 0;
     if (durationMs > 0) {
-      animateScrollTo(scrollable, isVertical, nextOffset, durationMs);
+      animateScrollTo(scrollable, isVertical, liveNextOffset, durationMs);
       return;
     }
+    var finalOffset = nextOffset;
     if (typeof scrollable.scrollTo === 'function') {
       if (isVertical) {
         scrollable.scrollTo({
-          y: nextOffset,
+          y: finalOffset,
           animated: spatialScrollConfig.smoothScrollEnabled !== false
         });
       } else {
         scrollable.scrollTo({
-          x: nextOffset,
+          x: finalOffset,
           animated: spatialScrollConfig.smoothScrollEnabled !== false
         });
       }
     } else if (isVertical) {
-      scrollable.scrollTop = nextOffset;
+      scrollable.scrollTop = finalOffset;
     } else {
-      scrollable.scrollLeft = nextOffset;
+      scrollable.scrollLeft = finalOffset;
     }
   });
 }
@@ -293,10 +346,37 @@ function triggerFocus(nextFocus, keyCode) {
     // set id first
     setupNodeId(nextFocus.elem);
     updateAncestorsAutoFocus(nextFocus.elem, spatialNavigationContainer);
+
+    // Log scroll positions before focus
+    logScrollEvent('BEFORE-focus-call', {
+      cause: 'before calling elem.focus()',
+      windowScrollY: window.scrollY,
+      windowScrollX: window.scrollX,
+      elem: nextFocus.elem.id || nextFocus.elem.className
+    });
     if (keyCode) {
       maybeScrollOnFocus(nextFocus.elem, keyCode);
     }
-    nextFocus.elem.focus();
+
+    // Call focus and immediately log after
+    var isVerticalFocus = keyCode === 'ArrowUp' || keyCode === 'ArrowDown';
+    if (isVerticalFocus) {
+      try {
+        nextFocus.elem.focus({
+          preventScroll: true
+        });
+      } catch (error) {
+        nextFocus.elem.focus();
+      }
+    } else {
+      nextFocus.elem.focus();
+    }
+    logScrollEvent('AFTER-focus-call', {
+      cause: 'immediately after elem.focus()',
+      windowScrollY: window.scrollY,
+      windowScrollX: window.scrollX,
+      elem: nextFocus.elem.id || nextFocus.elem.className
+    });
     return true;
   }
   return false;
@@ -308,9 +388,19 @@ function setupSpatialNavigation(container) {
   setSpatialNavigationConfig();
   spatialNavigationContainer = (container == null ? void 0 : container.ownerDocument) || window.document;
 
+  // Setup scroll event listeners for debugging
+  if (typeof window !== 'undefined') {
+    window.addEventListener('scroll', event => {
+      logScrollEvent('window-scroll', {
+        cause: 'window scroll event',
+        scrollY: window.scrollY,
+        scrollX: window.scrollX
+      });
+    }, true); // Use capture to catch early scrolls
+  }
+
   // Listen to keydown events on the container or document
   keyDownListener = addEventListener(spatialNavigationContainer, 'keydown', event => {
-    console.log('[SpatialNavigation] keydown event: ', event);
     var keyCode = event.key || event.code;
     if (keyCode !== 'ArrowUp' && keyCode !== 'ArrowDown' && keyCode !== 'ArrowLeft' && keyCode !== 'ArrowRight') {
       return;
@@ -319,7 +409,6 @@ function setupSpatialNavigation(container) {
       console.warn('No initial focus. Trying to set one...');
     }
     var nextFocus = getNextFocus(currentFocus.elem, keyCode, (container == null ? void 0 : container.ownerDocument) || window.document);
-    console.log('[SpatialNavigation] Next focus element: ', nextFocus);
     if (triggerFocus(nextFocus, keyCode) === true) {
       event.preventDefault();
     }
@@ -387,7 +476,6 @@ function setDestinations(host, destinations) {
         }
       }
     }
-    console.log('SpatialManager: setDestinations ', host.getAttribute('data-destinations'));
   }
 }
 function teardownSpatialNavigation() {
