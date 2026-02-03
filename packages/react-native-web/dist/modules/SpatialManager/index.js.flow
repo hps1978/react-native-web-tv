@@ -63,11 +63,6 @@ let spatialScrollConfig: SpatialScrollConfig = {
 };
 let lastScrollAt: number = 0;
 let scrollAnimationFrame: number | null = null;
-
-// Scroll event tracking for debugging
-let scrollEventLog = [];
-const MAX_SCROLL_EVENTS = 50;
-declare function logScrollEvent(source: any, details: any): any;
 declare function loadGlobalConfig(): SpatialNavigationConfig | null; // Setup configuration for Spatial Navigation
 // User provided through global configs or defaults
 declare function setSpatialNavigationConfig(): any;

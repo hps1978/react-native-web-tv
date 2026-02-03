@@ -48,8 +48,8 @@ function FlatListTVScrollExample() {
         edgeThresholdPx: 50,
         scrollThrottleMs: 80,
         smoothScrollEnabled: true,
-        scrollAnimationDurationMsVertical: 800,
-        scrollAnimationDurationMsHorizontal: 0
+        scrollAnimationDurationMsVertical: 200,
+        scrollAnimationDurationMsHorizontal: 200
       }
     };
     setupSpatialNavigation(document.body);

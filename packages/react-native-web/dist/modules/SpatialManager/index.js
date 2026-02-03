@@ -59,27 +59,6 @@ var keyDownListener = null;
 var spatialScrollConfig = _objectSpread({}, DEFAULT_SPATIAL_SCROLL_CONFIG);
 var lastScrollAt = 0;
 var scrollAnimationFrame = null;
-
-// Scroll event tracking for debugging
-var scrollEventLog = [];
-var MAX_SCROLL_EVENTS = 50;
-function logScrollEvent(source, details) {
-  var timestamp = getCurrentTime();
-  scrollEventLog.push(_objectSpread({
-    timestamp,
-    source,
-    windowScrollY: window.scrollY,
-    windowScrollX: window.scrollX
-  }, details));
-  if (scrollEventLog.length > MAX_SCROLL_EVENTS) {
-    scrollEventLog.shift();
-  }
-  console.log("[SpatialManager][scroll-event] " + source, _objectSpread({
-    timestamp: timestamp.toFixed(2),
-    windowScrollY: window.scrollY,
-    windowScrollX: window.scrollX
-  }, details));
-}
 function loadGlobalConfig() {
   // Check for window.appConfig.spatialNav (cross-platform pattern)
   if (typeof window !== 'undefined' && window.appConfig && window.appConfig) {
@@ -208,24 +187,6 @@ function maybeScrollOnFocus(elem, keyCode) {
         window.scroll ? window.scroll(scrollParam) : window.scrollTo(scrollParam);
       }
     };
-  } else {
-    // Setup scroll event listener on the scrollable container for debugging
-    var originalScrollListener = scrollable.__spatialScrollListener;
-    if (!originalScrollListener) {
-      var listener = event => {
-        logScrollEvent("container-scroll-" + direction, {
-          cause: 'container scroll event',
-          scrollTop: scrollable.scrollTop,
-          scrollLeft: scrollable.scrollLeft,
-          scrollHeight: scrollable.scrollHeight,
-          scrollWidth: scrollable.scrollWidth,
-          clientHeight: scrollable.clientHeight,
-          clientWidth: scrollable.clientWidth
-        });
-      };
-      scrollable.addEventListener('scroll', listener, true);
-      scrollable.__spatialScrollListener = listener;
-    }
   }
   if (!scrollable) return;
   var containerRect;
@@ -346,36 +307,13 @@ function triggerFocus(nextFocus, keyCode) {
     // set id first
     setupNodeId(nextFocus.elem);
     updateAncestorsAutoFocus(nextFocus.elem, spatialNavigationContainer);
-
-    // Log scroll positions before focus
-    logScrollEvent('BEFORE-focus-call', {
-      cause: 'before calling elem.focus()',
-      windowScrollY: window.scrollY,
-      windowScrollX: window.scrollX,
-      elem: nextFocus.elem.id || nextFocus.elem.className
-    });
     if (keyCode) {
       maybeScrollOnFocus(nextFocus.elem, keyCode);
     }
 
-    // Call focus and immediately log after
-    var isVerticalFocus = keyCode === 'ArrowUp' || keyCode === 'ArrowDown';
-    if (isVerticalFocus) {
-      try {
-        nextFocus.elem.focus({
-          preventScroll: true
-        });
-      } catch (error) {
-        nextFocus.elem.focus();
-      }
-    } else {
-      nextFocus.elem.focus();
-    }
-    logScrollEvent('AFTER-focus-call', {
-      cause: 'immediately after elem.focus()',
-      windowScrollY: window.scrollY,
-      windowScrollX: window.scrollX,
-      elem: nextFocus.elem.id || nextFocus.elem.className
+    // Focus the element without scrolling as we already handled scrolling
+    nextFocus.elem.focus({
+      preventScroll: true
     });
     return true;
   }
@@ -387,17 +325,6 @@ function setupSpatialNavigation(container) {
   }
   setSpatialNavigationConfig();
   spatialNavigationContainer = (container == null ? void 0 : container.ownerDocument) || window.document;
-
-  // Setup scroll event listeners for debugging
-  if (typeof window !== 'undefined') {
-    window.addEventListener('scroll', event => {
-      logScrollEvent('window-scroll', {
-        cause: 'window scroll event',
-        scrollY: window.scrollY,
-        scrollX: window.scrollX
-      });
-    }, true); // Use capture to catch early scrolls
-  }
 
   // Listen to keydown events on the container or document
   keyDownListener = addEventListener(spatialNavigationContainer, 'keydown', event => {
