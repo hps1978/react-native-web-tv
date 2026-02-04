@@ -67,8 +67,13 @@ declare function loadGlobalConfig(): SpatialNavigationConfig | null; // Setup co
 // User provided through global configs or defaults
 declare function setSpatialNavigationConfig(): any;
 declare function animateScrollTo(scrollable: any, isVertical: boolean, nextOffset: number, durationMs: number): any;
+declare function calculateScrollDirection(currentElem: HTMLElement, nextElem: HTMLElement): {
+  isVertical: boolean,
+  direction: string,
+  dominance: number,
+} | null;
 declare function findScrollableAncestor(elem: HTMLElement | null, direction: 'vertical' | 'horizontal'): HTMLElement | null;
-declare function maybeScrollOnFocus(elem: HTMLElement | null, keyCode: string): any;
+declare function maybeScrollOnFocus(elem: HTMLElement | null, keyCode: string, currentElem: HTMLElement | null): any;
 declare function triggerFocus(nextFocus: {
   elem: HTMLElement | null,
   parentHasAutofocus: boolean,

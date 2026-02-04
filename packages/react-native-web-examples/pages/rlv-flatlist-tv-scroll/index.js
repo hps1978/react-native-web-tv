@@ -32,7 +32,7 @@ const buildRowData = (rowIndex) =>
     imageUri: `https://picsum.photos/seed/tv-${rowIndex}-${i}/${ITEM_SIZE}/${ITEM_SIZE}`
   }));
 
-function FlatListTVScrollExample() {
+function RLVFlatListTVScrollExample() {
   const rows = useMemo(
     () =>
       Array.from({ length: ROW_COUNT }, (_, rowIndex) =>
@@ -48,8 +48,8 @@ function FlatListTVScrollExample() {
         edgeThresholdPx: 50,
         scrollThrottleMs: 80,
         smoothScrollEnabled: true,
-        scrollAnimationDurationMsVertical: 0,
-        scrollAnimationDurationMsHorizontal: 0
+        scrollAnimationDurationMsVertical: 200,
+        scrollAnimationDurationMsHorizontal: 200
       }
     };
     setupSpatialNavigation(document.body);
@@ -97,8 +97,14 @@ function FlatListTVScrollExample() {
               data={rowData}
               horizontal
               keyExtractor={keyExtractor}
+              layoutProvider={{
+                getLayoutTypeForIndex: () => 'item',
+                getDimensionForType: () => ({
+                  width: ITEM_SIZE + ITEM_SPACING * 2,
+                  height: ROW_HEIGHT
+                })
+              }}
               renderItem={renderItemForRow(rowIndex)}
-              showsHorizontalScrollIndicator
               style={styles.rowList}
             />
           </View>
@@ -134,15 +140,18 @@ const styles = StyleSheet.create({
   },
   verticalScroll: {
     flex: 1,
-    minHeight: 0
+    height: '100vh'
   },
   verticalContent: {
-    paddingBottom: 24
+    paddingBottom: 24,
+    height: '100vh'
   },
   rowSection: {
     paddingHorizontal: 24,
     paddingTop: 14,
-    paddingBottom: 18
+    paddingBottom: 18,
+    width: '100vw',
+    height: ROW_HEIGHT + ROW_TITLE_HEIGHT + 20
   },
   rowTitle: {
     height: ROW_TITLE_HEIGHT,
@@ -152,7 +161,8 @@ const styles = StyleSheet.create({
     marginBottom: 8
   },
   rowList: {
-    height: ROW_HEIGHT
+    height: ROW_HEIGHT,
+    width: '100vw'
   },
   rowContent: {
     paddingRight: ITEM_SPACING
@@ -179,4 +189,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default FlatListTVScrollExample;
+export default RLVFlatListTVScrollExample;

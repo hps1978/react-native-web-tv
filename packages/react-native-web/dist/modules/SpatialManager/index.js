@@ -122,6 +122,41 @@ function animateScrollTo(scrollable, isVertical, nextOffset, durationMs) {
   };
   scrollAnimationFrame = scheduleAnimationFrame(() => step(hasPerformance ? performance.now() : Date.now()));
 }
+function calculateScrollDirection(currentElem, nextElem) {
+  if (!currentElem || !nextElem || !hasGetBoundingClientRect) {
+    return null;
+  }
+  try {
+    var currentRect = currentElem.getBoundingClientRect();
+    var nextRect = nextElem.getBoundingClientRect();
+    var currentCenterY = currentRect.top + currentRect.height / 2;
+    var nextCenterY = nextRect.top + nextRect.height / 2;
+    var currentCenterX = currentRect.left + currentRect.width / 2;
+    var nextCenterX = nextRect.left + nextRect.width / 2;
+    var deltaY = nextCenterY - currentCenterY;
+    var deltaX = nextCenterX - currentCenterX;
+    var absDeltaY = Math.abs(deltaY);
+    var absDeltaX = Math.abs(deltaX);
+
+    // Determine primary direction based on larger delta
+    if (absDeltaY > absDeltaX) {
+      return {
+        isVertical: true,
+        direction: deltaY > 0 ? 'down' : 'up',
+        dominance: absDeltaX > 0 ? absDeltaY / absDeltaX : Infinity
+      };
+    } else if (absDeltaX > 0) {
+      return {
+        isVertical: false,
+        direction: deltaX > 0 ? 'right' : 'left',
+        dominance: absDeltaY > 0 ? absDeltaX / absDeltaY : Infinity
+      };
+    }
+  } catch (e) {
+    // Fallback if getBoundingClientRect fails
+  }
+  return null;
+}
 function findScrollableAncestor(elem, direction) {
   var current = elem ? elem.parentElement : null;
   while (current) {
@@ -148,7 +183,7 @@ function findScrollableAncestor(elem, direction) {
   }
   return null;
 }
-function maybeScrollOnFocus(elem, keyCode) {
+function maybeScrollOnFocus(elem, keyCode, currentElem) {
   if (!elem || typeof window === 'undefined') return;
   var now = Date.now();
   if (spatialScrollConfig.scrollThrottleMs != null) {
@@ -156,8 +191,26 @@ function maybeScrollOnFocus(elem, keyCode) {
       return;
     }
   }
-  var isVertical = keyCode === 'ArrowUp' || keyCode === 'ArrowDown';
-  var isHorizontal = keyCode === 'ArrowLeft' || keyCode === 'ArrowRight';
+
+  // Calculate actual direction from element positions if we have a current focus
+  // Otherwise fall back to keyCode direction
+  var isVertical = false;
+  var isHorizontal = false;
+  if (currentElem) {
+    var directionInfo = calculateScrollDirection(currentElem, elem);
+    if (directionInfo) {
+      isVertical = directionInfo.isVertical;
+      isHorizontal = !directionInfo.isVertical;
+    } else {
+      // Fallback to keyCode if geometry calculation fails
+      isVertical = keyCode === 'ArrowUp' || keyCode === 'ArrowDown';
+      isHorizontal = keyCode === 'ArrowLeft' || keyCode === 'ArrowRight';
+    }
+  } else {
+    // For first focus, determine direction from keyCode
+    isVertical = keyCode === 'ArrowUp' || keyCode === 'ArrowDown';
+    isHorizontal = keyCode === 'ArrowLeft' || keyCode === 'ArrowRight';
+  }
   if (!isVertical && !isHorizontal) return;
   var direction = isVertical ? 'vertical' : 'horizontal';
   var scrollable = findScrollableAncestor(elem, direction);
@@ -303,13 +356,14 @@ function maybeScrollOnFocus(elem, keyCode) {
 }
 function triggerFocus(nextFocus, keyCode) {
   if (nextFocus && nextFocus.elem) {
+    // Only handle scroll for subsequent navigations, not first focus
+    if (keyCode && currentFocus.elem) {
+      maybeScrollOnFocus(nextFocus.elem, keyCode, currentFocus.elem);
+    }
     currentFocus = nextFocus;
     // set id first
     setupNodeId(nextFocus.elem);
     updateAncestorsAutoFocus(nextFocus.elem, spatialNavigationContainer);
-    if (keyCode) {
-      maybeScrollOnFocus(nextFocus.elem, keyCode);
-    }
 
     // Focus the element without scrolling as we already handled scrolling
     nextFocus.elem.focus({
