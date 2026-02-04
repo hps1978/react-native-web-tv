@@ -17,6 +17,37 @@
 import { setConfig, getNextFocus, getParentContainer, updateAncestorsAutoFocus } from '@bbc/tv-lrud-spatial';
 import { addEventListener } from '../addEventListener';
 import { setupNodeId } from '../../exports/TV/utils';
+
+// API capability detection (one-time check at module load)
+const hasPerformance = typeof performance !== 'undefined' && typeof performance.now === 'function';
+const hasRequestAnimationFrame = typeof requestAnimationFrame === 'function';
+const hasGetComputedStyle = typeof window !== 'undefined' && typeof window.getComputedStyle === 'function';
+const hasGetBoundingClientRect = typeof Element !== 'undefined' && Element.prototype.getBoundingClientRect !== undefined;
+declare function getCurrentTime(): number;
+declare function scheduleAnimationFrame(callback: () => void): number;
+declare function cancelScheduledFrame(frameId: number): void;
+type SpatialScrollConfig = {
+  edgeThresholdPx?: number,
+  scrollThrottleMs?: number,
+  smoothScrollEnabled?: boolean,
+  scrollAnimationDurationMs?: number,
+  scrollAnimationDurationMsVertical?: number,
+  scrollAnimationDurationMsHorizontal?: number,
+};
+type SpatialNavigationConfig = {
+  keyMap?: {
+    [key: string]: string
+  },
+  scrollConfig?: SpatialScrollConfig,
+};
+const DEFAULT_SPATIAL_SCROLL_CONFIG: SpatialScrollConfig = {
+  edgeThresholdPx: 128,
+  scrollThrottleMs: 80,
+  smoothScrollEnabled: true,
+  scrollAnimationDurationMs: 0,
+  scrollAnimationDurationMsVertical: 0,
+  scrollAnimationDurationMsHorizontal: 0
+};
 let isSpatialManagerReady = false;
 let spatialNavigationContainer: HTMLElement | null = null;
 let currentFocus: {
@@ -27,10 +58,26 @@ let currentFocus: {
   parentHasAutofocus: false
 };
 let keyDownListener: ((event: any) => void) | null = null;
+let spatialScrollConfig: SpatialScrollConfig = {
+  ...DEFAULT_SPATIAL_SCROLL_CONFIG
+};
+let lastScrollAt: number = 0;
+let scrollAnimationFrame: number | null = null;
+declare function loadGlobalConfig(): SpatialNavigationConfig | null; // Setup configuration for Spatial Navigation
+// User provided through global configs or defaults
+declare function setSpatialNavigationConfig(): any;
+declare function animateScrollTo(scrollable: any, isVertical: boolean, nextOffset: number, durationMs: number): any;
+declare function calculateScrollDirection(currentElem: HTMLElement, nextElem: HTMLElement): {
+  isVertical: boolean,
+  direction: string,
+  dominance: number,
+} | null;
+declare function findScrollableAncestor(elem: HTMLElement | null, direction: 'vertical' | 'horizontal'): HTMLElement | null;
+declare function maybeScrollOnFocus(elem: HTMLElement | null, keyCode: string, currentElem: HTMLElement | null): any;
 declare function triggerFocus(nextFocus: {
   elem: HTMLElement | null,
   parentHasAutofocus: boolean,
-}): boolean;
+}, keyCode?: string): boolean;
 declare function setupSpatialNavigation(container?: HTMLElement): any;
 declare function setFocus(node: HTMLElement): any;
 declare function setDestinations(host: HTMLElement, destinations: HTMLElement[]): any;
