@@ -41,7 +41,7 @@ export default class NativeEventEmitter<TEventToArgsMap: {...}>
   _nativeModule: ?NativeModule;
 
   constructor(nativeModule: ?NativeModule) {
-    if (Platform.OS === 'ios') {
+    if (Platform.OS === 'ios' || Platform.OS === 'web') {
       invariant(
         nativeModule != null,
         '`new NativeEventEmitter()` requires a non-null argument.',

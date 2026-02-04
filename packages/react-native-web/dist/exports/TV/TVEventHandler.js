@@ -10,12 +10,7 @@
 
 'use strict';
 
-// import NativeTVNavigationEventEmitter from '../../../src/private/specs_DEPRECATED/modules/NativeTVNavigationEventEmitter';
-
-// TODO: Implement NativeTVNavigationEventEmitter for web TV
-var NativeTVNavigationEventEmitter = null;
-////////////////
-
+import NativeTVNavigationEventEmitter from './NativeTVNavigationEventEmitter';
 import NativeEventEmitter from '../NativeEventEmitter';
 import Platform from '../Platform';
 var __nativeTVNavigationEventEmitter = null;

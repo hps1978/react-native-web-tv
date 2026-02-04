@@ -1,38 +1,7 @@
-/**
- * @flow
- */
-
 import RCTDeviceEventEmitter from '../../vendor/react-native/EventEmitter/RCTDeviceEventEmitter';
-
-type HWEvent = {
-  eventType:
-    | 'up'
-    | 'down'
-    | 'right'
-    | 'left'
-    | 'longUp'
-    | 'longDown'
-    | 'longRight'
-    | 'longLeft'
-    | 'blur'
-    | 'focus'
-    | 'pan'
-    | string,
-  eventKeyAction?: -1 | 1 | 0 | number,
-  tag?: number,
-  body?: {
-    state: 'Began' | 'Changed' | 'Ended',
-    x: number,
-    y: number,
-    velocityX: number,
-    velocityY: number
-  }
-};
-
-const EVENT_NAME = 'onHWKeyEvent';
-
-const mapToHWEvent = (event: KeyboardEvent): HWEvent => {
-  let eventType: HWEvent['eventType'];
+var EVENT_NAME = 'onHWKeyEvent';
+var mapToHWEvent = event => {
+  var eventType;
   switch (event.key) {
     case 'ArrowUp':
       eventType = 'up';
@@ -56,14 +25,14 @@ const mapToHWEvent = (event: KeyboardEvent): HWEvent => {
     default:
       eventType = event.key;
   }
-  return { eventType };
+  return {
+    eventType
+  };
 };
-
-const NativeTVNavigationEventEmitter = {
+var NativeTVNavigationEventEmitter = {
   _listenerCount: 0,
-  _keydownHandler: (null: null | ((e: KeyboardEvent) => void)),
-
-  addListener(eventType: string) {
+  _keydownHandler: null,
+  addListener(eventType) {
     if (eventType !== EVENT_NAME) {
       return;
     }
@@ -72,8 +41,7 @@ const NativeTVNavigationEventEmitter = {
     }
     this._listenerCount += 1;
   },
-
-  removeListeners(count: number) {
+  removeListeners(count) {
     if (this._listenerCount === 0) {
       return;
     }
@@ -82,22 +50,19 @@ const NativeTVNavigationEventEmitter = {
       this._detachKeyboardListener();
     }
   },
-
   _attachKeyboardListener() {
     if (typeof window === 'undefined') {
       return;
     }
-
     if (this._keydownHandler) {
       return;
     }
-    this._keydownHandler = (e: KeyboardEvent) => {
-      const hwEvent = mapToHWEvent(e);
+    this._keydownHandler = e => {
+      var hwEvent = mapToHWEvent(e);
       RCTDeviceEventEmitter.emit(EVENT_NAME, hwEvent);
     };
     window.addEventListener('keydown', this._keydownHandler);
   },
-
   _detachKeyboardListener() {
     if (!this._keydownHandler) {
       return;
@@ -106,5 +71,4 @@ const NativeTVNavigationEventEmitter = {
     this._keydownHandler = null;
   }
 };
-
 export default NativeTVNavigationEventEmitter;
