@@ -10,12 +10,7 @@
 
 'use strict';
 
-// import NativeTVNavigationEventEmitter from '../../../src/private/specs_DEPRECATED/modules/NativeTVNavigationEventEmitter';
-
-// TODO: Implement NativeTVNavigationEventEmitter for web TV
-const NativeTVNavigationEventEmitter = null;
-////////////////
-
+import NativeTVNavigationEventEmitter from './NativeTVNavigationEventEmitter';
 import NativeEventEmitter from '../NativeEventEmitter';
 import Platform from '../Platform';
 import type { EventSubscription } from '../../vendor/react-native/vendor/emitter/EventEmitter';
