@@ -26,7 +26,10 @@ import invariant from 'fbjs/lib/invariant';
 export default class NativeEventEmitter {
   constructor(nativeModule) {
     if (Platform.OS === 'ios' || Platform.OS === 'web') {
-      invariant(nativeModule != null, '`new NativeEventEmitter()` requires a non-null argument.');
+      // Avoiding this check for web as there are 3rd party modules for web which are failing for this
+      if (Platform.OS === 'ios') {
+        invariant(nativeModule != null, '`new NativeEventEmitter()` requires a non-null argument.');
+      }
       this._nativeModule = nativeModule;
     }
   }
