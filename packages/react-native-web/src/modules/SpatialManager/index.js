@@ -17,7 +17,7 @@
 import {
   setConfig,
   getNextFocus,
-  getParentContainer,
+  getFocusableParentContainer,
   updateAncestorsAutoFocus
 } from '@bbc/tv-lrud-spatial';
 import { addEventListener } from '../addEventListener';
@@ -98,25 +98,35 @@ function loadGlobalConfig(): SpatialNavigationConfig | null {
   return null;
 }
 
+// This callback wil get triggered when LRUD fails to find a valid destination from the provided data-destinations
+// atrtribute. LRUD will use it's fallback. autofocus or default focus logic. This contianer will no longer be
+// focusable if there is no autofocus either.
+function noValidDestinationCallback(candidateContainer, hasAutoFocus) {
+  if (candidateContainer && !hasAutoFocus) {
+    candidateContainer.tabIndex = -1;
+  }
+}
+
 // Setup configuration for Spatial Navigation
 // User provided through global configs or defaults
 function setSpatialNavigationConfig() {
   // Auto-initialize from global config on first arrow key press if not already initialized
   if (!isSpatialManagerReady) {
+    let keyMap = null;
     const globalConfig: SpatialNavigationConfig | null = loadGlobalConfig();
     if (globalConfig) {
       // Setup LRUD Keys if provided
-      if (globalConfig?.keyMap) {
-        setConfig({
-          keyMap: globalConfig.keyMap
-        });
-      }
+      keyMap = globalConfig?.keyMap;
 
       spatialScrollConfig = {
         ...DEFAULT_SPATIAL_SCROLL_CONFIG,
         ...(globalConfig?.scrollConfig || {})
       };
     }
+    setConfig({
+      keyMap: keyMap,
+      noValidDestinationCallback
+    });
   }
 }
 
@@ -564,13 +574,15 @@ function setFocus(node: HTMLElement) {
   } else {
     if (node && node.focus) {
       const parentHasAutofocus =
-        getParentContainer(node)?.getAttribute('data-autofocus') === 'true' ||
-        false;
+        getFocusableParentContainer(node)?.getAttribute('data-autofocus') ===
+          'true' || false;
       triggerFocus({ elem: node, parentHasAutofocus });
     }
   }
 }
 
+// WARNING: This is a very specific API to set destinations for TVFocusGuideView and is not meant for general use.
+// It may have unexpected results if used outside of the context of TVFocusGuideView.
 function setDestinations(host: HTMLElement, destinations: HTMLElement[]) {
   // Get ids from destinations, and if id not set, generate a new one and set all of them into 'data-destinations' attribute in the host element
   if (destinations && Array.isArray(destinations)) {
@@ -588,26 +600,18 @@ function setDestinations(host: HTMLElement, destinations: HTMLElement[]) {
       .filter((id) => id != null);
     if (destinationIDs.length > 0) {
       host.setAttribute('data-destinations', destinationIDs.join(' '));
-      // Side effect: If this container has not been set with lrud-container class, do it now
-      // to allow collapsable/expandable containers to work properly for LRUD navigation
-      if (!host.className?.includes('lrud-container')) {
-        if (host.className?.length > 0) {
-          host.className += ' lrud-container';
-        } else {
-          host.className = 'lrud-container';
-        }
+      // Side effect: If this container has not been set with tabindex 0, do it now
+      // to make it a focusable container to work properly for LRUD navigation
+      if (!host.tabIndex || host.tabIndex === -1) {
+        host.tabIndex = 0;
       }
     } else {
       host.setAttribute('data-destinations', '');
-      // Side effect: If there are no destinations and auto-focus is false, we can remove the lrud-container class
-      const isContainer = host.className?.includes('lrud-container');
+      // Side effect: If there are no destinations and auto-focus is false, we can make this
+      // container non-focusable by setting tabindex to -1
       const isAutoFocus = host.getAttribute('data-autofocus') === 'true';
-      if (isContainer && !isAutoFocus) {
-        if (host.className?.length > 14) {
-          host.className = host.className.replace(' lrud-container', '');
-        } else {
-          host.className = host.className.replace('lrud-container', '');
-        }
+      if (!isAutoFocus) {
+        host.tabIndex = -1;
       }
     }
   }

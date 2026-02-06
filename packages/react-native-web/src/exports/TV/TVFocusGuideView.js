@@ -77,13 +77,8 @@ const TVFocusGuideView: React.AbstractComponent<
   const setDestinations = React.useCallback(
     (destinations: ?(HTMLElement[])) => {
       if (Platform.isTV) {
-        // const dests: number[] = (destinations || [])
-        //   .map((destination: any) => tagForComponentOrHandle(destination))
-        //   .filter(Boolean);
-
         if (focusGuideRef.current != null) {
           setNavDestinations(focusGuideRef.current, destinations);
-          // Commands.setDestinations(focusGuideRef.current, dests);
         } else {
           console.warn(
             '[TVFocusGuideView]: Cannot set destinations as focusGuideView ref unavailable for: ',

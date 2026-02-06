@@ -829,21 +829,33 @@ var createDOMProps = (elementType, props, options) => {
     // setup attributes and classes for tv focusable elements
     // based on @bbc/@bbc/tv-lrud-spatial library requirements
 
-    // Update tabIndex so that the container itself is not focusable
-    // This does not stop it's children to be focusable based on their focusable prop
-    domProps.tabIndex = '-1';
-
-    // Consider this container as a TV Focusable container for LRUD navigation only if:
-    // 1. tvFocusable is true OR 2. destinations are defined OR 3. autoFocus is defined
-    if (tvFocusable === true || autoFocus === true || (destinations == null ? void 0 : destinations.length) > 0) {
-      if (domProps.className) {
-        domProps.className += ' lrud-container';
-      } else {
-        domProps.className = 'lrud-container';
-      }
+    // 1. Mark it as a container for LRUD navigation by adding "lrud-container" class
+    if (domProps.className) {
+      domProps.className += ' lrud-container';
+    } else {
+      domProps.className = 'lrud-container';
     }
 
-    // 2. setup data-block-exit attributes for trapFocus* props
+    // 2. Consider this container as a TV Focusable container for LRUD navigation only if:
+    // destinations are defined OR 3. autoFocus is defined
+    if (autoFocus === true || (destinations == null ? void 0 : destinations.length) > 0) {
+      // focusable container should be in the tab order
+      domProps.tabIndex = '0';
+
+      // setup autoFocus: default is true
+      domProps['data-autofocus'] = autoFocus === false ? 'false' : 'true';
+      // setup destinations: get ids of destination elements
+      if (destinations && destinations.length > 0) {
+        var destinationString = destinations.map(dest => dest && dest.id ? dest.id : setupNodeId(dest)).filter(id => id != null).join(' ');
+        domProps['data-destinations'] = destinationString;
+      }
+    } else {
+      // non focusable container should be out of the tab order,
+      // but it's chrildren could still be focusable based on their own props
+      domProps.tabIndex = '-1';
+    }
+
+    // 3. setup data-block-exit attributes for trapFocus* props
     var trapFocusString = "" + (trapFocusUp ? 'up' : '') + (trapFocusDown ? ' down' : '') + (trapFocusLeft ? ' left' : '') + (trapFocusRight ? ' right' : '');
     if (trapFocusString.trim().length > 0) {
       domProps['data-lrud-prioritise-children'] = 'true';
@@ -852,16 +864,7 @@ var createDOMProps = (elementType, props, options) => {
       domProps['data-lrud-prioritise-children'] = 'false';
     }
 
-    // 3. setup autoFocus: default is true
-    domProps['data-autofocus'] = autoFocus === false ? 'false' : 'true';
-
-    // 4. setup destinations: get ids of destination elements
-    if (destinations && destinations.length > 0) {
-      var destinationString = destinations.map(dest => dest && dest.id ? dest.id : setupNodeId(dest)).filter(id => id != null).join(' ');
-      domProps['data-destinations'] = destinationString;
-    }
-
-    // 5. setup lrud-ignore class if tvFocusable is false
+    // 4. setup lrud-ignore class if tvFocusable is false
     if (tvFocusable === false) {
       // this also means focusable is false
       domProps.className += ' lrud-ignore';

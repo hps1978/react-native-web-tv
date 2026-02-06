@@ -24,6 +24,7 @@ import type {
 
 import RefreshControl from '../../../exports/RefreshControl';
 import ScrollView from '../../../exports/ScrollView';
+import TVFocusGuideView from '../../../exports/TV/TVFocusGuideView';
 import View, { type ViewProps } from '../../../exports/View';
 import StyleSheet from '../../../exports/StyleSheet';
 
@@ -49,6 +50,8 @@ import invariant from 'fbjs/lib/invariant';
 import nullthrows from 'nullthrows';
 import * as React from 'react';
 import VirtualizedListRLVAdapter from './VirtualizedListRLVAdapter';
+import I18nManager from '../../../exports/I18nManager';
+import Platform from '../../../exports/Platform';
 
 export type {RenderItemProps, RenderItemType, Separators};
 
@@ -421,7 +424,7 @@ class VirtualizedList extends StateSafePureComponent<Props, State> {
   constructor(props: Props) {
     super(props);
     this._checkProps(props);
-
+    console.log('VirtualizedList called');
     this._fillRateHelper = new FillRateHelper(this._getFrameMetrics);
     this._updateCellsToRenderBatcher = new Batchinator(
       this._updateCellsToRender,
@@ -1104,6 +1107,22 @@ class VirtualizedList extends StateSafePureComponent<Props, State> {
 
     this._hasMore = this.state.cellsAroundViewport.last < itemCount - 1;
 
+    const trapFocusHorizontal = I18nManager.isRTL
+      ? {
+          trapFocusRight:
+            horizontalOrDefault(this.props.horizontal) &&
+            this.state.cellsAroundViewport.first > 0,
+          trapFocusLeft:
+            horizontalOrDefault(this.props.horizontal) && this._hasMore,
+        }
+      : {
+          trapFocusLeft:
+            horizontalOrDefault(this.props.horizontal) &&
+            this.state.cellsAroundViewport.first > 0,
+          trapFocusRight:
+            horizontalOrDefault(this.props.horizontal) && this._hasMore,
+        };
+
     const innerRet = (
       <VirtualizedListContextProvider
         value={{
@@ -1114,6 +1133,16 @@ class VirtualizedList extends StateSafePureComponent<Props, State> {
           registerAsNestedChild: this._registerAsNestedChild,
           unregisterAsNestedChild: this._unregisterAsNestedChild,
         }}>
+        {Platform.isTV ? (
+          <TVFocusGuideView
+            {...trapFocusHorizontal}
+            trapFocusUp={
+              !horizontalOrDefault(this.props.horizontal) &&
+              this.state.cellsAroundViewport.first > 0
+            }
+            trapFocusDown={
+              !horizontalOrDefault(this.props.horizontal) && this._hasMore
+            }>
         {React.cloneElement(
           (
             this.props.renderScrollComponent ||
@@ -1123,6 +1152,19 @@ class VirtualizedList extends StateSafePureComponent<Props, State> {
             ref: this._captureScrollRef,
           },
           cells,
+            )}
+          </TVFocusGuideView>
+        ) : (
+        React.cloneElement(
+          (
+            this.props.renderScrollComponent ||
+            this._defaultRenderScrollComponent
+          )(scrollProps),
+          {
+            ref: this._captureScrollRef,
+          },
+          cells,
+            )
         )}
       </VirtualizedListContextProvider>
     );

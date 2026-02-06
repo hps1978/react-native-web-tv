@@ -27,13 +27,8 @@ var TVFocusGuideView = /*#__PURE__*/React.forwardRef((props, ref) => {
   var focusGuideRef = React.useRef(null);
   var setDestinations = React.useCallback(destinations => {
     if (Platform.isTV) {
-      // const dests: number[] = (destinations || [])
-      //   .map((destination: any) => tagForComponentOrHandle(destination))
-      //   .filter(Boolean);
-
       if (focusGuideRef.current != null) {
         setNavDestinations(focusGuideRef.current, destinations);
-        // Commands.setDestinations(focusGuideRef.current, dests);
       } else {
         console.warn('[TVFocusGuideView]: Cannot set destinations as focusGuideView ref unavailable for: ', destinations);
       }

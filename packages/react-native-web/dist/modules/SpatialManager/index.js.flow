@@ -14,7 +14,7 @@
 // focus and navigation.
 
 // Currently, it only supports arrow ISO keyboard navigation.
-import { setConfig, getNextFocus, getParentContainer, updateAncestorsAutoFocus } from '@bbc/tv-lrud-spatial';
+import { setConfig, getNextFocus, getFocusableParentContainer, updateAncestorsAutoFocus } from '@bbc/tv-lrud-spatial';
 import { addEventListener } from '../addEventListener';
 import { setupNodeId } from '../../exports/TV/utils';
 
@@ -63,7 +63,10 @@ let spatialScrollConfig: SpatialScrollConfig = {
 };
 let lastScrollAt: number = 0;
 let scrollAnimationFrame: number | null = null;
-declare function loadGlobalConfig(): SpatialNavigationConfig | null; // Setup configuration for Spatial Navigation
+declare function loadGlobalConfig(): SpatialNavigationConfig | null; // This callback wil get triggered when LRUD fails to find a valid destination from the provided data-destinations
+// atrtribute. LRUD will use it's fallback. autofocus or default focus logic. This contianer will no longer be
+// focusable if there is no autofocus either.
+declare function noValidDestinationCallback(candidateContainer: any, hasAutoFocus: any): any; // Setup configuration for Spatial Navigation
 // User provided through global configs or defaults
 declare function setSpatialNavigationConfig(): any;
 declare function animateScrollTo(scrollable: any, isVertical: boolean, nextOffset: number, durationMs: number): any;
@@ -79,7 +82,8 @@ declare function triggerFocus(nextFocus: {
   parentHasAutofocus: boolean,
 }, keyCode?: string): boolean;
 declare function setupSpatialNavigation(container?: HTMLElement): any;
-declare function setFocus(node: HTMLElement): any;
+declare function setFocus(node: HTMLElement): any; // WARNING: This is a very specific API to set destinations for TVFocusGuideView and is not meant for general use.
+// It may have unexpected results if used outside of the context of TVFocusGuideView.
 declare function setDestinations(host: HTMLElement, destinations: HTMLElement[]): any;
 declare function teardownSpatialNavigation(): any;
 export { setupSpatialNavigation, setFocus, teardownSpatialNavigation, setDestinations };

@@ -13,6 +13,7 @@ import _objectSpread from "@babel/runtime/helpers/objectSpread2";
 
 import RefreshControl from '../../../exports/RefreshControl';
 import ScrollView from '../../../exports/ScrollView';
+import TVFocusGuideView from '../../../exports/TV/TVFocusGuideView';
 import View from '../../../exports/View';
 import StyleSheet from '../../../exports/StyleSheet';
 import Batchinator from '../Batchinator';
@@ -30,6 +31,8 @@ import invariant from 'fbjs/lib/invariant';
 import nullthrows from 'nullthrows';
 import * as React from 'react';
 import VirtualizedListRLVAdapter from './VirtualizedListRLVAdapter';
+import I18nManager from '../../../exports/I18nManager';
+import Platform from '../../../exports/Platform';
 var __DEV__ = process.env.NODE_ENV !== 'production';
 var ON_EDGE_REACHED_EPSILON = 0.001;
 var _usedIndexForKey = false;
@@ -687,6 +690,7 @@ class VirtualizedList extends StateSafePureComponent {
       }];
     };
     this._checkProps(_props);
+    console.log('VirtualizedList called');
     this._fillRateHelper = new FillRateHelper(this._getFrameMetrics);
     this._updateCellsToRenderBatcher = new Batchinator(this._updateCellsToRender, (_this$props$updateCel = this.props.updateCellsBatchingPeriod) !== null && _this$props$updateCel !== void 0 ? _this$props$updateCel : 50);
     if (this.props.viewabilityConfigCallbackPairs) {
@@ -1148,6 +1152,13 @@ class VirtualizedList extends StateSafePureComponent {
       style: inversionStyle ? [inversionStyle, this.props.style] : this.props.style
     });
     this._hasMore = this.state.cellsAroundViewport.last < itemCount - 1;
+    var trapFocusHorizontal = I18nManager.isRTL ? {
+      trapFocusRight: horizontalOrDefault(this.props.horizontal) && this.state.cellsAroundViewport.first > 0,
+      trapFocusLeft: horizontalOrDefault(this.props.horizontal) && this._hasMore
+    } : {
+      trapFocusLeft: horizontalOrDefault(this.props.horizontal) && this.state.cellsAroundViewport.first > 0,
+      trapFocusRight: horizontalOrDefault(this.props.horizontal) && this._hasMore
+    };
     var innerRet = /*#__PURE__*/React.createElement(VirtualizedListContextProvider, {
       value: {
         cellKey: null,
@@ -1157,9 +1168,14 @@ class VirtualizedList extends StateSafePureComponent {
         registerAsNestedChild: this._registerAsNestedChild,
         unregisterAsNestedChild: this._unregisterAsNestedChild
       }
-    }, /*#__PURE__*/React.cloneElement((this.props.renderScrollComponent || this._defaultRenderScrollComponent)(scrollProps), {
+    }, Platform.isTV ? /*#__PURE__*/React.createElement(TVFocusGuideView, _extends({}, trapFocusHorizontal, {
+      trapFocusUp: !horizontalOrDefault(this.props.horizontal) && this.state.cellsAroundViewport.first > 0,
+      trapFocusDown: !horizontalOrDefault(this.props.horizontal) && this._hasMore
+    }), /*#__PURE__*/React.cloneElement((this.props.renderScrollComponent || this._defaultRenderScrollComponent)(scrollProps), {
       ref: this._captureScrollRef
-    }, cells));
+    }, cells)) : (/*#__PURE__*/React.cloneElement((this.props.renderScrollComponent || this._defaultRenderScrollComponent)(scrollProps), {
+      ref: this._captureScrollRef
+    }, cells)));
     var ret = innerRet;
     /* https://github.com/necolas/react-native-web/issues/2239: Re-enable when ScrollView.Context.Consumer is available.
     if (__DEV__) {
