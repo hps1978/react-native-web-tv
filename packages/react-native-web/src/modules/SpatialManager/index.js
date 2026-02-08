@@ -19,7 +19,8 @@ import {
   getNextFocus,
   getFocusableParentContainer,
   getParentContainer,
-  updateAncestorsAutoFocus
+  updateAncestorsAutoFocus,
+  findDestinationOrAutofocus
 } from '@bbc/tv-lrud-spatial';
 import {
   startObserving,
@@ -622,15 +623,18 @@ function setupSpatialNavigation(container?: HTMLElement) {
 
 function setFocus(node: HTMLElement) {
   if (node && node.className.includes('lrud-container')) {
-    // It's a container trigger spatial logic to find an focus
-    // TODO: Add another function which triggers the spatial logic based on the container
-    // and without the need to pass the keyCode
-    const nextFocus = getNextFocus(
-      null, // use this as starting point
+    // We are here if requestTVFocus is called with container as node
+    const nextFocus = findDestinationOrAutofocus(
+      currentFocus.elem,
       'ArrowDown',
-      node // this is the scope as well for now!
+      node,
+      true
     );
-    triggerFocus(nextFocus);
+    if (nextFocus.elem) {
+      triggerFocus(nextFocus);
+    } else {
+      console.warn('No focusable destination for requestTVFocus: ', node);
+    }
   } else {
     if (node && node.focus) {
       const parentHasAutofocus =

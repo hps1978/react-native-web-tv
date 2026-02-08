@@ -15,7 +15,7 @@ import _objectSpread from "@babel/runtime/helpers/objectSpread2";
 // focus and navigation.
 
 // Currently, it only supports arrow ISO keyboard navigation.
-import { setConfig, getNextFocus, getFocusableParentContainer, getParentContainer, updateAncestorsAutoFocus } from '@bbc/tv-lrud-spatial';
+import { setConfig, getNextFocus, getFocusableParentContainer, getParentContainer, updateAncestorsAutoFocus, findDestinationOrAutofocus } from '@bbc/tv-lrud-spatial';
 import { startObserving, stopObserving } from './mutationObserver';
 import { addEventListener } from '../addEventListener';
 import { setupNodeId } from '../../exports/TV/utils';
@@ -456,14 +456,13 @@ function setupSpatialNavigation(container) {
 }
 function setFocus(node) {
   if (node && node.className.includes('lrud-container')) {
-    // It's a container trigger spatial logic to find an focus
-    // TODO: Add another function which triggers the spatial logic based on the container
-    // and without the need to pass the keyCode
-    var nextFocus = getNextFocus(null,
-    // use this as starting point
-    'ArrowDown', node // this is the scope as well for now!
-    );
-    triggerFocus(nextFocus);
+    // We are here if requestTVFocus is called with container as node
+    var nextFocus = findDestinationOrAutofocus(currentFocus.elem, 'ArrowDown', node, true);
+    if (nextFocus.elem) {
+      triggerFocus(nextFocus);
+    } else {
+      console.warn('No focusable destination for requestTVFocus: ', node);
+    }
   } else {
     if (node && node.focus) {
       var _getFocusableParentCo;
