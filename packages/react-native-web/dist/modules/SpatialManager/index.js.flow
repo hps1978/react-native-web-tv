@@ -14,7 +14,8 @@
 // focus and navigation.
 
 // Currently, it only supports arrow ISO keyboard navigation.
-import { setConfig, getNextFocus, getFocusableParentContainer, updateAncestorsAutoFocus } from '@bbc/tv-lrud-spatial';
+import { setConfig, getNextFocus, getFocusableParentContainer, getParentContainer, updateAncestorsAutoFocus } from '@bbc/tv-lrud-spatial';
+import { startObserving, stopObserving, type MutationDetails } from './mutationObserver';
 import { addEventListener } from '../addEventListener';
 import { setupNodeId } from '../../exports/TV/utils';
 
@@ -77,6 +78,7 @@ declare function calculateScrollDirection(currentElem: HTMLElement, nextElem: HT
 } | null;
 declare function findScrollableAncestor(elem: HTMLElement | null, direction: 'vertical' | 'horizontal'): HTMLElement | null;
 declare function maybeScrollOnFocus(elem: HTMLElement | null, keyCode: string, currentElem: HTMLElement | null): any;
+declare function handleCurrentFocusMutations(details: MutationDetails): void;
 declare function triggerFocus(nextFocus: {
   elem: HTMLElement | null,
   parentHasAutofocus: boolean,

@@ -690,7 +690,6 @@ class VirtualizedList extends StateSafePureComponent {
       }];
     };
     this._checkProps(_props);
-    console.log('VirtualizedList called');
     this._fillRateHelper = new FillRateHelper(this._getFrameMetrics);
     this._updateCellsToRenderBatcher = new Batchinator(this._updateCellsToRender, (_this$props$updateCel = this.props.updateCellsBatchingPeriod) !== null && _this$props$updateCel !== void 0 ? _this$props$updateCel : 50);
     if (this.props.viewabilityConfigCallbackPairs) {

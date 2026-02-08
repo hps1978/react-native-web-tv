@@ -18,6 +18,7 @@ type ButtonProps = {|
   accessibilityLabel?: ?string,
   color?: ?string,
   disabled?: boolean,
+  hasTVPreferredFocus?: ?boolean,
   onPress?: ?(e: any) => void,
   testID?: ?string,
   title: string
@@ -29,7 +30,15 @@ const Button: React.AbstractComponent<
 > = React.forwardRef((props, forwardedRef) => {
   // warnOnce('Button', 'Button is deprecated. Please use Pressable.');
 
-  const { accessibilityLabel, color, disabled, onPress, testID, title } = props;
+  const {
+    accessibilityLabel,
+    color,
+    disabled,
+    hasTVPreferredFocus,
+    onPress,
+    testID,
+    title
+  } = props;
 
   return (
     <TouchableOpacity
@@ -37,6 +46,7 @@ const Button: React.AbstractComponent<
       accessibilityRole="button"
       disabled={disabled}
       focusable={!disabled}
+      hasTVPreferredFocus={hasTVPreferredFocus}
       onPress={onPress}
       ref={forwardedRef}
       style={[

@@ -15,7 +15,8 @@ import _objectSpread from "@babel/runtime/helpers/objectSpread2";
 // focus and navigation.
 
 // Currently, it only supports arrow ISO keyboard navigation.
-import { setConfig, getNextFocus, getFocusableParentContainer, updateAncestorsAutoFocus } from '@bbc/tv-lrud-spatial';
+import { setConfig, getNextFocus, getFocusableParentContainer, getParentContainer, updateAncestorsAutoFocus } from '@bbc/tv-lrud-spatial';
+import { startObserving, stopObserving } from './mutationObserver';
 import { addEventListener } from '../addEventListener';
 import { setupNodeId } from '../../exports/TV/utils';
 
@@ -364,21 +365,46 @@ function maybeScrollOnFocus(elem, keyCode, currentElem) {
     }
   });
 }
+function handleCurrentFocusMutations(details) {
+  var targetNode = details.targetNode;
+  // Current focused element (or it's ancestor) is removed from the DOM, we need to find a new focus
+  currentFocus = {
+    elem: null,
+    parentHasAutofocus: false
+  };
+  var nextFocus = getNextFocus(null,
+  // No current focus since it's removed
+  'ArrowDown',
+  // No directional input, just find the next best focus
+  targetNode);
+  triggerFocus(nextFocus);
+}
 function triggerFocus(nextFocus, keyCode) {
   if (nextFocus && nextFocus.elem) {
+    var preventScroll = false;
+    // Stop observing mutations on current focus
+    stopObserving();
+
     // Only handle scroll for subsequent navigations, not first focus
     if (keyCode && currentFocus.elem) {
       maybeScrollOnFocus(nextFocus.elem, keyCode, currentFocus.elem);
+      preventScroll = true;
     }
     currentFocus = nextFocus;
     // set id first
     setupNodeId(nextFocus.elem);
     updateAncestorsAutoFocus(nextFocus.elem, spatialNavigationContainer);
 
-    // Focus the element without scrolling as we already handled scrolling
+    // Focus the element with/without scrolling
     nextFocus.elem.focus({
-      preventScroll: true
+      preventScroll
     });
+
+    // Start observing mutations
+    var parentContainer = getParentContainer(nextFocus.elem);
+    if (parentContainer) {
+      startObserving(parentContainer, nextFocus.elem, handleCurrentFocusMutations);
+    }
     return true;
   }
   return false;

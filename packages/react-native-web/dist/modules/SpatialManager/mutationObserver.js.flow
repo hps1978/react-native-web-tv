@@ -1,0 +1,24 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ * @flow
+ * @format
+ */
+
+// MutationObserver wrapper for detecting changes to DOM child elements.
+// Used by SpatialManager to detect when focused elements or their parents are mutated.
+
+export type MutationDetails = {
+  removedNode: HTMLElement,
+  targetNode: HTMLElement,
+  childNode: HTMLElement,
+};
+const hasMutationObserver = typeof MutationObserver !== 'undefined';
+let mutationObserverInstance: MutationObserver | null = null;
+let currentSessionId = 0;
+declare function startObserving(targetNode: HTMLElement, childNode: HTMLElement, callback: (details: MutationDetails) => void): void;
+declare function stopObserving(): void;
+export { startObserving, stopObserving };

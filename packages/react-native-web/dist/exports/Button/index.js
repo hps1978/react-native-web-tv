@@ -20,6 +20,7 @@ var Button = /*#__PURE__*/React.forwardRef((props, forwardedRef) => {
   var accessibilityLabel = props.accessibilityLabel,
     color = props.color,
     disabled = props.disabled,
+    hasTVPreferredFocus = props.hasTVPreferredFocus,
     onPress = props.onPress,
     testID = props.testID,
     title = props.title;
@@ -28,6 +29,7 @@ var Button = /*#__PURE__*/React.forwardRef((props, forwardedRef) => {
     accessibilityRole: "button",
     disabled: disabled,
     focusable: !disabled,
+    hasTVPreferredFocus: hasTVPreferredFocus,
     onPress: onPress,
     ref: forwardedRef,
     style: [styles.button, color && {

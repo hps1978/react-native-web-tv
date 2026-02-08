@@ -18,8 +18,14 @@ import {
   setConfig,
   getNextFocus,
   getFocusableParentContainer,
+  getParentContainer,
   updateAncestorsAutoFocus
 } from '@bbc/tv-lrud-spatial';
+import {
+  startObserving,
+  stopObserving,
+  type MutationDetails
+} from './mutationObserver';
 import { addEventListener } from '../addEventListener';
 import { setupNodeId } from '../../exports/TV/utils';
 
@@ -491,6 +497,18 @@ function maybeScrollOnFocus(
   });
 }
 
+function handleCurrentFocusMutations(details: MutationDetails): void {
+  const { targetNode } = details;
+  // Current focused element (or it's ancestor) is removed from the DOM, we need to find a new focus
+  currentFocus = { elem: null, parentHasAutofocus: false };
+  const nextFocus = getNextFocus(
+    null, // No current focus since it's removed
+    'ArrowDown', // No directional input, just find the next best focus
+    targetNode
+  );
+  triggerFocus(nextFocus);
+}
+
 function triggerFocus(
   nextFocus: {
     elem: HTMLElement | null,
@@ -499,9 +517,14 @@ function triggerFocus(
   keyCode?: string
 ): boolean {
   if (nextFocus && nextFocus.elem) {
+    let preventScroll = false;
+    // Stop observing mutations on current focus
+    stopObserving();
+
     // Only handle scroll for subsequent navigations, not first focus
     if (keyCode && currentFocus.elem) {
       maybeScrollOnFocus(nextFocus.elem, keyCode, currentFocus.elem);
+      preventScroll = true;
     }
 
     currentFocus = nextFocus;
@@ -509,8 +532,18 @@ function triggerFocus(
     setupNodeId(nextFocus.elem);
     updateAncestorsAutoFocus(nextFocus.elem, spatialNavigationContainer);
 
-    // Focus the element without scrolling as we already handled scrolling
-    nextFocus.elem.focus({ preventScroll: true });
+    // Focus the element with/without scrolling
+    nextFocus.elem.focus({ preventScroll });
+
+    // Start observing mutations
+    const parentContainer = getParentContainer(nextFocus.elem);
+    if (parentContainer) {
+      startObserving(
+        parentContainer,
+        nextFocus.elem,
+        handleCurrentFocusMutations
+      );
+    }
 
     return true;
   }

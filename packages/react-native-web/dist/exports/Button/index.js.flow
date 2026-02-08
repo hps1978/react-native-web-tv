@@ -18,6 +18,7 @@ type ButtonProps = {|
   accessibilityLabel?: ?string,
   color?: ?string,
   disabled?: boolean,
+  hasTVPreferredFocus?: ?boolean,
   onPress?: ?(e: any) => void,
   testID?: ?string,
   title: string,
@@ -29,11 +30,12 @@ const Button: React.AbstractComponent<ButtonProps, React.ElementRef<typeof Touch
     accessibilityLabel,
     color,
     disabled,
+    hasTVPreferredFocus,
     onPress,
     testID,
     title
   } = props;
-  return <TouchableOpacity accessibilityLabel={accessibilityLabel} accessibilityRole="button" disabled={disabled} focusable={!disabled} onPress={onPress} ref={forwardedRef} style={[styles.button, color && {
+  return <TouchableOpacity accessibilityLabel={accessibilityLabel} accessibilityRole="button" disabled={disabled} focusable={!disabled} hasTVPreferredFocus={hasTVPreferredFocus} onPress={onPress} ref={forwardedRef} style={[styles.button, color && {
     backgroundColor: color
   }, disabled && styles.buttonDisabled]} testID={testID}>
       <Text style={[styles.text, disabled && styles.textDisabled]}>

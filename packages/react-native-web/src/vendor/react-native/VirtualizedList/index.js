@@ -424,7 +424,6 @@ class VirtualizedList extends StateSafePureComponent<Props, State> {
   constructor(props: Props) {
     super(props);
     this._checkProps(props);
-    console.log('VirtualizedList called');
     this._fillRateHelper = new FillRateHelper(this._getFrameMetrics);
     this._updateCellsToRenderBatcher = new Batchinator(
       this._updateCellsToRender,
