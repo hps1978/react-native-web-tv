@@ -18,8 +18,32 @@ export type MutationDetails = {
 };
 
 const hasMutationObserver = typeof MutationObserver !== 'undefined';
-let mutationObserverInstance: MutationObserver | null = null;
-let currentSessionId = 0;
+const GLOBAL_OBSERVER_KEY = '__rnwSpatialManagerObserver';
+
+type GlobalObserverState = {
+  mutationObserverInstance: MutationObserver | null
+};
+
+const moduleLocalObserverState: GlobalObserverState = {
+  mutationObserverInstance: null
+};
+
+function getObserverState(): GlobalObserverState {
+  if (typeof window === 'undefined') {
+    return moduleLocalObserverState;
+  }
+
+  const existing = (window: any)[GLOBAL_OBSERVER_KEY];
+  if (existing) {
+    return existing;
+  }
+
+  const created = {
+    mutationObserverInstance: null
+  };
+  (window: any)[GLOBAL_OBSERVER_KEY] = created;
+  return created;
+}
 
 function startObserving(
   targetNode: HTMLElement,
@@ -33,14 +57,10 @@ function startObserving(
 
   stopObserving();
 
-  // Increment session ID for this observing session
-  const sessionId = ++currentSessionId;
+  const observerState = getObserverState();
 
-  // Create a closure that captures THIS session's values AND sessionId
+  // Create a closure that captures THIS session's values
   const handleMutationsForThisSession = (mutations: MutationRecord[]) => {
-    // Ignore if this is a stale session
-    if (sessionId !== currentSessionId) return;
-
     mutations.forEach((mutation) => {
       if (mutation.type === 'childList') {
         mutation.removedNodes.forEach((node) => {
@@ -60,22 +80,21 @@ function startObserving(
     });
   };
 
-  mutationObserverInstance = new MutationObserver(
+  observerState.mutationObserverInstance = new MutationObserver(
     handleMutationsForThisSession
   );
-  mutationObserverInstance.observe(targetNode, {
+  observerState.mutationObserverInstance.observe(targetNode, {
     childList: true,
     subtree: true
   });
 }
 
 function stopObserving(): void {
-  if (mutationObserverInstance) {
-    mutationObserverInstance.disconnect();
-    mutationObserverInstance = null;
+  const observerState = getObserverState();
+  if (observerState.mutationObserverInstance) {
+    observerState.mutationObserverInstance.disconnect();
+    observerState.mutationObserverInstance = null;
   }
-  // Invalidate current session so old queued mutations are ignored
-  currentSessionId++;
 }
 
 export { startObserving, stopObserving };

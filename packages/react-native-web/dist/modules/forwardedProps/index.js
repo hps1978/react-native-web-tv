@@ -116,20 +116,22 @@ export var accessibilityProps = {
   accessibilityValueNow: true,
   accessibilityValueText: true
 };
+
+// For the moment disabling click and touch events on TV platforms
 export var clickProps = {
-  onClick: true,
-  onAuxClick: true,
-  onContextMenu: true,
-  onGotPointerCapture: true,
-  onLostPointerCapture: true,
-  onPointerCancel: true,
-  onPointerDown: true,
-  onPointerEnter: true,
-  onPointerMove: true,
-  onPointerLeave: true,
-  onPointerOut: true,
-  onPointerOver: true,
-  onPointerUp: true
+  onClick: false,
+  onAuxClick: false,
+  onContextMenu: false,
+  onGotPointerCapture: false,
+  onLostPointerCapture: false,
+  onPointerCancel: false,
+  onPointerDown: false,
+  onPointerEnter: false,
+  onPointerMove: false,
+  onPointerLeave: false,
+  onPointerOut: false,
+  onPointerOver: false,
+  onPointerUp: false
 };
 export var focusProps = {
   onBlur: true,

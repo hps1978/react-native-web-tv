@@ -23,7 +23,6 @@ import {
   TVFocusGuideView,
   View
 } from 'react-native';
-import { setupSpatialNavigation } from 'react-native-web/dist/modules/SpatialManager';
 
 // Set it to false to see the behavior without TVFocusGuide.
 const FOCUS_GUIDE_ENABLED = true;
@@ -504,10 +503,6 @@ const ContentArea = React.forwardRef(
 );
 
 export default function TVFocusGuideAutoFocusExample() {
-  React.useEffect(() => {
-    setupSpatialNavigation(document.body);
-    return () => {};
-  }, []);
   const sideMenuRef =
     React.useRef<?React.ElementRef<typeof TVFocusGuide>>(null);
 

@@ -27,7 +27,6 @@ import {
   TVFocusGuideView,
   type TVRemoteEvent
 } from 'react-native';
-import { setupSpatialNavigation } from 'react-native-web/dist/modules/SpatialManager';
 
 const focusHandler = (event: $FlowFixMe, props: any) => {
   if (props.noBubbledEvents) {
@@ -310,7 +309,6 @@ export const TVEventHandlerView: () => React.Node = () => {
         scrollAnimationDurationMsHorizontal: 0
       }
     };
-    setupSpatialNavigation(document.body);
     TVEventControl.enableTVPanGesture();
     return () => TVEventControl.disableTVPanGesture();
   }, []);

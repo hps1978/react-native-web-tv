@@ -144,7 +144,8 @@ const TVFocusGuideView: React.AbstractComponent<
 const styles = StyleSheet.create({
   container: {
     minWidth: 1,
-    minHeight: 1
+    minHeight: 1,
+    pointerEvents: 'none' // FocusGuides should not handle pointer events.
   }
 });
 

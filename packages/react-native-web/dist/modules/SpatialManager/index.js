@@ -390,7 +390,9 @@ function triggerFocus(nextFocus, keyCode) {
       maybeScrollOnFocus(nextFocus.elem, keyCode, currentFocus.elem);
       preventScroll = true;
     }
-    currentFocus = nextFocus;
+    currentFocus.elem = nextFocus.elem;
+    currentFocus.parentHasAutofocus = nextFocus.parentHasAutofocus;
+
     // set id first
     setupNodeId(nextFocus.elem);
     updateAncestorsAutoFocus(nextFocus.elem, spatialNavigationContainer);
@@ -409,11 +411,29 @@ function triggerFocus(nextFocus, keyCode) {
   }
   return false;
 }
+function handlePageVisibilityChange(event) {
+  if (event.type === 'focus') {
+    if (currentFocus.elem) {
+      setTimeout(() => {
+        currentFocus.elem.focus();
+      }, 200); // Workaround: Delay as react DOM tries to restore focus and then blurs it!!!
+    }
+  }
+}
+function setupPageVisibilityListeners() {
+  if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+    window.addEventListener('focus', handlePageVisibilityChange);
+    // Not handling blur as react dom already blurs on leaving the page
+  } else {
+    console.warn('Document or addEventListener not available, cannot setup visibility change listener');
+  }
+}
 function setupSpatialNavigation(container) {
   if (isSpatialManagerReady) {
     return;
   }
   setSpatialNavigationConfig();
+  setupPageVisibilityListeners();
   spatialNavigationContainer = (container == null ? void 0 : container.ownerDocument) || window.document;
 
   // Listen to keydown events on the container or document

@@ -83,6 +83,8 @@ declare function triggerFocus(nextFocus: {
   elem: HTMLElement | null,
   parentHasAutofocus: boolean,
 }, keyCode?: string): boolean;
+declare function handlePageVisibilityChange(event: any): any;
+declare function setupPageVisibilityListeners(): any;
 declare function setupSpatialNavigation(container?: HTMLElement): any;
 declare function setFocus(node: HTMLElement): any; // WARNING: This is a very specific API to set destinations for TVFocusGuideView and is not meant for general use.
 // It may have unexpected results if used outside of the context of TVFocusGuideView.

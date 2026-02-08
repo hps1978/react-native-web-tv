@@ -15,7 +15,6 @@ import {
   Image,
   Pressable
 } from 'react-native-web';
-import { setupSpatialNavigation } from 'react-native-web/dist/modules/SpatialManager';
 
 const ROW_COUNT = 10;
 const ITEM_COUNT = 15;
@@ -52,7 +51,6 @@ function FlatListTVScrollExample() {
         scrollAnimationDurationMsHorizontal: 0
       }
     };
-    setupSpatialNavigation(document.body);
   }, []);
 
   const renderItemForRow = useCallback(

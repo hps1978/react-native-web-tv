@@ -17,8 +17,14 @@ export type MutationDetails = {
   childNode: HTMLElement,
 };
 const hasMutationObserver = typeof MutationObserver !== 'undefined';
-let mutationObserverInstance: MutationObserver | null = null;
-let currentSessionId = 0;
+const GLOBAL_OBSERVER_KEY = '__rnwSpatialManagerObserver';
+type GlobalObserverState = {
+  mutationObserverInstance: MutationObserver | null
+};
+const moduleLocalObserverState: GlobalObserverState = {
+  mutationObserverInstance: null
+};
+declare function getObserverState(): GlobalObserverState;
 declare function startObserving(targetNode: HTMLElement, childNode: HTMLElement, callback: (details: MutationDetails) => void): void;
 declare function stopObserving(): void;
 export { startObserving, stopObserving };

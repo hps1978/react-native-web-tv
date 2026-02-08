@@ -12,22 +12,34 @@
 // Used by SpatialManager to detect when focused elements or their parents are mutated.
 
 var hasMutationObserver = typeof MutationObserver !== 'undefined';
-var mutationObserverInstance = null;
-var currentSessionId = 0;
+var GLOBAL_OBSERVER_KEY = '__rnwSpatialManagerObserver';
+var moduleLocalObserverState = {
+  mutationObserverInstance: null
+};
+function getObserverState() {
+  if (typeof window === 'undefined') {
+    return moduleLocalObserverState;
+  }
+  var existing = window[GLOBAL_OBSERVER_KEY];
+  if (existing) {
+    return existing;
+  }
+  var created = {
+    mutationObserverInstance: null
+  };
+  window[GLOBAL_OBSERVER_KEY] = created;
+  return created;
+}
 function startObserving(targetNode, childNode, callback) {
   if (!hasMutationObserver) {
     console.warn('MutationObserver is not supported in this environment');
     return;
   }
   stopObserving();
+  var observerState = getObserverState();
 
-  // Increment session ID for this observing session
-  var sessionId = ++currentSessionId;
-
-  // Create a closure that captures THIS session's values AND sessionId
+  // Create a closure that captures THIS session's values
   var handleMutationsForThisSession = mutations => {
-    // Ignore if this is a stale session
-    if (sessionId !== currentSessionId) return;
     mutations.forEach(mutation => {
       if (mutation.type === 'childList') {
         mutation.removedNodes.forEach(node => {
@@ -43,18 +55,17 @@ function startObserving(targetNode, childNode, callback) {
       }
     });
   };
-  mutationObserverInstance = new MutationObserver(handleMutationsForThisSession);
-  mutationObserverInstance.observe(targetNode, {
+  observerState.mutationObserverInstance = new MutationObserver(handleMutationsForThisSession);
+  observerState.mutationObserverInstance.observe(targetNode, {
     childList: true,
     subtree: true
   });
 }
 function stopObserving() {
-  if (mutationObserverInstance) {
-    mutationObserverInstance.disconnect();
-    mutationObserverInstance = null;
+  var observerState = getObserverState();
+  if (observerState.mutationObserverInstance) {
+    observerState.mutationObserverInstance.disconnect();
+    observerState.mutationObserverInstance = null;
   }
-  // Invalidate current session so old queued mutations are ignored
-  currentSessionId++;
 }
 export { startObserving, stopObserving };
