@@ -1,0 +1,118 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ * @flow strict
+ * @format
+ */
+
+type SpatialScrollConfig = {
+  edgeThresholdPx?: number,
+  scrollThrottleMs?: number,
+  smoothScrollEnabled?: boolean,
+  scrollAnimationDurationMs?: number,
+  scrollAnimationDurationMsVertical?: number,
+  scrollAnimationDurationMsHorizontal?: number,
+};
+type ScrollState = {
+  lastScrollAt: number,
+  scrollAnimationFrame: number | null,
+};
+
+// API capability detection (one-time check at module load)
+const hasPerformance = typeof performance !== 'undefined' && typeof performance.now === 'function';
+const hasRequestAnimationFrame = typeof requestAnimationFrame === 'function';
+const hasGetComputedStyle = typeof window !== 'undefined' && typeof window.getComputedStyle === 'function';
+const hasGetBoundingClientRect = typeof Element !== 'undefined' && Element.prototype.getBoundingClientRect !== undefined;
+const hasScrollEndEvent = false;
+//   typeof window !== 'undefined' &&
+//   'onscrollend' in window;
+
+const DEFAULT_SPATIAL_SCROLL_CONFIG: SpatialScrollConfig = {
+  edgeThresholdPx: 128,
+  scrollThrottleMs: 80,
+  smoothScrollEnabled: true,
+  scrollAnimationDurationMs: 0,
+  scrollAnimationDurationMsVertical: 0,
+  scrollAnimationDurationMsHorizontal: 0
+};
+declare function getCurrentTime(): number;
+declare function scheduleAnimationFrame(callback: () => void): number;
+declare function cancelScheduledFrame(frameId: number): void;
+declare function animateScrollTo(scrollable: any, isVertical: boolean, nextOffset: number, durationMs: number, scrollState: ScrollState): any;
+declare function calculateScrollDirection(currentElem: HTMLElement, nextElem: HTMLElement): {
+  isVertical: boolean,
+  direction: string,
+  dominance: number,
+} | null;
+declare function findScrollableAncestor(elem: HTMLElement | null, direction: 'vertical' | 'horizontal'): HTMLElement | null;
+declare function resolveScrollable(elem: HTMLElement, direction: 'vertical' | 'horizontal'): any;
+declare function resolveRects(scrollable: any, isWindowScroll: boolean, elem: HTMLElement): any;
+declare function resolveScrollOffsets(scrollable: any, isVertical: boolean): {
+  currentOffset: number,
+  maxOffset: number,
+};
+declare function performScroll(scrollable: any, isVertical: boolean, scrollConfig: SpatialScrollConfig, scrollState: ScrollState, nextOffset: number, liveNextOffset: number): any;
+declare function shouldScrollIntoView(isVertical: boolean, edgeThreshold: number, targetRect: any, visibleContainerRect: any): {
+  needsScroll: boolean,
+  scrollDelta: number,
+};
+declare function resolveDirection(currentElem: HTMLElement | null, nextElem: HTMLElement, keyCode: string): {
+  isVertical: boolean,
+  isHorizontal: boolean,
+};
+declare function calculateNextOffset(currentOffset: number, scrollDelta: number, isWindowScroll: boolean, maxOffset: number): number;
+type ReAcquireFocusOptions = {
+  getCurrentFocus: () => {
+    elem: HTMLElement | null,
+    parentHasAutofocus: boolean,
+  },
+  onScrollRefocus: (params: {
+    currentFocus: {
+      elem: HTMLElement | null,
+      parentHasAutofocus: boolean,
+    },
+    scrollContainer: HTMLElement | null,
+  }) => void,
+};
+
+// Flag to track if the current scroll was initiated by SpatialManager
+// Checked in the scrollend event to determine if focus reacquisition is needed
+let isSpatialManagerInitiatedScroll: boolean = false;
+
+// Debounce timer for fallback scroll handler (when scrollend not available)
+let reacquireFocusTimeout: number | null = null;
+
+/**
+ * Mark that a scroll is being initiated by SpatialManager (for focus).
+ * The flag will be checked in the scrollend event handler.
+ */
+declare function markSpatialManagerScroll(): void;
+/**
+ * Unmark SpatialManager-initiated scroll (called after scrollend event processes it).
+ */
+declare function unmarkSpatialManagerScroll(): void;
+declare export function createScrollState(): ScrollState;
+/**
+ * Check if an element is visible within its scrollable container's viewport.
+ * Used to determine if current focus is still in view after a scroll.
+ */
+declare export function isElementVisible(elem: HTMLElement, scrollContainer?: HTMLElement): boolean;
+/**
+ * Reacquire focus after app-initiated scroll.
+ * If current focus is no longer visible, find the best candidate within the scrolled container.
+ * This is called after the scroll settles (debounced).
+ */
+declare export function reacquireFocusAfterScroll(currentFocusElem: HTMLElement | null, scrollContainer: HTMLElement | null, options: ReAcquireFocusOptions): void;
+/**
+ * Setup global scroll listener to handle app-initiated scrolls.
+ * Uses scrollend event when available (modern browsers), falls back to debounced scroll listener.
+ * If SpatialManager initiated the scroll, skips focus reacquisition.
+ * If app initiated the scroll, reacquires focus if needed.
+ */
+declare export function setupAppInitiatedScrollHandler(container: HTMLElement | Document, options: ReAcquireFocusOptions): any;
+declare export function maybeScrollOnFocus(elem: HTMLElement | null, keyCode: string, currentElem: HTMLElement | null, scrollConfig: SpatialScrollConfig, scrollState: ScrollState): any;
+export type { SpatialScrollConfig, ReAcquireFocusOptions };
+export { DEFAULT_SPATIAL_SCROLL_CONFIG };
