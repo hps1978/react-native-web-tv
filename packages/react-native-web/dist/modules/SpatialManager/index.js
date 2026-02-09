@@ -98,7 +98,8 @@ function triggerFocus(nextFocus, keyCode) {
     // Only handle scroll for subsequent navigations, not first focus
     if (keyCode && currentFocus.elem) {
       maybeScrollOnFocus(nextFocus.elem, keyCode, currentFocus.elem, spatialScrollConfig, scrollState);
-      preventScroll = true;
+      // Uncomment this only after fixin the scrollHandler's calculateScrollDirection()
+      // preventScroll = true;
     }
     currentFocus.elem = nextFocus.elem;
     currentFocus.parentHasAutofocus = nextFocus.parentHasAutofocus;

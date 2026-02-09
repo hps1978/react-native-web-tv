@@ -118,7 +118,7 @@ function triggerFocus(
   keyCode?: string
 ): boolean {
   if (nextFocus && nextFocus.elem) {
-    let preventScroll = false;
+    const preventScroll = false;
     // Stop observing mutations on current focus
     stopObserving();
 
@@ -140,7 +140,8 @@ function triggerFocus(
         spatialScrollConfig,
         scrollState
       );
-      preventScroll = true;
+      // Uncomment this only after fixin the scrollHandler's calculateScrollDirection()
+      // preventScroll = true;
     }
 
     currentFocus.elem = nextFocus.elem;
