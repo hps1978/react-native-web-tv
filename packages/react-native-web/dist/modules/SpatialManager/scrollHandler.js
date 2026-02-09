@@ -17,6 +17,7 @@ var hasScrollEndEvent = false;
 //   typeof window !== 'undefined' &&
 //   'onscrollend' in window;
 
+var DEBUG_SCROLL = () => typeof window !== 'undefined' && window.__RNW_TV_SCROLL_DEBUG === true;
 var DEFAULT_SPATIAL_SCROLL_CONFIG = {
   edgeThresholdPx: 128,
   scrollThrottleMs: 80,
@@ -87,6 +88,24 @@ function calculateScrollDirection(currentElem, nextElem) {
   try {
     var currentRect = currentElem.getBoundingClientRect();
     var nextRect = nextElem.getBoundingClientRect();
+    var overlapX = Math.min(currentRect.right, nextRect.right) - Math.max(currentRect.left, nextRect.left);
+    var overlapY = Math.min(currentRect.bottom, nextRect.bottom) - Math.max(currentRect.top, nextRect.top);
+
+    // If rectangles overlap on one axis, prefer movement on the other axis.
+    if (overlapX > 0 && overlapY <= 0) {
+      return {
+        isVertical: true,
+        direction: nextRect.top >= currentRect.top ? 'down' : 'up',
+        dominance: Infinity
+      };
+    }
+    if (overlapY > 0 && overlapX <= 0) {
+      return {
+        isVertical: false,
+        direction: nextRect.left >= currentRect.left ? 'right' : 'left',
+        dominance: Infinity
+      };
+    }
     var currentCenterY = currentRect.top + currentRect.height / 2;
     var nextCenterY = nextRect.top + nextRect.height / 2;
     var currentCenterX = currentRect.left + currentRect.width / 2;
@@ -459,6 +478,26 @@ export function setupAppInitiatedScrollHandler(container, options) {
 }
 export function maybeScrollOnFocus(elem, keyCode, currentElem, scrollConfig, scrollState) {
   if (!elem || typeof window === 'undefined') return;
+  if (DEBUG_SCROLL()) {
+    try {
+      var curRect = currentElem == null || currentElem.getBoundingClientRect == null ? void 0 : currentElem.getBoundingClientRect();
+      var nextRect = elem.getBoundingClientRect();
+      console.log('[SpatialManager][scroll] input', {
+        keyCode,
+        currentId: currentElem == null ? void 0 : currentElem.id,
+        nextId: elem.id,
+        curRect,
+        nextRect
+      });
+    } catch (e) {
+      console.log('[SpatialManager][scroll] input', {
+        keyCode,
+        currentId: currentElem == null ? void 0 : currentElem.id,
+        nextId: elem.id,
+        error: String(e)
+      });
+    }
+  }
   var now = Date.now();
   if (scrollConfig.scrollThrottleMs != null) {
     if (now - scrollState.lastScrollAt < scrollConfig.scrollThrottleMs) {
@@ -468,12 +507,43 @@ export function maybeScrollOnFocus(elem, keyCode, currentElem, scrollConfig, scr
   var _resolveDirection = resolveDirection(currentElem, elem, keyCode),
     isVertical = _resolveDirection.isVertical,
     isHorizontal = _resolveDirection.isHorizontal;
+  if (DEBUG_SCROLL()) {
+    console.log('[SpatialManager][scroll] direction', {
+      isVertical,
+      isHorizontal
+    });
+  }
   if (!isVertical && !isHorizontal) return;
   var direction = isVertical ? 'vertical' : 'horizontal';
   var _resolveScrollable = resolveScrollable(elem, direction),
     scrollable = _resolveScrollable.scrollable,
     isWindowScroll = _resolveScrollable.isWindowScroll;
   if (!scrollable) return;
+  if (DEBUG_SCROLL()) {
+    if (isWindowScroll) {
+      var _document$documentEle;
+      console.log('[SpatialManager][scroll] container', {
+        isWindowScroll: true,
+        scrollTop: window.scrollY,
+        scrollHeight: (_document$documentEle = document.documentElement) == null ? void 0 : _document$documentEle.scrollHeight,
+        clientHeight: window.innerHeight
+      });
+    } else {
+      var style = hasGetComputedStyle ? window.getComputedStyle(scrollable) : null;
+      console.log('[SpatialManager][scroll] container', {
+        isWindowScroll: false,
+        sameAsTarget: scrollable === elem,
+        tagName: scrollable.tagName,
+        id: scrollable.id,
+        className: scrollable.className,
+        overflowY: style == null ? void 0 : style.overflowY,
+        overflowX: style == null ? void 0 : style.overflowX,
+        scrollTop: scrollable.scrollTop,
+        scrollHeight: scrollable.scrollHeight,
+        clientHeight: scrollable.clientHeight
+      });
+    }
+  }
   var _resolveRects = resolveRects(scrollable, isWindowScroll, elem),
     targetRect = _resolveRects.targetRect,
     visibleContainerRect = _resolveRects.visibleContainerRect;
@@ -484,6 +554,16 @@ export function maybeScrollOnFocus(elem, keyCode, currentElem, scrollConfig, scr
   var _shouldScrollIntoView = shouldScrollIntoView(isVertical, edgeThreshold, targetRect, visibleContainerRect),
     needsScroll = _shouldScrollIntoView.needsScroll,
     scrollDelta = _shouldScrollIntoView.scrollDelta;
+  if (DEBUG_SCROLL()) {
+    console.log('[SpatialManager][scroll] decision', {
+      needsScroll,
+      scrollDelta,
+      edgeThreshold,
+      isWindowScroll,
+      visibleContainerRect,
+      targetRect
+    });
+  }
   if (!needsScroll) {
     return;
   }

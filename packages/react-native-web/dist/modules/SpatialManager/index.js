@@ -30,6 +30,7 @@ var keyDownListener = null;
 var appInitiatedScrollCleanup = null;
 var spatialScrollConfig = _objectSpread({}, DEFAULT_SPATIAL_SCROLL_CONFIG);
 var scrollState = createScrollState();
+var DEBUG_SCROLL = typeof window !== 'undefined' && window.__RNW_TV_SCROLL_DEBUG === true;
 function loadGlobalConfig() {
   // Check for window.appConfig.spatialNav (cross-platform pattern)
   if (typeof window !== 'undefined' && window.appConfig && window.appConfig) {
@@ -84,6 +85,15 @@ function triggerFocus(nextFocus, keyCode) {
     var preventScroll = false;
     // Stop observing mutations on current focus
     stopObserving();
+    if (DEBUG_SCROLL) {
+      var _currentFocus;
+      console.log('[SpatialManager][focus] move', {
+        keyCode,
+        fromId: (_currentFocus = currentFocus) == null || (_currentFocus = _currentFocus.elem) == null ? void 0 : _currentFocus.id,
+        toId: nextFocus.elem.id,
+        parentHasAutofocus: nextFocus.parentHasAutofocus
+      });
+    }
 
     // Only handle scroll for subsequent navigations, not first focus
     if (keyCode && currentFocus.elem) {

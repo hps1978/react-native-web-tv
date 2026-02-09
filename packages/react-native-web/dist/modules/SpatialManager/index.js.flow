@@ -40,6 +40,7 @@ let spatialScrollConfig: SpatialScrollConfig = {
   ...DEFAULT_SPATIAL_SCROLL_CONFIG
 };
 const scrollState = createScrollState();
+const DEBUG_SCROLL = typeof window !== 'undefined' && window.__RNW_TV_SCROLL_DEBUG === true;
 declare function loadGlobalConfig(): SpatialNavigationConfig | null; // This callback wil get triggered when LRUD fails to find a valid destination from the provided data-destinations
 // atrtribute. LRUD will use it's fallback. autofocus or default focus logic. This contianer will no longer be
 // focusable if there is no autofocus either.

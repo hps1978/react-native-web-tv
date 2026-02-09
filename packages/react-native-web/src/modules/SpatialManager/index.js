@@ -55,6 +55,8 @@ let spatialScrollConfig: SpatialScrollConfig = {
   ...DEFAULT_SPATIAL_SCROLL_CONFIG
 };
 const scrollState = createScrollState();
+const DEBUG_SCROLL =
+  typeof window !== 'undefined' && window.__RNW_TV_SCROLL_DEBUG === true;
 
 function loadGlobalConfig(): SpatialNavigationConfig | null {
   // Check for window.appConfig.spatialNav (cross-platform pattern)
@@ -119,6 +121,15 @@ function triggerFocus(
     let preventScroll = false;
     // Stop observing mutations on current focus
     stopObserving();
+
+    if (DEBUG_SCROLL) {
+      console.log('[SpatialManager][focus] move', {
+        keyCode,
+        fromId: currentFocus?.elem?.id,
+        toId: nextFocus.elem.id,
+        parentHasAutofocus: nextFocus.parentHasAutofocus
+      });
+    }
 
     // Only handle scroll for subsequent navigations, not first focus
     if (keyCode && currentFocus.elem) {

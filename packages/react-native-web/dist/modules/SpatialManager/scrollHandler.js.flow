@@ -29,7 +29,7 @@ const hasGetBoundingClientRect = typeof Element !== 'undefined' && Element.proto
 const hasScrollEndEvent = false;
 //   typeof window !== 'undefined' &&
 //   'onscrollend' in window;
-
+declare var DEBUG_SCROLL: () => any;
 const DEFAULT_SPATIAL_SCROLL_CONFIG: SpatialScrollConfig = {
   edgeThresholdPx: 128,
   scrollThrottleMs: 80,
