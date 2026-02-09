@@ -15,6 +15,22 @@ This is the development monorepo for "React Native for Web" and related projects
 * `scripts`
   * Contains Node.js scripts for miscellaneous tasks.
 
+## Web TV fork additions
+
+This fork adds Web TV-focused APIs and spatial navigation on top of React Native for Web.
+
+Key additions:
+* TV spatial navigation via `@bbc/tv-lrud-spatial`, wired in `AppRegistry.runApplication()`.
+* TV exports from `react-native-web`: `TVEventHandler`, `TVEventControl`, `TVFocusGuideView`, `TVTextScrollView`, `useTVEventHandler`, and `TVRemoteEvent`.
+* TV focus props on `View`/pressables: `tvFocusable`, `isTVSelectable`, `trapFocusUp/Down/Left/Right`, `destinations`, `autoFocus`.
+* RecyclerListView adapter for `VirtualizedList`/`FlatList` (via `recyclerlistview`) to improve large-list performance on TV.
+
+## Try the TV examples
+
+- `npm install`
+- `npm run dev -w react-native-web-examples`
+- Open the dev server URL (typically `http://localhost:3000`) and visit `/view-tv`, `/tv-event-handler`, `/tv-focus-guide-view`, `/flatlist-tv-scroll`, `/rlv-flatlist-tv-scroll`, `/app-registry-tv`.
+
 ## Tasks
 
 * `build`

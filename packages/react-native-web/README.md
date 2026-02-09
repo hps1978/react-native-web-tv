@@ -38,6 +38,16 @@ AppRegistry.registerComponent('App', () => App);
 AppRegistry.runApplication('App', { rootTag: document.getElementById('react-root') });
 ```
 
+## Web TV support in this fork
+
+This fork adds Web TV spatial navigation and TV-specific APIs.
+
+Highlights:
+* Spatial navigation is integrated via `@bbc/tv-lrud-spatial` and initialized from `AppRegistry.runApplication()`.
+* New TV exports: `TVEventHandler`, `TVEventControl`, `TVFocusGuideView`, `TVTextScrollView`, `useTVEventHandler`, and `TVRemoteEvent`.
+* TV focus props on `View`/pressables: `tvFocusable`, `isTVSelectable`, `trapFocusUp/Down/Left/Right`, `destinations`, `autoFocus`.
+* RecyclerListView adapter for `VirtualizedList`/`FlatList` (via `recyclerlistview`) to improve large-list performance on TV.
+* `Platform.isTV` is currently forced to `true` in this fork (TV detection is TODO).
 ## Contributing
 
 Development happens in the open on GitHub and we are grateful for contributions including bugfixes, improvements, and ideas. Read below to learn how you can take part in improving React Native for Web.
