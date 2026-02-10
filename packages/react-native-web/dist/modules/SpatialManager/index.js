@@ -82,7 +82,6 @@ function handleCurrentFocusMutations(details) {
 }
 function triggerFocus(nextFocus, keyCode) {
   if (nextFocus && nextFocus.elem) {
-    var preventScroll = false;
     // Stop observing mutations on current focus
     stopObserving();
     if (DEBUG_SCROLL) {
@@ -94,12 +93,10 @@ function triggerFocus(nextFocus, keyCode) {
         parentHasAutofocus: nextFocus.parentHasAutofocus
       });
     }
-
+    var scrollPromise = null;
     // Only handle scroll for subsequent navigations, not first focus
     if (keyCode && currentFocus.elem) {
-      maybeScrollOnFocus(nextFocus.elem, keyCode, currentFocus.elem, spatialScrollConfig, scrollState);
-      // Uncomment this only after fixin the scrollHandler's calculateScrollDirection()
-      // preventScroll = true;
+      scrollPromise = maybeScrollOnFocus(nextFocus.elem, keyCode, currentFocus.elem, spatialScrollConfig, scrollState);
     }
     currentFocus.elem = nextFocus.elem;
     currentFocus.parentHasAutofocus = nextFocus.parentHasAutofocus;
@@ -107,16 +104,25 @@ function triggerFocus(nextFocus, keyCode) {
     // set id first
     setupNodeId(nextFocus.elem);
     updateAncestorsAutoFocus(nextFocus.elem, spatialNavigationContainer);
+    var applyFocus = () => {
+      if (!nextFocus.elem) {
+        return;
+      }
+      var preventScroll = scrollPromise != null;
+      nextFocus.elem.focus({
+        preventScroll
+      });
 
-    // Focus the element with/without scrolling
-    nextFocus.elem.focus({
-      preventScroll
-    });
-
-    // Start observing mutations
-    var parentContainer = getParentContainer(nextFocus.elem);
-    if (parentContainer) {
-      startObserving(parentContainer, nextFocus.elem, handleCurrentFocusMutations);
+      // Start observing mutations
+      var parentContainer = getParentContainer(nextFocus.elem);
+      if (parentContainer) {
+        startObserving(parentContainer, nextFocus.elem, handleCurrentFocusMutations);
+      }
+    };
+    if (scrollPromise && typeof scrollPromise.then === 'function') {
+      scrollPromise.then(applyFocus);
+    } else {
+      applyFocus();
     }
     return true;
   }

@@ -118,7 +118,6 @@ function triggerFocus(
   keyCode?: string
 ): boolean {
   if (nextFocus && nextFocus.elem) {
-    const preventScroll = false;
     // Stop observing mutations on current focus
     stopObserving();
 
@@ -131,17 +130,16 @@ function triggerFocus(
       });
     }
 
+    let scrollPromise = null;
     // Only handle scroll for subsequent navigations, not first focus
     if (keyCode && currentFocus.elem) {
-      maybeScrollOnFocus(
+      scrollPromise = maybeScrollOnFocus(
         nextFocus.elem,
         keyCode,
         currentFocus.elem,
         spatialScrollConfig,
         scrollState
       );
-      // Uncomment this only after fixin the scrollHandler's calculateScrollDirection()
-      // preventScroll = true;
     }
 
     currentFocus.elem = nextFocus.elem;
@@ -151,17 +149,29 @@ function triggerFocus(
     setupNodeId(nextFocus.elem);
     updateAncestorsAutoFocus(nextFocus.elem, spatialNavigationContainer);
 
-    // Focus the element with/without scrolling
-    nextFocus.elem.focus({ preventScroll });
+    const applyFocus = () => {
+      if (!nextFocus.elem) {
+        return;
+      }
 
-    // Start observing mutations
-    const parentContainer = getParentContainer(nextFocus.elem);
-    if (parentContainer) {
-      startObserving(
-        parentContainer,
-        nextFocus.elem,
-        handleCurrentFocusMutations
-      );
+      const preventScroll = scrollPromise != null;
+      nextFocus.elem.focus({ preventScroll });
+
+      // Start observing mutations
+      const parentContainer = getParentContainer(nextFocus.elem);
+      if (parentContainer) {
+        startObserving(
+          parentContainer,
+          nextFocus.elem,
+          handleCurrentFocusMutations
+        );
+      }
+    };
+
+    if (scrollPromise && typeof scrollPromise.then === 'function') {
+      scrollPromise.then(applyFocus);
+    } else {
+      applyFocus();
     }
 
     return true;

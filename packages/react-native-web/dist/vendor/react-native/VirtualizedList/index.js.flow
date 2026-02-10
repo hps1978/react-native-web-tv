@@ -31,7 +31,7 @@ import { computeWindowedRenderLimits, keyExtractor as defaultKeyExtractor } from
 import invariant from 'fbjs/lib/invariant';
 import nullthrows from 'nullthrows';
 import * as React from 'react';
-import VirtualizedListRLVAdapter from './VirtualizedListRLVAdapter';
+// import VirtualizedListRLVAdapter from './VirtualizedListRLVAdapter';
 import I18nManager from '../../../exports/I18nManager';
 import Platform from '../../../exports/Platform';
 export type { RenderItemProps, RenderItemType, Separators };

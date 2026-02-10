@@ -123,73 +123,198 @@ function animateScrollTo(
   );
 }
 
-function calculateScrollDirection(
-  currentElem: HTMLElement,
-  nextElem: HTMLElement
-): { isVertical: boolean, direction: string, dominance: number } | null {
-  if (!currentElem || !nextElem || !hasGetBoundingClientRect) {
-    return null;
+function getScrollDurationMs(
+  scrollConfig: SpatialScrollConfig,
+  isVertical: boolean
+): number {
+  const directionDurationMs = isVertical
+    ? scrollConfig.scrollAnimationDurationMsVertical
+    : scrollConfig.scrollAnimationDurationMsHorizontal;
+  return directionDurationMs != null
+    ? directionDurationMs
+    : scrollConfig.scrollAnimationDurationMs || 0;
+}
+
+function getScrollPosition(
+  scrollable: any,
+  isVertical: boolean,
+  isWindowScroll: boolean
+): number {
+  if (isWindowScroll) {
+    return isVertical ? window.scrollY : window.scrollX;
   }
-  // TO DO: this needs more work as it doesn't handle all edge cases well
-  // (e.g. what if new component is diagnal to current?)
-  // try {
-  //   const currentRect = currentElem.getBoundingClientRect();
-  //   const nextRect = nextElem.getBoundingClientRect();
+  return isVertical ? scrollable.scrollTop : scrollable.scrollLeft;
+}
 
-  //   const overlapX =
-  //     Math.min(currentRect.right, nextRect.right) -
-  //     Math.max(currentRect.left, nextRect.left);
-  //   const overlapY =
-  //     Math.min(currentRect.bottom, nextRect.bottom) -
-  //     Math.max(currentRect.top, nextRect.top);
+function getAxisScrollDelta(
+  targetRect: any,
+  visibleContainerRect: any,
+  axis: 'vertical' | 'horizontal'
+): { needsScroll: boolean, scrollDelta: number } {
+  if (axis === 'vertical') {
+    const targetHeight = targetRect.bottom - targetRect.top;
+    const visibleHeight =
+      visibleContainerRect.bottom - visibleContainerRect.top;
 
-  //   // If rectangles overlap on one axis, prefer movement on the other axis.
-  //   if (overlapX > 0 && overlapY <= 0) {
-  //     return {
-  //       isVertical: true,
-  //       direction: nextRect.top >= currentRect.top ? 'down' : 'up',
-  //       dominance: Infinity
-  //     };
-  //   }
+    if (targetHeight > visibleHeight) {
+      const delta = targetRect.top - visibleContainerRect.top;
+      return { needsScroll: delta !== 0, scrollDelta: delta };
+    }
 
-  //   if (overlapY > 0 && overlapX <= 0) {
-  //     return {
-  //       isVertical: false,
-  //       direction: nextRect.left >= currentRect.left ? 'right' : 'left',
-  //       dominance: Infinity
-  //     };
-  //   }
+    if (targetRect.top < visibleContainerRect.top) {
+      const delta = targetRect.top - visibleContainerRect.top;
+      return { needsScroll: true, scrollDelta: delta };
+    }
 
-  //   const currentCenterY = currentRect.top + currentRect.height / 2;
-  //   const nextCenterY = nextRect.top + nextRect.height / 2;
-  //   const currentCenterX = currentRect.left + currentRect.width / 2;
-  //   const nextCenterX = nextRect.left + nextRect.width / 2;
+    if (targetRect.bottom > visibleContainerRect.bottom) {
+      const delta = targetRect.bottom - visibleContainerRect.bottom;
+      return { needsScroll: true, scrollDelta: delta };
+    }
 
-  //   const deltaY = nextCenterY - currentCenterY;
-  //   const deltaX = nextCenterX - currentCenterX;
+    return { needsScroll: false, scrollDelta: 0 };
+  }
 
-  //   const absDeltaY = Math.abs(deltaY);
-  //   const absDeltaX = Math.abs(deltaX);
+  const targetWidth = targetRect.right - targetRect.left;
+  const visibleWidth = visibleContainerRect.right - visibleContainerRect.left;
 
-  //   // Determine primary direction based on larger delta
-  //   if (absDeltaY > absDeltaX) {
-  //     return {
-  //       isVertical: true,
-  //       direction: deltaY > 0 ? 'down' : 'up',
-  //       dominance: absDeltaX > 0 ? absDeltaY / absDeltaX : Infinity
-  //     };
-  //   } else if (absDeltaX > 0) {
-  //     return {
-  //       isVertical: false,
-  //       direction: deltaX > 0 ? 'right' : 'left',
-  //       dominance: absDeltaY > 0 ? absDeltaX / absDeltaY : Infinity
-  //     };
-  //   }
-  // } catch (e) {
-  //   // Fallback if getBoundingClientRect fails
-  // }
+  if (targetWidth > visibleWidth) {
+    const delta = targetRect.left - visibleContainerRect.left;
+    return { needsScroll: delta !== 0, scrollDelta: delta };
+  }
 
-  return null;
+  if (targetRect.left < visibleContainerRect.left) {
+    const delta = targetRect.left - visibleContainerRect.left;
+    return { needsScroll: true, scrollDelta: delta };
+  }
+
+  if (targetRect.right > visibleContainerRect.right) {
+    const delta = targetRect.right - visibleContainerRect.right;
+    return { needsScroll: true, scrollDelta: delta };
+  }
+
+  return { needsScroll: false, scrollDelta: 0 };
+}
+
+function waitForScrollSettle(
+  scrollable: any,
+  isVertical: boolean,
+  isWindowScroll: boolean
+): Promise<void> {
+  const maxWaitMs = 500;
+  let lastPos = getScrollPosition(scrollable, isVertical, isWindowScroll);
+  let stableFrames = 0;
+  const start = getCurrentTime();
+
+  return new Promise((resolve) => {
+    const step = () => {
+      const currentPos = getScrollPosition(
+        scrollable,
+        isVertical,
+        isWindowScroll
+      );
+      if (Math.abs(currentPos - lastPos) < 0.5) {
+        stableFrames += 1;
+      } else {
+        stableFrames = 0;
+      }
+      lastPos = currentPos;
+
+      if (stableFrames >= 2 || getCurrentTime() - start > maxWaitMs) {
+        resolve();
+        return;
+      }
+
+      scheduleAnimationFrame(step);
+    };
+
+    scheduleAnimationFrame(step);
+  });
+}
+
+function logScrollContainer(
+  label: string,
+  scrollableInfo: { scrollable: any, isWindowScroll: boolean },
+  elem: HTMLElement
+): void {
+  const { scrollable, isWindowScroll } = scrollableInfo;
+  if (isWindowScroll) {
+    console.log('[SpatialManager][scroll] container ' + label, {
+      isWindowScroll: true,
+      scrollTop: window.scrollY,
+      scrollHeight: document.documentElement?.scrollHeight,
+      clientHeight: window.innerHeight
+    });
+    return;
+  }
+
+  const style = hasGetComputedStyle
+    ? window.getComputedStyle(scrollable)
+    : null;
+  console.log('[SpatialManager][scroll] container ' + label, {
+    isWindowScroll: false,
+    sameAsTarget: scrollable === elem,
+    tagName: scrollable.tagName,
+    id: scrollable.id,
+    className: scrollable.className,
+    overflowY: style?.overflowY,
+    overflowX: style?.overflowX,
+    scrollTop: scrollable.scrollTop,
+    scrollHeight: scrollable.scrollHeight,
+    clientHeight: scrollable.clientHeight
+  });
+}
+
+function scrollAxis(params: {
+  scrollable: any,
+  isWindowScroll: boolean,
+  isVertical: boolean,
+  scrollDelta: number,
+  scrollConfig: SpatialScrollConfig,
+  scrollState: ScrollState
+}): Promise<void> {
+  const { scrollable, isWindowScroll, isVertical, scrollDelta } = params;
+  if (scrollDelta === 0) {
+    return Promise.resolve();
+  }
+
+  const currentOffset = getScrollPosition(
+    scrollable,
+    isVertical,
+    isWindowScroll
+  );
+  const maxOffset = isVertical
+    ? Math.max(0, scrollable.scrollHeight - scrollable.clientHeight)
+    : Math.max(0, scrollable.scrollWidth - scrollable.clientWidth);
+
+  const liveOffset = currentOffset;
+  const liveNextOffset = isWindowScroll
+    ? Math.min(Math.max(liveOffset + scrollDelta, 0), maxOffset)
+    : Math.max(liveOffset + scrollDelta, 0);
+
+  const nextOffset = calculateNextOffset(
+    currentOffset,
+    scrollDelta,
+    isWindowScroll,
+    maxOffset
+  );
+
+  performScroll(
+    scrollable,
+    isVertical,
+    params.scrollConfig,
+    params.scrollState,
+    nextOffset,
+    liveNextOffset
+  );
+
+  const durationMs = getScrollDurationMs(params.scrollConfig, isVertical);
+  if (durationMs > 0) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, durationMs);
+    });
+  }
+
+  return waitForScrollSettle(scrollable, isVertical, isWindowScroll);
 }
 
 function findScrollableAncestor(
@@ -325,20 +450,6 @@ function resolveRects(
   return { containerRect, targetRect, visibleContainerRect, viewportRect };
 }
 
-function resolveScrollOffsets(
-  scrollable: any,
-  isVertical: boolean
-): { currentOffset: number, maxOffset: number } {
-  const currentOffset = isVertical
-    ? scrollable.scrollTop
-    : scrollable.scrollLeft;
-  const maxOffset = isVertical
-    ? Math.max(0, scrollable.scrollHeight - scrollable.clientHeight)
-    : Math.max(0, scrollable.scrollWidth - scrollable.clientWidth);
-
-  return { currentOffset, maxOffset };
-}
-
 function performScroll(
   scrollable: any,
   isVertical: boolean,
@@ -383,66 +494,6 @@ function performScroll(
   } else {
     scrollable.scrollLeft = nextOffset;
   }
-}
-
-function shouldScrollIntoView(
-  isVertical: boolean,
-  edgeThreshold: number,
-  targetRect: any,
-  visibleContainerRect: any
-): { needsScroll: boolean, scrollDelta: number } {
-  if (isVertical) {
-    const padding = edgeThreshold;
-
-    if (targetRect.bottom > visibleContainerRect.bottom - padding) {
-      const delta = targetRect.bottom - (visibleContainerRect.bottom - padding);
-      return { needsScroll: true, scrollDelta: delta };
-    }
-
-    if (targetRect.top < visibleContainerRect.top + padding) {
-      const delta = visibleContainerRect.top + padding - targetRect.top;
-      return { needsScroll: true, scrollDelta: -delta };
-    }
-  } else {
-    const padding = edgeThreshold;
-
-    if (targetRect.right > visibleContainerRect.right - padding) {
-      const delta = targetRect.right - (visibleContainerRect.right - padding);
-      return { needsScroll: true, scrollDelta: delta };
-    }
-
-    if (targetRect.left < visibleContainerRect.left + padding) {
-      const delta = visibleContainerRect.left + padding - targetRect.left;
-      return { needsScroll: true, scrollDelta: -delta };
-    }
-  }
-
-  return { needsScroll: false, scrollDelta: 0 };
-}
-
-function resolveDirection(
-  currentElem: HTMLElement | null,
-  nextElem: HTMLElement,
-  keyCode: string
-): { isVertical: boolean, isHorizontal: boolean } {
-  let isVertical = false;
-  let isHorizontal = false;
-
-  if (currentElem) {
-    const directionInfo = calculateScrollDirection(currentElem, nextElem);
-    if (directionInfo) {
-      isVertical = directionInfo.isVertical;
-      isHorizontal = !directionInfo.isVertical;
-    } else {
-      isVertical = keyCode === 'ArrowUp' || keyCode === 'ArrowDown';
-      isHorizontal = keyCode === 'ArrowLeft' || keyCode === 'ArrowRight';
-    }
-  } else {
-    isVertical = keyCode === 'ArrowUp' || keyCode === 'ArrowDown';
-    isHorizontal = keyCode === 'ArrowLeft' || keyCode === 'ArrowRight';
-  }
-
-  return { isVertical, isHorizontal };
 }
 
 function calculateNextOffset(
@@ -681,120 +732,109 @@ export function maybeScrollOnFocus(
   const now = Date.now();
   if (scrollConfig.scrollThrottleMs != null) {
     if (now - scrollState.lastScrollAt < scrollConfig.scrollThrottleMs) {
-      return;
+      return null;
     }
   }
 
-  const { isVertical, isHorizontal } = resolveDirection(
-    currentElem,
-    elem,
-    keyCode
-  );
+  const verticalScroll = resolveScrollable(elem, 'vertical');
+  const horizontalScroll = resolveScrollable(elem, 'horizontal');
+
+  const computeDeltas = () => {
+    const verticalRects = resolveRects(
+      verticalScroll.scrollable,
+      verticalScroll.isWindowScroll,
+      elem
+    );
+    const horizontalRects = resolveRects(
+      horizontalScroll.scrollable,
+      horizontalScroll.isWindowScroll,
+      elem
+    );
+
+    const vertical = getAxisScrollDelta(
+      verticalRects.targetRect,
+      verticalRects.visibleContainerRect,
+      'vertical'
+    );
+    const horizontal = getAxisScrollDelta(
+      horizontalRects.targetRect,
+      horizontalRects.visibleContainerRect,
+      'horizontal'
+    );
+
+    return { vertical, horizontal, verticalRects, horizontalRects };
+  };
 
   if (DEBUG_SCROLL()) {
-    console.log('[SpatialManager][scroll] direction', {
-      isVertical,
-      isHorizontal
+    logScrollContainer('vertical', verticalScroll, elem);
+    logScrollContainer('horizontal', horizontalScroll, elem);
+  }
+
+  const initial = computeDeltas();
+
+  if (DEBUG_SCROLL()) {
+    console.log('[SpatialManager][scroll] deltas', {
+      vertical: initial.vertical,
+      horizontal: initial.horizontal
     });
   }
 
-  if (!isVertical && !isHorizontal) return;
-
-  const direction = isVertical ? 'vertical' : 'horizontal';
-  const { scrollable, isWindowScroll } = resolveScrollable(elem, direction);
-
-  if (!scrollable) return;
-
-  if (DEBUG_SCROLL()) {
-    if (isWindowScroll) {
-      console.log('[SpatialManager][scroll] container', {
-        isWindowScroll: true,
-        scrollTop: window.scrollY,
-        scrollHeight: document.documentElement?.scrollHeight,
-        clientHeight: window.innerHeight
-      });
-    } else {
-      const style = hasGetComputedStyle
-        ? window.getComputedStyle(scrollable)
-        : null;
-      console.log('[SpatialManager][scroll] container', {
-        isWindowScroll: false,
-        sameAsTarget: scrollable === elem,
-        tagName: scrollable.tagName,
-        id: scrollable.id,
-        className: scrollable.className,
-        overflowY: style?.overflowY,
-        overflowX: style?.overflowX,
-        scrollTop: scrollable.scrollTop,
-        scrollHeight: scrollable.scrollHeight,
-        clientHeight: scrollable.clientHeight
-      });
-    }
-  }
-
-  const { targetRect, visibleContainerRect } = resolveRects(
-    scrollable,
-    isWindowScroll,
-    elem
-  );
-
-  const { currentOffset, maxOffset } = resolveScrollOffsets(
-    scrollable,
-    isVertical
-  );
-
-  const edgeThreshold = scrollConfig.edgeThresholdPx || 0;
-  const { needsScroll, scrollDelta } = shouldScrollIntoView(
-    isVertical,
-    edgeThreshold,
-    targetRect,
-    visibleContainerRect
-  );
-
-  if (DEBUG_SCROLL()) {
-    console.log('[SpatialManager][scroll] decision', {
-      needsScroll,
-      scrollDelta,
-      edgeThreshold,
-      isWindowScroll,
-      visibleContainerRect,
-      targetRect
-    });
-  }
-
-  if (!needsScroll) {
-    return;
+  if (!initial.vertical.needsScroll && !initial.horizontal.needsScroll) {
+    return null;
   }
 
   scrollState.lastScrollAt = now;
 
   // Mark that we're about to initiate a scroll (so the listener knows to skip reacquisition)
   markSpatialManagerScroll();
-  // Defer scroll to next event loop to avoid blocking the keydown handler
-  Promise.resolve().then(() => {
-    const liveOffset = isVertical
-      ? scrollable.scrollTop
-      : scrollable.scrollLeft;
-    const liveNextOffset = isWindowScroll
-      ? Math.min(Math.max(liveOffset + scrollDelta, 0), maxOffset)
-      : Math.max(liveOffset + scrollDelta, 0);
 
-    const nextOffset = calculateNextOffset(
-      currentOffset,
-      scrollDelta,
-      isWindowScroll,
-      maxOffset
-    );
+  const runAxis = (
+    axis: 'vertical' | 'horizontal',
+    deltaInfo: { needsScroll: boolean, scrollDelta: number }
+  ) => {
+    if (!deltaInfo.needsScroll) {
+      return Promise.resolve();
+    }
 
-    performScroll(
-      scrollable,
-      isVertical,
+    const scrollInfo = axis === 'vertical' ? verticalScroll : horizontalScroll;
+    return scrollAxis({
+      scrollable: scrollInfo.scrollable,
+      isWindowScroll: scrollInfo.isWindowScroll,
+      isVertical: axis === 'vertical',
+      scrollDelta: deltaInfo.scrollDelta,
       scrollConfig,
-      scrollState,
-      nextOffset,
-      liveNextOffset
-    );
-  });
+      scrollState
+    });
+  };
+
+  if (initial.vertical.needsScroll && initial.horizontal.needsScroll) {
+    const primaryAxis =
+      Math.abs(initial.vertical.scrollDelta) >=
+      Math.abs(initial.horizontal.scrollDelta)
+        ? 'vertical'
+        : 'horizontal';
+    const secondaryAxis =
+      primaryAxis === 'vertical' ? 'horizontal' : 'vertical';
+
+    const primaryInfo =
+      primaryAxis === 'vertical' ? initial.vertical : initial.horizontal;
+
+    return runAxis(primaryAxis, primaryInfo).then(() => {
+      const after = computeDeltas();
+      const secondaryInfo =
+        secondaryAxis === 'vertical' ? after.vertical : after.horizontal;
+      if (!secondaryInfo.needsScroll) {
+        return;
+      }
+      return runAxis(secondaryAxis, secondaryInfo);
+    });
+  }
+
+  if (initial.vertical.needsScroll) {
+    return runAxis('vertical', initial.vertical);
+  }
+
+  return runAxis('horizontal', initial.horizontal);
 }
 
 export type { SpatialScrollConfig, ReAcquireFocusOptions };

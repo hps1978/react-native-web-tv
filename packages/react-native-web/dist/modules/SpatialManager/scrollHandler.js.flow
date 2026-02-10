@@ -42,27 +42,29 @@ declare function getCurrentTime(): number;
 declare function scheduleAnimationFrame(callback: () => void): number;
 declare function cancelScheduledFrame(frameId: number): void;
 declare function animateScrollTo(scrollable: any, isVertical: boolean, nextOffset: number, durationMs: number, scrollState: ScrollState): any;
-declare function calculateScrollDirection(currentElem: HTMLElement, nextElem: HTMLElement): {
-  isVertical: boolean,
-  direction: string,
-  dominance: number,
-} | null;
-declare function findScrollableAncestor(elem: HTMLElement | null, direction: 'vertical' | 'horizontal'): HTMLElement | null;
-declare function resolveScrollable(elem: HTMLElement, direction: 'vertical' | 'horizontal'): any;
-declare function resolveRects(scrollable: any, isWindowScroll: boolean, elem: HTMLElement): any;
-declare function resolveScrollOffsets(scrollable: any, isVertical: boolean): {
-  currentOffset: number,
-  maxOffset: number,
-};
-declare function performScroll(scrollable: any, isVertical: boolean, scrollConfig: SpatialScrollConfig, scrollState: ScrollState, nextOffset: number, liveNextOffset: number): any;
-declare function shouldScrollIntoView(isVertical: boolean, edgeThreshold: number, targetRect: any, visibleContainerRect: any): {
+declare function getScrollDurationMs(scrollConfig: SpatialScrollConfig, isVertical: boolean): number;
+declare function getScrollPosition(scrollable: any, isVertical: boolean, isWindowScroll: boolean): number;
+declare function getAxisScrollDelta(targetRect: any, visibleContainerRect: any, axis: 'vertical' | 'horizontal'): {
   needsScroll: boolean,
   scrollDelta: number,
 };
-declare function resolveDirection(currentElem: HTMLElement | null, nextElem: HTMLElement, keyCode: string): {
+declare function waitForScrollSettle(scrollable: any, isVertical: boolean, isWindowScroll: boolean): Promise<void>;
+declare function logScrollContainer(label: string, scrollableInfo: {
+  scrollable: any,
+  isWindowScroll: boolean,
+}, elem: HTMLElement): void;
+declare function scrollAxis(params: {
+  scrollable: any,
+  isWindowScroll: boolean,
   isVertical: boolean,
-  isHorizontal: boolean,
-};
+  scrollDelta: number,
+  scrollConfig: SpatialScrollConfig,
+  scrollState: ScrollState,
+}): Promise<void>;
+declare function findScrollableAncestor(elem: HTMLElement | null, direction: 'vertical' | 'horizontal'): HTMLElement | null;
+declare function resolveScrollable(elem: HTMLElement, direction: 'vertical' | 'horizontal'): any;
+declare function resolveRects(scrollable: any, isWindowScroll: boolean, elem: HTMLElement): any;
+declare function performScroll(scrollable: any, isVertical: boolean, scrollConfig: SpatialScrollConfig, scrollState: ScrollState, nextOffset: number, liveNextOffset: number): any;
 declare function calculateNextOffset(currentOffset: number, scrollDelta: number, isWindowScroll: boolean, maxOffset: number): number;
 type ReAcquireFocusOptions = {
   getCurrentFocus: () => {
