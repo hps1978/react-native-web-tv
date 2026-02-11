@@ -48,6 +48,38 @@ Highlights:
 * TV focus props on `View`/pressables: `tvFocusable`, `isTVSelectable`, `trapFocusUp/Down/Left/Right`, `destinations`, `autoFocus`.
 * RecyclerListView adapter for `VirtualizedList`/`FlatList` (via `recyclerlistview`) to improve large-list performance on TV.
 * `Platform.isTV` is currently forced to `true` in this fork (TV detection is TODO).
+
+## Spatial navigation configuration
+
+TV apps can configure spatial navigation before `AppRegistry.runApplication()` by setting `window.appConfig`.
+
+```html
+<script>
+  window.appConfig = {
+    keyMap: {
+      // Optional: map device-specific keys to ArrowUp/Down/Left/Right
+      // Example: 'Up': 'ArrowUp'
+    },
+    scrollConfig: {
+      edgeThresholdPx: 100,
+      scrollThrottleMs: 80,
+      smoothScrollEnabled: true,
+      scrollAnimationDurationMs: 0,
+      scrollAnimationDurationMsVertical: 0,
+      scrollAnimationDurationMsHorizontal: 0
+    }
+  };
+</script>
+```
+
+Supported config fields:
+* `keyMap`: optional key mapping for LRUD input. NOTE: this needs to be tested for custom keys. The defaults already work for basic key types without setting this config.
+* `scrollConfig.edgeThresholdPx`: padding from container edges before scrolling.
+* `scrollConfig.scrollThrottleMs`: minimum time between scrolls.
+* `scrollConfig.smoothScrollEnabled`: enables smooth scroll where supported.
+* `scrollConfig.scrollAnimationDurationMs`: fallback duration if axis-specific values are unset.
+* `scrollConfig.scrollAnimationDurationMsVertical`: vertical animation duration override.
+* `scrollConfig.scrollAnimationDurationMsHorizontal`: horizontal animation duration override.
 ## Contributing
 
 Development happens in the open on GitHub and we are grateful for contributions including bugfixes, improvements, and ideas. Read below to learn how you can take part in improving React Native for Web.
