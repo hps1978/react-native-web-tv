@@ -23,7 +23,8 @@ Key additions:
 * TV spatial navigation via `@bbc/tv-lrud-spatial-rnw` which is inspired by and a heavy re-write of `@bbc/tv-lrud-spatial` to address specific React Native Web on TV. It's wired into React Native Web through SpatialManager (another new module).
 * TV exports from `react-native-web`: `TVEventHandler`, `TVEventControl`, `TVFocusGuideView`, `TVTextScrollView`, `useTVEventHandler`, and `TVRemoteEvent`.
 * TV focus props on `View`/pressables: `tvFocusable`, `isTVSelectable`, `trapFocusUp/Down/Left/Right`, `destinations`, `autoFocus`.
-* RecyclerListView adapter for `VirtualizedList`/`FlatList` (via `recyclerlistview`) to improve large-list performance on TV.
+* RecyclerListView adapter for `VirtualizedList`/`FlatList` (via `recyclerlistview`) to improve large-list performance on TV. NOTE: Disabled at the moment to fix some issues.
+* `Platform.isTV` is currently forced to `true` in this fork (TV detection is TODO).
 
 ## Spatial navigation configuration
 
