@@ -66,10 +66,11 @@ The SpatialManager includes **one-time API capability detection at module load**
 
 ## Configuration summary
 
-Spatial navigation reads configuration from `window.appConfig` at runtime. The config object supports two top-level keys:
+Spatial navigation reads configuration from `window.appConfig` at runtime. The config object supports these top-level keys:
 
 - `keyMap`: Optional LRUD key mapping overrides.
 - `scrollConfig`: Scroll behavior settings (listed below).
+- `keydownThrottlingMs`: Optional minimum time (ms) between keydown events to reduce rapid repeats.
 
 `scrollConfig` fields:
 - `edgeThresholdPx`: Padding around the container edge to keep focused items from hugging the boundary.
@@ -93,6 +94,7 @@ Spatial navigation reads configuration from `window.appConfig` at runtime. The c
         'ArrowUp': 'up',
         'ArrowDown': 'down'
     },
+    keydownThrottlingMs: 0,
     scrollConfig: {
       edgeThresholdPx: 50,
       scrollThrottleMs: 80,

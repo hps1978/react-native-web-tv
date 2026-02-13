@@ -47,9 +47,10 @@ function FlatListTVScrollExample() {
         edgeThresholdPx: 50,
         scrollThrottleMs: 80,
         smoothScrollEnabled: true,
-        scrollAnimationDurationMsVertical: 0,
-        scrollAnimationDurationMsHorizontal: 0
-      }
+        scrollAnimationDurationMsVertical: 80,
+        scrollAnimationDurationMsHorizontal: 80
+      },
+      keydownThrottleMs: 0
     };
   }, []);
 

@@ -24,23 +24,31 @@ type SpatialNavigationConfig = {
     [key: string]: string
   },
   scrollConfig?: SpatialScrollConfig,
+  keydownThrottleMs?: number,
+};
+type FocusState = {
+  elem: HTMLElement | null,
+  parentHasAutofocus: boolean,
 };
 let isSpatialManagerReady = false;
 let spatialNavigationContainer: HTMLElement | null = null;
-let currentFocus: {
-  elem: HTMLElement | null,
-  parentHasAutofocus: boolean,
-} = {
+let currentFocus: FocusState = {
   elem: null,
   parentHasAutofocus: false
 };
+let pendingFocus: FocusState | null = null;
+let navigationSequence = 0;
+let keydownThrottleMs = 0;
 let keyDownListener: ((event: any) => void) | null = null;
+let keyUpListener: ((event: any) => void) | null = null;
 let appInitiatedScrollCleanup: (() => void) | null = null;
 let spatialScrollConfig: SpatialScrollConfig = {
   ...DEFAULT_SPATIAL_SCROLL_CONFIG
 };
+let lastKeydownAt = 0;
 const scrollState = createScrollState();
 const DEBUG_SCROLL = typeof window !== 'undefined' && window.__RNW_TV_SCROLL_DEBUG === true;
+const hasAnimationFrame = typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function';
 declare function loadGlobalConfig(): SpatialNavigationConfig | null; // This callback wil get triggered when LRUD fails to find a valid destination from the provided data-destinations
 // atrtribute. LRUD will use it's fallback. autofocus or default focus logic. This contianer will no longer be
 // focusable if there is no autofocus either.
@@ -48,10 +56,10 @@ declare function noValidDestinationCallback(candidateContainer: any, hasAutoFocu
 // User provided through global configs or defaults
 declare function setSpatialNavigationConfig(): any;
 declare function handleCurrentFocusMutations(details: MutationDetails): void;
-declare function triggerFocus(nextFocus: {
-  elem: HTMLElement | null,
-  parentHasAutofocus: boolean,
-}, keyCode?: string): boolean;
+declare function triggerFocus(nextFocus: FocusState, keyCode?: string, options?: {
+  sequence?: number,
+  navigationFrom?: HTMLElement | null,
+}): boolean;
 declare function handlePageVisibilityChange(event: any): any;
 declare function setupPageVisibilityListeners(): any;
 declare function setupAppInitiatedScrollTracking(): any;

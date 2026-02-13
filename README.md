@@ -37,6 +37,7 @@ TV apps can configure spatial navigation before `AppRegistry.runApplication()` b
       // Optional: map device-specific keys to ArrowUp/Down/Left/Right
       // Example: 'Up': 'ArrowUp'
     },
+    keydownThrottlingMs: 0,
     scrollConfig: {
       edgeThresholdPx: 100,
       scrollThrottleMs: 80,
@@ -51,6 +52,7 @@ TV apps can configure spatial navigation before `AppRegistry.runApplication()` b
 
 Supported config fields:
 * `keyMap`: optional key mapping for LRUD input. NOTE: this needs to be tested for custom keys. The defaults already work for basic key types without setting this config.
+* `keydownThrottlingMs`: minimum time between keydown events (ms). Use to reduce rapid repeats from held keys.
 * `scrollConfig.edgeThresholdPx`: padding from container edges before scrolling.
 * `scrollConfig.scrollThrottleMs`: minimum time between scrolls.
 * `scrollConfig.smoothScrollEnabled`: enables smooth scroll where supported.
