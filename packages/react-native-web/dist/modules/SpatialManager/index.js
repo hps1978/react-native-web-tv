@@ -63,13 +63,14 @@ function setSpatialNavigationConfig() {
     var keyMap = null;
     var globalConfig = loadGlobalConfig();
     if (globalConfig) {
+      var _globalConfig$focusCo;
       // Setup LRUD Keys if provided
       keyMap = globalConfig == null ? void 0 : globalConfig.keyMap;
       if (typeof (globalConfig == null ? void 0 : globalConfig.keydownThrottleMs) === 'number') {
         keydownThrottleMs = Math.max(0, globalConfig.keydownThrottleMs);
       }
-      if ((globalConfig == null ? void 0 : globalConfig.focusMode) === 'LeftTop') {
-        focusMode = 'LeftTop';
+      if ((globalConfig == null || (_globalConfig$focusCo = globalConfig.focusConfig) == null ? void 0 : _globalConfig$focusCo.mode) === 'AlignLeft') {
+        focusMode = 'AlignLeft';
       }
       spatialScrollConfig = _objectSpread(_objectSpread({}, DEFAULT_SPATIAL_SCROLL_CONFIG), (globalConfig == null ? void 0 : globalConfig.scrollConfig) || {});
     }

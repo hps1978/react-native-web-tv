@@ -8,7 +8,9 @@
  * @format
  */
 
-// API capability detection (one-time check at module load)
+// API capability detection (one-time check at module load).
+// TV platforms may lack modern APIs, so we detect and fall back gracefully.
+// This avoids repeated try-catch blocks on every scroll operation.
 var hasPerformance = typeof performance !== 'undefined' && typeof performance.now === 'function';
 var hasRequestAnimationFrame = typeof requestAnimationFrame === 'function';
 var hasGetComputedStyle = typeof window !== 'undefined' && typeof window.getComputedStyle === 'function';
@@ -91,6 +93,10 @@ function getScrollPosition(scrollable, isVertical, isWindowScroll) {
   }
   return isVertical ? scrollable.scrollTop : scrollable.scrollLeft;
 }
+
+// Calculate if and how much to scroll to keep an element visible within its container.
+// Uses edge threshold (edgeThresholdPx) to maintain padding from container boundaries.
+// Returns: { needsScroll: boolean, scrollDelta: number (in pixels) }
 function getAxisScrollDelta(targetRect, visibleContainerRect, axis) {
   if (axis === 'vertical') {
     var targetHeight = targetRect.bottom - targetRect.top;
@@ -279,6 +285,10 @@ function resolveScrollable(elem, direction) {
     isWindowScroll
   };
 }
+
+// Resolve element and container rectangles, clamping to viewport for accuracy.
+// Important: bounding rects are viewport-relative, not document-relative.
+// This avoids coordinate system mismatches when scrolling.
 function resolveRects(scrollable, isWindowScroll, elem) {
   var containerRect;
   var targetRect;
@@ -306,6 +316,9 @@ function resolveRects(scrollable, isWindowScroll, elem) {
     left: 0,
     right: window.innerWidth
   };
+
+  // Clamp container rect to viewport bounds so we don't scroll outside the visible area.
+  // This is critical for accurate visibility detection when container is partially off-screen.
   var visibleContainerRect = isWindowScroll ? viewportRect : {
     top: Math.max(containerRect.top, viewportRect.top),
     bottom: Math.min(containerRect.bottom, viewportRect.bottom),
@@ -427,8 +440,14 @@ export function reacquireFocusAfterScroll(currentFocusElem, scrollContainer, opt
 /**
  * Setup global scroll listener to handle app-initiated scrolls.
  * Uses scrollend event when available (modern browsers), falls back to debounced scroll listener.
- * If SpatialManager initiated the scroll, skips focus reacquisition.
- * If app initiated the scroll, reacquires focus if needed.
+ *
+ * Key pattern:
+ * - SpatialManager marks its scrolls via isSpatialManagerInitiatedScroll
+ * - Scroll event fires (either scrollend or debounced scroll)
+ * - If SpatialManager initiated: skip reacquisition (we already have focus control)
+ * - If app initiated: check if current focus is out of view and reacquire if needed
+ *
+ * This allows SpatialManager scrolls to be clean while gracefully handling app scrolls.
  */
 export function setupAppInitiatedScrollHandler(container, options) {
   var handleScrollEnd = e => {
@@ -497,17 +516,24 @@ export function setupAppInitiatedScrollHandler(container, options) {
 }
 
 /**
- * Scroll to align target element's top-left corner with container's top-left corner.
- * In LeftTop mode, the focus area stays fixed and content scrolls under it.
- * Used as an alternative to the default maybeScrollOnFocus behavior.
+ * Scroll to align target element for AlignLeft mode.
+ *
+ * Behavior:
+ * - ArrowRight: Align target's left edge to current focus X position (if scrollable space allows)
+ * - ArrowLeft, ArrowUp, ArrowDown: Use default visibility behavior (keep in view)
+ * - Vertical: Always uses default behavior regardless of direction
+ *
+ * Key insight: AlignLeft creates a fixed X position where focus appears to stay while
+ * content scrolls left/right. But at content boundaries, we fall back to default behavior
+ * to avoid breaking visual alignment of the original focus element.
  */
-function scrollToAlignLeftTop(elem, keyCode, currentElem, scrollConfig, scrollState) {
+function scrollToAlignLeft(elem, keyCode, currentElem, scrollConfig, scrollState) {
   if (!elem || typeof window === 'undefined') return;
   if (DEBUG_SCROLL()) {
     try {
       var curRect = currentElem == null || currentElem.getBoundingClientRect == null ? void 0 : currentElem.getBoundingClientRect();
       var nextRect = elem.getBoundingClientRect();
-      console.log('[SpatialManager][scroll] LeftTop input', {
+      console.log('[SpatialManager][scroll] AlignLeft input', {
         keyCode,
         currentId: currentElem == null ? void 0 : currentElem.id,
         nextId: elem.id,
@@ -515,7 +541,7 @@ function scrollToAlignLeftTop(elem, keyCode, currentElem, scrollConfig, scrollSt
         nextRect
       });
     } catch (e) {
-      console.log('[SpatialManager][scroll] LeftTop input', {
+      console.log('[SpatialManager][scroll] AlignLeft input', {
         keyCode,
         currentId: currentElem == null ? void 0 : currentElem.id,
         nextId: elem.id,
@@ -531,37 +557,65 @@ function scrollToAlignLeftTop(elem, keyCode, currentElem, scrollConfig, scrollSt
   }
   var verticalScroll = resolveScrollable(elem, 'vertical');
   var horizontalScroll = resolveScrollable(elem, 'horizontal');
-  var computeLeftTopDeltas = () => {
+  var computeAlignLeftDeltas = () => {
     var verticalRects = resolveRects(verticalScroll.scrollable, verticalScroll.isWindowScroll, elem);
     var horizontalRects = resolveRects(horizontalScroll.scrollable, horizontalScroll.isWindowScroll, elem);
+    var currentRect = currentElem == null || currentElem.getBoundingClientRect == null ? void 0 : currentElem.getBoundingClientRect();
+    var horizontalDelta = 0;
+    var needsHorizontalScroll = false;
+    if (keyCode === 'ArrowRight' && currentRect) {
+      // On right navigation: try to align target's left edge to current focus X position.
+      // This keeps focus visually fixed while content scrolls underneath.
+      var desiredDelta = horizontalRects.targetRect.left - currentRect.left;
+      var scrollable = horizontalScroll.scrollable;
+      var currentScroll = getScrollPosition(scrollable, false, horizontalScroll.isWindowScroll);
+      var maxScroll = Math.max(0, scrollable.scrollWidth - scrollable.clientWidth);
 
-    // In LeftTop mode, we want to align the target's top with the container's visible top
-    // and the target's left with the container's visible left.
-    var verticalDelta = verticalRects.targetRect.top - verticalRects.visibleContainerRect.top;
-    var horizontalDelta = horizontalRects.targetRect.left - horizontalRects.visibleContainerRect.left;
+      // Critical boundary check: can we achieve alignment without exceeding max scroll?
+      // This prevents breaking alignment at content boundaries (e.g., last item in list).
+      var canAchieveAlignment = currentScroll + desiredDelta <= maxScroll;
+      if (canAchieveAlignment) {
+        // Enough space: apply alignment scroll
+        horizontalDelta = desiredDelta;
+        needsHorizontalScroll = desiredDelta !== 0;
+      } else {
+        // Not enough space: gracefully fall back to default visibility.
+        // This prevents forcing a scroll that would break existing focus alignment.
+        var horizontal = getAxisScrollDelta(horizontalRects.targetRect, horizontalRects.visibleContainerRect, 'horizontal');
+        horizontalDelta = horizontal.scrollDelta;
+        needsHorizontalScroll = horizontal.needsScroll;
+      }
+    } else {
+      var _horizontal = getAxisScrollDelta(horizontalRects.targetRect, horizontalRects.visibleContainerRect, 'horizontal');
+      horizontalDelta = _horizontal.scrollDelta;
+      needsHorizontalScroll = _horizontal.needsScroll;
+    }
+
+    // Vertical: use default behavior (keep visible with edge threshold)
+    var vertical = getAxisScrollDelta(verticalRects.targetRect, verticalRects.visibleContainerRect, 'vertical');
     return {
-      verticalDelta,
       horizontalDelta,
+      verticalDelta: vertical.scrollDelta,
       verticalRects,
       horizontalRects,
-      needsVerticalScroll: verticalDelta !== 0,
-      needsHorizontalScroll: horizontalDelta !== 0
+      needsHorizontalScroll,
+      needsVerticalScroll: vertical.needsScroll
     };
   };
   if (DEBUG_SCROLL()) {
     logScrollContainer('vertical', verticalScroll, elem);
     logScrollContainer('horizontal', horizontalScroll, elem);
   }
-  var initial = computeLeftTopDeltas();
+  var initial = computeAlignLeftDeltas();
   if (DEBUG_SCROLL()) {
-    console.log('[SpatialManager][scroll] LeftTop deltas', {
-      verticalDelta: initial.verticalDelta,
+    console.log('[SpatialManager][scroll] AlignLeft deltas', {
       horizontalDelta: initial.horizontalDelta,
-      needsVerticalScroll: initial.needsVerticalScroll,
-      needsHorizontalScroll: initial.needsHorizontalScroll
+      verticalDelta: initial.verticalDelta,
+      needsHorizontalScroll: initial.needsHorizontalScroll,
+      needsVerticalScroll: initial.needsVerticalScroll
     });
   }
-  if (!initial.needsVerticalScroll && !initial.needsHorizontalScroll) {
+  if (!initial.needsHorizontalScroll && !initial.needsVerticalScroll) {
     return null;
   }
   scrollState.lastScrollAt = now;
@@ -580,26 +634,31 @@ function scrollToAlignLeftTop(elem, keyCode, currentElem, scrollConfig, scrollSt
       scrollState
     });
   };
-  if (initial.needsVerticalScroll && initial.needsHorizontalScroll) {
-    var primaryAxis = Math.abs(initial.verticalDelta) >= Math.abs(initial.horizontalDelta) ? 'vertical' : 'horizontal';
-    var secondaryAxis = primaryAxis === 'vertical' ? 'horizontal' : 'vertical';
-    return runAxis(primaryAxis, primaryAxis === 'vertical' ? initial.verticalDelta : initial.horizontalDelta).then(() => {
-      var after = computeLeftTopDeltas();
-      var secondaryDelta = secondaryAxis === 'vertical' ? after.verticalDelta : after.horizontalDelta;
-      if (secondaryDelta === 0) {
+  if (initial.needsHorizontalScroll && initial.needsVerticalScroll) {
+    // Both axes need scrolling: prioritize horizontal (AlignLeft alignment) first.
+    // After horizontal scroll settles, recompute deltas to see if vertical is still needed.
+    // Sequential approach prevents conflicting scroll operations.
+    return runAxis('horizontal', initial.horizontalDelta).then(() => {
+      var after = computeAlignLeftDeltas();
+      if (!after.needsVerticalScroll) {
         return;
       }
-      return runAxis(secondaryAxis, secondaryDelta);
+      return runAxis('vertical', after.verticalDelta);
     });
   }
-  if (initial.needsVerticalScroll) {
-    return runAxis('vertical', initial.verticalDelta);
+  if (initial.needsHorizontalScroll) {
+    return runAxis('horizontal', initial.horizontalDelta);
   }
-  return runAxis('horizontal', initial.horizontalDelta);
+  return runAxis('vertical', initial.verticalDelta);
 }
+
+// Main entry point for scroll-on-focus logic.
+// Dispatches to AlignLeft or default behavior based on focusMode.
+// - AlignLeft: right aligns to current focus X, other directions use default
+// - default: always use standard visibility behavior
 export function maybeScrollOnFocus(elem, keyCode, currentElem, scrollConfig, scrollState, focusMode) {
-  if (focusMode === 'LeftTop') {
-    return scrollToAlignLeftTop(elem, keyCode, currentElem, scrollConfig, scrollState);
+  if (focusMode === 'AlignLeft') {
+    return scrollToAlignLeft(elem, keyCode, currentElem, scrollConfig, scrollState);
   }
 
   // Default behavior
@@ -677,6 +736,9 @@ export function maybeScrollOnFocus(elem, keyCode, currentElem, scrollConfig, scr
     });
   };
   if (initial.vertical.needsScroll && initial.horizontal.needsScroll) {
+    // Both axes need scrolling: scroll the larger delta first (better UX).
+    // After primary axis settles, recompute secondary to handle post-scroll state changes.
+    // Sequential approach prevents conflicting operations.
     var primaryAxis = Math.abs(initial.vertical.scrollDelta) >= Math.abs(initial.horizontal.scrollDelta) ? 'vertical' : 'horizontal';
     var secondaryAxis = primaryAxis === 'vertical' ? 'horizontal' : 'vertical';
     var primaryInfo = primaryAxis === 'vertical' ? initial.vertical : initial.horizontal;

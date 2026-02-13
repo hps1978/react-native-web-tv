@@ -25,7 +25,9 @@ type SpatialNavigationConfig = {
   },
   scrollConfig?: SpatialScrollConfig,
   keydownThrottleMs?: number,
-  focusMode?: 'LeftTop' | 'default',
+  focusConfig?: {
+    mode?: 'AlignLeft' | 'default'
+  },
 };
 type FocusState = {
   elem: HTMLElement | null,
@@ -40,7 +42,7 @@ let currentFocus: FocusState = {
 let pendingFocus: FocusState | null = null;
 let navigationSequence = 0;
 let keydownThrottleMs = 0;
-let focusMode: 'LeftTop' | 'default' = 'default';
+let focusMode: 'AlignLeft' | 'default' = 'default';
 let keyDownListener: ((event: any) => void) | null = null;
 let keyUpListener: ((event: any) => void) | null = null;
 let appInitiatedScrollCleanup: (() => void) | null = null;
@@ -61,7 +63,7 @@ declare function handleCurrentFocusMutations(details: MutationDetails): void;
 declare function triggerFocus(nextFocus: FocusState, keyCode?: string, options?: {
   sequence?: number,
   navigationFrom?: HTMLElement | null,
-  focusMode?: 'LeftTop' | 'default',
+  focusMode?: 'AlignLeft' | 'default',
 }): boolean;
 declare function handlePageVisibilityChange(event: any): any;
 declare function setupPageVisibilityListeners(): any;

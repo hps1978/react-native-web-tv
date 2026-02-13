@@ -21,7 +21,9 @@ type ScrollState = {
   scrollAnimationFrame: number | null,
 };
 
-// API capability detection (one-time check at module load)
+// API capability detection (one-time check at module load).
+// TV platforms may lack modern APIs, so we detect and fall back gracefully.
+// This avoids repeated try-catch blocks on every scroll operation.
 const hasPerformance = typeof performance !== 'undefined' && typeof performance.now === 'function';
 const hasRequestAnimationFrame = typeof requestAnimationFrame === 'function';
 const hasGetComputedStyle = typeof window !== 'undefined' && typeof window.getComputedStyle === 'function';
@@ -43,7 +45,9 @@ declare function scheduleAnimationFrame(callback: () => void): number;
 declare function cancelScheduledFrame(frameId: number): void;
 declare function animateScrollTo(scrollable: any, isVertical: boolean, nextOffset: number, durationMs: number, scrollState: ScrollState): any;
 declare function getScrollDurationMs(scrollConfig: SpatialScrollConfig, isVertical: boolean): number;
-declare function getScrollPosition(scrollable: any, isVertical: boolean, isWindowScroll: boolean): number;
+declare function getScrollPosition(scrollable: any, isVertical: boolean, isWindowScroll: boolean): number; // Calculate if and how much to scroll to keep an element visible within its container.
+// Uses edge threshold (edgeThresholdPx) to maintain padding from container boundaries.
+// Returns: { needsScroll: boolean, scrollDelta: number (in pixels) }
 declare function getAxisScrollDelta(targetRect: any, visibleContainerRect: any, axis: 'vertical' | 'horizontal'): {
   needsScroll: boolean,
   scrollDelta: number,
@@ -62,7 +66,9 @@ declare function scrollAxis(params: {
   scrollState: ScrollState,
 }): Promise<void>;
 declare function findScrollableAncestor(elem: HTMLElement | null, direction: 'vertical' | 'horizontal'): HTMLElement | null;
-declare function resolveScrollable(elem: HTMLElement, direction: 'vertical' | 'horizontal'): any;
+declare function resolveScrollable(elem: HTMLElement, direction: 'vertical' | 'horizontal'): any; // Resolve element and container rectangles, clamping to viewport for accuracy.
+// Important: bounding rects are viewport-relative, not document-relative.
+// This avoids coordinate system mismatches when scrolling.
 declare function resolveRects(scrollable: any, isWindowScroll: boolean, elem: HTMLElement): any;
 declare function performScroll(scrollable: any, isVertical: boolean, scrollConfig: SpatialScrollConfig, scrollState: ScrollState, nextOffset: number, liveNextOffset: number): any;
 declare function calculateNextOffset(currentOffset: number, scrollDelta: number, isWindowScroll: boolean, maxOffset: number): number;
@@ -111,16 +117,32 @@ declare export function reacquireFocusAfterScroll(currentFocusElem: HTMLElement 
 /**
  * Setup global scroll listener to handle app-initiated scrolls.
  * Uses scrollend event when available (modern browsers), falls back to debounced scroll listener.
- * If SpatialManager initiated the scroll, skips focus reacquisition.
- * If app initiated the scroll, reacquires focus if needed.
+ *
+ * Key pattern:
+ * - SpatialManager marks its scrolls via isSpatialManagerInitiatedScroll
+ * - Scroll event fires (either scrollend or debounced scroll)
+ * - If SpatialManager initiated: skip reacquisition (we already have focus control)
+ * - If app initiated: check if current focus is out of view and reacquire if needed
+ *
+ * This allows SpatialManager scrolls to be clean while gracefully handling app scrolls.
  */
 declare export function setupAppInitiatedScrollHandler(container: HTMLElement | Document, options: ReAcquireFocusOptions): any;
 /**
- * Scroll to align target element's top-left corner with container's top-left corner.
- * In LeftTop mode, the focus area stays fixed and content scrolls under it.
- * Used as an alternative to the default maybeScrollOnFocus behavior.
+ * Scroll to align target element for AlignLeft mode.
+ *
+ * Behavior:
+ * - ArrowRight: Align target's left edge to current focus X position (if scrollable space allows)
+ * - ArrowLeft, ArrowUp, ArrowDown: Use default visibility behavior (keep in view)
+ * - Vertical: Always uses default behavior regardless of direction
+ *
+ * Key insight: AlignLeft creates a fixed X position where focus appears to stay while
+ * content scrolls left/right. But at content boundaries, we fall back to default behavior
+ * to avoid breaking visual alignment of the original focus element.
  */
-declare function scrollToAlignLeftTop(elem: HTMLElement | null, keyCode: string, currentElem: HTMLElement | null, scrollConfig: SpatialScrollConfig, scrollState: ScrollState): any;
-declare export function maybeScrollOnFocus(elem: HTMLElement | null, keyCode: string, currentElem: HTMLElement | null, scrollConfig: SpatialScrollConfig, scrollState: ScrollState, focusMode?: 'LeftTop' | 'default'): any;
+declare function scrollToAlignLeft(elem: HTMLElement | null, keyCode: string, currentElem: HTMLElement | null, scrollConfig: SpatialScrollConfig, scrollState: ScrollState): any; // Main entry point for scroll-on-focus logic.
+// Dispatches to AlignLeft or default behavior based on focusMode.
+// - AlignLeft: right aligns to current focus X, other directions use default
+// - default: always use standard visibility behavior
+declare export function maybeScrollOnFocus(elem: HTMLElement | null, keyCode: string, currentElem: HTMLElement | null, scrollConfig: SpatialScrollConfig, scrollState: ScrollState, focusMode?: 'AlignLeft' | 'default'): any;
 export type { SpatialScrollConfig, ReAcquireFocusOptions };
 export { DEFAULT_SPATIAL_SCROLL_CONFIG };

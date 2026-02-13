@@ -70,7 +70,8 @@ Spatial navigation reads configuration from `window.appConfig` at runtime. The c
 
 - `keyMap`: Optional LRUD key mapping overrides.
 - `scrollConfig`: Scroll behavior settings (listed below).
-- `keydownThrottlingMs`: Optional minimum time (ms) between keydown events to reduce rapid repeats.
+- `keydownThrottleMs`: Optional minimum time (ms) between keydown events to reduce rapid repeats.
+- `focusConfig`: Focus scrolling behavior configuration (mode). AlignLeft keeps left moves default and aligns right moves to the current focus X position when scrolling.
 
 `scrollConfig` fields:
 - `edgeThresholdPx`: Padding around the container edge to keep focused items from hugging the boundary.
@@ -94,7 +95,10 @@ Spatial navigation reads configuration from `window.appConfig` at runtime. The c
         'ArrowUp': 'up',
         'ArrowDown': 'down'
     },
-    keydownThrottlingMs: 0,
+    keydownThrottleMs: 0,
+    focusConfig: {
+      mode: 'default'  // or 'AlignLeft' for horizontal-only alignment
+    },
     scrollConfig: {
       edgeThresholdPx: 50,
       scrollThrottleMs: 80,

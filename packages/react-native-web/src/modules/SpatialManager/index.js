@@ -42,7 +42,9 @@ type SpatialNavigationConfig = {
   keyMap?: { [key: string]: string },
   scrollConfig?: SpatialScrollConfig,
   keydownThrottleMs?: number,
-  focusMode?: 'LeftTop' | 'default'
+  focusConfig?: {
+    mode?: 'AlignLeft' | 'default'
+  }
 };
 
 type FocusState = {
@@ -59,7 +61,7 @@ let currentFocus: FocusState = {
 let pendingFocus: FocusState | null = null;
 let navigationSequence = 0;
 let keydownThrottleMs = 0;
-let focusMode: 'LeftTop' | 'default' = 'default';
+let focusMode: 'AlignLeft' | 'default' = 'default';
 let keyDownListener: ((event: any) => void) | null = null;
 let keyUpListener: ((event: any) => void) | null = null;
 let appInitiatedScrollCleanup: (() => void) | null = null;
@@ -105,8 +107,8 @@ function setSpatialNavigationConfig() {
       if (typeof globalConfig?.keydownThrottleMs === 'number') {
         keydownThrottleMs = Math.max(0, globalConfig.keydownThrottleMs);
       }
-      if (globalConfig?.focusMode === 'LeftTop') {
-        focusMode = 'LeftTop';
+      if (globalConfig?.focusConfig?.mode === 'AlignLeft') {
+        focusMode = 'AlignLeft';
       }
       spatialScrollConfig = {
         ...DEFAULT_SPATIAL_SCROLL_CONFIG,
@@ -139,7 +141,7 @@ function triggerFocus(
   options?: {
     sequence?: number,
     navigationFrom?: HTMLElement | null,
-    focusMode?: 'LeftTop' | 'default'
+    focusMode?: 'AlignLeft' | 'default'
   }
 ): boolean {
   if (nextFocus && nextFocus.elem) {
