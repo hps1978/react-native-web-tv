@@ -131,8 +131,9 @@ declare export function setupAppInitiatedScrollHandler(container: HTMLElement | 
  * Scroll to align target element for AlignLeft mode.
  *
  * Behavior:
- * - ArrowRight: Align target's left edge to current focus X position (if scrollable space allows)
- * - ArrowLeft, ArrowUp, ArrowDown: Use default visibility behavior (keep in view)
+ * - ArrowRight: Align target's left edge to current focus X position
+ *   (only if scrollable space allows)
+ * - ArrowLeft, ArrowUp/ArrowDown: Use default visibility behavior (keep in view)
  * - Vertical: Always uses default behavior regardless of direction
  *
  * Key insight: AlignLeft creates a fixed X position where focus appears to stay while

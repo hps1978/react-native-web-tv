@@ -519,8 +519,9 @@ export function setupAppInitiatedScrollHandler(container, options) {
  * Scroll to align target element for AlignLeft mode.
  *
  * Behavior:
- * - ArrowRight: Align target's left edge to current focus X position (if scrollable space allows)
- * - ArrowLeft, ArrowUp, ArrowDown: Use default visibility behavior (keep in view)
+ * - ArrowRight: Align target's left edge to current focus X position
+ *   (only if scrollable space allows)
+ * - ArrowLeft, ArrowUp/ArrowDown: Use default visibility behavior (keep in view)
  * - Vertical: Always uses default behavior regardless of direction
  *
  * Key insight: AlignLeft creates a fixed X position where focus appears to stay while
@@ -564,16 +565,17 @@ function scrollToAlignLeft(elem, keyCode, currentElem, scrollConfig, scrollState
     var horizontalDelta = 0;
     var needsHorizontalScroll = false;
     if (keyCode === 'ArrowRight' && currentRect) {
-      // On right navigation: try to align target's left edge to current focus X position.
+      // On right navigation: align target's left edge to current focus X position.
       // This keeps focus visually fixed while content scrolls underneath.
       var desiredDelta = horizontalRects.targetRect.left - currentRect.left;
       var scrollable = horizontalScroll.scrollable;
       var currentScroll = getScrollPosition(scrollable, false, horizontalScroll.isWindowScroll);
       var maxScroll = Math.max(0, scrollable.scrollWidth - scrollable.clientWidth);
 
-      // Critical boundary check: can we achieve alignment without exceeding max scroll?
-      // This prevents breaking alignment at content boundaries (e.g., last item in list).
-      var canAchieveAlignment = currentScroll + desiredDelta <= maxScroll;
+      // Critical boundary check: can we achieve alignment without exceeding scroll bounds?
+      // This prevents breaking alignment at content boundaries (e.g., last item).
+      var nextScroll = currentScroll + desiredDelta;
+      var canAchieveAlignment = nextScroll >= 0 && nextScroll <= maxScroll;
       if (canAchieveAlignment) {
         // Enough space: apply alignment scroll
         horizontalDelta = desiredDelta;
@@ -584,6 +586,31 @@ function scrollToAlignLeft(elem, keyCode, currentElem, scrollConfig, scrollState
         var horizontal = getAxisScrollDelta(horizontalRects.targetRect, horizontalRects.visibleContainerRect, 'horizontal');
         horizontalDelta = horizontal.scrollDelta;
         needsHorizontalScroll = horizontal.needsScroll;
+      }
+    } else if (keyCode === 'ArrowLeft' && currentRect) {
+      // On left navigation: only align when a left scroll is actually needed.
+      // If the target is still visible, avoid scrolling to preserve the current view.
+      var defaultHorizontal = getAxisScrollDelta(horizontalRects.targetRect, horizontalRects.visibleContainerRect, 'horizontal');
+      if (defaultHorizontal.needsScroll) {
+        var _desiredDelta = horizontalRects.targetRect.left - currentRect.left;
+        var _scrollable = horizontalScroll.scrollable;
+        var _currentScroll = getScrollPosition(_scrollable, false, horizontalScroll.isWindowScroll);
+        var _maxScroll = Math.max(0, _scrollable.scrollWidth - _scrollable.clientWidth);
+        var _nextScroll = _currentScroll + _desiredDelta;
+        var _canAchieveAlignment = _nextScroll >= 0 && _nextScroll <= _maxScroll;
+        if (_canAchieveAlignment) {
+          // Enough space: align to current focus X position.
+          horizontalDelta = _desiredDelta;
+          needsHorizontalScroll = _desiredDelta !== 0;
+        } else {
+          // Not enough space: fall back to default visibility scroll.
+          horizontalDelta = defaultHorizontal.scrollDelta;
+          needsHorizontalScroll = defaultHorizontal.needsScroll;
+        }
+      } else {
+        // No scroll needed: keep the current view stable.
+        horizontalDelta = 0;
+        needsHorizontalScroll = false;
       }
     } else {
       var _horizontal = getAxisScrollDelta(horizontalRects.targetRect, horizontalRects.visibleContainerRect, 'horizontal');
