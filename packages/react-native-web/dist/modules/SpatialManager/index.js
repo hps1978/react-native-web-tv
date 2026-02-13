@@ -29,6 +29,7 @@ var currentFocus = {
 var pendingFocus = null;
 var navigationSequence = 0;
 var keydownThrottleMs = 0;
+var focusMode = 'default';
 var keyDownListener = null;
 var keyUpListener = null;
 var appInitiatedScrollCleanup = null;
@@ -67,6 +68,9 @@ function setSpatialNavigationConfig() {
       if (typeof (globalConfig == null ? void 0 : globalConfig.keydownThrottleMs) === 'number') {
         keydownThrottleMs = Math.max(0, globalConfig.keydownThrottleMs);
       }
+      if ((globalConfig == null ? void 0 : globalConfig.focusMode) === 'LeftTop') {
+        focusMode = 'LeftTop';
+      }
       spatialScrollConfig = _objectSpread(_objectSpread({}, DEFAULT_SPATIAL_SCROLL_CONFIG), (globalConfig == null ? void 0 : globalConfig.scrollConfig) || {});
     }
     setConfig({
@@ -104,9 +108,10 @@ function triggerFocus(nextFocus, keyCode, options) {
     }
     var scrollPromise = null;
     var navigationFrom = (options == null ? void 0 : options.navigationFrom) != null ? options.navigationFrom : currentFocus.elem;
+    var mode = (options == null ? void 0 : options.focusMode) || focusMode;
     // Only handle scroll for subsequent navigations, not first focus
     if (keyCode && navigationFrom) {
-      scrollPromise = maybeScrollOnFocus(nextFocus.elem, keyCode, navigationFrom, spatialScrollConfig, scrollState);
+      scrollPromise = maybeScrollOnFocus(nextFocus.elem, keyCode, navigationFrom, spatialScrollConfig, scrollState, mode);
     }
     var applyFocus = () => {
       if (!nextFocus.elem) {
@@ -232,7 +237,8 @@ function setupSpatialNavigation(container) {
     }
     if (triggerFocus(nextFocus, keyCode, {
       sequence,
-      navigationFrom
+      navigationFrom,
+      focusMode
     }) === true) {}
   }, {
     capture: true

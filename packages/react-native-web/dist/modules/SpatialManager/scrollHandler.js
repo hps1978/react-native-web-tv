@@ -495,7 +495,114 @@ export function setupAppInitiatedScrollHandler(container, options) {
     }
   };
 }
-export function maybeScrollOnFocus(elem, keyCode, currentElem, scrollConfig, scrollState) {
+
+/**
+ * Scroll to align target element's top-left corner with container's top-left corner.
+ * In LeftTop mode, the focus area stays fixed and content scrolls under it.
+ * Used as an alternative to the default maybeScrollOnFocus behavior.
+ */
+function scrollToAlignLeftTop(elem, keyCode, currentElem, scrollConfig, scrollState) {
+  if (!elem || typeof window === 'undefined') return;
+  if (DEBUG_SCROLL()) {
+    try {
+      var curRect = currentElem == null || currentElem.getBoundingClientRect == null ? void 0 : currentElem.getBoundingClientRect();
+      var nextRect = elem.getBoundingClientRect();
+      console.log('[SpatialManager][scroll] LeftTop input', {
+        keyCode,
+        currentId: currentElem == null ? void 0 : currentElem.id,
+        nextId: elem.id,
+        curRect,
+        nextRect
+      });
+    } catch (e) {
+      console.log('[SpatialManager][scroll] LeftTop input', {
+        keyCode,
+        currentId: currentElem == null ? void 0 : currentElem.id,
+        nextId: elem.id,
+        error: String(e)
+      });
+    }
+  }
+  var now = Date.now();
+  if (scrollConfig.scrollThrottleMs != null) {
+    if (now - scrollState.lastScrollAt < scrollConfig.scrollThrottleMs) {
+      return null;
+    }
+  }
+  var verticalScroll = resolveScrollable(elem, 'vertical');
+  var horizontalScroll = resolveScrollable(elem, 'horizontal');
+  var computeLeftTopDeltas = () => {
+    var verticalRects = resolveRects(verticalScroll.scrollable, verticalScroll.isWindowScroll, elem);
+    var horizontalRects = resolveRects(horizontalScroll.scrollable, horizontalScroll.isWindowScroll, elem);
+
+    // In LeftTop mode, we want to align the target's top with the container's visible top
+    // and the target's left with the container's visible left.
+    var verticalDelta = verticalRects.targetRect.top - verticalRects.visibleContainerRect.top;
+    var horizontalDelta = horizontalRects.targetRect.left - horizontalRects.visibleContainerRect.left;
+    return {
+      verticalDelta,
+      horizontalDelta,
+      verticalRects,
+      horizontalRects,
+      needsVerticalScroll: verticalDelta !== 0,
+      needsHorizontalScroll: horizontalDelta !== 0
+    };
+  };
+  if (DEBUG_SCROLL()) {
+    logScrollContainer('vertical', verticalScroll, elem);
+    logScrollContainer('horizontal', horizontalScroll, elem);
+  }
+  var initial = computeLeftTopDeltas();
+  if (DEBUG_SCROLL()) {
+    console.log('[SpatialManager][scroll] LeftTop deltas', {
+      verticalDelta: initial.verticalDelta,
+      horizontalDelta: initial.horizontalDelta,
+      needsVerticalScroll: initial.needsVerticalScroll,
+      needsHorizontalScroll: initial.needsHorizontalScroll
+    });
+  }
+  if (!initial.needsVerticalScroll && !initial.needsHorizontalScroll) {
+    return null;
+  }
+  scrollState.lastScrollAt = now;
+  markSpatialManagerScroll();
+  var runAxis = (axis, delta) => {
+    if (delta === 0) {
+      return Promise.resolve();
+    }
+    var scrollInfo = axis === 'vertical' ? verticalScroll : horizontalScroll;
+    return scrollAxis({
+      scrollable: scrollInfo.scrollable,
+      isWindowScroll: scrollInfo.isWindowScroll,
+      isVertical: axis === 'vertical',
+      scrollDelta: delta,
+      scrollConfig,
+      scrollState
+    });
+  };
+  if (initial.needsVerticalScroll && initial.needsHorizontalScroll) {
+    var primaryAxis = Math.abs(initial.verticalDelta) >= Math.abs(initial.horizontalDelta) ? 'vertical' : 'horizontal';
+    var secondaryAxis = primaryAxis === 'vertical' ? 'horizontal' : 'vertical';
+    return runAxis(primaryAxis, primaryAxis === 'vertical' ? initial.verticalDelta : initial.horizontalDelta).then(() => {
+      var after = computeLeftTopDeltas();
+      var secondaryDelta = secondaryAxis === 'vertical' ? after.verticalDelta : after.horizontalDelta;
+      if (secondaryDelta === 0) {
+        return;
+      }
+      return runAxis(secondaryAxis, secondaryDelta);
+    });
+  }
+  if (initial.needsVerticalScroll) {
+    return runAxis('vertical', initial.verticalDelta);
+  }
+  return runAxis('horizontal', initial.horizontalDelta);
+}
+export function maybeScrollOnFocus(elem, keyCode, currentElem, scrollConfig, scrollState, focusMode) {
+  if (focusMode === 'LeftTop') {
+    return scrollToAlignLeftTop(elem, keyCode, currentElem, scrollConfig, scrollState);
+  }
+
+  // Default behavior
   if (!elem || typeof window === 'undefined') return;
   if (DEBUG_SCROLL()) {
     try {

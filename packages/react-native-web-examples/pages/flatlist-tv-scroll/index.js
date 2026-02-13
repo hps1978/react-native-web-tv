@@ -50,6 +50,7 @@ function FlatListTVScrollExample() {
         scrollAnimationDurationMsVertical: 80,
         scrollAnimationDurationMsHorizontal: 80
       },
+      focusMode: 'LeftTop',
       keydownThrottleMs: 0
     };
   }, []);

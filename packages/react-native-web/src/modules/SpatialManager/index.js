@@ -41,7 +41,8 @@ import { setupNodeId } from '../../exports/TV/utils';
 type SpatialNavigationConfig = {
   keyMap?: { [key: string]: string },
   scrollConfig?: SpatialScrollConfig,
-  keydownThrottleMs?: number
+  keydownThrottleMs?: number,
+  focusMode?: 'LeftTop' | 'default'
 };
 
 type FocusState = {
@@ -58,6 +59,7 @@ let currentFocus: FocusState = {
 let pendingFocus: FocusState | null = null;
 let navigationSequence = 0;
 let keydownThrottleMs = 0;
+let focusMode: 'LeftTop' | 'default' = 'default';
 let keyDownListener: ((event: any) => void) | null = null;
 let keyUpListener: ((event: any) => void) | null = null;
 let appInitiatedScrollCleanup: (() => void) | null = null;
@@ -103,7 +105,9 @@ function setSpatialNavigationConfig() {
       if (typeof globalConfig?.keydownThrottleMs === 'number') {
         keydownThrottleMs = Math.max(0, globalConfig.keydownThrottleMs);
       }
-
+      if (globalConfig?.focusMode === 'LeftTop') {
+        focusMode = 'LeftTop';
+      }
       spatialScrollConfig = {
         ...DEFAULT_SPATIAL_SCROLL_CONFIG,
         ...(globalConfig?.scrollConfig || {})
@@ -134,7 +138,8 @@ function triggerFocus(
   keyCode?: string,
   options?: {
     sequence?: number,
-    navigationFrom?: HTMLElement | null
+    navigationFrom?: HTMLElement | null,
+    focusMode?: 'LeftTop' | 'default'
   }
 ): boolean {
   if (nextFocus && nextFocus.elem) {
@@ -153,6 +158,7 @@ function triggerFocus(
       options?.navigationFrom != null
         ? options.navigationFrom
         : currentFocus.elem;
+    const mode = options?.focusMode || focusMode;
     // Only handle scroll for subsequent navigations, not first focus
     if (keyCode && navigationFrom) {
       scrollPromise = maybeScrollOnFocus(
@@ -160,7 +166,8 @@ function triggerFocus(
         keyCode,
         navigationFrom,
         spatialScrollConfig,
-        scrollState
+        scrollState,
+        mode
       );
     }
 
@@ -336,7 +343,8 @@ function setupSpatialNavigation(container?: HTMLElement) {
       if (
         triggerFocus(nextFocus, keyCode, {
           sequence,
-          navigationFrom
+          navigationFrom,
+          focusMode
         }) === true
       ) {
       }

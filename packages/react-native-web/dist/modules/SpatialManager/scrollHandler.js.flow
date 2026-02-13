@@ -115,6 +115,12 @@ declare export function reacquireFocusAfterScroll(currentFocusElem: HTMLElement 
  * If app initiated the scroll, reacquires focus if needed.
  */
 declare export function setupAppInitiatedScrollHandler(container: HTMLElement | Document, options: ReAcquireFocusOptions): any;
-declare export function maybeScrollOnFocus(elem: HTMLElement | null, keyCode: string, currentElem: HTMLElement | null, scrollConfig: SpatialScrollConfig, scrollState: ScrollState): any;
+/**
+ * Scroll to align target element's top-left corner with container's top-left corner.
+ * In LeftTop mode, the focus area stays fixed and content scrolls under it.
+ * Used as an alternative to the default maybeScrollOnFocus behavior.
+ */
+declare function scrollToAlignLeftTop(elem: HTMLElement | null, keyCode: string, currentElem: HTMLElement | null, scrollConfig: SpatialScrollConfig, scrollState: ScrollState): any;
+declare export function maybeScrollOnFocus(elem: HTMLElement | null, keyCode: string, currentElem: HTMLElement | null, scrollConfig: SpatialScrollConfig, scrollState: ScrollState, focusMode?: 'LeftTop' | 'default'): any;
 export type { SpatialScrollConfig, ReAcquireFocusOptions };
 export { DEFAULT_SPATIAL_SCROLL_CONFIG };
