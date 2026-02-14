@@ -81,6 +81,8 @@ var TVFocusGuideView = /*#__PURE__*/React.forwardRef((props, ref) => {
 });
 var styles = StyleSheet.create({
   container: {
+    width: '100%',
+    height: '100%',
     pointerEvents: 'box-none' // FocusGuides should not handle pointer events.
   }
 });
