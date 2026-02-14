@@ -53,8 +53,8 @@ var TVFocusGuideView = /*#__PURE__*/React.forwardRef((props, ref) => {
       setDestinations(destinationsProp); // $FlowFixMe[incompatible-call]
     }
   }, [setDestinations, destinationsProp, focusable]);
-  var enabledStyle = enabled ? {} : {
-    display: 'none'
+  var enabledStyle = {
+    display: enabled ? 'flex' : 'none'
   };
   var style = [styles.container, props.style, enabledStyle];
 
@@ -81,8 +81,8 @@ var TVFocusGuideView = /*#__PURE__*/React.forwardRef((props, ref) => {
 });
 var styles = StyleSheet.create({
   container: {
-    width: '100%',
-    height: '100%',
+    minWidth: 1,
+    minHeight: 1,
     pointerEvents: 'box-none' // FocusGuides should not handle pointer events.
   }
 });

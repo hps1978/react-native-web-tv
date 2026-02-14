@@ -85,8 +85,8 @@ const TVFocusGuideView: React.AbstractComponent<TVFocusGuideViewProps, React.Ele
       setDestinations(destinationsProp); // $FlowFixMe[incompatible-call]
     }
   }, [setDestinations, destinationsProp, focusable]);
-  const enabledStyle = enabled ? {} : {
-    display: 'none'
+  const enabledStyle = {
+    display: enabled ? 'flex' : 'none'
   };
   const style = [styles.container, props.style, enabledStyle];
 
@@ -104,8 +104,8 @@ const TVFocusGuideView: React.AbstractComponent<TVFocusGuideViewProps, React.Ele
 });
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
-    height: '100%',
+    minWidth: 1,
+    minHeight: 1,
     pointerEvents: 'box-none' // FocusGuides should not handle pointer events.
   }
 });

@@ -116,7 +116,7 @@ const TVFocusGuideView: React.AbstractComponent<
     }
   }, [setDestinations, destinationsProp, focusable]);
 
-  const enabledStyle = enabled ? {} : { display: 'none' };
+  const enabledStyle = { display: enabled ? 'flex' : 'none' };
   const style = [styles.container, props.style, enabledStyle];
 
   // If there are no destinations and the autoFocus is false the the default value of focusable should be false
@@ -143,8 +143,8 @@ const TVFocusGuideView: React.AbstractComponent<
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
-    height: '100%',
+    minWidth: 1,
+    minHeight: 1,
     pointerEvents: 'box-none' // FocusGuides should not handle pointer events.
   }
 });
