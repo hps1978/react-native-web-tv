@@ -51,7 +51,7 @@ function FlatListTVScrollExample() {
         scrollAnimationDurationMsHorizontal: 100
       },
       focusConfig: {
-        mode: 'default'
+        mode: 'AlignLeft'
       },
       keydownThrottleMs: 0
     };
@@ -166,7 +166,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#0b1220',
     borderWidth: 1,
     borderColor: '#1f2a44',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    margin: '10px'
   },
   image: {
     width: ITEM_SIZE,

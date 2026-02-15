@@ -836,13 +836,6 @@ function scrollToAlignLeft(
     }
   }
 
-  // const now = Date.now();
-  // if (_scrollConfig.scrollThrottleMs != null) {
-  //   if (now - _scrollState.lastScrollAt < _scrollConfig.scrollThrottleMs) {
-  //     return null;
-  //   }
-  // }
-
   const verticalScroll = resolveScrollable(elem, 'vertical');
   const horizontalScroll = resolveScrollable(elem, 'horizontal');
 
@@ -861,7 +854,7 @@ function scrollToAlignLeft(
     const currentRect = currentElem?.getBoundingClientRect?.();
     let horizontalDelta = 0;
     let needsHorizontalScroll = false;
-
+    // TODO: We loose the reference point for Align left as soon as the scrolling moves into the end part on the right.
     if (keyCode === 'ArrowRight' && currentRect) {
       // On right navigation: align target's left edge to current focus X position.
       // This keeps focus visually fixed while content scrolls underneath.
@@ -897,45 +890,8 @@ function scrollToAlignLeft(
         horizontalDelta = horizontal.scrollDelta;
         needsHorizontalScroll = horizontal.needsScroll;
       }
-    } else if (keyCode === 'ArrowLeft' && currentRect) {
-      // On left navigation: only align when a left scroll is actually needed.
-      // If the target is still visible, avoid scrolling to preserve the current view.
-      const defaultHorizontal = getAxisScrollDelta(
-        horizontalRects.targetRect,
-        horizontalRects.visibleContainerRect,
-        'horizontal'
-      );
-
-      if (defaultHorizontal.needsScroll) {
-        const desiredDelta = horizontalRects.targetRect.left - currentRect.left;
-        const scrollable = horizontalScroll.scrollable;
-        const currentScroll = getScrollPosition(
-          scrollable,
-          false,
-          horizontalScroll.isWindowScroll
-        );
-        const maxScroll = Math.max(
-          0,
-          scrollable.scrollWidth - scrollable.clientWidth
-        );
-        const nextScroll = currentScroll + desiredDelta;
-        const canAchieveAlignment = nextScroll >= 0 && nextScroll <= maxScroll;
-
-        if (canAchieveAlignment) {
-          // Enough space: align to current focus X position.
-          horizontalDelta = desiredDelta;
-          needsHorizontalScroll = desiredDelta !== 0;
-        } else {
-          // Not enough space: fall back to default visibility scroll.
-          horizontalDelta = defaultHorizontal.scrollDelta;
-          needsHorizontalScroll = defaultHorizontal.needsScroll;
-        }
-      } else {
-        // No scroll needed: keep the current view stable.
-        horizontalDelta = 0;
-        needsHorizontalScroll = false;
-      }
     } else {
+      // On left navigation (or otherwise): use default behavior (keep visible with edge threshold).
       const horizontal = getAxisScrollDelta(
         horizontalRects.targetRect,
         horizontalRects.visibleContainerRect,
@@ -1058,13 +1014,6 @@ function maybeScrollOnFocus(
       });
     }
   }
-
-  // const now = Date.now();
-  // if (_scrollConfig.scrollThrottleMs != null) {
-  //   if (now - _scrollState.lastScrollAt < _scrollConfig.scrollThrottleMs) {
-  //     return null;
-  //   }
-  // }
 
   const verticalScroll = resolveScrollable(nextElem, 'vertical');
   const horizontalScroll = resolveScrollable(nextElem, 'horizontal');

@@ -33,22 +33,20 @@ type FocusState = {
   elem: HTMLElement | null,
   parentHasAutofocus: boolean,
 };
-let isSpatialManagerReady = false;
-let spatialNavigationContainer: HTMLElement | null = null;
-let currentFocus: FocusState = {
+let _isSpatialManagerReady = false;
+let _spatialNavigationContainer: HTMLElement | null = null;
+let _currentFocus: FocusState = {
   elem: null,
   parentHasAutofocus: false
 };
-// let pendingFocus: FocusState | null = null;
 let _pendingFocusCount = 0;
-// let navigationSequence = 0;
-let keydownThrottleMs = 0;
+let _keydownThrottleMs = 0;
 let keyDownListener: ((event: any) => void) | null = null;
 let keyUpListener: ((event: any) => void) | null = null;
 let appInitiatedScrollCleanup: (() => void) | null = null;
-let lastKeydownAt = 0;
+let _lastKeydownAt = 0;
 const DEBUG_SCROLL = typeof window !== 'undefined' && window.__RNW_TV_SCROLL_DEBUG === true;
-const hasAnimationFrame = typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function';
+const _hasAnimationFrame = typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function';
 declare function loadGlobalConfig(): SpatialNavigationConfigType | null; // This callback wil get triggered when LRUD fails to find a valid destination from the provided data-destinations
 // atrtribute. LRUD will use it's fallback. autofocus or default focus logic. This contianer will no longer be
 // focusable if there is no autofocus either.
