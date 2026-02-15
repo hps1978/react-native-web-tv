@@ -45,7 +45,6 @@ TV apps can configure spatial navigation before `AppRegistry.runApplication()` b
       edgeThresholdPx: 100,
       scrollThrottleMs: 80,
       smoothScrollEnabled: true,
-      scrollAnimationDurationMs: 0,
       scrollAnimationDurationMsVertical: 0,
       scrollAnimationDurationMsHorizontal: 0
     }
@@ -60,7 +59,6 @@ Supported config fields:
 * `scrollConfig.edgeThresholdPx`: padding from container edges before scrolling.
 * `scrollConfig.scrollThrottleMs`: minimum time between scrolls.
 * `scrollConfig.smoothScrollEnabled`: enables smooth scroll where supported.
-* `scrollConfig.scrollAnimationDurationMs`: fallback duration if axis-specific values are unset.
 * `scrollConfig.scrollAnimationDurationMsVertical`: vertical animation duration override.
 * `scrollConfig.scrollAnimationDurationMsHorizontal`: horizontal animation duration override.
 

@@ -28,7 +28,6 @@ If the target is outside the safe zone (defined by `edgeThresholdPx`), the code 
 ## Animation
 Smooth scrolling is controlled by these options:
 - `smoothScrollEnabled`: uses native smooth behavior where supported.
-- `scrollAnimationDurationMs`: optional manual animation duration (ms) for both directions.
 - `scrollAnimationDurationMsVertical`: optional override for vertical only.
 - `scrollAnimationDurationMsHorizontal`: optional override for horizontal only.
 
@@ -77,7 +76,6 @@ Spatial navigation reads configuration from `window.appConfig` at runtime. The c
 - `edgeThresholdPx`: Padding around the container edge to keep focused items from hugging the boundary.
 - `scrollThrottleMs`: Minimum time between scrolls to avoid rapid repeat scrolling.
 - `smoothScrollEnabled`: Enables native smooth behavior when not using manual animation.
-- `scrollAnimationDurationMs`: Global animation duration (ms).
 - `scrollAnimationDurationMsVertical`: Vertical-only animation duration (ms).
 - `scrollAnimationDurationMsHorizontal`: Horizontal-only animation duration (ms).
 

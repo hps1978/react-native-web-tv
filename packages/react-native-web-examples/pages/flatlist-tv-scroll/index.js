@@ -47,11 +47,11 @@ function FlatListTVScrollExample() {
         edgeThresholdPx: 50,
         scrollThrottleMs: 80,
         smoothScrollEnabled: true,
-        scrollAnimationDurationMsVertical: 80,
-        scrollAnimationDurationMsHorizontal: 80
+        scrollAnimationDurationMsVertical: 100,
+        scrollAnimationDurationMsHorizontal: 100
       },
       focusConfig: {
-        mode: 'AlignLeft'
+        mode: 'default'
       },
       keydownThrottleMs: 0
     };
