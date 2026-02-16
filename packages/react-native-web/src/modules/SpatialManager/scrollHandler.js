@@ -51,7 +51,7 @@ const DEBUG_SCROLL = () =>
   typeof window !== 'undefined' && window.__RNW_TV_SCROLL_DEBUG === true;
 
 const DEFAULT_SPATIAL_SCROLL_CONFIG: SpatialScrollConfigType = {
-  edgeThresholdPx: 128,
+  edgeThresholdPx: 0, // only used on the left edge and in horizontal scrolling
   scrollThrottleMs: 80, // not used for now
   smoothScrollEnabled: true,
   scrollAnimationDurationMs: 0,
@@ -184,12 +184,18 @@ function getAxisScrollDelta(
   const visibleWidth = visibleContainerRect.right - visibleContainerRect.left;
 
   if (targetWidth > visibleWidth) {
-    const delta = targetRect.left - visibleContainerRect.left;
+    const delta =
+      targetRect.left -
+      visibleContainerRect.left -
+      _scrollConfig.edgeThresholdPx;
     return { needsScroll: delta !== 0, scrollDelta: delta };
   }
 
   if (targetRect.left < visibleContainerRect.left) {
-    const delta = targetRect.left - visibleContainerRect.left;
+    const delta =
+      targetRect.left -
+      visibleContainerRect.left -
+      _scrollConfig.edgeThresholdPx;
     return { needsScroll: true, scrollDelta: delta };
   }
 

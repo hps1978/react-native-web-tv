@@ -44,7 +44,7 @@ function FlatListTVScrollExample() {
     if (typeof window === 'undefined') return;
     window.appConfig = {
       scrollConfig: {
-        edgeThresholdPx: 50,
+        edgeThresholdPx: 10,
         scrollThrottleMs: 80,
         smoothScrollEnabled: true,
         scrollAnimationDurationMsVertical: 100,

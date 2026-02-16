@@ -44,7 +44,8 @@ const _hasScrollEndEvent = false;
 //   'onscrollend' in window;
 declare var DEBUG_SCROLL: () => any;
 const DEFAULT_SPATIAL_SCROLL_CONFIG: SpatialScrollConfigType = {
-  edgeThresholdPx: 128,
+  edgeThresholdPx: 0,
+  // only used on the left edge and in horizontal scrolling
   scrollThrottleMs: 80,
   // not used for now
   smoothScrollEnabled: true,

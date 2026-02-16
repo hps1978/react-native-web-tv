@@ -22,7 +22,8 @@ var _hasScrollEndEvent = false;
 
 var DEBUG_SCROLL = () => typeof window !== 'undefined' && window.__RNW_TV_SCROLL_DEBUG === true;
 var DEFAULT_SPATIAL_SCROLL_CONFIG = {
-  edgeThresholdPx: 128,
+  edgeThresholdPx: 0,
+  // only used on the left edge and in horizontal scrolling
   scrollThrottleMs: 80,
   // not used for now
   smoothScrollEnabled: true,
@@ -131,14 +132,14 @@ function getAxisScrollDelta(targetRect, visibleContainerRect, axis) {
   var targetWidth = targetRect.right - targetRect.left;
   var visibleWidth = visibleContainerRect.right - visibleContainerRect.left;
   if (targetWidth > visibleWidth) {
-    var _delta3 = targetRect.left - visibleContainerRect.left;
+    var _delta3 = targetRect.left - visibleContainerRect.left - _scrollConfig.edgeThresholdPx;
     return {
       needsScroll: _delta3 !== 0,
       scrollDelta: _delta3
     };
   }
   if (targetRect.left < visibleContainerRect.left) {
-    var _delta4 = targetRect.left - visibleContainerRect.left;
+    var _delta4 = targetRect.left - visibleContainerRect.left - _scrollConfig.edgeThresholdPx;
     return {
       needsScroll: true,
       scrollDelta: _delta4
