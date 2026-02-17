@@ -12,8 +12,8 @@
 // But for Web TV platforms we will allow App to configure the key through window.appConfig.keyMap
 // with keyMap.Back set to the keycode of the key they want to use as back button for specific TV platform.
 
-const TVEventHandler = require('../TV/TVEventHandler').default;
-const Platform = require('./Platform').default;
+import TVEventHandler from '../TV/TVEventHandler';
+import Platform from '../Platform';
 
 type BackPressEventName = 'backPress' | 'hardwareBackPress';
 type BackPressHandler = () => ?boolean;
