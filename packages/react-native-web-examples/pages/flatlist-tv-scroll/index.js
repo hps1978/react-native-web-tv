@@ -44,12 +44,16 @@ function FlatListTVScrollExample() {
     if (typeof window === 'undefined') return;
     window.appConfig = {
       scrollConfig: {
-        edgeThresholdPx: 50,
-        scrollThrottleMs: 80,
+        edgeThresholdPx: 10,
+        scrollThrottleMs: 80, // Not implemented
         smoothScrollEnabled: true,
-        scrollAnimationDurationMsVertical: 0,
-        scrollAnimationDurationMsHorizontal: 0
-      }
+        scrollAnimationDurationMsVertical: 100,
+        scrollAnimationDurationMsHorizontal: 100
+      },
+      focusConfig: {
+        mode: 'AlignLeft'
+      },
+      keydownThrottleMs: 0
     };
   }, []);
 
@@ -162,7 +166,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#0b1220',
     borderWidth: 1,
     borderColor: '#1f2a44',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    margin: '10px'
   },
   image: {
     width: ITEM_SIZE,

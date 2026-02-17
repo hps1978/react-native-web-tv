@@ -28,7 +28,6 @@ If the target is outside the safe zone (defined by `edgeThresholdPx`), the code 
 ## Animation
 Smooth scrolling is controlled by these options:
 - `smoothScrollEnabled`: uses native smooth behavior where supported.
-- `scrollAnimationDurationMs`: optional manual animation duration (ms) for both directions.
 - `scrollAnimationDurationMsVertical`: optional override for vertical only.
 - `scrollAnimationDurationMsHorizontal`: optional override for horizontal only.
 
@@ -66,16 +65,17 @@ The SpatialManager includes **one-time API capability detection at module load**
 
 ## Configuration summary
 
-Spatial navigation reads configuration from `window.appConfig` at runtime. The config object supports two top-level keys:
+Spatial navigation reads configuration from `window.appConfig` at runtime. The config object supports these top-level keys:
 
 - `keyMap`: Optional LRUD key mapping overrides.
 - `scrollConfig`: Scroll behavior settings (listed below).
+- `keydownThrottleMs`: Optional minimum time (ms) between keydown events to reduce rapid repeats.
+- `focusConfig`: Focus scrolling behavior configuration (mode). AlignLeft keeps left moves default and aligns right moves to the current focus X position when scrolling.
 
 `scrollConfig` fields:
 - `edgeThresholdPx`: Padding around the container edge to keep focused items from hugging the boundary.
-- `scrollThrottleMs`: Minimum time between scrolls to avoid rapid repeat scrolling.
+- `scrollThrottleMs`: Minimum time between scrolls to avoid rapid repeat scrolling. NOTE: not implemented.
 - `smoothScrollEnabled`: Enables native smooth behavior when not using manual animation.
-- `scrollAnimationDurationMs`: Global animation duration (ms).
 - `scrollAnimationDurationMsVertical`: Vertical-only animation duration (ms).
 - `scrollAnimationDurationMsHorizontal`: Horizontal-only animation duration (ms).
 
@@ -93,9 +93,13 @@ Spatial navigation reads configuration from `window.appConfig` at runtime. The c
         'ArrowUp': 'up',
         'ArrowDown': 'down'
     },
+    keydownThrottleMs: 0,
+    focusConfig: {
+      mode: 'default'  // or 'AlignLeft' for horizontal-only alignment
+    },
     scrollConfig: {
       edgeThresholdPx: 50,
-      scrollThrottleMs: 80,
+      scrollThrottleMs: 80, // Not implemented
       smoothScrollEnabled: true,
       scrollAnimationDurationMsVertical: 600,
       scrollAnimationDurationMsHorizontal: 400

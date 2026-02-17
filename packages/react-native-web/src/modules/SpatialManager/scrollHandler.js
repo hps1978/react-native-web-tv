@@ -8,86 +8,101 @@
  * @format
  */
 
-type SpatialScrollConfig = {
+type SpatialScrollConfigType = {
   edgeThresholdPx?: number,
-  scrollThrottleMs?: number,
+  scrollThrottleMs?: number, // not used for now
   smoothScrollEnabled?: boolean,
-  scrollAnimationDurationMs?: number,
   scrollAnimationDurationMsVertical?: number,
   scrollAnimationDurationMsHorizontal?: number
 };
 
-type ScrollState = {
+type ScrollStateType = {
   lastScrollAt: number,
   scrollAnimationFrame: number | null
 };
 
-// API capability detection (one-time check at module load)
-const hasPerformance =
+type getCurrentFocusType = () => {
+  elem: HTMLElement | null,
+  parentHasAutofocus: boolean
+};
+
+type onScrollRefocusType = (params: {
+  currentFocus: { elem: HTMLElement | null, parentHasAutofocus: boolean },
+  scrollContainer: HTMLElement | null
+}) => void;
+
+// API capability detection (one-time check at module load).
+// TV platforms may lack modern APIs, so we detect and fall back gracefully.
+// This avoids repeated try-catch blocks on every scroll operation.
+const _hasPerformance =
   typeof performance !== 'undefined' && typeof performance.now === 'function';
-const hasRequestAnimationFrame = typeof requestAnimationFrame === 'function';
-const hasGetComputedStyle =
+const _hasRequestAnimationFrame = typeof requestAnimationFrame === 'function';
+const _hasGetComputedStyle =
   typeof window !== 'undefined' &&
   typeof window.getComputedStyle === 'function';
-const hasGetBoundingClientRect =
+const _hasGetBoundingClientRect =
   typeof Element !== 'undefined' &&
   Element.prototype.getBoundingClientRect !== undefined;
-const hasScrollEndEvent = false;
+const _hasScrollEndEvent = false;
 //   typeof window !== 'undefined' &&
 //   'onscrollend' in window;
 
 const DEBUG_SCROLL = () =>
   typeof window !== 'undefined' && window.__RNW_TV_SCROLL_DEBUG === true;
 
-const DEFAULT_SPATIAL_SCROLL_CONFIG: SpatialScrollConfig = {
-  edgeThresholdPx: 128,
-  scrollThrottleMs: 80,
+const DEFAULT_SPATIAL_SCROLL_CONFIG: SpatialScrollConfigType = {
+  edgeThresholdPx: 0, // only used on the left edge and in horizontal scrolling
+  scrollThrottleMs: 80, // not used for now
   smoothScrollEnabled: true,
   scrollAnimationDurationMs: 0,
   scrollAnimationDurationMsVertical: 0,
   scrollAnimationDurationMsHorizontal: 0
 };
 
+let _isConfigured = false;
+let _scrollConfig: SpatialScrollConfigType = DEFAULT_SPATIAL_SCROLL_CONFIG;
+let _focusMode: 'AlignLeft' | 'default' = 'default';
+const _scrollState: ScrollStateType = {
+  lastScrollAt: 0, // Timestamp of last scroll initiation (for throttling, if enabled)
+  scrollAnimationFrame: null
+};
+
 function getCurrentTime(): number {
-  return hasPerformance ? performance.now() : Date.now();
+  return _hasPerformance ? performance.now() : Date.now();
 }
 
 function scheduleAnimationFrame(callback: () => void): number {
-  if (hasRequestAnimationFrame) {
+  if (_hasRequestAnimationFrame) {
     return requestAnimationFrame(callback);
   }
-  // Fallback: simulate 60fps with setTimeout (16ms per frame)
-  return (setTimeout(callback, 16): any);
+  // Fallback: simulate 30fps with setTimeout (33ms per frame)
+  // TODO: Consider making this adaptive based on actual frame rate or using a more sophisticated polyfill if needed
+  return (setTimeout(callback, 33): any);
 }
 
-function cancelScheduledFrame(frameId: number): void {
-  if (hasRequestAnimationFrame) {
-    cancelAnimationFrame(frameId);
-  } else {
-    clearTimeout(frameId);
-  }
-}
+const cancelScheduledFrame = _hasRequestAnimationFrame
+  ? cancelAnimationFrame
+  : clearTimeout;
 
 function animateScrollTo(
   scrollable: any,
   isVertical: boolean,
   nextOffset: number,
-  durationMs: number,
-  scrollState: ScrollState
+  durationMs: number
 ) {
   const startOffset = isVertical ? scrollable.scrollTop : scrollable.scrollLeft;
   const delta = nextOffset - startOffset;
 
   if (delta === 0 || durationMs <= 0) return;
 
-  if (scrollState.scrollAnimationFrame != null) {
-    cancelScheduledFrame(scrollState.scrollAnimationFrame);
-    scrollState.scrollAnimationFrame = null;
+  if (_scrollState.scrollAnimationFrame != null) {
+    cancelScheduledFrame(_scrollState.scrollAnimationFrame);
+    _scrollState.scrollAnimationFrame = null;
   }
 
   const startTime = getCurrentTime();
   const step = (now: number) => {
-    const elapsed = hasPerformance ? now - startTime : Date.now() - startTime;
+    const elapsed = _hasPerformance ? now - startTime : Date.now() - startTime;
     const t = Math.min(1, elapsed / durationMs);
     const value = startOffset + delta * t;
 
@@ -110,29 +125,17 @@ function animateScrollTo(
     }
 
     if (t < 1) {
-      scrollState.scrollAnimationFrame = scheduleAnimationFrame(() =>
-        step(hasPerformance ? performance.now() : Date.now())
+      _scrollState.scrollAnimationFrame = scheduleAnimationFrame(() =>
+        step(_hasPerformance ? performance.now() : Date.now())
       );
     } else {
-      scrollState.scrollAnimationFrame = null;
+      _scrollState.scrollAnimationFrame = null;
     }
   };
 
-  scrollState.scrollAnimationFrame = scheduleAnimationFrame(() =>
-    step(hasPerformance ? performance.now() : Date.now())
+  _scrollState.scrollAnimationFrame = scheduleAnimationFrame(() =>
+    step(_hasPerformance ? performance.now() : Date.now())
   );
-}
-
-function getScrollDurationMs(
-  scrollConfig: SpatialScrollConfig,
-  isVertical: boolean
-): number {
-  const directionDurationMs = isVertical
-    ? scrollConfig.scrollAnimationDurationMsVertical
-    : scrollConfig.scrollAnimationDurationMsHorizontal;
-  return directionDurationMs != null
-    ? directionDurationMs
-    : scrollConfig.scrollAnimationDurationMs || 0;
 }
 
 function getScrollPosition(
@@ -146,6 +149,9 @@ function getScrollPosition(
   return isVertical ? scrollable.scrollTop : scrollable.scrollLeft;
 }
 
+// Calculate if and how much to scroll to keep an element visible within its container.
+// Uses edge threshold (edgeThresholdPx) to maintain padding from container boundaries.
+// Returns: { needsScroll: boolean, scrollDelta: number (in pixels) }
 function getAxisScrollDelta(
   targetRect: any,
   visibleContainerRect: any,
@@ -178,12 +184,18 @@ function getAxisScrollDelta(
   const visibleWidth = visibleContainerRect.right - visibleContainerRect.left;
 
   if (targetWidth > visibleWidth) {
-    const delta = targetRect.left - visibleContainerRect.left;
+    const delta =
+      targetRect.left -
+      visibleContainerRect.left -
+      _scrollConfig.edgeThresholdPx;
     return { needsScroll: delta !== 0, scrollDelta: delta };
   }
 
   if (targetRect.left < visibleContainerRect.left) {
-    const delta = targetRect.left - visibleContainerRect.left;
+    const delta =
+      targetRect.left -
+      visibleContainerRect.left -
+      _scrollConfig.edgeThresholdPx;
     return { needsScroll: true, scrollDelta: delta };
   }
 
@@ -247,7 +259,7 @@ function logScrollContainer(
     return;
   }
 
-  const style = hasGetComputedStyle
+  const style = _hasGetComputedStyle
     ? window.getComputedStyle(scrollable)
     : null;
   console.log('[SpatialManager][scroll] container ' + label, {
@@ -268,9 +280,7 @@ function scrollAxis(params: {
   scrollable: any,
   isWindowScroll: boolean,
   isVertical: boolean,
-  scrollDelta: number,
-  scrollConfig: SpatialScrollConfig,
-  scrollState: ScrollState
+  scrollDelta: number
 }): Promise<void> {
   const { scrollable, isWindowScroll, isVertical, scrollDelta } = params;
   if (scrollDelta === 0) {
@@ -298,16 +308,12 @@ function scrollAxis(params: {
     maxOffset
   );
 
-  performScroll(
-    scrollable,
-    isVertical,
-    params.scrollConfig,
-    params.scrollState,
-    nextOffset,
-    liveNextOffset
-  );
+  performScroll(scrollable, isVertical, nextOffset, liveNextOffset);
 
-  const durationMs = getScrollDurationMs(params.scrollConfig, isVertical);
+  const durationMs = isVertical
+    ? _scrollConfig.scrollAnimationDurationMsVertical
+    : _scrollConfig.scrollAnimationDurationMsHorizontal;
+
   if (durationMs > 0) {
     return new Promise((resolve) => {
       setTimeout(resolve, durationMs);
@@ -326,7 +332,7 @@ function findScrollableAncestor(
     let overflowY = '';
     let overflowX = '';
 
-    if (hasGetComputedStyle) {
+    if (_hasGetComputedStyle) {
       const style = window.getComputedStyle(current);
       overflowY = style.overflowY;
       overflowX = style.overflowX;
@@ -400,6 +406,9 @@ function resolveScrollable(
   return { scrollable, isWindowScroll };
 }
 
+// Resolve element and container rectangles, clamping to viewport for accuracy.
+// Important: bounding rects are viewport-relative, not document-relative.
+// This avoids coordinate system mismatches when scrolling.
 function resolveRects(
   scrollable: any,
   isWindowScroll: boolean,
@@ -408,7 +417,7 @@ function resolveRects(
   let containerRect;
   let targetRect;
 
-  if (hasGetBoundingClientRect) {
+  if (_hasGetBoundingClientRect) {
     containerRect = scrollable.getBoundingClientRect();
     targetRect = elem.getBoundingClientRect();
   } else {
@@ -438,6 +447,8 @@ function resolveRects(
     right: window.innerWidth
   };
 
+  // Clamp container rect to viewport bounds so we don't scroll outside the visible area.
+  // This is critical for accurate visibility detection when container is partially off-screen.
   const visibleContainerRect = isWindowScroll
     ? viewportRect
     : {
@@ -453,27 +464,15 @@ function resolveRects(
 function performScroll(
   scrollable: any,
   isVertical: boolean,
-  scrollConfig: SpatialScrollConfig,
-  scrollState: ScrollState,
   nextOffset: number,
   liveNextOffset: number
 ) {
-  const directionDurationMs = isVertical
-    ? scrollConfig.scrollAnimationDurationMsVertical
-    : scrollConfig.scrollAnimationDurationMsHorizontal;
-  const durationMs =
-    directionDurationMs != null
-      ? directionDurationMs
-      : scrollConfig.scrollAnimationDurationMs || 0;
+  const durationMs = isVertical
+    ? _scrollConfig.scrollAnimationDurationMsVertical
+    : _scrollConfig.scrollAnimationDurationMsHorizontal;
 
   if (durationMs > 0) {
-    animateScrollTo(
-      scrollable,
-      isVertical,
-      liveNextOffset,
-      durationMs,
-      scrollState
-    );
+    animateScrollTo(scrollable, isVertical, liveNextOffset, durationMs);
     return;
   }
 
@@ -481,12 +480,12 @@ function performScroll(
     if (isVertical) {
       scrollable.scrollTo({
         y: nextOffset,
-        animated: scrollConfig.smoothScrollEnabled !== false
+        animated: _scrollConfig.smoothScrollEnabled !== false
       });
     } else {
       scrollable.scrollTo({
         x: nextOffset,
-        animated: scrollConfig.smoothScrollEnabled !== false
+        animated: _scrollConfig.smoothScrollEnabled !== false
       });
     }
   } else if (isVertical) {
@@ -508,17 +507,6 @@ function calculateNextOffset(
 
   return currentOffset + scrollDelta;
 }
-
-type ReAcquireFocusOptions = {
-  getCurrentFocus: () => {
-    elem: HTMLElement | null,
-    parentHasAutofocus: boolean
-  },
-  onScrollRefocus: (params: {
-    currentFocus: { elem: HTMLElement | null, parentHasAutofocus: boolean },
-    scrollContainer: HTMLElement | null
-  }) => void
-};
 
 // Flag to track if the current scroll was initiated by SpatialManager
 // Checked in the scrollend event to determine if focus reacquisition is needed
@@ -542,39 +530,42 @@ function unmarkSpatialManagerScroll(): void {
   isSpatialManagerInitiatedScroll = false;
 }
 
-export function createScrollState(): ScrollState {
-  return {
-    lastScrollAt: 0,
-    scrollAnimationFrame: null
-  };
+function setupScrollHandler(config?: {
+  scrollConfig?: SpatialScrollConfigType,
+  focusMode?: 'AlignLeft' | 'default',
+  scrollState?: ScrollState
+}): void {
+  if (_isConfigured) {
+    return;
+  }
+
+  if (config?.scrollConfig) {
+    _scrollConfig = {
+      ..._scrollConfig,
+      ...config.scrollConfig
+    };
+  }
+
+  _focusMode = config?.focusMode || _focusMode;
+
+  _isConfigured = true;
 }
 
 /**
- * Check if an element is visible within its scrollable container's viewport.
- * Used to determine if current focus is still in view after a scroll.
+ * Check if an element is visible within the window viewport.
+ * Only checks window viewport, not parent containers.
+ * Assumes element passed here is already CSS-visible (display, visibility, opacity).
+ *
+ * @param {HTMLElement} elem The element to check
+ * @return {boolean} True if element intersects window viewport
  */
-export function isElementVisible(
-  elem: HTMLElement,
-  scrollContainer?: HTMLElement
-): boolean {
-  if (!elem || !hasGetBoundingClientRect) {
+function isElementInWindowViewport(elem: HTMLElement): boolean {
+  if (!elem || !_hasGetBoundingClientRect) {
     return true; // Assume visible if we can't measure
   }
 
   try {
     const elemRect = elem.getBoundingClientRect();
-
-    if (scrollContainer) {
-      const containerRect = scrollContainer.getBoundingClientRect();
-      return (
-        elemRect.top < containerRect.bottom &&
-        elemRect.bottom > containerRect.top &&
-        elemRect.left < containerRect.right &&
-        elemRect.right > containerRect.left
-      );
-    }
-
-    // Default: check against viewport
     const viewportHeight =
       window.innerHeight || document.documentElement.clientHeight;
     const viewportWidth =
@@ -592,41 +583,108 @@ export function isElementVisible(
 }
 
 /**
- * Reacquire focus after app-initiated scroll.
- * If current focus is no longer visible, find the best candidate within the scrolled container.
- * This is called after the scroll settles (debounced).
+ * Check if an element is fully visible in the window viewport.
+ * Returns visibility percentage (0-1).
+ *
+ * @param {HTMLElement} elem The element to check
+ * @return {number} Visibility ratio: 0 = not visible, 1 = fully visible
  */
-export function reacquireFocusAfterScroll(
-  currentFocusElem: HTMLElement | null,
-  scrollContainer: HTMLElement | null,
-  options: ReAcquireFocusOptions
-): void {
-  if (!currentFocusElem) {
-    return;
+function getElementVisibilityRatio(elem: HTMLElement): number {
+  if (!elem || !_hasGetBoundingClientRect) {
+    return 1; // Assume fully visible if we can't measure
   }
 
-  // If current focus is still visible, no need to refocus
-  if (isElementVisible(currentFocusElem, scrollContainer || undefined)) {
-    return;
+  try {
+    const elemRect = elem.getBoundingClientRect();
+    const viewportHeight =
+      window.innerHeight || document.documentElement.clientHeight;
+    const viewportWidth =
+      window.innerWidth || document.documentElement.clientWidth;
+
+    // Calculate clipped rectangle intersecting with viewport
+    const clippedTop = Math.max(0, elemRect.top);
+    const clippedBottom = Math.min(viewportHeight, elemRect.bottom);
+    const clippedLeft = Math.max(0, elemRect.left);
+    const clippedRight = Math.min(viewportWidth, elemRect.right);
+
+    // Calculate visible area
+    const visibleHeight = Math.max(0, clippedBottom - clippedTop);
+    const visibleWidth = Math.max(0, clippedRight - clippedLeft);
+    const visibleArea = visibleHeight * visibleWidth;
+
+    // Calculate total element area
+    const totalHeight = elemRect.height;
+    const totalWidth = elemRect.width;
+    const totalArea = totalHeight * totalWidth;
+
+    if (totalArea === 0) {
+      return 0;
+    }
+
+    return Math.min(1, visibleArea / totalArea);
+  } catch (e) {
+    return 1; // Safe fallback
+  }
+}
+
+/**
+ * Infer scroll direction from scrollContainer's scroll capability.
+ * Used to provide directional hint to maybeScrollOnFocus.
+ *
+ * @param {HTMLElement} scrollContainer The container that scrolled
+ * @return {'ArrowDown' | 'ArrowRight'} Direction hint
+ */
+function inferScrollDirection(
+  scrollContainer: HTMLElement | null
+): 'ArrowDown' | 'ArrowRight' {
+  if (!scrollContainer) {
+    return 'ArrowDown';
   }
 
-  // Current focus is out of view. We'll let LRUD logic pick the next focus
-  // by using 'ArrowDown' as a neutral direction signal (not a real navigation)
-  // The spatial algorithm will find the best visible candidate.
-  // For now, we defer this to SpatialManager via the callback
-  // (actual LRUD call will happen there with proper context)
+  const isWindowScroll =
+    scrollContainer === window ||
+    scrollContainer === document ||
+    scrollContainer === document.documentElement;
+
+  if (isWindowScroll) {
+    return 'ArrowDown';
+  }
+
+  // Check if container can scroll vertically
+  const canScrollVertical = (() => {
+    if (_hasGetComputedStyle) {
+      const style = window.getComputedStyle(scrollContainer);
+      return (
+        (style.overflowY === 'auto' ||
+          style.overflowY === 'scroll' ||
+          style.overflowY === 'overlay') &&
+        scrollContainer.scrollHeight > scrollContainer.clientHeight
+      );
+    }
+    return scrollContainer.scrollHeight > scrollContainer.clientHeight;
+  })();
+
+  // Prefer vertical direction if possible
+  return canScrollVertical ? 'ArrowDown' : 'ArrowRight';
 }
 
 /**
  * Setup global scroll listener to handle app-initiated scrolls.
  * Uses scrollend event when available (modern browsers), falls back to debounced scroll listener.
- * If SpatialManager initiated the scroll, skips focus reacquisition.
- * If app initiated the scroll, reacquires focus if needed.
+ *
+ * Key pattern:
+ * - SpatialManager marks its scrolls via isSpatialManagerInitiatedScroll
+ * - Scroll event fires (either scrollend or debounced scroll)
+ * - If SpatialManager initiated: skip reacquisition (we already have focus control)
+ * - If app initiated: check if current focus is out of view and reacquire if needed
+ *
+ * This allows SpatialManager scrolls to be clean while gracefully handling app scrolls.
  */
-export function setupAppInitiatedScrollHandler(
+function setupAppInitiatedScrollHandler(
   container: HTMLElement | Document,
-  options: ReAcquireFocusOptions
-) {
+  getCurrentFocus: getCurrentFocusType,
+  onScrollRefocus: onScrollRefocusType
+): () => void {
   const handleScrollEnd = (e: any) => {
     // If SpatialManager initiated this scroll, it already handled focus
     if (isSpatialManagerInitiatedScroll) {
@@ -634,7 +692,7 @@ export function setupAppInitiatedScrollHandler(
       return;
     }
 
-    const currentFocus = options.getCurrentFocus();
+    const currentFocus = getCurrentFocus();
     if (!currentFocus || !currentFocus.elem) {
       return;
     }
@@ -648,12 +706,56 @@ export function setupAppInitiatedScrollHandler(
         ? (target: any)
         : null;
 
-    if (isElementVisible(currentFocus.elem, scrollContainer || undefined)) {
+    // Case 1: currentFocus is fully in window viewport - do nothing
+    if (isElementInWindowViewport(currentFocus.elem)) {
       return;
     }
 
-    // App-initiated scroll - focused element is now out of view
-    options.onScrollRefocus({ currentFocus, scrollContainer });
+    // Case 2 & 3: currentFocus is partially or completely out of viewport
+    // Check visibility ratio to decide: preserve focus or reacquire
+    const visibilityRatio = getElementVisibilityRatio(currentFocus.elem);
+
+    if (visibilityRatio > 0) {
+      // Case 2: currentFocus is partially visible (e.g., 10% in viewport)
+      // PRESERVE focus continuity by scrolling it fully back into view
+      if (DEBUG_SCROLL) {
+        console.log(
+          '[SpatialManager][scroll] currentFocus partially visible, scrolling back into view',
+          {
+            elementId: currentFocus.elem.id,
+            visibilityRatio: Math.round(visibilityRatio * 100) + '%'
+          }
+        );
+      }
+
+      // Infer scroll direction from scrollContainer
+      const scrollDirection = inferScrollDirection(scrollContainer);
+
+      // Call maybeScrollOnFocus to bring currentFocus fully into view
+      // This maintains focus continuity while respecting app-initiated scroll
+      maybeScrollOnFocus(
+        currentFocus.elem,
+        currentFocus.elem, // TODO: Handle this better: navigationFrom is currentFocus itself
+        scrollDirection
+      );
+      return;
+    }
+
+    // Case 3: currentFocus is completely out of viewport (0% visible)
+    // REACQUIRE focus by finding first focusable in scrollContainer
+    if (DEBUG_SCROLL) {
+      console.log(
+        '[SpatialManager][scroll] currentFocus out of viewport, reacquiring focus',
+        {
+          elementId: currentFocus.elem.id,
+          scrollContainerId: scrollContainer?.id
+        }
+      );
+    }
+
+    // App-initiated scroll - focused element is completely out of view
+    // Need to find a new focus in the scrolled container
+    onScrollRefocus({ currentFocus, scrollContainer });
   };
 
   const handleScrollFallback = (e) => {
@@ -669,7 +771,7 @@ export function setupAppInitiatedScrollHandler(
   };
 
   if (typeof window !== 'undefined') {
-    if (hasScrollEndEvent) {
+    if (_hasScrollEndEvent) {
       // Modern approach: use scrollend event
       window.addEventListener('scrollend', handleScrollEnd, { passive: true });
     } else {
@@ -684,7 +786,7 @@ export function setupAppInitiatedScrollHandler(
   // Return cleanup function
   return () => {
     if (typeof window !== 'undefined') {
-      if (hasScrollEndEvent) {
+      if (_hasScrollEndEvent) {
         window.removeEventListener('scrollend', handleScrollEnd);
       } else {
         window.removeEventListener('scroll', handleScrollFallback, {
@@ -699,12 +801,23 @@ export function setupAppInitiatedScrollHandler(
   };
 }
 
-export function maybeScrollOnFocus(
+/**
+ * Scroll to align target element for AlignLeft mode.
+ *
+ * Behavior:
+ * - ArrowRight: Align target's left edge to current focus X position
+ *   (only if scrollable space allows)
+ * - ArrowLeft, ArrowUp/ArrowDown: Use default visibility behavior (keep in view)
+ * - Vertical: Always uses default behavior regardless of direction
+ *
+ * Key insight: AlignLeft creates a fixed X position where focus appears to stay while
+ * content scrolls left/right. But at content boundaries, we fall back to default behavior
+ * to avoid breaking visual alignment of the original focus element.
+ */
+function scrollToAlignLeft(
   elem: HTMLElement | null,
   keyCode: string,
-  currentElem: HTMLElement | null,
-  scrollConfig: SpatialScrollConfig,
-  scrollState: ScrollState
+  currentElem: HTMLElement | null
 ) {
   if (!elem || typeof window === 'undefined') return;
 
@@ -712,7 +825,7 @@ export function maybeScrollOnFocus(
     try {
       const curRect = currentElem?.getBoundingClientRect?.();
       const nextRect = elem.getBoundingClientRect();
-      console.log('[SpatialManager][scroll] input', {
+      console.log('[SpatialManager][scroll] AlignLeft input', {
         keyCode,
         currentId: currentElem?.id,
         nextId: elem.id,
@@ -720,7 +833,7 @@ export function maybeScrollOnFocus(
         nextRect
       });
     } catch (e) {
-      console.log('[SpatialManager][scroll] input', {
+      console.log('[SpatialManager][scroll] AlignLeft input', {
         keyCode,
         currentId: currentElem?.id,
         nextId: elem.id,
@@ -729,17 +842,10 @@ export function maybeScrollOnFocus(
     }
   }
 
-  const now = Date.now();
-  if (scrollConfig.scrollThrottleMs != null) {
-    if (now - scrollState.lastScrollAt < scrollConfig.scrollThrottleMs) {
-      return null;
-    }
-  }
-
   const verticalScroll = resolveScrollable(elem, 'vertical');
   const horizontalScroll = resolveScrollable(elem, 'horizontal');
 
-  const computeDeltas = () => {
+  const computeAlignLeftDeltas = () => {
     const verticalRects = resolveRects(
       verticalScroll.scrollable,
       verticalScroll.isWindowScroll,
@@ -749,6 +855,185 @@ export function maybeScrollOnFocus(
       horizontalScroll.scrollable,
       horizontalScroll.isWindowScroll,
       elem
+    );
+
+    const currentRect = currentElem?.getBoundingClientRect?.();
+    let horizontalDelta = 0;
+    let needsHorizontalScroll = false;
+    // TODO: We loose the reference point for Align left as soon as the scrolling moves into the end part on the right.
+    if (keyCode === 'ArrowRight' && currentRect) {
+      // On right navigation: align target's left edge to current focus X position.
+      // This keeps focus visually fixed while content scrolls underneath.
+      const desiredDelta = horizontalRects.targetRect.left - currentRect.left;
+      const scrollable = horizontalScroll.scrollable;
+      const currentScroll = getScrollPosition(
+        scrollable,
+        false,
+        horizontalScroll.isWindowScroll
+      );
+      const maxScroll = Math.max(
+        0,
+        scrollable.scrollWidth - scrollable.clientWidth
+      );
+
+      // Critical boundary check: can we achieve alignment without exceeding scroll bounds?
+      // This prevents breaking alignment at content boundaries (e.g., last item).
+      const nextScroll = currentScroll + desiredDelta;
+      const canAchieveAlignment = nextScroll >= 0 && nextScroll <= maxScroll;
+
+      if (canAchieveAlignment) {
+        // Enough space: apply alignment scroll
+        horizontalDelta = desiredDelta;
+        needsHorizontalScroll = desiredDelta !== 0;
+      } else {
+        // Not enough space: gracefully fall back to default visibility.
+        // This prevents forcing a scroll that would break existing focus alignment.
+        const horizontal = getAxisScrollDelta(
+          horizontalRects.targetRect,
+          horizontalRects.visibleContainerRect,
+          'horizontal'
+        );
+        horizontalDelta = horizontal.scrollDelta;
+        needsHorizontalScroll = horizontal.needsScroll;
+      }
+    } else {
+      // On left navigation (or otherwise): use default behavior (keep visible with edge threshold).
+      const horizontal = getAxisScrollDelta(
+        horizontalRects.targetRect,
+        horizontalRects.visibleContainerRect,
+        'horizontal'
+      );
+      horizontalDelta = horizontal.scrollDelta;
+      needsHorizontalScroll = horizontal.needsScroll;
+    }
+
+    // Vertical: use default behavior (keep visible with edge threshold)
+    const vertical = getAxisScrollDelta(
+      verticalRects.targetRect,
+      verticalRects.visibleContainerRect,
+      'vertical'
+    );
+
+    return {
+      horizontalDelta,
+      verticalDelta: vertical.scrollDelta,
+      verticalRects,
+      horizontalRects,
+      needsHorizontalScroll,
+      needsVerticalScroll: vertical.needsScroll
+    };
+  };
+
+  if (DEBUG_SCROLL()) {
+    logScrollContainer('vertical', verticalScroll, elem);
+    logScrollContainer('horizontal', horizontalScroll, elem);
+  }
+
+  const initial = computeAlignLeftDeltas();
+
+  if (DEBUG_SCROLL()) {
+    console.log('[SpatialManager][scroll] AlignLeft deltas', {
+      horizontalDelta: initial.horizontalDelta,
+      verticalDelta: initial.verticalDelta,
+      needsHorizontalScroll: initial.needsHorizontalScroll,
+      needsVerticalScroll: initial.needsVerticalScroll
+    });
+  }
+
+  if (!initial.needsHorizontalScroll && !initial.needsVerticalScroll) {
+    return null;
+  }
+
+  // _scrollState.lastScrollAt = now;
+
+  markSpatialManagerScroll();
+
+  const runAxis = (
+    axis: 'vertical' | 'horizontal',
+    delta: number
+  ): Promise<void> => {
+    if (delta === 0) {
+      return Promise.resolve();
+    }
+
+    const scrollInfo = axis === 'vertical' ? verticalScroll : horizontalScroll;
+    return scrollAxis({
+      scrollable: scrollInfo.scrollable,
+      isWindowScroll: scrollInfo.isWindowScroll,
+      isVertical: axis === 'vertical',
+      scrollDelta: delta
+    });
+  };
+
+  if (initial.needsHorizontalScroll && initial.needsVerticalScroll) {
+    // Both axes need scrolling: prioritize horizontal (AlignLeft alignment) first.
+    // After horizontal scroll settles, recompute deltas to see if vertical is still needed.
+    // Sequential approach prevents conflicting scroll operations.
+    return runAxis('horizontal', initial.horizontalDelta).then(() => {
+      const after = computeAlignLeftDeltas();
+      if (!after.needsVerticalScroll) {
+        return;
+      }
+      return runAxis('vertical', after.verticalDelta);
+    });
+  }
+
+  if (initial.needsHorizontalScroll) {
+    return runAxis('horizontal', initial.horizontalDelta);
+  }
+
+  return runAxis('vertical', initial.verticalDelta);
+}
+
+// Main entry point for scroll-on-focus logic.
+// Dispatches to AlignLeft or default behavior based on focusMode.
+// - AlignLeft: right aligns to current focus X, other directions use default
+// - default: always use standard visibility behavior
+function maybeScrollOnFocus(
+  nextElem: HTMLElement | null,
+  currentElem: HTMLElement | null,
+  keyCode: string
+) {
+  if (!nextElem || typeof window === 'undefined') return null;
+
+  if (_focusMode === 'AlignLeft') {
+    return scrollToAlignLeft(nextElem, keyCode, currentElem);
+  }
+
+  if (DEBUG_SCROLL()) {
+    try {
+      const curRect = currentElem?.getBoundingClientRect?.();
+      const nextRect = nextElem.getBoundingClientRect();
+      console.log('[SpatialManager][scroll] input', {
+        keyCode,
+        currentId: currentElem?.id,
+        nextId: nextElem.id,
+        curRect,
+        nextRect
+      });
+    } catch (e) {
+      console.log('[SpatialManager][scroll] input', {
+        keyCode,
+        currentId: currentElem?.id,
+        nextId: nextElem.id,
+        error: String(e)
+      });
+    }
+  }
+
+  const verticalScroll = resolveScrollable(nextElem, 'vertical');
+  const horizontalScroll = resolveScrollable(nextElem, 'horizontal');
+
+  const computeDeltas = () => {
+    const verticalRects = resolveRects(
+      verticalScroll.scrollable,
+      verticalScroll.isWindowScroll,
+      nextElem
+    );
+    const horizontalRects = resolveRects(
+      horizontalScroll.scrollable,
+      horizontalScroll.isWindowScroll,
+      nextElem
     );
 
     const vertical = getAxisScrollDelta(
@@ -766,8 +1051,8 @@ export function maybeScrollOnFocus(
   };
 
   if (DEBUG_SCROLL()) {
-    logScrollContainer('vertical', verticalScroll, elem);
-    logScrollContainer('horizontal', horizontalScroll, elem);
+    logScrollContainer('vertical', verticalScroll, nextElem);
+    logScrollContainer('horizontal', horizontalScroll, nextElem);
   }
 
   const initial = computeDeltas();
@@ -783,7 +1068,7 @@ export function maybeScrollOnFocus(
     return null;
   }
 
-  scrollState.lastScrollAt = now;
+  // _scrollState.lastScrollAt = now;
 
   // Mark that we're about to initiate a scroll (so the listener knows to skip reacquisition)
   markSpatialManagerScroll();
@@ -801,13 +1086,14 @@ export function maybeScrollOnFocus(
       scrollable: scrollInfo.scrollable,
       isWindowScroll: scrollInfo.isWindowScroll,
       isVertical: axis === 'vertical',
-      scrollDelta: deltaInfo.scrollDelta,
-      scrollConfig,
-      scrollState
+      scrollDelta: deltaInfo.scrollDelta
     });
   };
 
   if (initial.vertical.needsScroll && initial.horizontal.needsScroll) {
+    // Both axes need scrolling: scroll the larger delta first (better UX).
+    // After primary axis settles, recompute secondary to handle post-scroll state changes.
+    // Sequential approach prevents conflicting operations.
     const primaryAxis =
       Math.abs(initial.vertical.scrollDelta) >=
       Math.abs(initial.horizontal.scrollDelta)
@@ -837,5 +1123,14 @@ export function maybeScrollOnFocus(
   return runAxis('horizontal', initial.horizontal);
 }
 
-export type { SpatialScrollConfig, ReAcquireFocusOptions };
-export { DEFAULT_SPATIAL_SCROLL_CONFIG };
+export type {
+  SpatialScrollConfigType,
+  getCurrentFocusType,
+  onScrollRefocusType
+};
+export {
+  setupScrollHandler,
+  setupAppInitiatedScrollHandler,
+  isElementInWindowViewport,
+  maybeScrollOnFocus
+};

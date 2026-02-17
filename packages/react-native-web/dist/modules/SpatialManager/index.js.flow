@@ -14,46 +14,49 @@
 // focus and navigation.
 
 // Currently, it only supports arrow ISO keyboard navigation.
-import { setConfig, getNextFocus, getFocusableParentContainer, getParentContainer, updateAncestorsAutoFocus, findDestinationOrAutofocus } from '@bbc/tv-lrud-spatial';
+import { setConfig as setLrudConfig, getNextFocus, getFocusableParentContainer, getParentContainer, updateAncestorsAutoFocus, findDestinationOrAutofocus, getNextFocusInViewport } from '@bbc/tv-lrud-spatial';
 import { startObserving, stopObserving, type MutationDetails } from './mutationObserver';
-import { DEFAULT_SPATIAL_SCROLL_CONFIG, type SpatialScrollConfig, type ReAcquireFocusOptions, createScrollState, maybeScrollOnFocus, setupAppInitiatedScrollHandler } from './scrollHandler';
+import { type SpatialScrollConfigType, type getCurrentFocusType, type onScrollRefocusType, maybeScrollOnFocus, setupAppInitiatedScrollHandler, isElementInWindowViewport, setupScrollHandler } from './scrollHandler';
 import { addEventListener } from '../addEventListener';
 import { setupNodeId } from '../../exports/TV/utils';
-type SpatialNavigationConfig = {
+type SpatialNavigationConfigType = {
   keyMap?: {
     [key: string]: string
   },
-  scrollConfig?: SpatialScrollConfig,
+  scrollConfig?: SpatialScrollConfigType,
+  keydownThrottleMs?: number,
+  focusConfig?: {
+    mode?: 'AlignLeft' | 'default'
+  },
 };
-let isSpatialManagerReady = false;
-let spatialNavigationContainer: HTMLElement | null = null;
-let currentFocus: {
+type FocusState = {
   elem: HTMLElement | null,
   parentHasAutofocus: boolean,
-} = {
+};
+let _isSpatialManagerReady = false;
+let _spatialNavigationContainer: HTMLElement | null = null;
+let _currentFocus: FocusState = {
   elem: null,
   parentHasAutofocus: false
 };
+let _pendingFocusCount = 0;
+let _keydownThrottleMs = 0;
 let keyDownListener: ((event: any) => void) | null = null;
+let keyUpListener: ((event: any) => void) | null = null;
 let appInitiatedScrollCleanup: (() => void) | null = null;
-let spatialScrollConfig: SpatialScrollConfig = {
-  ...DEFAULT_SPATIAL_SCROLL_CONFIG
-};
-const scrollState = createScrollState();
+let _lastKeydownAt = 0;
 const DEBUG_SCROLL = typeof window !== 'undefined' && window.__RNW_TV_SCROLL_DEBUG === true;
-declare function loadGlobalConfig(): SpatialNavigationConfig | null; // This callback wil get triggered when LRUD fails to find a valid destination from the provided data-destinations
+const _hasAnimationFrame = typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function';
+declare function loadGlobalConfig(): SpatialNavigationConfigType | null; // This callback wil get triggered when LRUD fails to find a valid destination from the provided data-destinations
 // atrtribute. LRUD will use it's fallback. autofocus or default focus logic. This contianer will no longer be
 // focusable if there is no autofocus either.
-declare function noValidDestinationCallback(candidateContainer: any, hasAutoFocus: any): any; // Setup configuration for Spatial Navigation
-// User provided through global configs or defaults
-declare function setSpatialNavigationConfig(): any;
+declare function noValidDestinationCallback(candidateContainer: any, hasAutoFocus: any): any; // Setup configuration for Spatial Navigation, LRUD, and scrollHandler
+// global configs (App provided) or defaults
+declare function setupConfigs(): any; // Handles refocussing when current focused element (or it's ancestor) is removed from the DOM.
 declare function handleCurrentFocusMutations(details: MutationDetails): void;
-declare function triggerFocus(nextFocus: {
-  elem: HTMLElement | null,
-  parentHasAutofocus: boolean,
-}, keyCode?: string): boolean;
+declare function triggerFocus(nextFocus: FocusState, keyCode?: string): boolean;
 declare function handlePageVisibilityChange(event: any): any;
-declare function setupPageVisibilityListeners(): any;
+declare function setupAppVisibilityListeners(): any; // Handler to detect when app calls scroll APIs and reacquire focus if needed
 declare function setupAppInitiatedScrollTracking(): any;
 declare function setupSpatialNavigation(container?: HTMLElement): any;
 declare function setFocus(node: HTMLElement): any; // WARNING: This is a very specific API to set destinations for TVFocusGuideView and is not meant for general use.

@@ -1134,6 +1134,7 @@ class VirtualizedList extends StateSafePureComponent<Props, State> {
         }}>
         {Platform.isTV ? (
           <TVFocusGuideView
+            style={this.props.style}
             {...trapFocusHorizontal}
             trapFocusUp={
               !horizontalOrDefault(this.props.horizontal) &&
