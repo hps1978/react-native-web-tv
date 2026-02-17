@@ -53,11 +53,19 @@ var TVFocusGuideView = /*#__PURE__*/React.forwardRef((props, ref) => {
       setDestinations(destinationsProp); // $FlowFixMe[incompatible-call]
     }
   }, [setDestinations, destinationsProp, focusable]);
-  var enabledStyle = {
-    display: enabled ? 'flex' : 'none'
-  };
+  var enabledStyle = {};
+  if (props.style) {
+    // If user passes a style we only use display: none if enabled is false.
+    enabledStyle = !enabled ? {
+      display: 'none'
+    } : {};
+  } else {
+    enabledStyle = {
+      display: enabled ? 'flex' : 'none'
+    };
+  }
   var style = [styles.container, props.style, enabledStyle];
-
+  console.log('TVFocusGuideView style: ', style);
   // If there are no destinations and the autoFocus is false the the default value of focusable should be false
   // It is then properly handled by the native code
   var tvOSSelectable = destinationsProp || autoFocus ? focusable !== false : false;

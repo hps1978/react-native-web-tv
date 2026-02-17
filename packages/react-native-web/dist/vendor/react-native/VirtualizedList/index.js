@@ -1168,7 +1168,9 @@ class VirtualizedList extends StateSafePureComponent {
         registerAsNestedChild: this._registerAsNestedChild,
         unregisterAsNestedChild: this._unregisterAsNestedChild
       }
-    }, Platform.isTV ? /*#__PURE__*/React.createElement(TVFocusGuideView, _extends({}, trapFocusHorizontal, {
+    }, Platform.isTV ? /*#__PURE__*/React.createElement(TVFocusGuideView, _extends({
+      style: this.props.style
+    }, trapFocusHorizontal, {
       trapFocusUp: !horizontalOrDefault(this.props.horizontal) && this.state.cellsAroundViewport.first > 0,
       trapFocusDown: !horizontalOrDefault(this.props.horizontal) && this._hasMore
     }), /*#__PURE__*/React.cloneElement((this.props.renderScrollComponent || this._defaultRenderScrollComponent)(scrollProps), {
