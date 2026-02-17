@@ -74,7 +74,7 @@ Spatial navigation reads configuration from `window.appConfig` at runtime. The c
 
 `scrollConfig` fields:
 - `edgeThresholdPx`: Padding around the container edge to keep focused items from hugging the boundary.
-- `scrollThrottleMs`: Minimum time between scrolls to avoid rapid repeat scrolling.
+- `scrollThrottleMs`: Minimum time between scrolls to avoid rapid repeat scrolling. NOTE: not implemented.
 - `smoothScrollEnabled`: Enables native smooth behavior when not using manual animation.
 - `scrollAnimationDurationMsVertical`: Vertical-only animation duration (ms).
 - `scrollAnimationDurationMsHorizontal`: Horizontal-only animation duration (ms).
@@ -99,7 +99,7 @@ Spatial navigation reads configuration from `window.appConfig` at runtime. The c
     },
     scrollConfig: {
       edgeThresholdPx: 50,
-      scrollThrottleMs: 80,
+      scrollThrottleMs: 80, // Not implemented
       smoothScrollEnabled: true,
       scrollAnimationDurationMsVertical: 600,
       scrollAnimationDurationMsHorizontal: 400

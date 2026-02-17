@@ -45,7 +45,7 @@ function RLVFlatListTVScrollExample() {
     window.appConfig = {
       scrollConfig: {
         edgeThresholdPx: 50,
-        scrollThrottleMs: 80,
+        scrollThrottleMs: 80, // Not implemented
         smoothScrollEnabled: true,
         scrollAnimationDurationMsVertical: 200,
         scrollAnimationDurationMsHorizontal: 200

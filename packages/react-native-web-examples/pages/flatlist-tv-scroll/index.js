@@ -45,7 +45,7 @@ function FlatListTVScrollExample() {
     window.appConfig = {
       scrollConfig: {
         edgeThresholdPx: 10,
-        scrollThrottleMs: 80,
+        scrollThrottleMs: 80, // Not implemented
         smoothScrollEnabled: true,
         scrollAnimationDurationMsVertical: 100,
         scrollAnimationDurationMsHorizontal: 100

@@ -303,7 +303,7 @@ export const TVEventHandlerView: () => React.Node = () => {
     window.appConfig = {
       scrollConfig: {
         edgeThresholdPx: 50,
-        scrollThrottleMs: 80,
+        scrollThrottleMs: 80, // Not implemented
         smoothScrollEnabled: true,
         scrollAnimationDurationMsVertical: 0,
         scrollAnimationDurationMsHorizontal: 0
