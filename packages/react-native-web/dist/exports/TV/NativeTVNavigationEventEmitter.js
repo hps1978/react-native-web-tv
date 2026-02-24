@@ -1,6 +1,7 @@
 import RCTDeviceEventEmitter from '../../vendor/react-native/EventEmitter/RCTDeviceEventEmitter';
 var EVENT_NAME = 'onHWKeyEvent';
 var mapToHWEvent = event => {
+  var _window;
   var eventType;
   switch (event.key) {
     case 'ArrowUp':
@@ -23,7 +24,12 @@ var mapToHWEvent = event => {
       eventType = 'menu';
       break;
     default:
-      eventType = event.key;
+      // Detect user configured back key for Web TV platforms through window.appConfig.keyMap.Back
+      if (typeof window !== 'undefined' && ((_window = window) == null || (_window = _window.appConfig) == null || (_window = _window.keyMap) == null ? void 0 : _window['Back']) === event.keyCode) {
+        eventType = 'menu';
+      } else {
+        eventType = event.key;
+      }
   }
   return {
     eventType
