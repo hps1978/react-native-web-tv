@@ -49,15 +49,11 @@ const mapToHWEvent = (event: KeyboardEvent): HWEvent => {
     case 'Enter':
       eventType = 'select';
       break;
-    case 'Backspace':
-    case 'Escape':
-      eventType = 'menu';
-      break;
     default:
-      // Detect user configured back key for Web TV platforms through window.appConfig.keyMap.Back
+      // Detect user configured Menu key for Web TV platforms through window.appConfig.keyMap.Menu
       if (
         typeof window !== 'undefined' &&
-        window?.appConfig?.keyMap?.['Back'] === event.keyCode
+        window?.appConfig?.keyMap?.['Menu'] === event.keyCode
       ) {
         eventType = 'menu';
       } else {

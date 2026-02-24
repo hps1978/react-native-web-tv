@@ -20,7 +20,7 @@ This is the development monorepo for "React Native for Web" and related projects
 This fork adds Web TV-focused APIs and spatial navigation on top of React Native for Web.
 
 Key additions:
-* TV spatial navigation via [@bbc/tv-lrud-spatial-rnw](https://github.com/hps1978/lrud-spatial-rnw) which is inspired by and a heavy re-write of `@bbc/tv-lrud-spatial` to address React Native Web components on TV. It's wired into React Native Web through SpatialManager (another new module).
+* TV spatial navigation via [@bbc/tv-lrud-spatial-rnw](https://github.com/hps1978/lrud-spatial-rnw) which is inspired by and a heavy rewrite of `@bbc/tv-lrud-spatial` to address React Native Web components on TV. It's wired into React Native Web through SpatialManager (another new module).
 * TV exports from `react-native-web`: `TVEventHandler`, `TVEventControl`, `TVFocusGuideView`, `TVTextScrollView`, `useTVEventHandler`, and `TVRemoteEvent`.
 * TV focus props on `View`/pressables: `tvFocusable`, `isTVSelectable`, `trapFocusUp/Down/Left/Right`, `destinations`, `autoFocus`.
 * RecyclerListView adapter for `VirtualizedList`/`FlatList` (via `recyclerlistview`) to improve large-list performance on TV. NOTE: Disabled at the moment to fix some issues.
@@ -36,6 +36,7 @@ TV apps can configure spatial navigation before `AppRegistry.runApplication()` b
     keyMap: {
       // Optional: map device-specific keys to ArrowUp/Down/Left/Right
       // Example: 'Up': 'ArrowUp'
+      Menu: 10009
     },
     keydownThrottleMs: 0,
     focusConfig: {
@@ -53,7 +54,7 @@ TV apps can configure spatial navigation before `AppRegistry.runApplication()` b
 ```
 
 Supported config fields:
-* `keyMap`: optional key mapping for LRUD input. NOTE: this needs to be tested for custom keys. The defaults already work for basic key types without setting this config.
+* `keyMap`: optional key mapping for LRUD input. NOTE: this needs to be tested for custom keys. The defaults Left/Right/Up/Down already work for basic key types without setting this config. However, to set up TV platform specific __Menu__ and __Back__ keys, the app can pass the specific __keyCodes__ mapped to them to get 'menu' through TVEventHandler and BackHandler events.
 * `keydownThrottleMs`: minimum time between keydown events (ms). Use to reduce rapid repeats from held keys.
 * `focusConfig.mode`: focus scrolling behavior mode ('default' or 'AlignLeft'). AlignLeft keeps left moves default, and aligns right moves to the current focus X position when scrolling.
 * `scrollConfig.edgeThresholdPx`: padding from container edges before scrolling.
@@ -95,7 +96,7 @@ Read the [contributing guide][contributing-url] to learn about the development p
 
 ### Good first issues
 
-To help you get you familiar with the contribution process, there is a list of [good first issues][good-first-issue-url] that contain bugs which have a relatively limited scope. This is a great place to get started.
+To help get you familiar with the contribution process, there is a list of [good first issues][good-first-issue-url] that contain bugs which have a relatively limited scope. This is a great place to get started.
 
 [contributing-url]: https://github.com/necolas/react-native-web/blob/master/.github/CONTRIBUTING.md
 [good-first-issue-url]: https://github.com/necolas/react-native-web/labels/good%20first%20issue

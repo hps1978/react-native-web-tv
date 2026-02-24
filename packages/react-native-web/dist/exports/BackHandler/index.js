@@ -28,7 +28,8 @@ var BackHandler = {
 if (Platform.isTV && typeof window !== 'undefined' && (_window = window) != null && (_window = _window.appConfig) != null && (_window = _window.keyMap) != null && _window['Back']) {
   var _backPressSubscriptions = new Set();
   TVEventHandler.addListener(function (evt) {
-    if (evt && evt.eventType === 'menu') {
+    var _window2;
+    if (evt && evt.keyCode === ((_window2 = window) == null || (_window2 = _window2.appConfig) == null || (_window2 = _window2.keyMap) == null ? void 0 : _window2['Back'])) {
       var invokeDefault = true;
       var subscriptions = Array.from(_backPressSubscriptions.values()).reverse();
       for (var i = 0; i < subscriptions.length; ++i) {

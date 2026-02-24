@@ -19,13 +19,9 @@ var mapToHWEvent = event => {
     case 'Enter':
       eventType = 'select';
       break;
-    case 'Backspace':
-    case 'Escape':
-      eventType = 'menu';
-      break;
     default:
-      // Detect user configured back key for Web TV platforms through window.appConfig.keyMap.Back
-      if (typeof window !== 'undefined' && ((_window = window) == null || (_window = _window.appConfig) == null || (_window = _window.keyMap) == null ? void 0 : _window['Back']) === event.keyCode) {
+      // Detect user configured Menu key for Web TV platforms through window.appConfig.keyMap.Menu
+      if (typeof window !== 'undefined' && ((_window = window) == null || (_window = _window.appConfig) == null || (_window = _window.keyMap) == null ? void 0 : _window['Menu']) === event.keyCode) {
         eventType = 'menu';
       } else {
         eventType = event.key;
