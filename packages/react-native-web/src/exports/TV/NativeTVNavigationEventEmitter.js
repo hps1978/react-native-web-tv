@@ -54,7 +54,15 @@ const mapToHWEvent = (event: KeyboardEvent): HWEvent => {
       eventType = 'menu';
       break;
     default:
-      eventType = event.key;
+      // Detect user configured back key for Web TV platforms through window.appConfig.keyMap.Back
+      if (
+        typeof window !== 'undefined' &&
+        window?.appConfig?.keyMap?.['Back'] === event.keyCode
+      ) {
+        eventType = 'menu';
+      } else {
+        eventType = event.key;
+      }
   }
   return { eventType };
 };

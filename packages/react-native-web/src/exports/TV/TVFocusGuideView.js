@@ -125,7 +125,6 @@ const TVFocusGuideView: React.AbstractComponent<
   }
   const style = [styles.container, props.style, enabledStyle];
 
-  console.log('TVFocusGuideView style: ', style);
   // If there are no destinations and the autoFocus is false the the default value of focusable should be false
   // It is then properly handled by the native code
   const tvOSSelectable =
