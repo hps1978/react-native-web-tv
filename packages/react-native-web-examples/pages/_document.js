@@ -14,7 +14,9 @@ export default class MyDocument extends Document {
   render() {
     return (
       <Html>
-        <Head />
+        <Head>
+          <script src="/app-config.js" />
+        </Head>
         <body>
           <Main />
           <NextScript />
