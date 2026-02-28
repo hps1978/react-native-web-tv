@@ -919,14 +919,9 @@ function scrollToAlignLeft(
 
   if (delta.needsHorizontalScroll && delta.needsVerticalScroll) {
     // Both axes need scrolling: prioritize horizontal (AlignLeft alignment) first.
-    // After horizontal scroll settles, recompute deltas to see if vertical is still needed.
     // Sequential approach prevents conflicting scroll operations.
     runAxis('horizontal', delta.horizontalDelta);
-    const after = computeAlignLeftDeltas();
-    if (!after.needsVerticalScroll) {
-      return null;
-    }
-    runAxis('vertical', after.verticalDelta);
+    runAxis('vertical', delta.verticalDelta);
     return null;
   }
 
@@ -1066,13 +1061,8 @@ function maybeScrollOnFocus(
       primaryAxis === 'vertical' ? delta.vertical : delta.horizontal;
 
     runAxis(primaryAxis, primaryInfo);
-    // const after = computeDeltas();
     const secondaryInfo =
-      // secondaryAxis === 'vertical' ? after.vertical : after.horizontal;
       secondaryAxis === 'vertical' ? delta.vertical : delta.horizontal;
-    // if (!secondaryInfo.needsScroll) {
-    //   return null;
-    // }
     runAxis(secondaryAxis, secondaryInfo);
     return null;
   }
