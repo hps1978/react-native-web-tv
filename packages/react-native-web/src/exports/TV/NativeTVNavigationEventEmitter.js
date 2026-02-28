@@ -49,15 +49,11 @@ const mapToHWEvent = (event: KeyboardEvent): HWEvent => {
     case 'Enter':
       eventType = 'select';
       break;
-    case 'Backspace':
-    case 'Escape':
-      eventType = 'menu';
-      break;
     default:
-      // Detect user configured back key for Web TV platforms through window.appConfig.keyMap.Back
+      // Detect user configured Menu key for Web TV platforms through window.appConfig.keyMap.Menu
       if (
         typeof window !== 'undefined' &&
-        window?.appConfig?.keyMap?.['Back'] === event.keyCode
+        window?.appConfig?.keyMap?.['Menu'] === event.keyCode
       ) {
         eventType = 'menu';
       } else {
@@ -70,6 +66,8 @@ const mapToHWEvent = (event: KeyboardEvent): HWEvent => {
 const NativeTVNavigationEventEmitter = {
   _listenerCount: 0,
   _keydownHandler: (null: null | ((e: KeyboardEvent) => void)),
+  _onFocusHandler: (null: null | ((e: FocusEvent) => void)),
+  _onBlurHandler: (null: null | ((e: FocusEvent) => void)),
 
   addListener(eventType: string) {
     if (eventType !== EVENT_NAME) {
@@ -104,6 +102,21 @@ const NativeTVNavigationEventEmitter = {
       RCTDeviceEventEmitter.emit(EVENT_NAME, hwEvent);
     };
     window.addEventListener('keydown', this._keydownHandler);
+    if (typeof document !== 'undefined') {
+      // Use capture phase to catch per-element focus/blur once at the top.
+      this._onFocusHandler = () => {
+        RCTDeviceEventEmitter.emit(EVENT_NAME, {
+          eventType: 'focus'
+        });
+      };
+      this._onBlurHandler = () => {
+        RCTDeviceEventEmitter.emit(EVENT_NAME, {
+          eventType: 'blur'
+        });
+      };
+      document.addEventListener('focus', this._onFocusHandler, true);
+      document.addEventListener('blur', this._onBlurHandler, true);
+    }
   },
 
   _detachKeyboardListener() {
@@ -112,6 +125,14 @@ const NativeTVNavigationEventEmitter = {
     }
     window.removeEventListener('keydown', this._keydownHandler);
     this._keydownHandler = null;
+    if (this._onBlurHandler && typeof document !== 'undefined') {
+      document.removeEventListener('blur', this._onBlurHandler, true);
+    }
+    if (this._onFocusHandler && typeof document !== 'undefined') {
+      document.removeEventListener('focus', this._onFocusHandler, true);
+    }
+    this._onBlurHandler = null;
+    this._onFocusHandler = null;
   }
 };
 

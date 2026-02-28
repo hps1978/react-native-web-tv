@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useMemo, useCallback, useEffect } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   FlatList,
   ScrollView,
@@ -39,19 +39,6 @@ function RLVFlatListTVScrollExample() {
       ),
     []
   );
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    window.appConfig = {
-      scrollConfig: {
-        edgeThresholdPx: 50,
-        scrollThrottleMs: 80, // Not implemented
-        smoothScrollEnabled: true,
-        scrollAnimationDurationMsVertical: 200,
-        scrollAnimationDurationMsHorizontal: 200
-      }
-    };
-  }, []);
 
   const renderItemForRow = useCallback(
     (rowIndex) =>

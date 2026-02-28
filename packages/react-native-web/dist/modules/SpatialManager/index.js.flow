@@ -46,7 +46,9 @@ let keyUpListener: ((event: any) => void) | null = null;
 let appInitiatedScrollCleanup: (() => void) | null = null;
 let _lastKeydownAt = 0;
 const DEBUG_SCROLL = typeof window !== 'undefined' && window.__RNW_TV_SCROLL_DEBUG === true;
-const _hasAnimationFrame = typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function';
+// const _hasAnimationFrame =
+//   typeof window !== 'undefined' &&
+//   typeof window.requestAnimationFrame === 'function';
 declare function loadGlobalConfig(): SpatialNavigationConfigType | null; // This callback wil get triggered when LRUD fails to find a valid destination from the provided data-destinations
 // atrtribute. LRUD will use it's fallback. autofocus or default focus logic. This contianer will no longer be
 // focusable if there is no autofocus either.

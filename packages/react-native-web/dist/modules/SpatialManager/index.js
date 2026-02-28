@@ -33,7 +33,10 @@ var keyUpListener = null;
 var appInitiatedScrollCleanup = null;
 var _lastKeydownAt = 0;
 var DEBUG_SCROLL = typeof window !== 'undefined' && window.__RNW_TV_SCROLL_DEBUG === true;
-var _hasAnimationFrame = typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function';
+// const _hasAnimationFrame =
+//   typeof window !== 'undefined' &&
+//   typeof window.requestAnimationFrame === 'function';
+
 function loadGlobalConfig() {
   // Check for window.appConfig.spatialNav (cross-platform pattern)
   if (typeof window !== 'undefined' && window.appConfig) {
@@ -107,8 +110,11 @@ function triggerFocus(nextFocus, keyCode) {
         pendingFocusCount: _pendingFocusCount
       });
     }
-    var scrollPromise = null;
-    scrollPromise = maybeScrollOnFocus(nextFocus.elem, _currentFocus.elem, keyCode);
+
+    // let scrollPromise = null;
+
+    // scrollPromise = maybeScrollOnFocus(
+    maybeScrollOnFocus(nextFocus.elem, _currentFocus.elem, keyCode);
     var applyFocus = () => {
       if (!nextFocus.elem) {
         return;
@@ -118,11 +124,13 @@ function triggerFocus(nextFocus, keyCode) {
       stopObserving();
       _currentFocus.elem = nextFocus.elem;
       _currentFocus.parentHasAutofocus = nextFocus.parentHasAutofocus;
-
       // set id first
       setupNodeId(nextFocus.elem);
+      console.log('>>>> Updated current focus to: ', _currentFocus.elem.id);
       updateAncestorsAutoFocus(nextFocus.elem, _spatialNavigationContainer);
-      var preventScroll = scrollPromise != null;
+
+      // const preventScroll = scrollPromise != null;
+      var preventScroll = true;
       if (_pendingFocusCount > 0) {
         _pendingFocusCount--;
       }
@@ -141,17 +149,14 @@ function triggerFocus(nextFocus, keyCode) {
       }
     };
     var scheduleFocus = () => {
-      if (_hasAnimationFrame) {
-        window.requestAnimationFrame(applyFocus);
-      } else {
-        applyFocus();
-      }
+      // if (_hasAnimationFrame) {
+      //   window.requestAnimationFrame(applyFocus);
+      // } else {
+      //   applyFocus();
+      // }
+      applyFocus();
     };
-    if (scrollPromise && typeof scrollPromise.then === 'function') {
-      scrollPromise.then(applyFocus);
-    } else {
-      scheduleFocus();
-    }
+    scheduleFocus();
     return true;
   }
   return false;
@@ -239,7 +244,9 @@ function setupSpatialNavigation(container) {
     if (!_currentFocus.elem) {
       console.warn('No initial focus. Trying to set one...');
     }
+    console.log('>>>> Keypress');
     var nextFocus = getNextFocus(_currentFocus.elem, keyCode, (container == null ? void 0 : container.ownerDocument) || window.document);
+    console.log('>>>> nextFocus: ', nextFocus.elem);
     if (nextFocus && nextFocus.elem) {
       // Increment pending focus count to indicate focus is required for this navigation action
       _pendingFocusCount += 1;

@@ -51,7 +51,7 @@ if (
   const _backPressSubscriptions = new Set<() => ?boolean>();
 
   TVEventHandler.addListener(function (evt) {
-    if (evt && evt.eventType === 'menu') {
+    if (evt && evt.keyCode === window?.appConfig?.keyMap?.['Back']) {
       let invokeDefault = true;
       const subscriptions = Array.from(
         _backPressSubscriptions.values()

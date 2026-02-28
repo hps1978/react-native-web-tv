@@ -48,7 +48,7 @@ const DEFAULT_SPATIAL_SCROLL_CONFIG: SpatialScrollConfigType = {
   // only used on the left edge and in horizontal scrolling
   scrollThrottleMs: 80,
   // not used for now
-  smoothScrollEnabled: true,
+  smoothScrollEnabled: false,
   scrollAnimationDurationMs: 0,
   scrollAnimationDurationMsVertical: 0,
   scrollAnimationDurationMsHorizontal: 0
@@ -64,27 +64,61 @@ const _scrollState: ScrollStateType = {
 declare function getCurrentTime(): number;
 declare function scheduleAnimationFrame(callback: () => void): number;
 const cancelScheduledFrame = _hasRequestAnimationFrame ? cancelAnimationFrame : clearTimeout;
-declare function animateScrollTo(scrollable: any, isVertical: boolean, nextOffset: number, durationMs: number): any;
-declare function getScrollPosition(scrollable: any, isVertical: boolean, isWindowScroll: boolean): number; // Calculate if and how much to scroll to keep an element visible within its container.
+const _windowScrollable = typeof window !== 'undefined' ? {
+  get scrollTop() {
+    return window.scrollY;
+  },
+  get scrollLeft() {
+    return window.scrollX;
+  },
+  clientHeight: window.innerHeight,
+  clientWidth: window.innerWidth,
+  scrollHeight: document.documentElement.scrollHeight,
+  scrollWidth: document.documentElement.scrollWidth,
+  getBoundingClientRect: () => ({
+    top: 0,
+    left: 0,
+    bottom: window.innerHeight,
+    right: window.innerWidth
+  }),
+  scrollTo: (options: any) => {
+    const scrollParam = {
+      top: options.y !== undefined ? options.y : window.scrollY,
+      left: options.x !== undefined ? options.x : window.scrollX,
+      behavior: options.animated ? 'smooth' : 'auto'
+    };
+    window.scroll ? window.scroll(scrollParam) : window.scrollTo(scrollParam);
+  }
+} : null;
+const _viewportRect = typeof window !== 'undefined' ? {
+  top: 0,
+  bottom: window.innerHeight,
+  left: 0,
+  right: window.innerWidth
+} : null;
+declare function animateScrollTo(scrollable: any, isVertical: boolean, nextOffset: number, durationMs: number): any; // function getScrollPosition(
+//   scrollable: any,
+//   isVertical: boolean,
+//   isWindowScroll: boolean
+// ): number {
+//   if (isWindowScroll) {
+//     return isVertical ? window.scrollY : window.scrollX;
+//   }
+//   return isVertical ? scrollable.scrollTop : scrollable.scrollLeft;
+// }
+// Calculate if and how much to scroll to keep an element visible within its container.
 // Uses edge threshold (edgeThresholdPx) to maintain padding from container boundaries.
 // Returns: { needsScroll: boolean, scrollDelta: number (in pixels) }
 declare function getAxisScrollDelta(targetRect: any, visibleContainerRect: any, axis: 'vertical' | 'horizontal'): {
   needsScroll: boolean,
   scrollDelta: number,
 };
-declare function waitForScrollSettle(scrollable: any, isVertical: boolean, isWindowScroll: boolean): Promise<void>;
 declare function logScrollContainer(label: string, scrollableInfo: {
   scrollable: any,
   isWindowScroll: boolean,
 }, elem: HTMLElement): void;
-declare function scrollAxis(params: {
-  scrollable: any,
-  isWindowScroll: boolean,
-  isVertical: boolean,
-  scrollDelta: number,
-}): Promise<void>;
-declare function findScrollableAncestor(elem: HTMLElement | null, direction: 'vertical' | 'horizontal'): HTMLElement | null;
-declare function resolveScrollable(elem: HTMLElement, direction: 'vertical' | 'horizontal'): any; // Resolve element and container rectangles, clamping to viewport for accuracy.
+declare function scrollAxis(scrollable: any, isWindowScroll: boolean, isVertical: boolean, scrollDelta: number): void;
+declare function findScrollableAncestor(elem: HTMLElement | null, direction: 'vertical' | 'horizontal'): HTMLElement | null; // Resolve element and container rectangles, clamping to viewport for accuracy.
 // Important: bounding rects are viewport-relative, not document-relative.
 // This avoids coordinate system mismatches when scrolling.
 declare function resolveRects(scrollable: any, isWindowScroll: boolean, elem: HTMLElement): any;
@@ -161,7 +195,13 @@ declare function setupAppInitiatedScrollHandler(container: HTMLElement | Documen
  * content scrolls left/right. But at content boundaries, we fall back to default behavior
  * to avoid breaking visual alignment of the original focus element.
  */
-declare function scrollToAlignLeft(elem: HTMLElement | null, keyCode: string, currentElem: HTMLElement | null): any; // Main entry point for scroll-on-focus logic.
+declare function scrollToAlignLeft(elem: HTMLElement | null, keyCode: string, currentElem: HTMLElement | null, verticalScroll: {
+  scrollable: any,
+  isWindowScroll: boolean,
+}, horizontalScroll: {
+  scrollable: any,
+  isWindowScroll: boolean,
+}): any; // Main entry point for scroll-on-focus logic.
 // Dispatches to AlignLeft or default behavior based on focusMode.
 // - AlignLeft: right aligns to current focus X, other directions use default
 // - default: always use standard visibility behavior

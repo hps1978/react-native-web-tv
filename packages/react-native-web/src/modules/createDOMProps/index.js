@@ -944,10 +944,7 @@ const createDOMProps = (elementType, props, options) => {
       trapFocusDown ? ' down' : ''
     }${trapFocusLeft ? ' left' : ''}${trapFocusRight ? ' right' : ''}`;
     if (trapFocusString.trim().length > 0) {
-      domProps['data-lrud-prioritise-children'] = 'true';
       domProps['data-block-exit'] = trapFocusString;
-    } else {
-      domProps['data-lrud-prioritise-children'] = 'false';
     }
 
     // 4. setup lrud-ignore class if tvFocusable is false
