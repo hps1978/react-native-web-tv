@@ -176,7 +176,6 @@ function triggerFocus(nextFocus: FocusState, keyCode?: string): boolean {
       _currentFocus.parentHasAutofocus = nextFocus.parentHasAutofocus;
       // set id first
       setupNodeId(nextFocus.elem);
-      console.log('>>>> Updated current focus to: ', _currentFocus.elem.id);
       updateAncestorsAutoFocus(nextFocus.elem, _spatialNavigationContainer);
 
       // const preventScroll = scrollPromise != null;
@@ -334,13 +333,13 @@ function setupSpatialNavigation(container?: HTMLElement) {
       if (!_currentFocus.elem) {
         console.warn('No initial focus. Trying to set one...');
       }
-      console.log('>>>> Keypress');
+
       const nextFocus = getNextFocus(
         _currentFocus.elem,
         keyCode,
         container?.ownerDocument || window.document
       );
-      console.log('>>>> nextFocus: ', nextFocus.elem);
+
       if (nextFocus && nextFocus.elem) {
         // Increment pending focus count to indicate focus is required for this navigation action
         _pendingFocusCount += 1;

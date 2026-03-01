@@ -299,16 +299,6 @@ export const TVEventHandlerView: () => React.Node = () => {
 
   // Apple TV: enable detection of pan gesture events (and disable on unmount)
   React.useEffect(() => {
-    if (typeof window === 'undefined') return;
-    window.appConfig = {
-      scrollConfig: {
-        edgeThresholdPx: 50,
-        scrollThrottleMs: 80, // Not implemented
-        smoothScrollEnabled: true,
-        scrollAnimationDurationMsVertical: 0,
-        scrollAnimationDurationMsHorizontal: 0
-      }
-    };
     TVEventControl.enableTVPanGesture();
     return () => TVEventControl.disableTVPanGesture();
   }, []);

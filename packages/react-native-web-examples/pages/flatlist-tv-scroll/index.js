@@ -82,9 +82,11 @@ function FlatListTVScrollExample() {
               data={rowData}
               horizontal
               keyExtractor={keyExtractor}
+              maxToRenderPerBatch={5}
               renderItem={renderItemForRow(rowIndex)}
               showsHorizontalScrollIndicator
               style={styles.rowList}
+              windowSize={2}
             />
           </View>
         ))}

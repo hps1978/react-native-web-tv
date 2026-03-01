@@ -21,7 +21,7 @@ The algorithm uses viewport-relative rectangles to avoid mismatched coordinate s
 - `targetRect` (element’s bounding box)
 - `visibleContainerRect` (scroll container clamped to the viewport)
 
-If the target is outside the safe zone (defined by `edgeThresholdPx`), the code computes a delta and applies it to the current scroll offset:
+If the target is outside the safe zone (defined by `leftEdgePaddingPx` and `topEdgePaddingPx`), the code computes a delta and applies it to the current scroll offset:
 - **Vertical**: scroll down when `targetRect.bottom` exceeds the container’s bottom minus padding; scroll up when `targetRect.top` is above the container’s top plus padding.
 - **Horizontal**: same logic with left/right edges.
 
@@ -73,7 +73,8 @@ Spatial navigation reads configuration from `window.appConfig` at runtime. The c
 - `focusConfig`: Focus scrolling behavior configuration (mode). AlignLeft keeps left moves default and aligns right moves to the current focus X position when scrolling.
 
 `scrollConfig` fields:
-- `edgeThresholdPx`: Padding around the container edge to keep focused items from hugging the boundary.
+- `scrollConfig.leftEdgePaddingPx`: padding from scroll container left edge.
+- `scrollConfig.topEdgePaddingPx`: padding from scroll container top edge.
 - `scrollThrottleMs`: Minimum time between scrolls to avoid rapid repeat scrolling. NOTE: not implemented.
 - `smoothScrollEnabled`: Enables native smooth behavior when not using manual animation.
 - `scrollAnimationDurationMsVertical`: Vertical-only animation duration (ms).
@@ -98,7 +99,8 @@ Spatial navigation reads configuration from `window.appConfig` at runtime. The c
       mode: 'default'  // or 'AlignLeft' for horizontal-only alignment
     },
     scrollConfig: {
-      edgeThresholdPx: 50,
+      leftEdgePaddingPx: 10,
+      topEdgePaddingPx: 15,
       scrollThrottleMs: 80, // Not implemented
       smoothScrollEnabled: true,
       scrollAnimationDurationMsVertical: 600,
