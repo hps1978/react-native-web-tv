@@ -9,7 +9,8 @@
  */
 
 type SpatialScrollConfigType = {
-  edgeThresholdPx?: number,
+  leftEdgePaddingPx?: number,
+  topEdgePaddingPx?: number,
   scrollThrottleMs?: number, // not used for now
   smoothScrollEnabled?: boolean,
   scrollAnimationDurationMsVertical?: number,
@@ -48,7 +49,8 @@ const _hasScrollEndEvent = false;
 //   'onscrollend' in window;
 
 const DEFAULT_SPATIAL_SCROLL_CONFIG: SpatialScrollConfigType = {
-  edgeThresholdPx: 0, // only used on the left edge and in horizontal scrolling
+  leftEdgePaddingPx: 0, // only used on the left edge and in horizontal scrolling
+  topEdgePaddingPx: 0, // only used on the top edge and in vertical scrolling
   scrollThrottleMs: 80, // not used for now
   smoothScrollEnabled: false,
   scrollAnimationDurationMs: 0,
@@ -140,23 +142,19 @@ function animateScrollTo(
   }
 
   const startTime = getCurrentTime();
-  const step = (now: number) => {
+  const easingFunction = (t) => t * (2 - t); // Example: easeOutQuad
+
+  const step = (now) => {
     const elapsed = _hasPerformance ? now - startTime : Date.now() - startTime;
     const t = Math.min(1, elapsed / durationMs);
-    const value = startOffset + delta * t;
+    const easedT = easingFunction(t);
+    const value = startOffset + delta * easedT;
 
     if (typeof scrollable.scrollTo === 'function') {
-      if (isVertical) {
-        scrollable.scrollTo({
-          y: value,
-          animated: false
-        });
-      } else {
-        scrollable.scrollTo({
-          x: value,
-          animated: false
-        });
-      }
+      scrollable.scrollTo({
+        [isVertical ? 'y' : 'x']: value,
+        animated: false
+      });
     } else if (isVertical) {
       scrollable.scrollTop = value;
     } else {
@@ -189,7 +187,7 @@ function animateScrollTo(
 // }
 
 // Calculate if and how much to scroll to keep an element visible within its container.
-// Uses edge threshold (edgeThresholdPx) to maintain padding from container boundaries.
+// Uses padding (leftEdgePaddingPx and topEdgePaddingPx) to maintain padding from container boundaries.
 // Returns: { needsScroll: boolean, scrollDelta: number (in pixels) }
 function getAxisScrollDelta(
   targetRect: any,
@@ -209,10 +207,12 @@ function getAxisScrollDelta(
 
   if (targetSize > visibleSize) {
     const delta = isVertical
-      ? targetRect.top - visibleContainerRect.top
+      ? targetRect.top -
+        visibleContainerRect.top -
+        _scrollConfig.topEdgePaddingPx
       : targetRect.left -
         visibleContainerRect.left -
-        _scrollConfig.edgeThresholdPx;
+        _scrollConfig.leftEdgePaddingPx;
     return { needsScroll: delta !== 0, scrollDelta: delta };
   }
 
@@ -220,7 +220,10 @@ function getAxisScrollDelta(
     if (targetRect.top < visibleContainerRect.top) {
       return {
         needsScroll: true,
-        scrollDelta: targetRect.top - visibleContainerRect.top
+        scrollDelta:
+          targetRect.top -
+          visibleContainerRect.top -
+          _scrollConfig.topEdgePaddingPx
       };
     }
     if (targetRect.bottom > visibleContainerRect.bottom) {
@@ -236,7 +239,7 @@ function getAxisScrollDelta(
         scrollDelta:
           targetRect.left -
           visibleContainerRect.left -
-          _scrollConfig.edgeThresholdPx
+          _scrollConfig.leftEdgePaddingPx
       };
     }
     if (targetRect.right > visibleContainerRect.right) {
@@ -245,7 +248,7 @@ function getAxisScrollDelta(
         scrollDelta:
           targetRect.right -
           visibleContainerRect.right +
-          _scrollConfig.edgeThresholdPx
+          _scrollConfig.leftEdgePaddingPx
       };
     }
   }
@@ -257,7 +260,8 @@ function scrollAxis(
   scrollable: any,
   isWindowScroll: boolean,
   isVertical: boolean,
-  scrollDelta: number
+  scrollDelta: number,
+  animate: boolean = false
 ): void {
   if (scrollDelta === 0) {
     return;
@@ -288,7 +292,7 @@ function scrollAxis(
     maxOffset
   );
 
-  performScroll(scrollable, isVertical, nextOffset, liveNextOffset);
+  performScroll(scrollable, isVertical, nextOffset, liveNextOffset, animate);
 }
 
 function findScrollableAncestor(
@@ -342,27 +346,40 @@ function findScrollableAncestor(
 // Important: bounding rects are viewport-relative, not document-relative.
 // This avoids coordinate system mismatches when scrolling.
 function resolveRects(
-  scrollable: any,
-  isWindowScroll: boolean,
+  scrollableH: any,
+  isWindowScrollH: boolean,
+  scrollableV: any,
+  isWindowScrollV: boolean,
   elem: HTMLElement
 ) {
-  let containerRect;
+  let containerRectH, containerRectV;
   let targetRect;
 
   if (_hasGetBoundingClientRect) {
-    containerRect = scrollable.getBoundingClientRect();
+    containerRectH = scrollableH.getBoundingClientRect();
+    containerRectV = scrollableV.getBoundingClientRect();
     targetRect = elem.getBoundingClientRect();
   } else {
     // Fallback: use offset dimensions
-    containerRect = {
-      top: (scrollable: any).offsetTop || 0,
-      left: (scrollable: any).offsetLeft || 0,
+    containerRectH = {
+      top: (scrollableH: any).offsetTop || 0,
+      left: (scrollableH: any).offsetLeft || 0,
       bottom:
-        ((scrollable: any).offsetTop || 0) +
-        ((scrollable: any).offsetHeight || 0),
+        ((scrollableH: any).offsetTop || 0) +
+        ((scrollableH: any).offsetHeight || 0),
       right:
-        ((scrollable: any).offsetLeft || 0) +
-        ((scrollable: any).offsetWidth || 0)
+        ((scrollableH: any).offsetLeft || 0) +
+        ((scrollableH: any).offsetWidth || 0)
+    };
+    containerRectV = {
+      top: (scrollableV: any).offsetTop || 0,
+      left: (scrollableV: any).offsetLeft || 0,
+      bottom:
+        ((scrollableV: any).offsetTop || 0) +
+        ((scrollableV: any).offsetHeight || 0),
+      right:
+        ((scrollableV: any).offsetLeft || 0) +
+        ((scrollableV: any).offsetWidth || 0)
     };
     targetRect = {
       top: elem.offsetTop || 0,
@@ -374,7 +391,7 @@ function resolveRects(
 
   // Clamp container rect to viewport bounds so we don't scroll outside the visible area.
   // This is critical for accurate visibility detection when container is partially off-screen.
-  // const visibleContainerRect = isWindowScroll
+  // const visibleContainerRect = isWindowScrollH
   //   ? _viewportRect
   //   : {
   //       top: Math.max(containerRect.top, _viewportRect.top),
@@ -384,20 +401,31 @@ function resolveRects(
   //     };
 
   // return { containerRect, targetRect, visibleContainerRect };
-  return { containerRect, targetRect, visibleContainerRect: containerRect };
+  return {
+    horizontalRects: {
+      containerRect: containerRectH,
+      visibleContainerRect: containerRectH
+    },
+    verticalRects: {
+      containerRect: containerRectV,
+      visibleContainerRect: containerRectV
+    },
+    targetRect
+  };
 }
 
 function performScroll(
   scrollable: any,
   isVertical: boolean,
   nextOffset: number,
-  liveNextOffset: number
+  liveNextOffset: number,
+  animate: boolean = false
 ) {
   const durationMs = isVertical
     ? _scrollConfig.scrollAnimationDurationMsVertical
     : _scrollConfig.scrollAnimationDurationMsHorizontal;
 
-  if (durationMs > 0) {
+  if (animate && durationMs > 0) {
     animateScrollTo(scrollable, isVertical, liveNextOffset, durationMs);
     return;
   }
@@ -731,14 +759,11 @@ function scrollToAlignLeft(
   if (!elem || typeof window === 'undefined') return;
 
   const computeAlignLeftDeltas = () => {
-    const verticalRects = resolveRects(
-      verticalScroll.scrollable,
-      verticalScroll.isWindowScroll,
-      elem
-    );
-    const horizontalRects = resolveRects(
+    const { verticalRects, horizontalRects, targetRect } = resolveRects(
       horizontalScroll.scrollable,
       horizontalScroll.isWindowScroll,
+      verticalScroll.scrollable,
+      verticalScroll.isWindowScroll,
       elem
     );
 
@@ -746,14 +771,14 @@ function scrollToAlignLeft(
     if (keyCode === 'ArrowUp' || keyCode === 'ArrowDown') {
       // Make sure the target is fully visible
       const vertical = getAxisScrollDelta(
-        verticalRects.targetRect,
+        targetRect,
         verticalRects.visibleContainerRect,
         'vertical'
       );
 
       // We may still need horizontal scroll to maintain target within the visible area
       const horizontal = getAxisScrollDelta(
-        horizontalRects.targetRect,
+        targetRect,
         horizontalRects.visibleContainerRect,
         'horizontal'
       );
@@ -770,16 +795,16 @@ function scrollToAlignLeft(
 
     if (keyCode === 'ArrowRight') {
       // On right navigation:
-      // - try to align target's left edge to scrollables X position (+ edgeThresholdPx).
+      // - try to align target's left edge to scrollables X position (+ leftEdgePaddingPx).
       // - if not enough scrollable space
       //    - either there is no scroll required, OR
       //    - there is scroll required to bring the target into the visible area
       let horizontalDelta = 0;
       let needsHorizontalScroll = false;
       const desiredDelta =
-        horizontalRects.targetRect.left -
+        targetRect.left -
         horizontalRects.visibleContainerRect.left -
-        _scrollConfig.edgeThresholdPx;
+        _scrollConfig.leftEdgePaddingPx;
       const scrollable = horizontalScroll.scrollable;
       const currentScrollPosition = scrollable.scrollLeft;
       const maxScroll = Math.max(
@@ -797,7 +822,7 @@ function scrollToAlignLeft(
       } else {
         // Not enough space: get defaults which bring the target into the visible area.
         const horizontal = getAxisScrollDelta(
-          horizontalRects.targetRect,
+          targetRect,
           horizontalRects.visibleContainerRect,
           'horizontal'
         );
@@ -807,7 +832,7 @@ function scrollToAlignLeft(
 
       // We may still need vertical scroll to maintain target within the visible area
       const vertical = getAxisScrollDelta(
-        verticalRects.targetRect,
+        targetRect,
         verticalRects.visibleContainerRect,
         'vertical'
       );
@@ -822,16 +847,16 @@ function scrollToAlignLeft(
       };
     } else {
       // On left navigation:
-      // - default to keeping the target fully visible (including edgeThresholdPx)
+      // - default to keeping the target fully visible (including leftEdgePaddingPx)
       const horizontal = getAxisScrollDelta(
-        horizontalRects.targetRect,
+        targetRect,
         horizontalRects.visibleContainerRect,
         'horizontal'
       );
 
       // We may still need vertical scroll to maintain target within the visible area
       const vertical = getAxisScrollDelta(
-        verticalRects.targetRect,
+        targetRect,
         verticalRects.visibleContainerRect,
         'vertical'
       );
@@ -857,7 +882,11 @@ function scrollToAlignLeft(
 
   markSpatialManagerScroll();
 
-  const runAxis = (axis: 'vertical' | 'horizontal', delta: number): void => {
+  const runAxis = (
+    axis: 'vertical' | 'horizontal',
+    delta: number,
+    animate: boolean
+  ): void => {
     if (delta === 0) {
       return;
     }
@@ -867,7 +896,8 @@ function scrollToAlignLeft(
       scrollInfo.scrollable,
       scrollInfo.isWindowScroll,
       axis === 'vertical',
-      delta
+      delta,
+      animate
     );
   };
 
@@ -879,17 +909,17 @@ function scrollToAlignLeft(
     //   runAxis('horizontal', delta.horizontalDelta);
     //   return null;
     // }
-    runAxis('horizontal', delta.horizontalDelta);
-    runAxis('vertical', delta.verticalDelta);
+    runAxis('horizontal', delta.horizontalDelta, false);
+    runAxis('vertical', delta.verticalDelta, true);
     return null;
   }
 
   if (delta.needsHorizontalScroll) {
-    runAxis('horizontal', delta.horizontalDelta);
+    runAxis('horizontal', delta.horizontalDelta, true);
     return null;
   }
 
-  runAxis('vertical', delta.verticalDelta);
+  runAxis('vertical', delta.verticalDelta, true);
   return null;
 }
 
@@ -918,24 +948,21 @@ function maybeScrollOnFocus(
   }
 
   const computeDeltas = () => {
-    const verticalRects = resolveRects(
+    const { verticalRects, horizontalRects, targetRect } = resolveRects(
+      horizontalScroll.scrollable,
+      horizontalScroll.isWindowScroll,
       verticalScroll.scrollable,
       verticalScroll.isWindowScroll,
       nextElem
     );
-    const horizontalRects = resolveRects(
-      horizontalScroll.scrollable,
-      horizontalScroll.isWindowScroll,
-      nextElem
-    );
 
     const vertical = getAxisScrollDelta(
-      verticalRects.targetRect,
+      targetRect,
       verticalRects.visibleContainerRect,
       'vertical'
     );
     const horizontal = getAxisScrollDelta(
-      horizontalRects.targetRect,
+      targetRect,
       horizontalRects.visibleContainerRect,
       'horizontal'
     );
@@ -956,7 +983,8 @@ function maybeScrollOnFocus(
 
   const runAxis = (
     axis: 'vertical' | 'horizontal',
-    deltaInfo: { needsScroll: boolean, scrollDelta: number }
+    deltaInfo: { needsScroll: boolean, scrollDelta: number },
+    animate: boolean
   ): void => {
     if (!deltaInfo.needsScroll) {
       return;
@@ -967,7 +995,8 @@ function maybeScrollOnFocus(
       scrollInfo.scrollable,
       scrollInfo.isWindowScroll,
       axis === 'vertical',
-      deltaInfo.scrollDelta
+      deltaInfo.scrollDelta,
+      animate
     );
   };
 
@@ -986,19 +1015,19 @@ function maybeScrollOnFocus(
     const primaryInfo =
       primaryAxis === 'vertical' ? delta.vertical : delta.horizontal;
 
-    runAxis(primaryAxis, primaryInfo);
+    runAxis(primaryAxis, primaryInfo, true);
     const secondaryInfo =
       secondaryAxis === 'vertical' ? delta.vertical : delta.horizontal;
-    runAxis(secondaryAxis, secondaryInfo);
+    runAxis(secondaryAxis, secondaryInfo, false);
     return null;
   }
 
   if (delta.vertical.needsScroll) {
-    runAxis('vertical', delta.vertical);
+    runAxis('vertical', delta.vertical, true);
     return null;
   }
 
-  runAxis('horizontal', delta.horizontal);
+  runAxis('horizontal', delta.horizontal, true);
   return null;
 }
 

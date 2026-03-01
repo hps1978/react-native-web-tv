@@ -9,7 +9,8 @@
  */
 
 type SpatialScrollConfigType = {
-  edgeThresholdPx?: number,
+  leftEdgePaddingPx?: number,
+  topEdgePaddingPx?: number,
   scrollThrottleMs?: number,
   // not used for now
   smoothScrollEnabled?: boolean,
@@ -44,8 +45,10 @@ const _hasScrollEndEvent = false;
 //   'onscrollend' in window;
 
 const DEFAULT_SPATIAL_SCROLL_CONFIG: SpatialScrollConfigType = {
-  edgeThresholdPx: 0,
+  leftEdgePaddingPx: 0,
   // only used on the left edge and in horizontal scrolling
+  topEdgePaddingPx: 0,
+  // only used on the top edge and in vertical scrolling
   scrollThrottleMs: 80,
   // not used for now
   smoothScrollEnabled: false,
@@ -111,18 +114,18 @@ declare function animateScrollTo(scrollable: any, isVertical: boolean, nextOffse
 //   return isVertical ? scrollable.scrollTop : scrollable.scrollLeft;
 // }
 // Calculate if and how much to scroll to keep an element visible within its container.
-// Uses edge threshold (edgeThresholdPx) to maintain padding from container boundaries.
+// Uses padding (leftEdgePaddingPx and topEdgePaddingPx) to maintain padding from container boundaries.
 // Returns: { needsScroll: boolean, scrollDelta: number (in pixels) }
 declare function getAxisScrollDelta(targetRect: any, visibleContainerRect: any, axis: 'vertical' | 'horizontal'): {
   needsScroll: boolean,
   scrollDelta: number,
 };
-declare function scrollAxis(scrollable: any, isWindowScroll: boolean, isVertical: boolean, scrollDelta: number): void;
+declare function scrollAxis(scrollable: any, isWindowScroll: boolean, isVertical: boolean, scrollDelta: number, animate: boolean): void;
 declare function findScrollableAncestor(elem: HTMLElement | null, direction: 'vertical' | 'horizontal'): HTMLElement | null; // Resolve element and container rectangles, clamping to viewport for accuracy.
 // Important: bounding rects are viewport-relative, not document-relative.
 // This avoids coordinate system mismatches when scrolling.
-declare function resolveRects(scrollable: any, isWindowScroll: boolean, elem: HTMLElement): any;
-declare function performScroll(scrollable: any, isVertical: boolean, nextOffset: number, liveNextOffset: number): any;
+declare function resolveRects(scrollableH: any, isWindowScrollH: boolean, scrollableV: any, isWindowScrollV: boolean, elem: HTMLElement): any;
+declare function performScroll(scrollable: any, isVertical: boolean, nextOffset: number, liveNextOffset: number, animate: boolean): any;
 declare function calculateNextOffset(currentOffset: number, scrollDelta: number, isWindowScroll: boolean, maxOffset: number): number; // Flag to track if the current scroll was initiated by SpatialManager
 // Checked in the scrollend event to determine if focus reacquisition is needed
 let isSpatialManagerInitiatedScroll: boolean = false;

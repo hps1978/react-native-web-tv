@@ -43,7 +43,8 @@ TV apps can configure spatial navigation before `AppRegistry.runApplication()` b
       mode: 'default'  // 'default' or 'AlignLeft'
     },
     scrollConfig: {
-      edgeThresholdPx: 100,
+      leftEdgePaddingPx: 10,
+      topEdgePaddingPx: 15,
       scrollThrottleMs: 80, // Not implemented
       smoothScrollEnabled: true,
       scrollAnimationDurationMsVertical: 0,
@@ -57,7 +58,8 @@ Supported config fields:
 * `keyMap`: optional key mapping for LRUD input. NOTE: this needs to be tested for custom keys. The defaults Left/Right/Up/Down already work for basic key types without setting this config. However, to set up TV platform specific __Menu__ and __Back__ keys, the app can pass the specific __keyCodes__ mapped to them to get 'menu' through TVEventHandler and BackHandler events.
 * `keydownThrottleMs`: minimum time between keydown events (ms). Use to reduce rapid repeats from held keys.
 * `focusConfig.mode`: focus scrolling behavior mode ('default' or 'AlignLeft'). AlignLeft keeps left moves default, and aligns right moves to the current focus X position when scrolling.
-* `scrollConfig.edgeThresholdPx`: padding from container edges before scrolling.
+* `scrollConfig.leftEdgePaddingPx`: padding from scroll container left edge.
+* `scrollConfig.topEdgePaddingPx`: padding from scroll container top edge.
 * `scrollConfig.scrollThrottleMs`: minimum time between scrolls. NOTE: not implemented.
 * `scrollConfig.smoothScrollEnabled`: enables smooth scroll where supported.
 * `scrollConfig.scrollAnimationDurationMsVertical`: vertical animation duration override.

@@ -1,10 +1,11 @@
 window.appConfig = {
   scrollConfig: {
-    edgeThresholdPx: 10,
+    leftEdgePaddingPx: 10,
+    topEdgePaddingPx: 0,
     scrollThrottleMs: 80,
     smoothScrollEnabled: false,
-    scrollAnimationDurationMsVertical: 0,
-    scrollAnimationDurationMsHorizontal: 0
+    scrollAnimationDurationMsVertical: 200,
+    scrollAnimationDurationMsHorizontal: 200
   },
   focusConfig: {
     mode: 'AlignLeft'
