@@ -7,7 +7,7 @@ window.appConfig = {
     scrollAnimationDurationMsHorizontal: 0
   },
   focusConfig: {
-    mode: 'default'
+    mode: 'AlignLeft'
   },
   keydownThrottleMs: 0
 };

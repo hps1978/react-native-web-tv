@@ -540,6 +540,8 @@ const styles = StyleSheet.create({
   slowListTitle: { fontSize: 24 * scale, margin: 16 * scale },
   container: {
     flex: 1,
+    height: '100vh',
+    width: '100%',
     flexDirection: 'row'
   },
   sideMenuContainer: {

@@ -42,7 +42,7 @@ const _hasGetBoundingClientRect = typeof Element !== 'undefined' && Element.prot
 const _hasScrollEndEvent = false;
 //   typeof window !== 'undefined' &&
 //   'onscrollend' in window;
-declare var DEBUG_SCROLL: () => any;
+
 const DEFAULT_SPATIAL_SCROLL_CONFIG: SpatialScrollConfigType = {
   edgeThresholdPx: 0,
   // only used on the left edge and in horizontal scrolling
@@ -90,12 +90,16 @@ const _windowScrollable = typeof window !== 'undefined' ? {
     window.scroll ? window.scroll(scrollParam) : window.scrollTo(scrollParam);
   }
 } : null;
-const _viewportRect = typeof window !== 'undefined' ? {
-  top: 0,
-  bottom: window.innerHeight,
-  left: 0,
-  right: window.innerWidth
-} : null;
+
+// const _viewportRect =
+//   typeof window !== 'undefined'
+//     ? {
+//         top: 0,
+//         bottom: window.innerHeight,
+//         left: 0,
+//         right: window.innerWidth
+//       }
+//     : null;
 declare function animateScrollTo(scrollable: any, isVertical: boolean, nextOffset: number, durationMs: number): any; // function getScrollPosition(
 //   scrollable: any,
 //   isVertical: boolean,
@@ -113,10 +117,6 @@ declare function getAxisScrollDelta(targetRect: any, visibleContainerRect: any, 
   needsScroll: boolean,
   scrollDelta: number,
 };
-declare function logScrollContainer(label: string, scrollableInfo: {
-  scrollable: any,
-  isWindowScroll: boolean,
-}, elem: HTMLElement): void;
 declare function scrollAxis(scrollable: any, isWindowScroll: boolean, isVertical: boolean, scrollDelta: number): void;
 declare function findScrollableAncestor(elem: HTMLElement | null, direction: 'vertical' | 'horizontal'): HTMLElement | null; // Resolve element and container rectangles, clamping to viewport for accuracy.
 // Important: bounding rects are viewport-relative, not document-relative.
