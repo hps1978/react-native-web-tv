@@ -8,17 +8,11 @@
  * @format
  */
 
-// This module supports SpatialNavigation for TV platforms on web using
-// the @bbc/tv-lrud-spatial library. Currently, SpatialNavigation working
-// completely outside the React tree, i.e, it uses DOM APIs to manage
-// focus and navigation.
-
-// Currently, it only supports arrow ISO keyboard navigation.
 import { setConfig as setLrudConfig, getNextFocus, getFocusableParentContainer, getParentContainer, updateAncestorsAutoFocus, findDestinationOrAutofocus, getNextFocusInViewport } from '@bbc/tv-lrud-spatial';
-import { startObserving, stopObserving, type MutationDetails } from './mutationObserver';
-import { type SpatialScrollConfigType, type getCurrentFocusType, type onScrollRefocusType, maybeScrollOnFocus, setupAppInitiatedScrollHandler, isElementInWindowViewport, setupScrollHandler } from './scrollHandler';
 import { addEventListener } from '../addEventListener';
 import { setupNodeId } from '../../exports/TV/utils';
+import { startObserving, stopObserving, type MutationDetails } from './mutationObserver';
+import { type SpatialScrollConfigType, type getCurrentFocusType, type onScrollRefocusType, maybeScrollOnFocus, setupAppInitiatedScrollHandler, isElementInWindowViewport, setupScrollHandler } from './scrollHandler';
 type SpatialNavigationConfigType = {
   keyMap?: {
     [key: string]: string
@@ -33,36 +27,37 @@ type FocusState = {
   elem: HTMLElement | null,
   parentHasAutofocus: boolean,
 };
-let _isSpatialManagerReady = false;
-let _spatialNavigationContainer: HTMLElement | null = null;
-let _currentFocus: FocusState = {
-  elem: null,
-  parentHasAutofocus: false
-};
-let _pendingFocusCount = 0;
-let _keydownThrottleMs = 0;
-let keyDownListener: ((event: any) => void) | null = null;
-let keyUpListener: ((event: any) => void) | null = null;
-let appInitiatedScrollCleanup: (() => void) | null = null;
-let _lastKeydownAt = 0;
-const DEBUG_SCROLL = typeof window !== 'undefined' && window.__RNW_TV_SCROLL_DEBUG === true;
-// const _hasAnimationFrame =
-//   typeof window !== 'undefined' &&
-//   typeof window.requestAnimationFrame === 'function';
-declare function loadGlobalConfig(): SpatialNavigationConfigType | null; // This callback wil get triggered when LRUD fails to find a valid destination from the provided data-destinations
-// atrtribute. LRUD will use it's fallback. autofocus or default focus logic. This contianer will no longer be
-// focusable if there is no autofocus either.
-declare function noValidDestinationCallback(candidateContainer: any, hasAutoFocus: any): any; // Setup configuration for Spatial Navigation, LRUD, and scrollHandler
-// global configs (App provided) or defaults
-declare function setupConfigs(): any; // Handles refocussing when current focused element (or it's ancestor) is removed from the DOM.
-declare function handleCurrentFocusMutations(details: MutationDetails): void;
-declare function triggerFocus(nextFocus: FocusState, keyCode?: string): boolean;
-declare function handlePageVisibilityChange(event: any): any;
-declare function setupAppVisibilityListeners(): any; // Handler to detect when app calls scroll APIs and reacquire focus if needed
-declare function setupAppInitiatedScrollTracking(): any;
-declare function setupSpatialNavigation(container?: HTMLElement): any;
-declare function setFocus(node: HTMLElement): any; // WARNING: This is a very specific API to set destinations for TVFocusGuideView and is not meant for general use.
-// It may have unexpected results if used outside of the context of TVFocusGuideView.
-declare function setDestinations(host: HTMLElement, destinations: HTMLElement[]): any;
-declare function teardownSpatialNavigation(): any;
-export { setupSpatialNavigation, setFocus, teardownSpatialNavigation, setDestinations };
+
+/**
+ * SpatialManager
+ * Manages spatial navigation for TV platforms using the @bbc/tv-lrud-spatial library.
+ * Implements singleton pattern to ensure only one instance exists across the app.
+ */
+declare class SpatialManager {
+  _isSpatialManagerReady: boolean,
+  _spatialNavigationContainer: HTMLElement | null,
+  _currentFocus: FocusState,
+  _pendingFocusCount: number,
+  _keydownThrottleMs: number,
+  keyDownListener: ((event: any) => void) | null,
+  appInitiatedScrollCleanup: (() => void) | null,
+  _lastKeydownAt: number,
+  constructor(): any,
+  loadGlobalConfig(): SpatialNavigationConfigType | null,
+  noValidDestinationCallback(candidateContainer: any, hasAutoFocus: any): any,
+  setupConfigs(): any,
+  handleCurrentFocusMutations(details: MutationDetails): void,
+  triggerFocus(nextFocus: FocusState, keyCode?: string): boolean,
+  handlePageVisibilityChange(event: any): any,
+  setupAppVisibilityListeners(): any,
+  setupAppInitiatedScrollTracking(): any,
+  setupSpatialNavigation(container?: HTMLElement): any,
+  setFocus(node: HTMLElement): any,
+  setDestinations(host: HTMLElement, destinations: HTMLElement[]): any,
+  teardownSpatialNavigation(): any,
+}
+const spatialManager = new SpatialManager();
+export const setupSpatialNavigation = spatialManager.setupSpatialNavigation.bind(spatialManager);
+export const setFocus = spatialManager.setFocus.bind(spatialManager);
+export const setDestinations = spatialManager.setDestinations.bind(spatialManager);
+export const teardownSpatialNavigation = spatialManager.teardownSpatialNavigation.bind(spatialManager);

@@ -8,93 +8,107 @@
  * @format
  */
 
-// MutationObserver wrapper for detecting changes to DOM child elements.
-// Used by SpatialManager to detect when focused elements or their parents are mutated.
-
 export type MutationDetails = {
   removedNode: HTMLElement,
   targetNode: HTMLElement,
   childNode: HTMLElement
 };
 
-const hasMutationObserver = typeof MutationObserver !== 'undefined';
-const GLOBAL_OBSERVER_KEY = '__rnwSpatialManagerObserver';
+/**
+ * MutationObserverManager
+ * Singleton class that manages DOM mutation observation for focus tracking.
+ * Helps SpatialManager in detecting when focused elements are removed from the DOM.
+ */
+class MutationObserverManager {
+  static #_instance = null;
+  static #hasMutationObserver = typeof MutationObserver !== 'undefined';
 
-type GlobalObserverState = {
-  mutationObserverInstance: MutationObserver | null
-};
+  /**
+   * constructor
+   * Initializes or returns the singleton instance of MutationObserverManager.
+   * Performs API capability detection for MutationObserver support.
+   * @returns {MutationObserverManager} The singleton instance
+   */
+  constructor() {
+    if (MutationObserverManager.#_instance) {
+      return MutationObserverManager.#_instance;
+    }
 
-const moduleLocalObserverState: GlobalObserverState = {
-  mutationObserverInstance: null
-};
+    this.mutationObserverInstance = null;
 
-function getObserverState(): GlobalObserverState {
-  if (typeof window === 'undefined') {
-    return moduleLocalObserverState;
+    MutationObserverManager.#_instance = this;
   }
 
-  const existing = (window: any)[GLOBAL_OBSERVER_KEY];
-  if (existing) {
-    return existing;
-  }
+  /**
+   * startObserving
+   * Begins observing a target node for child list mutations.
+   * If the observed child node is removed, triggers callback with mutation details.
+   * Automatically stops previous observation before starting a new one.
+   * @param {HTMLElement} targetNode - The parent element to observe for mutations
+   * @param {HTMLElement} childNode - The specific child element being tracked
+   * @param {(details: MutationDetails) => void} callback - Called when childNode is removed
+   * @returns {void}
+   */
+  startObserving(
+    targetNode,
+    childNode,
+    callback: (details: MutationDetails) => void
+  ) {
+    if (!MutationObserverManager.#hasMutationObserver) {
+      console.warn('MutationObserver is not supported in this environment');
+      return;
+    }
 
-  const created = {
-    mutationObserverInstance: null
-  };
-  (window: any)[GLOBAL_OBSERVER_KEY] = created;
-  return created;
-}
+    this.stopObserving();
 
-function startObserving(
-  targetNode: HTMLElement,
-  childNode: HTMLElement,
-  callback: (details: MutationDetails) => void
-): void {
-  if (!hasMutationObserver) {
-    console.warn('MutationObserver is not supported in this environment');
-    return;
-  }
+    const handleMutationsForThisSession = (mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'childList') {
+          mutation.removedNodes.forEach((node) => {
+            if (
+              node instanceof HTMLElement &&
+              (node?.id === childNode.id || node.contains(childNode))
+            ) {
+              callback({
+                removedNode: node,
+                targetNode: targetNode,
+                childNode: childNode
+              });
+              return;
+            }
+          });
+        }
+      });
+    };
 
-  stopObserving();
-
-  const observerState = getObserverState();
-
-  // Create a closure that captures THIS session's values
-  const handleMutationsForThisSession = (mutations: MutationRecord[]) => {
-    mutations.forEach((mutation) => {
-      if (mutation.type === 'childList') {
-        mutation.removedNodes.forEach((node) => {
-          if (
-            node instanceof HTMLElement &&
-            (node?.id === childNode.id || node.contains(childNode))
-          ) {
-            callback({
-              removedNode: node,
-              targetNode: targetNode,
-              childNode: childNode
-            });
-            return;
-          }
-        });
-      }
+    this.mutationObserverInstance = new MutationObserver(
+      handleMutationsForThisSession
+    );
+    this.mutationObserverInstance.observe(targetNode, {
+      childList: true,
+      subtree: true
     });
-  };
+  }
 
-  observerState.mutationObserverInstance = new MutationObserver(
-    handleMutationsForThisSession
-  );
-  observerState.mutationObserverInstance.observe(targetNode, {
-    childList: true,
-    subtree: true
-  });
-}
-
-function stopObserving(): void {
-  const observerState = getObserverState();
-  if (observerState.mutationObserverInstance) {
-    observerState.mutationObserverInstance.disconnect();
-    observerState.mutationObserverInstance = null;
+  /**
+   * stopObserving
+   * Stops the active MutationObserver and disconnects it from the DOM.
+   * Cleans up observation state for potential re-initialization.
+   * @returns {void}
+   */
+  stopObserving() {
+    if (this.mutationObserverInstance) {
+      this.mutationObserverInstance.disconnect();
+      this.mutationObserverInstance = null;
+    }
   }
 }
 
-export { startObserving, stopObserving };
+// Export static functions for compatibility
+const mutationObserverManager = new MutationObserverManager();
+export const startObserving = mutationObserverManager.startObserving.bind(
+  mutationObserverManager
+);
+export const stopObserving = mutationObserverManager.stopObserving.bind(
+  mutationObserverManager
+);
