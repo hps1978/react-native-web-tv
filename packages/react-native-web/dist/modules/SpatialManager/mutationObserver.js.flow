@@ -8,23 +8,22 @@
  * @format
  */
 
-// MutationObserver wrapper for detecting changes to DOM child elements.
-// Used by SpatialManager to detect when focused elements or their parents are mutated.
-
 export type MutationDetails = {
   removedNode: HTMLElement,
   targetNode: HTMLElement,
   childNode: HTMLElement,
 };
-const hasMutationObserver = typeof MutationObserver !== 'undefined';
-const GLOBAL_OBSERVER_KEY = '__rnwSpatialManagerObserver';
-type GlobalObserverState = {
-  mutationObserverInstance: MutationObserver | null
-};
-const moduleLocalObserverState: GlobalObserverState = {
-  mutationObserverInstance: null
-};
-declare function getObserverState(): GlobalObserverState;
-declare function startObserving(targetNode: HTMLElement, childNode: HTMLElement, callback: (details: MutationDetails) => void): void;
-declare function stopObserving(): void;
-export { startObserving, stopObserving };
+
+/**
+ * MutationObserverManager
+ * Singleton class that manages DOM mutation observation for focus tracking.
+ * Helps SpatialManager in detecting when focused elements are removed from the DOM.
+ */
+declare class MutationObserverManager {
+  constructor(): any,
+  startObserving(targetNode: any, childNode: any, callback: (details: MutationDetails) => void): any,
+  stopObserving(): any,
+} // Export static functions for compatibility
+const mutationObserverManager = new MutationObserverManager();
+export const startObserving = mutationObserverManager.startObserving.bind(mutationObserverManager);
+export const stopObserving = mutationObserverManager.stopObserving.bind(mutationObserverManager);
