@@ -97,6 +97,8 @@ function Pressable(props: Props, forwardedRef): React.Node {
     tabIndex,
     testOnly_hovered,
     testOnly_pressed,
+    focusable,
+    isTVSelectable,
     ...rest
   } = props;
 
@@ -197,11 +199,13 @@ function Pressable(props: Props, forwardedRef): React.Node {
     [onKeyDown, onKeyDownPress]
   );
 
+  // Use tabindex to handle focusable
+  // as LRUD focus handling depends on it
   let _tabIndex;
   if (tabIndex !== undefined) {
     _tabIndex = tabIndex;
   } else {
-    _tabIndex = disabled ? -1 : 0;
+    _tabIndex = focusable !== false && isTVSelectable !== false ? 0 : -1;
   }
 
   return (
