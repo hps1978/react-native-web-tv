@@ -45,7 +45,13 @@ function FlatListTVScrollExample() {
       ({ item, index }) => {
         const isPreferredFocus = rowIndex === 0 && index === 0;
         return (
-          <Pressable hasTVPreferredFocus={isPreferredFocus} style={styles.card}>
+          <Pressable
+            hasTVPreferredFocus={isPreferredFocus}
+            style={(state) => [
+              styles.card,
+              state.focused && { borderColor: '#3b82f6', borderWidth: 2 }
+            ]}
+          >
             <Image
               resizeMode="cover"
               source={{ uri: item.imageUri }}

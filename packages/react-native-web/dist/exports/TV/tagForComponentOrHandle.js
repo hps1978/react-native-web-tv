@@ -14,7 +14,6 @@ var tagForComponentOrHandle = component => {
   if (component === null || component === undefined) {
     return undefined;
   }
-  console.log('[tagForComponentOrHandle] component: ', component);
   if (component.id) {
     return component.id;
   }
