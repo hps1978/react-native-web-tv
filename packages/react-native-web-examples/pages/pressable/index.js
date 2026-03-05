@@ -6,6 +6,7 @@ import Example from '../../shared/example';
 export default function PressablePage() {
   const [eventLog, updateEventLog] = React.useState([]);
   const [disabled, setDisabled] = React.useState(false);
+  const [focusable, setFocusable] = React.useState(true);
   const [delay, setDelay] = React.useState(0);
 
   const handleEvent = (eventName) => {
@@ -27,6 +28,7 @@ export default function PressablePage() {
           delayPressIn={delay}
           delayPressOut={delay}
           disabled={disabled}
+          focusable={focusable}
           onBlur={handleEvent('onBlur')}
           onFocus={handleEvent('onFocus')}
           onHoverIn={handleEvent('onHoverIn')}
@@ -38,13 +40,13 @@ export default function PressablePage() {
           onPress={handleEvent(`onPress - ${delay}ms delay`)}
           onPressIn={handleEvent(`onPressIn - ${delay}ms delay`)}
           onPressOut={handleEvent(`oPressOut - ${delay}ms delay`)}
-          role="button"
           style={(state) => [
             styles.pressable,
             !disabled && state.focused && styles.focused,
             !disabled && state.hovered && styles.hovered,
             !disabled && state.pressed && styles.pressed,
-            disabled && styles.disabled
+            disabled && styles.disabled,
+            disabled && state.focused && styles.focused
           ]}
         >
           <Text>Pressable</Text>
@@ -59,6 +61,11 @@ export default function PressablePage() {
           <Button
             onPress={() => setDelay((state) => (state === 0 ? 350 : 0))}
             title={delay === 0 ? 'Add delay' : 'Remove delay'}
+          />
+          <View style={{ width: '1rem' }} />
+          <Button
+            onPress={() => setFocusable((state) => !state)}
+            title={focusable ? 'Focusable' : 'Not Focusable'}
           />
         </View>
 
@@ -89,13 +96,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#ddd'
   },
   focused: {
-    boxShadow: '0px 0px 0px 1px blue'
+    boxShadow: '0px 0px 0px 2px blue'
   },
   pressed: {
     backgroundColor: 'lightblue'
   },
   disabled: {
-    opacity: 0.5
+    opacity: 0.2
   },
   buttons: {
     flexDirection: 'row',

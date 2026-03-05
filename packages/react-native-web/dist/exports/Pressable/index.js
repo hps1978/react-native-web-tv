@@ -11,7 +11,7 @@
 
 import _extends from "@babel/runtime/helpers/extends";
 import _objectWithoutPropertiesLoose from "@babel/runtime/helpers/objectWithoutPropertiesLoose";
-var _excluded = ["children", "delayLongPress", "delayPressIn", "delayPressOut", "disabled", "onBlur", "onContextMenu", "onFocus", "onHoverIn", "onHoverOut", "onKeyDown", "onLongPress", "onPress", "onPressMove", "onPressIn", "onPressOut", "style", "tabIndex", "testOnly_hovered", "testOnly_pressed"];
+var _excluded = ["children", "delayLongPress", "delayPressIn", "delayPressOut", "disabled", "onBlur", "onContextMenu", "onFocus", "onHoverIn", "onHoverOut", "onKeyDown", "onLongPress", "onPress", "onPressMove", "onPressIn", "onPressOut", "style", "tabIndex", "testOnly_hovered", "testOnly_pressed", "focusable", "isTVSelectable"];
 import * as React from 'react';
 import { forwardRef, memo, useMemo, useState, useRef } from 'react';
 import useMergeRefs from '../../modules/useMergeRefs';
@@ -44,6 +44,8 @@ function Pressable(props, forwardedRef) {
     tabIndex = props.tabIndex,
     testOnly_hovered = props.testOnly_hovered,
     testOnly_pressed = props.testOnly_pressed,
+    focusable = props.focusable,
+    isTVSelectable = props.isTVSelectable,
     rest = _objectWithoutPropertiesLoose(props, _excluded);
   var _useForceableState = useForceableState(testOnly_hovered === true),
     hovered = _useForceableState[0],
@@ -115,11 +117,14 @@ function Pressable(props, forwardedRef) {
       onKeyDown(e);
     }
   }, [onKeyDown, onKeyDownPress]);
+
+  // Use tabindex to handle focusable
+  // as LRUD focus handling depends on it
   var _tabIndex;
   if (tabIndex !== undefined) {
     _tabIndex = tabIndex;
   } else {
-    _tabIndex = disabled ? -1 : 0;
+    _tabIndex = focusable !== false && isTVSelectable !== false ? 0 : -1;
   }
   return /*#__PURE__*/React.createElement(View, _extends({}, rest, pressEventHandlers, {
     "aria-disabled": disabled,
