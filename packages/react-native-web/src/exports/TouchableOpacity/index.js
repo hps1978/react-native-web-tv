@@ -50,6 +50,7 @@ function TouchableOpacity(props: Props, forwardedRef): React.Node {
     delayLongPress,
     disabled,
     focusable,
+    isTVSelectable,
     onLongPress,
     onPress,
     onPressIn,
@@ -145,6 +146,7 @@ function TouchableOpacity(props: Props, forwardedRef): React.Node {
         opacityOverride != null && { opacity: opacityOverride },
         { transitionDuration: duration }
       ]}
+      tabIndex={focusable !== false && isTVSelectable !== false ? 0 : -1}
     />
   );
 }

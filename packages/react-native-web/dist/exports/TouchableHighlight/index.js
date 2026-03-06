@@ -12,7 +12,7 @@
 
 import _extends from "@babel/runtime/helpers/extends";
 import _objectWithoutPropertiesLoose from "@babel/runtime/helpers/objectWithoutPropertiesLoose";
-var _excluded = ["activeOpacity", "children", "delayPressIn", "delayPressOut", "delayLongPress", "disabled", "focusable", "onHideUnderlay", "onLongPress", "onPress", "onPressIn", "onPressOut", "onShowUnderlay", "rejectResponderTermination", "style", "testOnly_pressed", "underlayColor"];
+var _excluded = ["activeOpacity", "children", "delayPressIn", "delayPressOut", "delayLongPress", "disabled", "focusable", "isTVSelectable", "onHideUnderlay", "onLongPress", "onPress", "onPressIn", "onPressOut", "onShowUnderlay", "rejectResponderTermination", "style", "testOnly_pressed", "underlayColor"];
 import * as React from 'react';
 import { useCallback, useMemo, useState, useRef } from 'react';
 import useMergeRefs from '../../modules/useMergeRefs';
@@ -63,6 +63,7 @@ function TouchableHighlight(props, forwardedRef) {
     delayLongPress = props.delayLongPress,
     disabled = props.disabled,
     focusable = props.focusable,
+    isTVSelectable = props.isTVSelectable,
     onHideUnderlay = props.onHideUnderlay,
     onLongPress = props.onLongPress,
     onPress = props.onPress,
@@ -127,7 +128,8 @@ function TouchableHighlight(props, forwardedRef) {
     focusable: !disabled && focusable !== false,
     pointerEvents: disabled ? 'box-none' : undefined,
     ref: setRef,
-    style: [styles.root, style, !disabled && styles.actionable, extraStyles && extraStyles.underlay]
+    style: [styles.root, style, !disabled && styles.actionable, extraStyles && extraStyles.underlay],
+    tabIndex: focusable !== false && isTVSelectable !== false ? 0 : -1
   }), /*#__PURE__*/React.cloneElement(child, {
     style: [child.props.style, extraStyles && extraStyles.child]
   }));
