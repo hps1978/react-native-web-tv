@@ -12,7 +12,7 @@
 
 import _extends from "@babel/runtime/helpers/extends";
 import _objectWithoutPropertiesLoose from "@babel/runtime/helpers/objectWithoutPropertiesLoose";
-var _excluded = ["activeOpacity", "delayPressIn", "delayPressOut", "delayLongPress", "disabled", "focusable", "onLongPress", "onPress", "onPressIn", "onPressOut", "rejectResponderTermination", "style"];
+var _excluded = ["activeOpacity", "delayPressIn", "delayPressOut", "delayLongPress", "disabled", "focusable", "isTVSelectable", "onLongPress", "onPress", "onPressIn", "onPressOut", "rejectResponderTermination", "style"];
 import * as React from 'react';
 import { useCallback, useMemo, useState, useRef } from 'react';
 import useMergeRefs from '../../modules/useMergeRefs';
@@ -39,6 +39,7 @@ function TouchableOpacity(props, forwardedRef) {
     delayLongPress = props.delayLongPress,
     disabled = props.disabled,
     focusable = props.focusable,
+    isTVSelectable = props.isTVSelectable,
     onLongPress = props.onLongPress,
     onPress = props.onPress,
     onPressIn = props.onPressIn,
@@ -96,7 +97,8 @@ function TouchableOpacity(props, forwardedRef) {
       opacity: opacityOverride
     }, {
       transitionDuration: duration
-    }]
+    }],
+    tabIndex: focusable !== false && isTVSelectable !== false ? 0 : -1
   }));
 }
 var styles = StyleSheet.create({

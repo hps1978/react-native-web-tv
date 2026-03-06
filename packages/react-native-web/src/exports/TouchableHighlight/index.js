@@ -88,6 +88,7 @@ function TouchableHighlight(props: Props, forwardedRef): React.Node {
     delayLongPress,
     disabled,
     focusable,
+    isTVSelectable,
     onHideUnderlay,
     onLongPress,
     onPress,
@@ -187,6 +188,7 @@ function TouchableHighlight(props: Props, forwardedRef): React.Node {
         !disabled && styles.actionable,
         extraStyles && extraStyles.underlay
       ]}
+      tabIndex={focusable !== false && isTVSelectable !== false ? 0 : -1}
     >
       {React.cloneElement(child, {
         style: [child.props.style, extraStyles && extraStyles.child]

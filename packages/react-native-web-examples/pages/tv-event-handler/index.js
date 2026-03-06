@@ -142,16 +142,23 @@ const TouchableOpacityButton = (props: {
   title: string,
   log: (entry: string) => void
 }) => {
+  const [isFocused, setIsFocused] = React.useState(false);
   return (
     <TouchableOpacity
       {...props}
-      onBlur={(event: any) => blurHandler(event, props)}
-      onFocus={(event: any) => focusHandler(event, props)}
+      onBlur={(event: any) => {
+        blurHandler(event, props);
+        setIsFocused(false);
+      }}
+      onFocus={(event: any) => {
+        focusHandler(event, props);
+        setIsFocused(true);
+      }}
       onLongPress={() => pressEventHandler('onLongPress', props)}
       onPress={() => pressEventHandler('onPress', props)}
       onPressIn={() => pressEventHandler('onPressIn', props)}
       onPressOut={() => pressEventHandler('onPressOut', props)}
-      style={styles.pressable}
+      style={[styles.pressable, isFocused ? styles.focused : null]}
     >
       <Text style={styles.pressableText}>{props.title}</Text>
     </TouchableOpacity>
@@ -162,16 +169,24 @@ const TouchableHighlightButton = (props: {
   title: string,
   log: (entry: string) => void
 }) => {
+  const [isFocused, setIsFocused] = React.useState(false);
+
   return (
     <TouchableHighlight
       {...props}
-      onBlur={(event: any) => blurHandler(event, props)}
-      onFocus={(event: any) => focusHandler(event, props)}
+      onBlur={(event: any) => {
+        blurHandler(event, props);
+        setIsFocused(false);
+      }}
+      onFocus={(event: any) => {
+        focusHandler(event, props);
+        setIsFocused(true);
+      }}
       onLongPress={() => pressEventHandler('onLongPress', props)}
       onPress={() => pressEventHandler('onPress', props)}
       onPressIn={() => pressEventHandler('onPressIn', props)}
       onPressOut={() => pressEventHandler('onPressOut', props)}
-      style={styles.pressable}
+      style={[styles.pressable, isFocused ? styles.focused : null]}
     >
       <Text style={styles.pressableText}>{props.title}</Text>
     </TouchableHighlight>
@@ -234,9 +249,9 @@ const styles = StyleSheet.create({
   pressableFocused: {
     minWidth: 200 * scale,
     height: 20 * scale,
-    borderColor: 'blue',
+    borderColor: 'orange',
     backgroundColor: '#000088',
-    borderWidth: 1,
+    borderWidth: 2,
     borderRadius: 5 * scale,
     margin: 5 * scale
   },
@@ -252,6 +267,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 10 * scale,
     marginTop: 10 * scale
+  },
+  focused: {
+    borderColor: 'orange',
+    borderWidth: 2
   }
 });
 
