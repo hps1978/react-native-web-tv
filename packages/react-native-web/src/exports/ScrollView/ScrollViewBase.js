@@ -74,6 +74,8 @@ const ScrollViewBase: React.AbstractComponent<
   React.ElementRef<typeof View>
 > = React.forwardRef((props, forwardedRef) => {
   const {
+    focusable,
+    isTVSelectable,
     onScroll,
     onTouchMove,
     onWheel,
@@ -162,6 +164,7 @@ const ScrollViewBase: React.AbstractComponent<
         !scrollEnabled && styles.scrollDisabled,
         hideScrollbar && styles.hideScrollbar
       ]}
+      tabIndex={focusable === true || isTVSelectable === true ? 0 : undefined}
     />
   );
 });

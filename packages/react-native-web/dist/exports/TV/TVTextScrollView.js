@@ -1,3 +1,4 @@
+import _extends from "@babel/runtime/helpers/extends";
 import _objectSpread from "@babel/runtime/helpers/objectSpread2";
 /**
  * Copyright (c) Douglas Lowder.
@@ -28,9 +29,18 @@ var _require = require('./TVFocusEventHandler'),
  */
 
 class TVTextScrollView extends React.Component {
+  constructor() {
+    super(...arguments);
+    this._setScrollViewRef = ref => {
+      this._scrollViewRef = ref;
+    };
+  }
+  getScrollViewRef() {
+    return this._scrollViewRef;
+  }
   componentDidMount() {
     var cmp = this; // eslint-disable-line consistent-this
-    var myTag = tagForComponentOrHandle(this);
+    var myTag = tagForComponentOrHandle(this._scrollViewRef);
     tvFocusEventHandler == null || tvFocusEventHandler.register(myTag, function (evt) {
       if (myTag === evt.tag) {
         if (evt.eventType === 'focus') {
@@ -42,7 +52,7 @@ class TVTextScrollView extends React.Component {
     });
   }
   componentWillUnmount() {
-    var myTag = tagForComponentOrHandle(this);
+    var myTag = tagForComponentOrHandle(this._scrollViewRef);
     tvFocusEventHandler == null || tvFocusEventHandler.unregister(myTag);
   }
   render() {
@@ -55,7 +65,9 @@ class TVTextScrollView extends React.Component {
       removeClippedSubviews: false,
       automaticallyAdjustContentInsets: false
     });
-    return /*#__PURE__*/React.createElement(ScrollView, props, this.props.children);
+    return /*#__PURE__*/React.createElement(ScrollView, _extends({}, props, {
+      ref: this._setScrollViewRef
+    }), this.props.children);
   }
 }
 export default TVTextScrollView;

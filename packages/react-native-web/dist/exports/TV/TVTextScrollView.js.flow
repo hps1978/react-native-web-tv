@@ -62,6 +62,9 @@ declare class TVTextScrollView extends React.Component<{
   onBlur?: (evt: Event) => void,
 }> {
   _subscription: any,
+  _scrollViewRef: ?React.ElementRef<typeof ScrollView>,
+  _setScrollViewRef: any,
+  getScrollViewRef(): ?React.ElementRef<typeof ScrollView>,
   componentDidMount(): any,
   componentWillUnmount(): any,
   render(): $FlowFixMe,

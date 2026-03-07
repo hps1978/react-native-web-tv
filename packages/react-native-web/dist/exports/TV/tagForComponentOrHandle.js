@@ -14,8 +14,11 @@ var tagForComponentOrHandle = component => {
   if (component === null || component === undefined) {
     return undefined;
   }
-  if (component.id) {
-    return component.id;
+
+  // For web, we'll always expect a ref to a DOM element
+  // we'll return the element tilself as it is after a check
+  if (component instanceof HTMLElement) {
+    return component;
   }
   return undefined;
 

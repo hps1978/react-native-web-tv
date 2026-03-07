@@ -63,10 +63,19 @@ class TVTextScrollView extends React.Component<{
   onBlur?: (evt: Event) => void
 }> {
   _subscription: any;
+  _scrollViewRef: ?React.ElementRef<typeof ScrollView>;
+
+  _setScrollViewRef = (ref: ?React.ElementRef<typeof ScrollView>) => {
+    this._scrollViewRef = ref;
+  };
+
+  getScrollViewRef(): ?React.ElementRef<typeof ScrollView> {
+    return this._scrollViewRef;
+  }
 
   componentDidMount() {
     const cmp = this; // eslint-disable-line consistent-this
-    const myTag = tagForComponentOrHandle(this);
+    const myTag = tagForComponentOrHandle(this._scrollViewRef);
     tvFocusEventHandler?.register(myTag, function (evt) {
       if (myTag === evt.tag) {
         if (evt.eventType === 'focus') {
@@ -79,7 +88,7 @@ class TVTextScrollView extends React.Component<{
   }
 
   componentWillUnmount() {
-    const myTag = tagForComponentOrHandle(this);
+    const myTag = tagForComponentOrHandle(this._scrollViewRef);
     tvFocusEventHandler?.unregister(myTag);
   }
 
@@ -94,7 +103,11 @@ class TVTextScrollView extends React.Component<{
       removeClippedSubviews: false,
       automaticallyAdjustContentInsets: false
     };
-    return <ScrollView {...props}>{this.props.children}</ScrollView>;
+    return (
+      <ScrollView {...props} ref={this._setScrollViewRef}>
+        {this.props.children}
+      </ScrollView>
+    );
   }
 }
 
