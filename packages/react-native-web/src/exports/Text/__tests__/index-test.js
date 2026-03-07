@@ -12,6 +12,9 @@ import Text from '../';
 import { createEventTarget, setPointerEvent } from 'dom-event-testing-library';
 import { act, render } from '@testing-library/react';
 
+const pointerEnabled = process.env.RNW_TV_POINTER_TESTS === '1';
+const describePointer = pointerEnabled ? describe : describe.skip;
+
 describe('components/Text', () => {
   test('default', () => {
     const { container } = render(<Text />);
@@ -187,7 +190,7 @@ describe('components/Text', () => {
     });
   });
 
-  describe('prop "onClick"', () => {
+  describePointer('prop "onClick"', () => {
     test('is called', () => {
       const onClick = jest.fn();
       const ref = React.createRef();
@@ -230,7 +233,7 @@ describe('components/Text', () => {
     });
   });
 
-  describe('prop "onPointerDown"', () => {
+  describePointer('prop "onPointerDown"', () => {
     beforeEach(() => {
       setPointerEvent(true);
     });

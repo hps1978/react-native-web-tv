@@ -47,3 +47,13 @@ jobs:
         node-version: 16
     - run: npm install
     - run: npm run unit
+
+  spatial-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 16
+    - run: npm install
+    - run: npm run unit:dom -- packages/react-native-web/src/modules/SpatialManager/__tests__/index-test.js
