@@ -9,6 +9,8 @@ import React from 'react';
 import Pressable from '../';
 import { createEventTarget } from 'dom-event-testing-library';
 import { act, render } from '@testing-library/react';
+const pointerEnabled = process.env.RNW_TV_POINTER_TESTS === '1';
+const testPointer = pointerEnabled ? test : test.skip;
 
 describe('components/Pressable', () => {
   test('default', () => {
@@ -125,7 +127,7 @@ describe('components/Pressable', () => {
     expect(onBlur).toBeCalled();
   });
 
-  test('hover interaction', () => {
+  testPointer('hover interaction', () => {
     let container;
     const onHoverIn = jest.fn();
     const onHoverOut = jest.fn();
@@ -157,7 +159,7 @@ describe('components/Pressable', () => {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  test('press interaction (pointer)', () => {
+  testPointer('press interaction (pointer)', () => {
     let container;
     const onContextMenu = jest.fn();
     const onPress = jest.fn();
