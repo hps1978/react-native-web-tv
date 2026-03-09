@@ -12,7 +12,7 @@ import { setConfig as setLrudConfig, getNextFocus, getParentContainer, updateAnc
 import { addEventListener } from '../addEventListener';
 import { setupNodeId, type ElemData } from '../../exports/TV/utils';
 import { startObserving, stopObserving, type MutationDetails } from './mutationObserver';
-import { type SpatialScrollConfigType, type getCurrentFocusType, type onScrollRefocusType, maybeScrollOnFocus, setupAppInitiatedScrollHandler, isElementInWindowViewport, setupScrollHandler } from './scrollHandler';
+import { type SpatialScrollConfigType, type getCurrentFocusType, type onScrollRefocusType, maybeScrollOnFocus, setupAppInitiatedScrollHandler, isElementInWindowViewport, setupScrollHandler, scrollToEdge } from './scrollHandler';
 type SpatialNavigationConfigType = {
   keyMap?: {
     [key: string]: string
@@ -33,7 +33,6 @@ declare class SpatialManager {
   _isSpatialManagerReady: boolean,
   _spatialNavigationContainer: HTMLElement | null,
   _currentFocus: ElemData,
-  _pendingFocusCount: number,
   _keydownThrottleMs: number,
   keyDownListener: ((event: any) => void) | null,
   appInitiatedScrollCleanup: (() => void) | null,

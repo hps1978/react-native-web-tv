@@ -15,7 +15,7 @@ import { setConfig as setLrudConfig, getNextFocus, getParentContainer, updateAnc
 import { addEventListener } from '../addEventListener';
 import { setupNodeId } from '../../exports/TV/utils';
 import { startObserving, stopObserving } from './mutationObserver';
-import { maybeScrollOnFocus, setupAppInitiatedScrollHandler, isElementInWindowViewport, setupScrollHandler } from './scrollHandler';
+import { maybeScrollOnFocus, setupAppInitiatedScrollHandler, isElementInWindowViewport, setupScrollHandler, scrollToEdge } from './scrollHandler';
 var _instance = /*#__PURE__*/_classPrivateFieldLooseKey("_instance");
 /**
  * SpatialManager
@@ -23,6 +23,8 @@ var _instance = /*#__PURE__*/_classPrivateFieldLooseKey("_instance");
  * Implements singleton pattern to ensure only one instance exists across the app.
  */
 class SpatialManager {
+  // _pendingFocusCount: number;
+
   /**
    * constructor
    * Initializes or returns the singleton instance of SpatialManager.
@@ -38,7 +40,7 @@ class SpatialManager {
       elem: null,
       parentContainer: null
     };
-    this._pendingFocusCount = 0;
+    // this._pendingFocusCount = 0;
     this._keydownThrottleMs = 0;
     this.keyDownListener = null;
     this.appInitiatedScrollCleanup = null;
@@ -125,7 +127,7 @@ class SpatialManager {
     'ArrowDown',
     // No directional input, just find the next best focus
     targetNode);
-    this._pendingFocusCount = 1;
+    // this._pendingFocusCount = 1;
     this.triggerFocus(nextFocus);
   }
 
@@ -159,16 +161,17 @@ class SpatialManager {
 
         // const preventScroll = scrollPromise != null;
         var preventScroll = true;
-        if (this._pendingFocusCount > 0) {
-          this._pendingFocusCount--;
-        }
-        if (this._pendingFocusCount === 0) {
-          // We focus only on the last pending focus to avoid unnecessary intermediate focuses
-          // during rapid navigation
-          nextFocus.elem.focus({
-            preventScroll
-          });
-        }
+
+        // if (this._pendingFocusCount > 0) {
+        //   this._pendingFocusCount--;
+        // }
+        // if (this._pendingFocusCount === 0) {
+        // We focus only on the last pending focus to avoid unnecessary intermediate focuses
+        // during rapid navigation
+        nextFocus.elem.focus({
+          preventScroll
+        });
+        // }
 
         // Start observing mutations
         var parentContainer = getParentContainer(nextFocus.elem, true);
@@ -243,7 +246,7 @@ class SpatialManager {
       var nextFocus = getNextFocusInViewport(scrollContainer, isInViewportCallback);
       if (nextFocus != null && nextFocus.elem) {
         // Reset the pending focus count to 1 to indicate we need to focus the nextFocus element after scroll
-        this._pendingFocusCount = 1;
+        // this._pendingFocusCount = 1;
         this.triggerFocus(nextFocus, null);
       }
     };
@@ -285,13 +288,16 @@ class SpatialManager {
       if (!this._currentFocus.elem) {
         console.warn('No initial focus. Trying to set one...');
       }
+      event.preventDefault();
       var nextFocus = getNextFocus(this._currentFocus.elem, keyCode, (container == null ? void 0 : container.ownerDocument) || window.document);
       if (nextFocus && nextFocus.elem) {
         // Increment pending focus count to indicate focus is required for this navigation action
-        this._pendingFocusCount += 1;
-        event.preventDefault();
+        // this._pendingFocusCount += 1;
+        this.triggerFocus(nextFocus, keyCode);
+      } else {
+        // We may not be at the edge of the scroll
+        scrollToEdge(this._currentFocus.elem, keyCode);
       }
-      this.triggerFocus(nextFocus, keyCode);
     }, {
       capture: true
     });
@@ -311,7 +317,7 @@ class SpatialManager {
       // We are here if requestTVFocus is called with container as node
       var nextFocus = findDestinationOrAutofocus(this._currentFocus.elem, 'ArrowDown', node, true);
       if (nextFocus.elem) {
-        this._pendingFocusCount = 1;
+        // this._pendingFocusCount = 1;
         this.triggerFocus(nextFocus);
       } else {
         console.warn('No focusable destination for requestTVFocus: ', node);
@@ -319,7 +325,7 @@ class SpatialManager {
     } else {
       if (node && node.focus) {
         var parentContainer = getParentContainer(node, false);
-        this._pendingFocusCount = 1;
+        // this._pendingFocusCount = 1;
         this.triggerFocus({
           elem: node,
           parentContainer

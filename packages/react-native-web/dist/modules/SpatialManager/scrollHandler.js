@@ -468,6 +468,35 @@ class ScrollHandler {
       }
     };
   }
+
+  /**
+   * scrollToEdge
+   * Scrolled to the edge of an elements scrollable, if available
+   * @param {HTMLElement | null} elem Referece element
+   * @param {string} keyCode Key code to derive direction from
+   * @return {null}
+   */
+  scrollToEdge(elem, keyCode) {
+    if (!elem) {
+      return null;
+    }
+    var isVertical = keyCode === 'ArrowUp' || keyCode === 'ArrowDown';
+    var scrollInfo = findScrollableAncestor(elem, isVertical ? 'vertical' : 'horizontal');
+    if (!scrollInfo || !scrollInfo.scrollable) {
+      return null;
+    }
+    var scrollable = scrollInfo.scrollable,
+      isWindowScroll = scrollInfo.isWindowScroll;
+    var currentOffset = isVertical ? scrollable.scrollTop : scrollable.scrollLeft;
+    var maxOffset = isVertical ? Math.max(0, scrollable.scrollHeight - scrollable.clientHeight) : Math.max(0, scrollable.scrollWidth - scrollable.clientWidth);
+    var targetOffset = keyCode === 'ArrowUp' || keyCode === 'ArrowLeft' ? 0 : maxOffset;
+    var delta = targetOffset - currentOffset;
+    if (delta === 0) {
+      return null;
+    }
+    this.scrollAxis(scrollable, isWindowScroll, isVertical, delta, true);
+    return null;
+  }
 }
 Object.defineProperty(ScrollHandler, _instance, {
   writable: true,
@@ -477,4 +506,5 @@ var scrollHandler = new ScrollHandler();
 export var setupScrollHandler = scrollHandler.setupScrollHandler.bind(scrollHandler);
 export var setupAppInitiatedScrollHandler = scrollHandler.setupAppInitiatedScrollHandler.bind(scrollHandler);
 export { isElementInWindowViewport };
+export var scrollToEdge = scrollHandler.scrollToEdge.bind(scrollHandler);
 export var maybeScrollOnFocus = scrollHandler.maybeScrollOnFocus.bind(scrollHandler);

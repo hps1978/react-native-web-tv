@@ -30,7 +30,8 @@ import {
   maybeScrollOnFocus,
   setupAppInitiatedScrollHandler,
   isElementInWindowViewport,
-  setupScrollHandler
+  setupScrollHandler,
+  scrollToEdge
 } from './scrollHandler';
 
 type SpatialNavigationConfigType = {
@@ -52,7 +53,7 @@ class SpatialManager {
   _isSpatialManagerReady: boolean;
   _spatialNavigationContainer: HTMLElement | null;
   _currentFocus: ElemData;
-  _pendingFocusCount: number;
+  // _pendingFocusCount: number;
   _keydownThrottleMs: number;
   keyDownListener: ((event: any) => void) | null;
   appInitiatedScrollCleanup: (() => void) | null;
@@ -73,7 +74,7 @@ class SpatialManager {
       elem: null,
       parentContainer: null
     };
-    this._pendingFocusCount = 0;
+    // this._pendingFocusCount = 0;
     this._keydownThrottleMs = 0;
     this.keyDownListener = null;
     this.appInitiatedScrollCleanup = null;
@@ -173,7 +174,7 @@ class SpatialManager {
       'ArrowDown', // No directional input, just find the next best focus
       targetNode
     );
-    this._pendingFocusCount = 1;
+    // this._pendingFocusCount = 1;
     this.triggerFocus(nextFocus);
   }
 
@@ -213,14 +214,14 @@ class SpatialManager {
         // const preventScroll = scrollPromise != null;
         const preventScroll = true;
 
-        if (this._pendingFocusCount > 0) {
-          this._pendingFocusCount--;
-        }
-        if (this._pendingFocusCount === 0) {
-          // We focus only on the last pending focus to avoid unnecessary intermediate focuses
-          // during rapid navigation
-          nextFocus.elem.focus({ preventScroll });
-        }
+        // if (this._pendingFocusCount > 0) {
+        //   this._pendingFocusCount--;
+        // }
+        // if (this._pendingFocusCount === 0) {
+        // We focus only on the last pending focus to avoid unnecessary intermediate focuses
+        // during rapid navigation
+        nextFocus.elem.focus({ preventScroll });
+        // }
 
         // Start observing mutations
         const parentContainer = getParentContainer(nextFocus.elem, true);
@@ -315,7 +316,7 @@ class SpatialManager {
 
       if (nextFocus?.elem) {
         // Reset the pending focus count to 1 to indicate we need to focus the nextFocus element after scroll
-        this._pendingFocusCount = 1;
+        // this._pendingFocusCount = 1;
         this.triggerFocus(nextFocus, null);
       }
     };
@@ -378,6 +379,8 @@ class SpatialManager {
           console.warn('No initial focus. Trying to set one...');
         }
 
+        event.preventDefault();
+
         const nextFocus = getNextFocus(
           this._currentFocus.elem,
           keyCode,
@@ -386,11 +389,12 @@ class SpatialManager {
 
         if (nextFocus && nextFocus.elem) {
           // Increment pending focus count to indicate focus is required for this navigation action
-          this._pendingFocusCount += 1;
-          event.preventDefault();
+          // this._pendingFocusCount += 1;
+          this.triggerFocus(nextFocus, keyCode);
+        } else {
+          // We may not be at the edge of the scroll
+          scrollToEdge(this._currentFocus.elem, keyCode);
         }
-
-        this.triggerFocus(nextFocus, keyCode);
       },
       { capture: true }
     );
@@ -415,7 +419,7 @@ class SpatialManager {
         true
       );
       if (nextFocus.elem) {
-        this._pendingFocusCount = 1;
+        // this._pendingFocusCount = 1;
         this.triggerFocus(nextFocus);
       } else {
         console.warn('No focusable destination for requestTVFocus: ', node);
@@ -423,7 +427,7 @@ class SpatialManager {
     } else {
       if (node && node.focus) {
         const parentContainer = getParentContainer(node, false);
-        this._pendingFocusCount = 1;
+        // this._pendingFocusCount = 1;
         this.triggerFocus({ elem: node, parentContainer });
       }
     }

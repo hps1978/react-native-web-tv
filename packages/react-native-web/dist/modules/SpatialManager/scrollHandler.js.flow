@@ -68,10 +68,12 @@ declare class ScrollHandler {
   }): any,
   maybeScrollOnFocus(nextElemData: ElemData, currentElemData: ElemData | null, keyCode: string): any,
   setupAppInitiatedScrollHandler(container: HTMLElement | Document, getCurrentFocus: getCurrentFocusType, onScrollRefocus: onScrollRefocusType): () => void,
+  scrollToEdge(elem: HTMLElement, keyCode: string): any,
 }
 export type { SpatialScrollConfigType, getCurrentFocusType, onScrollRefocusType, ElemData };
 const scrollHandler = new ScrollHandler();
 export const setupScrollHandler = scrollHandler.setupScrollHandler.bind(scrollHandler);
 export const setupAppInitiatedScrollHandler = scrollHandler.setupAppInitiatedScrollHandler.bind(scrollHandler);
 export { isElementInWindowViewport };
+export const scrollToEdge = scrollHandler.scrollToEdge.bind(scrollHandler);
 export const maybeScrollOnFocus = scrollHandler.maybeScrollOnFocus.bind(scrollHandler);
