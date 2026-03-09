@@ -18,7 +18,8 @@ jest.mock('../scrollHandler', () => ({
   maybeScrollOnFocus: jest.fn(),
   setupAppInitiatedScrollHandler: jest.fn(() => () => {}),
   isElementInWindowViewport: jest.fn(() => true),
-  setupScrollHandler: jest.fn()
+  setupScrollHandler: jest.fn(),
+  scrollToEdge: jest.fn()
 }));
 
 jest.mock('../mutationObserver', () => ({
