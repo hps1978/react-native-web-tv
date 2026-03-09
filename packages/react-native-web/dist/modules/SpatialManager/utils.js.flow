@@ -11,6 +11,10 @@
 // API capability detection (one-time check at module load).
 // TV platforms may lack modern APIs, so we detect and fall back gracefully.
 // This avoids repeated try-catch blocks on every scroll operation.
+export type ElemData = {
+  elem: HTMLElement | null,
+  parentContainer: HTMLElement | null,
+};
 const _hasPerformance = typeof performance !== 'undefined' && typeof performance.now === 'function';
 const _hasRequestAnimationFrame = typeof requestAnimationFrame === 'function';
 const _hasGetComputedStyle = typeof window !== 'undefined' && typeof window.getComputedStyle === 'function';
@@ -111,15 +115,17 @@ declare export function inferScrollDirection(scrollContainer: HTMLElement | null
 /**
  * getBoundingRectangles
  * Resolves element and container viewport-relative bounding rectangles.
+ * Sets up target as parent container if it's within a scrollable to allow scrolling
+ * to bring a parent container into visibilty instead of the element itself.
  * Falls back to offset dimensions if getBoundingClientRect unavailable.
  * @param {any} scrollableH - Horizontal scrollable container
  * @param {boolean} isWindowScrollH - If true, scrollableH is the window
  * @param {any} scrollableV - Vertical scrollable container
  * @param {boolean} isWindowScrollV - If true, scrollableV is the window
  * @param {HTMLElement} elem - The target element to measure
- * @returns {Object} Object with horizontalRects, verticalRects, and targetRect
+ * @returns {Object} Object with horizontalRects, verticalRects, targetHRect, targetVRect
  */
-declare export function getBoundingRectangles(scrollableH: any, isWindowScrollH: boolean, scrollableV: any, isWindowScrollV: boolean, elem: HTMLElement): any;
+declare export function getBoundingRectangles(scrollableH: any, isWindowScrollH: boolean, scrollableV: any, isWindowScrollV: boolean, elemData: ElemData): any;
 /**
  * getAxisScrollDelta
  * Calculates scroll distance needed to keep an element visible within container.

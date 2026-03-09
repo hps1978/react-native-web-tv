@@ -7,7 +7,7 @@
  * @flow strict
  * @format
  */
-import { getCurrentTime, scheduleAnimationFrame, cancelScheduledFrame, findScrollableAncestor, isElementInWindowViewport, getElementVisibilityRatio, inferScrollDirection, getBoundingRectangles, getAxisScrollDelta } from './utils';
+import { getCurrentTime, scheduleAnimationFrame, cancelScheduledFrame, findScrollableAncestor, isElementInWindowViewport, getElementVisibilityRatio, inferScrollDirection, getBoundingRectangles, getAxisScrollDelta, ElemData } from './utils';
 type SpatialScrollConfigType = {
   leftEdgePaddingPx?: number,
   topEdgePaddingPx?: number,
@@ -22,13 +22,10 @@ type ScrollStateType = {
 };
 type getCurrentFocusType = () => {
   elem: HTMLElement | null,
-  parentHasAutofocus: boolean,
+  parentContainer: HTMLElement | null,
 };
 type onScrollRefocusType = (params: {
-  currentFocus: {
-    elem: HTMLElement | null,
-    parentHasAutofocus: boolean,
-  },
+  currentFocus: ElemData,
   scrollContainer: HTMLElement | null,
 }) => void;
 const DEFAULT_SPATIAL_SCROLL_CONFIG: SpatialScrollConfigType = {
@@ -62,19 +59,21 @@ declare class ScrollHandler {
   animateScrollTo(scrollable: any, isVertical: boolean, nextOffset: number, durationMs: number): any,
   performScroll(scrollable: any, isVertical: boolean, nextOffset: number, liveNextOffset: number, animate: boolean): any,
   scrollAxis(scrollable: any, isWindowScroll: boolean, isVertical: boolean, scrollDelta: number, animate: boolean): void,
-  scrollToAlignLeft(elem: HTMLElement | null, keyCode: string, currentElem: HTMLElement | null, verticalScroll: {
+  scrollToAlignLeft(elemData: ElemData, keyCode: string, currentElemData: ElemData | null, verticalScroll: {
     scrollable: any,
     isWindowScroll: boolean,
   }, horizontalScroll: {
     scrollable: any,
     isWindowScroll: boolean,
   }): any,
-  maybeScrollOnFocus(nextElem: HTMLElement | null, currentElem: HTMLElement | null, keyCode: string): any,
+  maybeScrollOnFocus(nextElemData: ElemData, currentElemData: ElemData | null, keyCode: string): any,
   setupAppInitiatedScrollHandler(container: HTMLElement | Document, getCurrentFocus: getCurrentFocusType, onScrollRefocus: onScrollRefocusType): () => void,
+  scrollToEdge(elem: HTMLElement, keyCode: string): any,
 }
-export type { SpatialScrollConfigType, getCurrentFocusType, onScrollRefocusType };
+export type { SpatialScrollConfigType, getCurrentFocusType, onScrollRefocusType, ElemData };
 const scrollHandler = new ScrollHandler();
 export const setupScrollHandler = scrollHandler.setupScrollHandler.bind(scrollHandler);
 export const setupAppInitiatedScrollHandler = scrollHandler.setupAppInitiatedScrollHandler.bind(scrollHandler);
 export { isElementInWindowViewport };
+export const scrollToEdge = scrollHandler.scrollToEdge.bind(scrollHandler);
 export const maybeScrollOnFocus = scrollHandler.maybeScrollOnFocus.bind(scrollHandler);

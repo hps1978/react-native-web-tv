@@ -11,6 +11,7 @@
 // API capability detection (one-time check at module load).
 // TV platforms may lack modern APIs, so we detect and fall back gracefully.
 // This avoids repeated try-catch blocks on every scroll operation.
+
 var _hasPerformance = typeof performance !== 'undefined' && typeof performance.now === 'function';
 var _hasRequestAnimationFrame = typeof requestAnimationFrame === 'function';
 var _hasGetComputedStyle = typeof window !== 'undefined' && typeof window.getComputedStyle === 'function';
@@ -220,21 +221,32 @@ export function inferScrollDirection(scrollContainer) {
 /**
  * getBoundingRectangles
  * Resolves element and container viewport-relative bounding rectangles.
+ * Sets up target as parent container if it's within a scrollable to allow scrolling
+ * to bring a parent container into visibilty instead of the element itself.
  * Falls back to offset dimensions if getBoundingClientRect unavailable.
  * @param {any} scrollableH - Horizontal scrollable container
  * @param {boolean} isWindowScrollH - If true, scrollableH is the window
  * @param {any} scrollableV - Vertical scrollable container
  * @param {boolean} isWindowScrollV - If true, scrollableV is the window
  * @param {HTMLElement} elem - The target element to measure
- * @returns {Object} Object with horizontalRects, verticalRects, and targetRect
+ * @returns {Object} Object with horizontalRects, verticalRects, targetHRect, targetVRect
  */
-export function getBoundingRectangles(scrollableH, isWindowScrollH, scrollableV, isWindowScrollV, elem) {
+export function getBoundingRectangles(scrollableH, isWindowScrollH, scrollableV, isWindowScrollV, elemData) {
+  var elem = elemData.elem,
+    parentContainer = elemData.parentContainer;
   var containerRectH, containerRectV;
-  var targetRect;
+  var targetHRect, targetVRect;
+
+  // Check if parent container of the next element is within the scrollable area of either axis.
+  var isParentInVScroll = parentContainer && (isWindowScrollV || scrollableV.contains(parentContainer));
+  var isParentInHScroll = parentContainer && (isWindowScrollH || scrollableH.contains(parentContainer));
   if (_hasGetBoundingClientRect) {
+    var targetElemRect = elem.getBoundingClientRect();
+    var parentContainerRect = parentContainer ? parentContainer.getBoundingClientRect() : null;
     containerRectH = scrollableH.getBoundingClientRect();
     containerRectV = scrollableV.getBoundingClientRect();
-    targetRect = elem.getBoundingClientRect();
+    targetHRect = isParentInHScroll ? parentContainerRect : targetElemRect;
+    targetVRect = isParentInVScroll ? parentContainerRect : targetElemRect;
   } else {
     // Fallback: use offset dimensions
     containerRectH = {
@@ -249,12 +261,23 @@ export function getBoundingRectangles(scrollableH, isWindowScrollH, scrollableV,
       bottom: (scrollableV.offsetTop || 0) + (scrollableV.offsetHeight || 0),
       right: (scrollableV.offsetLeft || 0) + (scrollableV.offsetWidth || 0)
     };
-    targetRect = {
+    var _targetElemRect = {
       top: elem.offsetTop || 0,
       left: elem.offsetLeft || 0,
       bottom: (elem.offsetTop || 0) + (elem.offsetHeight || 0),
       right: (elem.offsetLeft || 0) + (elem.offsetWidth || 0)
     };
+    var _parentContainerRect = null;
+    if (isParentInVScroll || isParentInHScroll) {
+      _parentContainerRect = {
+        top: parentContainer.offsetTop || 0,
+        left: parentContainer.offsetLeft || 0,
+        bottom: (parentContainer.offsetTop || 0) + (parentContainer.offsetHeight || 0),
+        right: (parentContainer.offsetLeft || 0) + (parentContainer.offsetWidth || 0)
+      };
+    }
+    targetHRect = isParentInHScroll ? _parentContainerRect : _targetElemRect;
+    targetVRect = isParentInVScroll ? _parentContainerRect : _targetElemRect;
   }
 
   // Clamp container rect to viewport bounds so we don't scroll outside the visible area.
@@ -278,7 +301,8 @@ export function getBoundingRectangles(scrollableH, isWindowScrollH, scrollableV,
       containerRect: containerRectV,
       visibleContainerRect: containerRectV
     },
-    targetRect
+    targetHRect,
+    targetVRect
   };
 }
 
