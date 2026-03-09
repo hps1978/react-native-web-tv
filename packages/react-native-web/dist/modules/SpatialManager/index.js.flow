@@ -8,9 +8,9 @@
  * @format
  */
 
-import { setConfig as setLrudConfig, getNextFocus, getFocusableParentContainer, getParentContainer, updateAncestorsAutoFocus, findDestinationOrAutofocus, getNextFocusInViewport } from '@bbc/tv-lrud-spatial';
+import { setConfig as setLrudConfig, getNextFocus, getParentContainer, updateAncestorsAutoFocus, findDestinationOrAutofocus, getNextFocusInViewport } from '@bbc/tv-lrud-spatial';
 import { addEventListener } from '../addEventListener';
-import { setupNodeId } from '../../exports/TV/utils';
+import { setupNodeId, type ElemData } from '../../exports/TV/utils';
 import { startObserving, stopObserving, type MutationDetails } from './mutationObserver';
 import { type SpatialScrollConfigType, type getCurrentFocusType, type onScrollRefocusType, maybeScrollOnFocus, setupAppInitiatedScrollHandler, isElementInWindowViewport, setupScrollHandler } from './scrollHandler';
 type SpatialNavigationConfigType = {
@@ -23,10 +23,6 @@ type SpatialNavigationConfigType = {
     mode?: 'AlignLeft' | 'default'
   },
 };
-type FocusState = {
-  elem: HTMLElement | null,
-  parentHasAutofocus: boolean,
-};
 
 /**
  * SpatialManager
@@ -36,7 +32,7 @@ type FocusState = {
 declare class SpatialManager {
   _isSpatialManagerReady: boolean,
   _spatialNavigationContainer: HTMLElement | null,
-  _currentFocus: FocusState,
+  _currentFocus: ElemData,
   _pendingFocusCount: number,
   _keydownThrottleMs: number,
   keyDownListener: ((event: any) => void) | null,
@@ -47,7 +43,7 @@ declare class SpatialManager {
   noValidDestinationCallback(candidateContainer: any, hasAutoFocus: any): any,
   setupConfigs(): any,
   handleCurrentFocusMutations(details: MutationDetails): void,
-  triggerFocus(nextFocus: FocusState, keyCode?: string): boolean,
+  triggerFocus(nextFocus: ElemData, keyCode?: string): boolean,
   handlePageVisibilityChange(event: any): any,
   setupAppVisibilityListeners(): any,
   setupAppInitiatedScrollTracking(): any,

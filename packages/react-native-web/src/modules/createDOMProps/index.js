@@ -936,7 +936,7 @@ const createDOMProps = (elementType, props, options) => {
     } else {
       // non focusable container should be out of the tab order,
       // but it's chrildren could still be focusable based on their own props
-      domProps.tabIndex = '-1';
+      domProps.tabIndex = tabIndex === -999 ? '-999' : '-1'; // -999 identifies a FlatList container
     }
 
     // 3. setup data-block-exit attributes for trapFocus* props

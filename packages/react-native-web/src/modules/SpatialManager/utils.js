@@ -11,6 +11,11 @@
 // API capability detection (one-time check at module load).
 // TV platforms may lack modern APIs, so we detect and fall back gracefully.
 // This avoids repeated try-catch blocks on every scroll operation.
+export type ElemData = {
+  elem: HTMLElement | null,
+  parentContainer: HTMLElement | null
+};
+
 const _hasPerformance =
   typeof performance !== 'undefined' && typeof performance.now === 'function';
 const _hasRequestAnimationFrame = typeof requestAnimationFrame === 'function';
@@ -273,28 +278,45 @@ export function inferScrollDirection(
 /**
  * getBoundingRectangles
  * Resolves element and container viewport-relative bounding rectangles.
+ * Sets up target as parent container if it's within a scrollable to allow scrolling
+ * to bring a parent container into visibilty instead of the element itself.
  * Falls back to offset dimensions if getBoundingClientRect unavailable.
  * @param {any} scrollableH - Horizontal scrollable container
  * @param {boolean} isWindowScrollH - If true, scrollableH is the window
  * @param {any} scrollableV - Vertical scrollable container
  * @param {boolean} isWindowScrollV - If true, scrollableV is the window
  * @param {HTMLElement} elem - The target element to measure
- * @returns {Object} Object with horizontalRects, verticalRects, and targetRect
+ * @returns {Object} Object with horizontalRects, verticalRects, targetHRect, targetVRect
  */
 export function getBoundingRectangles(
   scrollableH: any,
   isWindowScrollH: boolean,
   scrollableV: any,
   isWindowScrollV: boolean,
-  elem: HTMLElement
+  elemData: ElemData
 ) {
+  const { elem, parentContainer } = elemData;
   let containerRectH, containerRectV;
-  let targetRect;
+  let targetHRect, targetVRect;
+
+  // Check if parent container of the next element is within the scrollable area of either axis.
+  const isParentInVScroll =
+    parentContainer &&
+    (isWindowScrollV || scrollableV.contains(parentContainer));
+  const isParentInHScroll =
+    parentContainer &&
+    (isWindowScrollH || scrollableH.contains(parentContainer));
 
   if (_hasGetBoundingClientRect) {
+    const targetElemRect = elem.getBoundingClientRect();
+    const parentContainerRect = parentContainer
+      ? parentContainer.getBoundingClientRect()
+      : null;
+
     containerRectH = scrollableH.getBoundingClientRect();
     containerRectV = scrollableV.getBoundingClientRect();
-    targetRect = elem.getBoundingClientRect();
+    targetHRect = isParentInHScroll ? parentContainerRect : targetElemRect;
+    targetVRect = isParentInVScroll ? parentContainerRect : targetElemRect;
   } else {
     // Fallback: use offset dimensions
     containerRectH = {
@@ -317,12 +339,26 @@ export function getBoundingRectangles(
         ((scrollableV: any).offsetLeft || 0) +
         ((scrollableV: any).offsetWidth || 0)
     };
-    targetRect = {
+    const targetElemRect = {
       top: elem.offsetTop || 0,
       left: elem.offsetLeft || 0,
       bottom: (elem.offsetTop || 0) + (elem.offsetHeight || 0),
       right: (elem.offsetLeft || 0) + (elem.offsetWidth || 0)
     };
+    let parentContainerRect = null;
+    if (isParentInVScroll || isParentInHScroll) {
+      parentContainerRect = {
+        top: parentContainer.offsetTop || 0,
+        left: parentContainer.offsetLeft || 0,
+        bottom:
+          (parentContainer.offsetTop || 0) +
+          (parentContainer.offsetHeight || 0),
+        right:
+          (parentContainer.offsetLeft || 0) + (parentContainer.offsetWidth || 0)
+      };
+    }
+    targetHRect = isParentInHScroll ? parentContainerRect : targetElemRect;
+    targetVRect = isParentInVScroll ? parentContainerRect : targetElemRect;
   }
 
   // Clamp container rect to viewport bounds so we don't scroll outside the visible area.
@@ -346,7 +382,8 @@ export function getBoundingRectangles(
       containerRect: containerRectV,
       visibleContainerRect: containerRectV
     },
-    targetRect
+    targetHRect,
+    targetVRect
   };
 }
 

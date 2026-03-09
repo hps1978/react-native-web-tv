@@ -11,7 +11,7 @@ import _classPrivateFieldLooseKey from "@babel/runtime/helpers/classPrivateField
  * @format
  */
 
-import { setConfig as setLrudConfig, getNextFocus, getFocusableParentContainer, getParentContainer, updateAncestorsAutoFocus, findDestinationOrAutofocus, getNextFocusInViewport } from '@bbc/tv-lrud-spatial';
+import { setConfig as setLrudConfig, getNextFocus, getParentContainer, updateAncestorsAutoFocus, findDestinationOrAutofocus, getNextFocusInViewport } from '@bbc/tv-lrud-spatial';
 import { addEventListener } from '../addEventListener';
 import { setupNodeId } from '../../exports/TV/utils';
 import { startObserving, stopObserving } from './mutationObserver';
@@ -36,7 +36,7 @@ class SpatialManager {
     this._spatialNavigationContainer = null;
     this._currentFocus = {
       elem: null,
-      parentHasAutofocus: false
+      parentContainer: null
     };
     this._pendingFocusCount = 0;
     this._keydownThrottleMs = 0;
@@ -118,7 +118,7 @@ class SpatialManager {
     // Current focused element (or it's ancestor) is removed from the DOM, we need to find a new focus
     this._currentFocus = {
       elem: null,
-      parentHasAutofocus: false
+      parentContainer: null
     };
     var nextFocus = getNextFocus(null,
     // No current focus since it's removed
@@ -133,16 +133,17 @@ class SpatialManager {
    * triggerFocus
    * Applies focus to the specified element after handling scroll positioning.
    * Updates spatial manager state and sets up mutation observation on the new focus target.
-   * @param {FocusState} nextFocus - Object containing elem (target element) and parentHasAutofocus flag
+   * @param {ElemData} nextFocus - Object containing elem (target element) and it's LRUD parentContainer
    * @param {string} [keyCode] - Optional key code that triggered the focus change (e.g., 'ArrowUp')
    * @returns {boolean} True if focus was successfully applied, false if nextFocus or elem is invalid
    */
   triggerFocus(nextFocus, keyCode) {
     if (nextFocus && nextFocus.elem) {
       // let scrollPromise = null;
+      keyCode = keyCode || 'ArrowDown'; // Default to ArrowDown if not provided
 
       // scrollPromise = maybeScrollOnFocus(
-      maybeScrollOnFocus(nextFocus.elem, this._currentFocus.elem, keyCode);
+      maybeScrollOnFocus(nextFocus, this._currentFocus, keyCode);
       var applyFocus = () => {
         if (!nextFocus.elem) {
           return;
@@ -151,7 +152,7 @@ class SpatialManager {
         // Stop observing mutations on current focus
         stopObserving();
         this._currentFocus.elem = nextFocus.elem;
-        this._currentFocus.parentHasAutofocus = nextFocus.parentHasAutofocus;
+        this._currentFocus.parentContainer = nextFocus.parentContainer;
         // set id first
         setupNodeId(nextFocus.elem);
         updateAncestorsAutoFocus(nextFocus.elem, this._spatialNavigationContainer);
@@ -170,7 +171,7 @@ class SpatialManager {
         }
 
         // Start observing mutations
-        var parentContainer = getParentContainer(nextFocus.elem);
+        var parentContainer = getParentContainer(nextFocus.elem, true);
         if (parentContainer) {
           startObserving(parentContainer, nextFocus.elem, this.handleCurrentFocusMutations.bind(this));
         }
@@ -317,12 +318,11 @@ class SpatialManager {
       }
     } else {
       if (node && node.focus) {
-        var _getFocusableParentCo;
-        var parentHasAutofocus = ((_getFocusableParentCo = getFocusableParentContainer(node)) == null ? void 0 : _getFocusableParentCo.getAttribute('data-autofocus')) === 'true' || false;
+        var parentContainer = getParentContainer(node, false);
         this._pendingFocusCount = 1;
         this.triggerFocus({
           elem: node,
-          parentHasAutofocus
+          parentContainer
         });
       }
     }
@@ -389,7 +389,7 @@ class SpatialManager {
     stopObserving();
     this._currentFocus = {
       elem: null,
-      parentHasAutofocus: false
+      parentContainer: null
     };
     this._isSpatialManagerReady = false;
     this._spatialNavigationContainer = null;

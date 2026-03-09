@@ -82,7 +82,7 @@ describe('modules/SpatialManager/scrollHandler', () => {
 
     const getCurrentFocus = jest.fn(() => ({
       elem: target,
-      parentHasAutofocus: false
+      parentContainer: null
     }));
     const onScrollRefocus = jest.fn();
 
@@ -97,15 +97,6 @@ describe('modules/SpatialManager/scrollHandler', () => {
 
     expect(utilsMock.inferScrollDirection).toHaveBeenCalledWith(
       scrollContainer
-    );
-    expect(utilsMock.findScrollableAncestor).toHaveBeenCalledTimes(2);
-    expect(utilsMock.findScrollableAncestor).toHaveBeenCalledWith(
-      target,
-      'vertical'
-    );
-    expect(utilsMock.findScrollableAncestor).toHaveBeenCalledWith(
-      target,
-      'horizontal'
     );
     expect(onScrollRefocus).not.toHaveBeenCalled();
 
@@ -126,7 +117,7 @@ describe('modules/SpatialManager/scrollHandler', () => {
 
     const getCurrentFocus = jest.fn(() => ({
       elem: target,
-      parentHasAutofocus: true
+      parentContainer: null
     }));
     const onScrollRefocus = jest.fn();
 
@@ -146,7 +137,7 @@ describe('modules/SpatialManager/scrollHandler', () => {
     jest.advanceTimersByTime(100);
 
     expect(onScrollRefocus).toHaveBeenCalledWith({
-      currentFocus: { elem: target, parentHasAutofocus: true },
+      currentFocus: { elem: target, parentContainer: null },
       scrollContainer
     });
 
@@ -164,7 +155,7 @@ describe('modules/SpatialManager/scrollHandler', () => {
 
     const getCurrentFocus = jest.fn(() => ({
       elem: target,
-      parentHasAutofocus: false
+      parentContainer: null
     }));
     const onScrollRefocus = jest.fn();
 
@@ -232,7 +223,11 @@ describe('modules/SpatialManager/scrollHandler', () => {
     });
 
     const nextElem = document.createElement('button');
-    maybeScrollOnFocus(nextElem, null, 'ArrowDown');
+    maybeScrollOnFocus(
+      { elem: nextElem, parentContainer: null },
+      null,
+      'ArrowDown'
+    );
 
     expect(scrollOrder).toEqual(['vertical', 'horizontal']);
     expect(verticalScrollable.scrollTo).toHaveBeenCalled();

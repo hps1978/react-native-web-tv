@@ -11,14 +11,13 @@
 import {
   setConfig as setLrudConfig,
   getNextFocus,
-  getFocusableParentContainer,
   getParentContainer,
   updateAncestorsAutoFocus,
   findDestinationOrAutofocus,
   getNextFocusInViewport
 } from '@bbc/tv-lrud-spatial';
 import { addEventListener } from '../addEventListener';
-import { setupNodeId } from '../../exports/TV/utils';
+import { setupNodeId, type ElemData } from '../../exports/TV/utils';
 import {
   startObserving,
   stopObserving,
@@ -43,11 +42,6 @@ type SpatialNavigationConfigType = {
   }
 };
 
-type FocusState = {
-  elem: HTMLElement | null,
-  parentHasAutofocus: boolean
-};
-
 /**
  * SpatialManager
  * Manages spatial navigation for TV platforms using the @bbc/tv-lrud-spatial library.
@@ -57,7 +51,7 @@ class SpatialManager {
   static #_instance = null;
   _isSpatialManagerReady: boolean;
   _spatialNavigationContainer: HTMLElement | null;
-  _currentFocus: FocusState;
+  _currentFocus: ElemData;
   _pendingFocusCount: number;
   _keydownThrottleMs: number;
   keyDownListener: ((event: any) => void) | null;
@@ -77,7 +71,7 @@ class SpatialManager {
     this._spatialNavigationContainer = null;
     this._currentFocus = {
       elem: null,
-      parentHasAutofocus: false
+      parentContainer: null
     };
     this._pendingFocusCount = 0;
     this._keydownThrottleMs = 0;
@@ -172,7 +166,7 @@ class SpatialManager {
   handleCurrentFocusMutations(details: MutationDetails): void {
     const { targetNode } = details;
     // Current focused element (or it's ancestor) is removed from the DOM, we need to find a new focus
-    this._currentFocus = { elem: null, parentHasAutofocus: false };
+    this._currentFocus = { elem: null, parentContainer: null };
 
     const nextFocus = getNextFocus(
       null, // No current focus since it's removed
@@ -187,16 +181,17 @@ class SpatialManager {
    * triggerFocus
    * Applies focus to the specified element after handling scroll positioning.
    * Updates spatial manager state and sets up mutation observation on the new focus target.
-   * @param {FocusState} nextFocus - Object containing elem (target element) and parentHasAutofocus flag
+   * @param {ElemData} nextFocus - Object containing elem (target element) and it's LRUD parentContainer
    * @param {string} [keyCode] - Optional key code that triggered the focus change (e.g., 'ArrowUp')
    * @returns {boolean} True if focus was successfully applied, false if nextFocus or elem is invalid
    */
-  triggerFocus(nextFocus: FocusState, keyCode?: string): boolean {
+  triggerFocus(nextFocus: ElemData, keyCode?: string): boolean {
     if (nextFocus && nextFocus.elem) {
       // let scrollPromise = null;
+      keyCode = keyCode || 'ArrowDown'; // Default to ArrowDown if not provided
 
       // scrollPromise = maybeScrollOnFocus(
-      maybeScrollOnFocus(nextFocus.elem, this._currentFocus.elem, keyCode);
+      maybeScrollOnFocus(nextFocus, this._currentFocus, keyCode);
 
       const applyFocus = () => {
         if (!nextFocus.elem) {
@@ -207,7 +202,7 @@ class SpatialManager {
         stopObserving();
 
         this._currentFocus.elem = nextFocus.elem;
-        this._currentFocus.parentHasAutofocus = nextFocus.parentHasAutofocus;
+        this._currentFocus.parentContainer = nextFocus.parentContainer;
         // set id first
         setupNodeId(nextFocus.elem);
         updateAncestorsAutoFocus(
@@ -228,7 +223,7 @@ class SpatialManager {
         }
 
         // Start observing mutations
-        const parentContainer = getParentContainer(nextFocus.elem);
+        const parentContainer = getParentContainer(nextFocus.elem, true);
         if (parentContainer) {
           startObserving(
             parentContainer,
@@ -428,11 +423,9 @@ class SpatialManager {
       }
     } else {
       if (node && node.focus) {
-        const parentHasAutofocus =
-          getFocusableParentContainer(node)?.getAttribute('data-autofocus') ===
-            'true' || false;
+        const parentContainer = getParentContainer(node, false);
         this._pendingFocusCount = 1;
-        this.triggerFocus({ elem: node, parentHasAutofocus });
+        this.triggerFocus({ elem: node, parentContainer });
       }
     }
   }
@@ -506,7 +499,7 @@ class SpatialManager {
       window.removeEventListener('focus', this.handlePageVisibilityChange);
     }
     stopObserving();
-    this._currentFocus = { elem: null, parentHasAutofocus: false };
+    this._currentFocus = { elem: null, parentContainer: null };
     this._isSpatialManagerReady = false;
     this._spatialNavigationContainer = null;
   }
