@@ -275,7 +275,6 @@ class SpatialManager {
       if (keyCode !== 'ArrowUp' && keyCode !== 'ArrowDown' && keyCode !== 'ArrowLeft' && keyCode !== 'ArrowRight') {
         return;
       }
-      event.preventDefault();
       if (this._keydownThrottleMs > 0) {
         var now = Date.now();
         if (now - this._lastKeydownAt < this._keydownThrottleMs) {
@@ -290,6 +289,7 @@ class SpatialManager {
       if (nextFocus && nextFocus.elem) {
         // Increment pending focus count to indicate focus is required for this navigation action
         this._pendingFocusCount += 1;
+        event.preventDefault();
       }
       this.triggerFocus(nextFocus, keyCode);
     }, {
