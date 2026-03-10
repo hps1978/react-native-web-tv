@@ -15,6 +15,7 @@ var I18nManager = {
   forceRTL() {
     return;
   },
+  isRTL: false,
   getConstants() {
     return {
       isRTL: false

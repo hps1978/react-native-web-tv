@@ -15,6 +15,10 @@ export type ElemData = {
   elem: HTMLElement | null,
   parentContainer: HTMLElement | null,
 };
+export type ScrollableAncestorInfo = {
+  scrollable: any,
+  isWindowScroll: boolean,
+};
 const _hasPerformance = typeof performance !== 'undefined' && typeof performance.now === 'function';
 const _hasRequestAnimationFrame = typeof requestAnimationFrame === 'function';
 const _hasGetComputedStyle = typeof window !== 'undefined' && typeof window.getComputedStyle === 'function';
@@ -28,8 +32,8 @@ const _windowScrollable = typeof window !== 'undefined' ? {
   },
   clientHeight: window.innerHeight,
   clientWidth: window.innerWidth,
-  scrollHeight: document.documentElement.scrollHeight,
-  scrollWidth: document.documentElement.scrollWidth,
+  scrollHeight: document.documentElement && document.documentElement.scrollHeight || document.body && document.body.scrollHeight || 0,
+  scrollWidth: document.documentElement && document.documentElement.scrollWidth || document.body && document.body.scrollWidth || 0,
   getBoundingClientRect: () => ({
     top: 0,
     left: 0,
@@ -58,11 +62,10 @@ declare export function getCurrentTime(): number;
  * Schedules a callback for the next animation frame.
  * Uses requestAnimationFrame if available, falls back to 30fps setTimeout simulation.
  * @param {() => void} callback - Function to execute on next animation frame
- * @returns {number} Animation frame ID for cancellation with cancelScheduledFrame()
+ * @returns {any} Animation frame ID for cancellation with cancelScheduledFrame()
  */
-declare export function scheduleAnimationFrame(callback: () => void): number;
-export const cancelScheduledFrame = _hasRequestAnimationFrame ? cancelAnimationFrame : clearTimeout;
-
+declare export function scheduleAnimationFrame(callback: () => void): any;
+declare export function cancelScheduledFrame(frameId: any): void;
 /**
  * findScrollableAncestor
  * Traverses DOM ancestors to find a scrollable parent element in specified direction.
@@ -70,9 +73,9 @@ export const cancelScheduledFrame = _hasRequestAnimationFrame ? cancelAnimationF
  * Falls back to window scrollable if no ancestor can scroll in the direction.
  * @param {HTMLElement | null} elem - Starting element for ancestor traversal
  * @param {'vertical' | 'horizontal'} direction - Direction to check scrollability
- * @returns {HTMLElement | null} Scrollable ancestor or window scrollable; null if not found
+ * @returns {ScrollableAncestorInfo} Scrollable ancestor info (falls back to window scrollable)
  */
-declare export function findScrollableAncestor(elem: HTMLElement | null, direction: 'vertical' | 'horizontal'): HTMLElement | null;
+declare export function findScrollableAncestor(elem: HTMLElement | null, direction: 'vertical' | 'horizontal'): ScrollableAncestorInfo;
 /**
  * isElementInWindowViewport
  * Checks if an element intersects with the window viewport.

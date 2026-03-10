@@ -1,51 +1,85 @@
-# Development monorepo
+# React Native Web for TV monorepo
 
-This is the development monorepo for "React Native for Web" and related projects.
+This repository is a customized React Native for Web fork that adds TV-first APIs and focus navigation for web-based TV platforms.
 
-## Structure
+It is intended for TV browser runtimes, while keeping React Native for Web compatibility for shared app code.
 
-* `.github`
-  * Contains workflows used by GitHub Actions.
-  * Contains issue templates.
-* `configs`
-  * Contains configuration files used by the monorepo tooling (compiling, linting, testing, etc.)
-* `packages`
-  * [react-native-web](https://github.com/necolas/react-native-web/blob/master/packages/react-native-web)
-  * Contains the individual packages managed in the monorepo.
-* `scripts`
-  * Contains Node.js scripts for miscellaneous tasks.
+## What's included in this fork
 
-## Web TV fork additions
+- TV spatial navigation via [@bbc/tv-lrud-spatial-rnw](https://github.com/hps1978/lrud-spatial-rnw), integrated through `SpatialManager`.
+- TV exports from `react-native-web`:
+  - `TVFocusGuideView`
+  - `TVEventHandler`
+  - `TVEventControl`
+  - `useTVEventHandler`
+  - `TVTextScrollView`
+  - `TVRemoteEvent` (type)
+- TV focus and directional props available in core components (for example `View`, `Pressable`, `TextInput`):
+  - `tvFocusable`, `isTVSelectable`
+  - `hasTVPreferredFocus`, `autoFocus`
+  - `trapFocusUp`, `trapFocusDown`, `trapFocusLeft`, `trapFocusRight`
+  - `nextFocusUp`, `nextFocusDown`, `nextFocusLeft`, `nextFocusRight`, `nextFocusForward`
+  - `destinations` (for `TVFocusGuideView` and focus guide flows)
+- TV-enabled list/focus integrations in `VirtualizedList` pathways.
 
-This fork adds Web TV-focused APIs and spatial navigation on top of React Native for Web.
+Current implementation notes:
 
-Key additions:
-* TV spatial navigation via [@bbc/tv-lrud-spatial-rnw](https://github.com/hps1978/lrud-spatial-rnw) which is inspired by and a heavy rewrite of `@bbc/tv-lrud-spatial` to address React Native Web components on TV. It's wired into React Native Web through SpatialManager (another new module).
-* TV exports from `react-native-web`: `TVEventHandler`, `TVEventControl`, `TVFocusGuideView`, `TVTextScrollView`, `useTVEventHandler`, and `TVRemoteEvent`.
-* TV focus props on `View`/pressables: `tvFocusable`, `isTVSelectable`, `trapFocusUp/Down/Left/Right`, `destinations`, `autoFocus`.
-* RecyclerListView adapter for `VirtualizedList`/`FlatList` (via `recyclerlistview`) to improve large-list performance on TV. NOTE: Disabled at the moment to fix some issues.
-* `Platform.isTV` is currently forced to `true` in this fork (TV detection is TODO).
+- `Platform.isTV` is forced to `true` for TV first support.
+- `TVEventControl` API surface exists for compatibility; methods currently warn as not implemented on web.
 
-## Spatial navigation configuration
+## Monorepo structure
 
-TV apps can configure spatial navigation before `AppRegistry.runApplication()` by setting `window.appConfig`.
+- `.github`: GitHub workflows and templates.
+- `configs`: shared Babel/Jest/ESLint/Flow configuration.
+- `packages`: workspace packages (`react-native-web`, docs, examples, plugin, etc.).
+- `scripts`: repository scripts (release/build helpers).
+
+## Quick start
+
+From repository root:
+
+```bash
+npm install
+npm run build
+npm run test
+```
+
+Useful workspace-specific commands:
+
+```bash
+# Core package
+npm run dev -w react-native-web
+
+# Examples app
+npm run dev -w react-native-web-examples
+
+# Docs site (Eleventy)
+npm run dev -w react-native-web-docs
+npm run build -w react-native-web-docs
+```
+
+## TV spatial navigation configuration
+
+Configure TV behavior before `AppRegistry.runApplication()` using `window.appConfig`.
 
 ```html
 <script>
   window.appConfig = {
     keyMap: {
-      // Optional: map device-specific keys to ArrowUp/Down/Left/Right
-      // Example: 'Up': 'ArrowUp'
+      // Optional custom key mappings for TV remotes.
+      // Add Back/Menu keyCodes per platform as needed.
+      Back: 461,
       Menu: 10009
     },
     keydownThrottleMs: 0,
     focusConfig: {
-      mode: 'default'  // 'default' or 'AlignLeft'
+      // 'default' or 'AlignLeft'
+      mode: 'default'
     },
     scrollConfig: {
       leftEdgePaddingPx: 10,
       topEdgePaddingPx: 15,
-      scrollThrottleMs: 80, // Not implemented
+      scrollThrottleMs: 80, // currently not implemented
       smoothScrollEnabled: true,
       scrollAnimationDurationMsVertical: 0,
       scrollAnimationDurationMsHorizontal: 0
@@ -54,51 +88,58 @@ TV apps can configure spatial navigation before `AppRegistry.runApplication()` b
 </script>
 ```
 
-Supported config fields:
-* `keyMap`: optional key mapping for LRUD input. NOTE: this needs to be tested for custom keys. The defaults Left/Right/Up/Down already work for basic key types without setting this config. However, to set up TV platform specific __Menu__ and __Back__ keys, the app can pass the specific __keyCodes__ mapped to them to get 'menu' through TVEventHandler and BackHandler events.
-* `keydownThrottleMs`: minimum time between keydown events (ms). Use to reduce rapid repeats from held keys.
-* `focusConfig.mode`: focus scrolling behavior mode ('default' or 'AlignLeft'). AlignLeft keeps left moves default, and aligns right moves to the current focus X position when scrolling.
-* `scrollConfig.leftEdgePaddingPx`: padding from scroll container left edge.
-* `scrollConfig.topEdgePaddingPx`: padding from scroll container top edge.
-* `scrollConfig.scrollThrottleMs`: minimum time between scrolls. NOTE: not implemented.
-* `scrollConfig.smoothScrollEnabled`: enables smooth scroll where supported.
-* `scrollConfig.scrollAnimationDurationMsVertical`: vertical animation duration override.
-* `scrollConfig.scrollAnimationDurationMsHorizontal`: horizontal animation duration override.
+Supported fields:
 
-## Try the TV examples
+- `keyMap`: map remote keys to navigation/back/menu behavior.
+- `keydownThrottleMs`: minimum delay between keydown events.
+- `focusConfig.mode`: focus-scroll behavior (`default` or `AlignLeft`).
+- `scrollConfig.leftEdgePaddingPx`: left boundary padding while scrolling.
+- `scrollConfig.topEdgePaddingPx`: top boundary padding while scrolling.
+- `scrollConfig.scrollThrottleMs`: minimum delay between scroll operations (currently not implemented).
+- `scrollConfig.smoothScrollEnabled`: enable/disable smooth scrolling where supported.
+- `scrollConfig.scrollAnimationDurationMsVertical`: vertical scroll animation duration override.
+- `scrollConfig.scrollAnimationDurationMsHorizontal`: horizontal scroll animation duration override.
 
-- `npm install`
-- `npm run dev -w react-native-web-examples`
-- Open the dev server URL (typically `http://localhost:3000`) and visit `/view-tv`, `/tv-event-handler`, `/tv-focus-guide-view`, `/flatlist-tv-scroll`, `/rlv-flatlist-tv-scroll`, `/app-registry-tv`.
+## Try TV examples
 
-## Tasks
+Run the examples workspace:
 
-* `build`
-  * Use `npm run build` to run the build script in every package.
-  * Use `npm run build -w <package-name>` to run the build script for a specific package.
-* `dev`
-  * Use `npm run dev` to run the dev script in every package.
-  * Use `npm run dev -w <package-name>` to run the dev script for a specific package.
-* `test`
-  * Use `npm run test` to run tests for every package.
+```bash
+npm run dev -w react-native-web-examples
+```
 
-More details can be found in the contributing guide below.
+Then open the local dev URL and try TV-focused routes such as:
+
+- `/tv-event-handler`
+- `/tv-focus-guide-view`
+- `/flatlist-tv-scroll`
+- `/rlv-flatlist-tv-scroll`
+
+## Docs
+
+- Docs workspace source: `packages/react-native-web-docs`
+- TV docs include:
+  - TV navigation concepts
+  - `TVFocusGuideView`
+  - `TVEventHandler`
+  - `TVEventControl`
+  - `useTVEventHandler`
 
 ## Contributing
 
-Development happens in the open on GitHub and we are grateful for contributions including bugfixes, improvements, and ideas.
+Development happens in the open on GitHub and contributions are welcome.
 
 ### Code of conduct
 
-This project expects all participants to adhere to Meta's OSS [Code of Conduct][code-of-conduct]. Please read the full text so that you can understand what actions will and will not be tolerated.
+This project expects all participants to adhere to Meta's OSS [Code of Conduct][code-of-conduct].
 
 ### Contributing guide
 
-Read the [contributing guide][contributing-url] to learn about the development process, how to propose bugfixes and improvements, and how to build and test your changes to React Native for Web.
+Read the [contributing guide][contributing-url] to learn how to propose and ship changes.
 
 ### Good first issues
 
-To help get you familiar with the contribution process, there is a list of [good first issues][good-first-issue-url] that contain bugs which have a relatively limited scope. This is a great place to get started.
+Get started with [good first issues][good-first-issue-url].
 
 [contributing-url]: https://github.com/necolas/react-native-web/blob/master/.github/CONTRIBUTING.md
 [good-first-issue-url]: https://github.com/necolas/react-native-web/labels/good%20first%20issue

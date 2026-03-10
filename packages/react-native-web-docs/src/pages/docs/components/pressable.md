@@ -51,6 +51,14 @@ How long to delay calling `onPressOut` after an interaction ends.
 Disables all pointer interactions with the element.
 {% endcall %}
 
+{% call macro.prop('focusable', '?boolean') %}
+Controls whether the element participates in keyboard/remote focus.
+{% endcall %}
+
+{% call macro.prop('isTVSelectable', '?boolean') %}
+TV compatibility prop that affects remote focus behavior. When set to `false`, the element is removed from tab/remote navigation.
+{% endcall %}
+
 {% call macro.prop('onHoverIn', '?(e: MouseEvent) => void') %}
 Called when the pointer starts hovering over the element. Touch interactions have no effect.
 {% endcall %}

@@ -10,26 +10,24 @@ import * as React from 'react';
 
 // import { findNodeHandle } from '../findNodeHandle';
 
-export type ComponentOrHandleType = ?(
-  | React.ElementRef<React.ElementType>
-  | number
-);
+export type ComponentOrHandleType = ?React.ElementRef<React.ElementType>;
 
 export type TagForComponentOrHandleType = (
   component: ComponentOrHandleType
-) => ?number;
+) => ?HTMLElement;
 
 const tagForComponentOrHandle: TagForComponentOrHandleType = (component) => {
   if (component === null || component === undefined) {
     return undefined;
   }
 
-  if (component.id) {
-    return component.id;
-  }
+  // if (component.id) {
+  //   return component.id;
+  // }
 
-  return undefined;
+  // return undefined;
 
+  return ((component: any): ?HTMLElement);
   // return findNodeHandle(component, true); // suppress warning
   /*
   if (typeof component === 'number') {

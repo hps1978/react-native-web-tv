@@ -5,6 +5,10 @@
 A Babel plugin that will alias `react-native` to `react-native-web` and exclude
 any modules not required by your app (keeping bundle size down).
 
+In this TV fork, the plugin behavior is unchanged and works for TV exports as well
+(for example `TVFocusGuideView`, `TVEventHandler`, and `useTVEventHandler`) when
+they are imported from `react-native`.
+
 ## Installation
 
 ```

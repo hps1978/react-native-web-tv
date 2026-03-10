@@ -16,6 +16,11 @@ export type ElemData = {
   parentContainer: HTMLElement | null
 };
 
+export type ScrollableAncestorInfo = {
+  scrollable: any,
+  isWindowScroll: boolean
+};
+
 const _hasPerformance =
   typeof performance !== 'undefined' && typeof performance.now === 'function';
 const _hasRequestAnimationFrame = typeof requestAnimationFrame === 'function';
@@ -37,8 +42,14 @@ const _windowScrollable =
         },
         clientHeight: window.innerHeight,
         clientWidth: window.innerWidth,
-        scrollHeight: document.documentElement.scrollHeight,
-        scrollWidth: document.documentElement.scrollWidth,
+        scrollHeight:
+          (document.documentElement && document.documentElement.scrollHeight) ||
+          (document.body && document.body.scrollHeight) ||
+          0,
+        scrollWidth:
+          (document.documentElement && document.documentElement.scrollWidth) ||
+          (document.body && document.body.scrollWidth) ||
+          0,
         getBoundingClientRect: () => ({
           top: 0,
           left: 0,
@@ -73,20 +84,24 @@ export function getCurrentTime(): number {
  * Schedules a callback for the next animation frame.
  * Uses requestAnimationFrame if available, falls back to 30fps setTimeout simulation.
  * @param {() => void} callback - Function to execute on next animation frame
- * @returns {number} Animation frame ID for cancellation with cancelScheduledFrame()
+ * @returns {any} Animation frame ID for cancellation with cancelScheduledFrame()
  */
-export function scheduleAnimationFrame(callback: () => void): number {
+export function scheduleAnimationFrame(callback: () => void): any {
   if (_hasRequestAnimationFrame) {
-    return requestAnimationFrame(callback);
+    return (requestAnimationFrame(callback): any);
   }
   // Fallback: simulate 30fps with setTimeout (33ms per frame)
   // TODO: Consider making this adaptive based on actual frame rate or using a more sophisticated polyfill if needed
   return (setTimeout(callback, 33): any);
 }
 
-export const cancelScheduledFrame = _hasRequestAnimationFrame
-  ? cancelAnimationFrame
-  : clearTimeout;
+export function cancelScheduledFrame(frameId: any): void {
+  if (_hasRequestAnimationFrame) {
+    cancelAnimationFrame((frameId: any));
+    return;
+  }
+  clearTimeout((frameId: any));
+}
 
 /**
  * findScrollableAncestor
@@ -95,13 +110,15 @@ export const cancelScheduledFrame = _hasRequestAnimationFrame
  * Falls back to window scrollable if no ancestor can scroll in the direction.
  * @param {HTMLElement | null} elem - Starting element for ancestor traversal
  * @param {'vertical' | 'horizontal'} direction - Direction to check scrollability
- * @returns {HTMLElement | null} Scrollable ancestor or window scrollable; null if not found
+ * @returns {ScrollableAncestorInfo} Scrollable ancestor info (falls back to window scrollable)
  */
 export function findScrollableAncestor(
   elem: HTMLElement | null,
   direction: 'vertical' | 'horizontal'
-): HTMLElement | null {
-  let current = elem ? elem.parentElement : null;
+): ScrollableAncestorInfo {
+  let current: HTMLElement | null = elem
+    ? ((elem.parentElement: any): HTMLElement | null)
+    : null;
   while (current) {
     let overflowY = '';
     let overflowX = '';
@@ -138,7 +155,7 @@ export function findScrollableAncestor(
       break;
     }
 
-    current = current.parentElement;
+    current = ((current.parentElement: any): HTMLElement | null);
   }
   // Return window scrollable as fallback if no scrollable ancestor found
   return { scrollable: _windowScrollable, isWindowScroll: true };
@@ -159,10 +176,10 @@ export function isElementInWindowViewport(elem: HTMLElement): boolean {
 
   try {
     const elemRect = elem.getBoundingClientRect();
+    const docEl = document.documentElement;
     const viewportHeight =
-      window.innerHeight || document.documentElement.clientHeight;
-    const viewportWidth =
-      window.innerWidth || document.documentElement.clientWidth;
+      window.innerHeight || (docEl ? docEl.clientHeight : 0);
+    const viewportWidth = window.innerWidth || (docEl ? docEl.clientWidth : 0);
 
     return (
       elemRect.top < viewportHeight &&
@@ -196,10 +213,10 @@ export function getElementVisibilityRatio(elem: HTMLElement): number {
 
   try {
     const elemRect = elem.getBoundingClientRect();
+    const docEl = document.documentElement;
     const viewportHeight =
-      window.innerHeight || document.documentElement.clientHeight;
-    const viewportWidth =
-      window.innerWidth || document.documentElement.clientWidth;
+      window.innerHeight || (docEl ? docEl.clientHeight : 0);
+    const viewportWidth = window.innerWidth || (docEl ? docEl.clientWidth : 0);
 
     // Calculate clipped rectangle intersecting with viewport
     const clippedTop = Math.max(0, elemRect.top);
@@ -294,17 +311,33 @@ export function getBoundingRectangles(
   scrollableV: any,
   isWindowScrollV: boolean,
   elemData: ElemData
-) {
+): any {
   const { elem, parentContainer } = elemData;
   let containerRectH, containerRectV;
   let targetHRect, targetVRect;
 
+  if (!elem) {
+    const emptyRect = { top: 0, left: 0, bottom: 0, right: 0 };
+    return {
+      horizontalRects: {
+        containerRect: emptyRect,
+        visibleContainerRect: emptyRect
+      },
+      verticalRects: {
+        containerRect: emptyRect,
+        visibleContainerRect: emptyRect
+      },
+      targetHRect: emptyRect,
+      targetVRect: emptyRect
+    };
+  }
+
   // Check if parent container of the next element is within the scrollable area of either axis.
   const isParentInVScroll =
-    parentContainer &&
+    !!parentContainer &&
     (isWindowScrollV || scrollableV.contains(parentContainer));
   const isParentInHScroll =
-    parentContainer &&
+    !!parentContainer &&
     (isWindowScrollH || scrollableH.contains(parentContainer));
 
   if (_hasGetBoundingClientRect) {
@@ -346,7 +379,7 @@ export function getBoundingRectangles(
       right: (elem.offsetLeft || 0) + (elem.offsetWidth || 0)
     };
     let parentContainerRect = null;
-    if (isParentInVScroll || isParentInHScroll) {
+    if ((isParentInVScroll || isParentInHScroll) && parentContainer) {
       parentContainerRect = {
         top: parentContainer.offsetTop || 0,
         left: parentContainer.offsetLeft || 0,

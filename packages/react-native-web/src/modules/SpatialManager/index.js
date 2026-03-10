@@ -17,7 +17,8 @@ import {
   getNextFocusInViewport
 } from '@bbc/tv-lrud-spatial';
 import { addEventListener } from '../addEventListener';
-import { setupNodeId, type ElemData } from '../../exports/TV/utils';
+import { setupNodeId } from '../../exports/TV/utils';
+import type { ElemData } from './utils';
 import {
   startObserving,
   stopObserving,
@@ -49,9 +50,9 @@ type SpatialNavigationConfigType = {
  * Implements singleton pattern to ensure only one instance exists across the app.
  */
 class SpatialManager {
-  static #_instance = null;
+  static #_instance: SpatialManager | null = null;
   _isSpatialManagerReady: boolean;
-  _spatialNavigationContainer: HTMLElement | null;
+  _spatialNavigationContainer: Document | HTMLElement | null;
   _currentFocus: ElemData;
   // _pendingFocusCount: number;
   _keydownThrottleMs: number;
@@ -188,11 +189,12 @@ class SpatialManager {
    */
   triggerFocus(nextFocus: ElemData, keyCode?: string): boolean {
     if (nextFocus && nextFocus.elem) {
+      const nextElem = nextFocus.elem;
       // let scrollPromise = null;
-      keyCode = keyCode || 'ArrowDown'; // Default to ArrowDown if not provided
+      const finalKeyCode = keyCode || 'ArrowDown'; // Default to ArrowDown if not provided
 
       // scrollPromise = maybeScrollOnFocus(
-      maybeScrollOnFocus(nextFocus, this._currentFocus, keyCode);
+      maybeScrollOnFocus(nextFocus, this._currentFocus, finalKeyCode);
 
       const applyFocus = () => {
         if (!nextFocus.elem) {
@@ -202,14 +204,11 @@ class SpatialManager {
         // Stop observing mutations on current focus
         stopObserving();
 
-        this._currentFocus.elem = nextFocus.elem;
+        this._currentFocus.elem = nextElem;
         this._currentFocus.parentContainer = nextFocus.parentContainer;
         // set id first
-        setupNodeId(nextFocus.elem);
-        updateAncestorsAutoFocus(
-          nextFocus.elem,
-          this._spatialNavigationContainer
-        );
+        setupNodeId(nextElem);
+        updateAncestorsAutoFocus(nextElem, this._spatialNavigationContainer);
 
         // const preventScroll = scrollPromise != null;
         const preventScroll = true;
@@ -220,15 +219,15 @@ class SpatialManager {
         // if (this._pendingFocusCount === 0) {
         // We focus only on the last pending focus to avoid unnecessary intermediate focuses
         // during rapid navigation
-        nextFocus.elem.focus({ preventScroll });
+        nextElem.focus({ preventScroll });
         // }
 
         // Start observing mutations
-        const parentContainer = getParentContainer(nextFocus.elem, true);
+        const parentContainer = getParentContainer(nextElem, true);
         if (parentContainer) {
           startObserving(
             parentContainer,
-            nextFocus.elem,
+            nextElem,
             this.handleCurrentFocusMutations.bind(this)
           );
         }
@@ -250,9 +249,10 @@ class SpatialManager {
    */
   handlePageVisibilityChange(event: any) {
     if (event.type === 'focus') {
-      if (this._currentFocus.elem) {
+      const currentElem = this._currentFocus.elem;
+      if (currentElem) {
         setTimeout(() => {
-          this._currentFocus.elem.focus();
+          currentElem.focus();
         }, 200); // Workaround: Delay as react DOM tries to restore focus and then blurs it!!!
       }
     }
@@ -317,7 +317,7 @@ class SpatialManager {
       if (nextFocus?.elem) {
         // Reset the pending focus count to 1 to indicate we need to focus the nextFocus element after scroll
         // this._pendingFocusCount = 1;
-        this.triggerFocus(nextFocus, null);
+        this.triggerFocus(nextFocus);
       }
     };
 
@@ -409,7 +409,11 @@ class SpatialManager {
    * @param {HTMLElement} node - The target element or container to focus
    * @returns {void}
    */
-  setFocus(node: HTMLElement) {
+  setFocus(node: ?HTMLElement) {
+    if (node == null) {
+      return;
+    }
+
     if (node && node.className.includes('lrud-container')) {
       // We are here if requestTVFocus is called with container as node
       const nextFocus = findDestinationOrAutofocus(
@@ -442,18 +446,11 @@ class SpatialManager {
    * @param {HTMLElement[]} destinations - Array of target elements that can receive focus
    * @returns {void}
    */
-  setDestinations(host: HTMLElement, destinations: HTMLElement[]) {
+  setDestinations(host: HTMLElement, destinations: ?Array<?HTMLElement>) {
     // Get ids from destinations, and if id not set, generate a new one and set all of them into 'data-destinations' attribute in the host element
     if (destinations && Array.isArray(destinations)) {
       const destinationIDs = destinations
         .map((dest) => {
-          if (dest && !(dest instanceof HTMLElement)) {
-            console.error(
-              'Error: Argument appears to not be a ReactComponent',
-              dest
-            );
-            return null;
-          }
           return dest ? setupNodeId(dest) : null;
         })
         .filter((id) => id != null);
@@ -509,10 +506,13 @@ class SpatialManager {
 }
 
 const spatialManager = new SpatialManager();
-export const setupSpatialNavigation =
+export const setupSpatialNavigation: (container?: HTMLElement) => void =
   spatialManager.setupSpatialNavigation.bind(spatialManager);
-export const setFocus = spatialManager.setFocus.bind(spatialManager);
-export const setDestinations =
-  spatialManager.setDestinations.bind(spatialManager);
-export const teardownSpatialNavigation =
+export const setFocus: (node: ?HTMLElement) => void =
+  spatialManager.setFocus.bind(spatialManager);
+export const setDestinations: (
+  host: HTMLElement,
+  destinations: ?Array<?HTMLElement>
+) => void = spatialManager.setDestinations.bind(spatialManager);
+export const teardownSpatialNavigation: () => void =
   spatialManager.teardownSpatialNavigation.bind(spatialManager);

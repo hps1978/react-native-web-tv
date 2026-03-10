@@ -21,6 +21,7 @@ var RecyclerListView, RLVDataProvider, RLVLayoutProvider, RLVGridLayoutProvider;
 function ensureRLVLoaded() {
   if (RecyclerListView) return;
   try {
+    // $FlowFixMe[cannot-resolve-module] Optional dependency loaded only when available.
     var rlv = require('recyclerlistview');
     RecyclerListView = rlv.RecyclerListView;
     RLVDataProvider = rlv.DataProvider;
@@ -328,6 +329,14 @@ class RNWLayoutProvider {
     }
     return meta.type;
   }
+  getLayoutForIndex(index) {
+    var type = this.getLayoutTypeForIndex(index);
+    var dimensions = this.getDimensionForType(type);
+    return {
+      type,
+      dimensions
+    };
+  }
 
   // Return dimensions for a given layout type
   getDimensionForType(type) {
@@ -448,6 +457,8 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
     // Initialize providers lazily - only on client side
     super(props);
     _this = this;
+    this._dataProvider = null;
+    this._layoutProvider = null;
     this._scrollEventLastTick = 0;
     this._hasInteracted = false;
     this._containerRef = null;
@@ -497,7 +508,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
       var _params = params,
         _params$animated = _params.animated,
         animated = _params$animated === void 0 ? true : _params$animated;
-      var size = _this._dataProvider.getSize();
+      var size = _this._dataProvider ? _this._dataProvider.getSize() : 0;
       if (_this._listRef && size > 0) {
         _this._listRef.scrollToIndex(size - 1, animated);
       }
@@ -721,8 +732,6 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
         }
       } catch (e) {}
     };
-    this._dataProvider = null;
-    this._layoutProvider = null;
     this._scrollEventLastTick = 0;
     this._viewabilityHelper = null;
     this._onViewableItemsChanged = null;
@@ -778,7 +787,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
 
     // Initialize viewability helper if needed
     if (onViewableItemsChanged || viewabilityConfigCallbackPairs) {
-      var config = viewabilityConfig || (viewabilityConfigCallbackPairs && viewabilityConfigCallbackPairs[0] ? viewabilityConfigCallbackPairs[0].viewabilityConfig : ViewabilityHelper.DEFAULT_VIEWABILITY_CONFIG);
+      var config = viewabilityConfig || (viewabilityConfigCallbackPairs && viewabilityConfigCallbackPairs[0] ? viewabilityConfigCallbackPairs[0].viewabilityConfig : {});
       this._viewabilityHelper = new ViewabilityHelper(config);
 
       // Store callback for use in scroll handler
@@ -795,8 +804,8 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
     this._measureContainer();
 
     // Measure header/footer after DOM is laid out
-    var hasHeader = this._layoutProvider && this._layoutProvider._hasHeader;
-    var hasFooter = this._layoutProvider && this._layoutProvider._hasFooter;
+    var hasHeader = !!(this._layoutProvider && this._layoutProvider._hasHeader);
+    var hasFooter = !!(this._layoutProvider && this._layoutProvider._hasFooter);
     if (hasHeader || hasFooter) {
       // Use requestAnimationFrame to ensure DOM has been painted and laid out
       requestAnimationFrame(() => {
@@ -818,7 +827,9 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
 
     // Update data provider if data changed
     if (data !== prevProps.data || rowHasChanged !== prevProps.rowHasChanged) {
-      this._dataProvider = this._dataProvider.cloneWithRows(data, rowHasChanged);
+      if (this._dataProvider) {
+        this._dataProvider = this._dataProvider.cloneWithRows(data, rowHasChanged);
+      }
     }
 
     // Update viewability if callbacks changed

@@ -23,6 +23,10 @@ var BackHandler = {
     return {
       remove: emptyFunction
     };
+  },
+  removeEventListener: function removeEventListener(eventName, handler) {
+    console.warn('BackHandler is only supported if window.appConfig.keyMap.Back is configured for Web TV platforms.');
+    return;
   }
 };
 if (Platform.isTV && typeof window !== 'undefined' && (_window = window) != null && (_window = _window.appConfig) != null && (_window = _window.keyMap) != null && _window['Back']) {
