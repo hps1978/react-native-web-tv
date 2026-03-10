@@ -16,7 +16,7 @@ import useMergeRefs from '../../modules/useMergeRefs';
 import View from '../View';
 // import {Commands} from '../View/ViewNativeComponent';
 import { setDestinations as setNavDestinations } from '../../modules/SpatialManager';
-// import tagForComponentOrHandle from './tagForComponentOrHandle';
+import tagForComponentOrHandle from './tagForComponentOrHandle';
 
 import StyleSheet from '../StyleSheet';
 import * as React from 'react';
@@ -55,7 +55,7 @@ type TVFocusGuideViewProps = $ReadOnly<{
 }>;
 
 export type TVFocusGuideViewImperativeMethods = $ReadOnly<{
-  setDestinations: (destinations: (ComponentOrHandleType | number)[]) => void
+  setDestinations: (destinations: ComponentOrHandleType[]) => void
 }>;
 
 const TVFocusGuideView: React.AbstractComponent<
@@ -75,10 +75,14 @@ const TVFocusGuideView: React.AbstractComponent<
   );
 
   const setDestinations = React.useCallback(
-    (destinations: ?(HTMLElement[])) => {
+    (destinations: ?(ComponentOrHandleType[])) => {
       if (Platform.isTV) {
-        if (focusGuideRef.current != null) {
-          setNavDestinations(focusGuideRef.current, destinations);
+        const focusGuideHost = focusGuideRef.current;
+        if (focusGuideHost != null) {
+          const resolvedDestinations = destinations?.map(
+            tagForComponentOrHandle
+          );
+          setNavDestinations(focusGuideHost, resolvedDestinations);
         } else {
           console.warn(
             '[TVFocusGuideView]: Cannot set destinations as focusGuideView ref unavailable for: ',

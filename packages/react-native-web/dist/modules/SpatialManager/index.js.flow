@@ -10,7 +10,8 @@
 
 import { setConfig as setLrudConfig, getNextFocus, getParentContainer, updateAncestorsAutoFocus, findDestinationOrAutofocus, getNextFocusInViewport } from '@bbc/tv-lrud-spatial';
 import { addEventListener } from '../addEventListener';
-import { setupNodeId, type ElemData } from '../../exports/TV/utils';
+import { setupNodeId } from '../../exports/TV/utils';
+import type { ElemData } from './utils';
 import { startObserving, stopObserving, type MutationDetails } from './mutationObserver';
 import { type SpatialScrollConfigType, type getCurrentFocusType, type onScrollRefocusType, maybeScrollOnFocus, setupAppInitiatedScrollHandler, isElementInWindowViewport, setupScrollHandler, scrollToEdge } from './scrollHandler';
 type SpatialNavigationConfigType = {
@@ -31,7 +32,7 @@ type SpatialNavigationConfigType = {
  */
 declare class SpatialManager {
   _isSpatialManagerReady: boolean,
-  _spatialNavigationContainer: HTMLElement | null,
+  _spatialNavigationContainer: Document | HTMLElement | null,
   _currentFocus: ElemData,
   _keydownThrottleMs: number,
   keyDownListener: ((event: any) => void) | null,
@@ -47,12 +48,12 @@ declare class SpatialManager {
   setupAppVisibilityListeners(): any,
   setupAppInitiatedScrollTracking(): any,
   setupSpatialNavigation(container?: HTMLElement): any,
-  setFocus(node: HTMLElement): any,
-  setDestinations(host: HTMLElement, destinations: HTMLElement[]): any,
+  setFocus(node: ?HTMLElement): any,
+  setDestinations(host: HTMLElement, destinations: ?Array<?HTMLElement>): any,
   teardownSpatialNavigation(): any,
 }
 const spatialManager = new SpatialManager();
-export const setupSpatialNavigation = spatialManager.setupSpatialNavigation.bind(spatialManager);
-export const setFocus = spatialManager.setFocus.bind(spatialManager);
-export const setDestinations = spatialManager.setDestinations.bind(spatialManager);
-export const teardownSpatialNavigation = spatialManager.teardownSpatialNavigation.bind(spatialManager);
+export const setupSpatialNavigation: (container?: HTMLElement) => void = spatialManager.setupSpatialNavigation.bind(spatialManager);
+export const setFocus: (node: ?HTMLElement) => void = spatialManager.setFocus.bind(spatialManager);
+export const setDestinations: (host: HTMLElement, destinations: ?Array<?HTMLElement>) => void = spatialManager.setDestinations.bind(spatialManager);
+export const teardownSpatialNavigation: () => void = spatialManager.teardownSpatialNavigation.bind(spatialManager);

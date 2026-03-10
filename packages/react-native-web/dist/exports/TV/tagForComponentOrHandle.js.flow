@@ -10,7 +10,7 @@ import * as React from 'react';
 
 // import { findNodeHandle } from '../findNodeHandle';
 
-export type ComponentOrHandleType = ?(React.ElementRef<React.ElementType> | number);
-export type TagForComponentOrHandleType = (component: ComponentOrHandleType) => ?number;
+export type ComponentOrHandleType = ?React.ElementRef<React.ElementType>;
+export type TagForComponentOrHandleType = (component: ComponentOrHandleType) => ?HTMLElement;
 declare var tagForComponentOrHandle: (component: any) => any;
 export default tagForComponentOrHandle;

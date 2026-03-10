@@ -11,6 +11,7 @@
 type I18nManagerStatus = {
   allowRTL: (allowRTL: boolean) => void,
   forceRTL: (forceRTL: boolean) => void,
+  isRTL: boolean,
   getConstants: () => Constants
 };
 
@@ -25,6 +26,7 @@ const I18nManager: I18nManagerStatus = {
   forceRTL() {
     return;
   },
+  isRTL: false,
   getConstants(): Constants {
     return { isRTL: false };
   }

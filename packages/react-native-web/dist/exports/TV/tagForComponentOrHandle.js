@@ -14,11 +14,14 @@ var tagForComponentOrHandle = component => {
   if (component === null || component === undefined) {
     return undefined;
   }
-  if (component.id) {
-    return component.id;
-  }
-  return undefined;
 
+  // if (component.id) {
+  //   return component.id;
+  // }
+
+  // return undefined;
+
+  return component;
   // return findNodeHandle(component, true); // suppress warning
   /*
   if (typeof component === 'number') {

@@ -1,6 +1,7 @@
 import _objectSpread from "@babel/runtime/helpers/objectSpread2";
 import _classPrivateFieldLooseBase from "@babel/runtime/helpers/classPrivateFieldLooseBase";
 import _classPrivateFieldLooseKey from "@babel/runtime/helpers/classPrivateFieldLooseKey";
+var _SpatialManager;
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
@@ -141,11 +142,12 @@ class SpatialManager {
    */
   triggerFocus(nextFocus, keyCode) {
     if (nextFocus && nextFocus.elem) {
+      var nextElem = nextFocus.elem;
       // let scrollPromise = null;
-      keyCode = keyCode || 'ArrowDown'; // Default to ArrowDown if not provided
+      var finalKeyCode = keyCode || 'ArrowDown'; // Default to ArrowDown if not provided
 
       // scrollPromise = maybeScrollOnFocus(
-      maybeScrollOnFocus(nextFocus, this._currentFocus, keyCode);
+      maybeScrollOnFocus(nextFocus, this._currentFocus, finalKeyCode);
       var applyFocus = () => {
         if (!nextFocus.elem) {
           return;
@@ -153,11 +155,11 @@ class SpatialManager {
 
         // Stop observing mutations on current focus
         stopObserving();
-        this._currentFocus.elem = nextFocus.elem;
+        this._currentFocus.elem = nextElem;
         this._currentFocus.parentContainer = nextFocus.parentContainer;
         // set id first
-        setupNodeId(nextFocus.elem);
-        updateAncestorsAutoFocus(nextFocus.elem, this._spatialNavigationContainer);
+        setupNodeId(nextElem);
+        updateAncestorsAutoFocus(nextElem, this._spatialNavigationContainer);
 
         // const preventScroll = scrollPromise != null;
         var preventScroll = true;
@@ -168,15 +170,15 @@ class SpatialManager {
         // if (this._pendingFocusCount === 0) {
         // We focus only on the last pending focus to avoid unnecessary intermediate focuses
         // during rapid navigation
-        nextFocus.elem.focus({
+        nextElem.focus({
           preventScroll
         });
         // }
 
         // Start observing mutations
-        var parentContainer = getParentContainer(nextFocus.elem, true);
+        var parentContainer = getParentContainer(nextElem, true);
         if (parentContainer) {
-          startObserving(parentContainer, nextFocus.elem, this.handleCurrentFocusMutations.bind(this));
+          startObserving(parentContainer, nextElem, this.handleCurrentFocusMutations.bind(this));
         }
       };
       applyFocus();
@@ -194,9 +196,10 @@ class SpatialManager {
    */
   handlePageVisibilityChange(event) {
     if (event.type === 'focus') {
-      if (this._currentFocus.elem) {
+      var currentElem = this._currentFocus.elem;
+      if (currentElem) {
         setTimeout(() => {
-          this._currentFocus.elem.focus();
+          currentElem.focus();
         }, 200); // Workaround: Delay as react DOM tries to restore focus and then blurs it!!!
       }
     }
@@ -247,7 +250,7 @@ class SpatialManager {
       if (nextFocus != null && nextFocus.elem) {
         // Reset the pending focus count to 1 to indicate we need to focus the nextFocus element after scroll
         // this._pendingFocusCount = 1;
-        this.triggerFocus(nextFocus, null);
+        this.triggerFocus(nextFocus);
       }
     };
 
@@ -313,6 +316,9 @@ class SpatialManager {
    * @returns {void}
    */
   setFocus(node) {
+    if (node == null) {
+      return;
+    }
     if (node && node.className.includes('lrud-container')) {
       // We are here if requestTVFocus is called with container as node
       var nextFocus = findDestinationOrAutofocus(this._currentFocus.elem, 'ArrowDown', node, true);
@@ -347,10 +353,6 @@ class SpatialManager {
     // Get ids from destinations, and if id not set, generate a new one and set all of them into 'data-destinations' attribute in the host element
     if (destinations && Array.isArray(destinations)) {
       var destinationIDs = destinations.map(dest => {
-        if (dest && !(dest instanceof HTMLElement)) {
-          console.error('Error: Argument appears to not be a ReactComponent', dest);
-          return null;
-        }
         return dest ? setupNodeId(dest) : null;
       }).filter(id => id != null);
       if (destinationIDs.length > 0) {
@@ -401,6 +403,7 @@ class SpatialManager {
     this._spatialNavigationContainer = null;
   }
 }
+_SpatialManager = SpatialManager;
 Object.defineProperty(SpatialManager, _instance, {
   writable: true,
   value: null

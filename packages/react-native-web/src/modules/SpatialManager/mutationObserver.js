@@ -20,8 +20,9 @@ export type MutationDetails = {
  * Helps SpatialManager in detecting when focused elements are removed from the DOM.
  */
 class MutationObserverManager {
-  static #_instance = null;
+  static #_instance: MutationObserverManager | null = null;
   static #hasMutationObserver = typeof MutationObserver !== 'undefined';
+  mutationObserverInstance: MutationObserver | null;
 
   /**
    * constructor
@@ -106,9 +107,13 @@ class MutationObserverManager {
 
 // Export static functions for compatibility
 const mutationObserverManager = new MutationObserverManager();
-export const startObserving = mutationObserverManager.startObserving.bind(
-  mutationObserverManager
-);
-export const stopObserving = mutationObserverManager.stopObserving.bind(
-  mutationObserverManager
-);
+export const startObserving: (
+  targetNode: HTMLElement,
+  childNode: HTMLElement,
+  callback: (details: MutationDetails) => void
+) => void = (targetNode, childNode, callback) => {
+  mutationObserverManager.startObserving(targetNode, childNode, callback);
+};
+export const stopObserving: () => void = () => {
+  mutationObserverManager.stopObserving();
+};

@@ -1,6 +1,7 @@
 import _objectSpread from "@babel/runtime/helpers/objectSpread2";
 import _classPrivateFieldLooseBase from "@babel/runtime/helpers/classPrivateFieldLooseBase";
 import _classPrivateFieldLooseKey from "@babel/runtime/helpers/classPrivateFieldLooseKey";
+var _ScrollHandler;
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
@@ -10,7 +11,7 @@ import _classPrivateFieldLooseKey from "@babel/runtime/helpers/classPrivateField
  * 
  * @format
  */
-import { getCurrentTime, scheduleAnimationFrame, cancelScheduledFrame, findScrollableAncestor, isElementInWindowViewport, getElementVisibilityRatio, inferScrollDirection, getBoundingRectangles, getAxisScrollDelta, ElemData } from './utils';
+import { getCurrentTime, scheduleAnimationFrame, cancelScheduledFrame, findScrollableAncestor, isElementInWindowViewport, getElementVisibilityRatio, inferScrollDirection, getBoundingRectangles, getAxisScrollDelta } from './utils';
 var DEFAULT_SPATIAL_SCROLL_CONFIG = {
   leftEdgePaddingPx: 0,
   // only used on the left edge and in horizontal scrolling
@@ -19,7 +20,6 @@ var DEFAULT_SPATIAL_SCROLL_CONFIG = {
   scrollThrottleMs: 80,
   // not used for now
   smoothScrollEnabled: false,
-  scrollAnimationDurationMs: 0,
   scrollAnimationDurationMsVertical: 0,
   scrollAnimationDurationMsHorizontal: 0
 };
@@ -98,10 +98,17 @@ class ScrollHandler {
       var easedT = easingFunction(t);
       var value = startOffset + delta * easedT;
       if (typeof scrollable.scrollTo === 'function') {
-        scrollable.scrollTo({
-          [isVertical ? 'y' : 'x']: value,
-          animated: false
-        });
+        if (isVertical) {
+          scrollable.scrollTo({
+            y: value,
+            animated: false
+          });
+        } else {
+          scrollable.scrollTo({
+            x: value,
+            animated: false
+          });
+        }
       } else if (isVertical) {
         scrollable.scrollTop = value;
       } else {
@@ -410,7 +417,7 @@ class ScrollHandler {
 
         // Call maybeScrollOnFocus to bring currentFocus fully into view
         // This maintains focus continuity while respecting app-initiated scroll
-        this.maybeScrollOnFocus(currentFocus.elem, currentFocus.elem,
+        this.maybeScrollOnFocus(currentFocus, currentFocus,
         // TODO: Handle this better: navigationFrom is currentFocus itself
         scrollDirection);
         return;
@@ -498,13 +505,14 @@ class ScrollHandler {
     return null;
   }
 }
+_ScrollHandler = ScrollHandler;
 Object.defineProperty(ScrollHandler, _instance, {
   writable: true,
   value: null
 });
 var scrollHandler = new ScrollHandler();
-export var setupScrollHandler = scrollHandler.setupScrollHandler.bind(scrollHandler);
-export var setupAppInitiatedScrollHandler = scrollHandler.setupAppInitiatedScrollHandler.bind(scrollHandler);
+export var setupScrollHandler = config => scrollHandler.setupScrollHandler(config);
+export var setupAppInitiatedScrollHandler = (container, getCurrentFocus, onScrollRefocus) => scrollHandler.setupAppInitiatedScrollHandler(container, getCurrentFocus, onScrollRefocus);
 export { isElementInWindowViewport };
-export var scrollToEdge = scrollHandler.scrollToEdge.bind(scrollHandler);
-export var maybeScrollOnFocus = scrollHandler.maybeScrollOnFocus.bind(scrollHandler);
+export var scrollToEdge = (elem, keyCode) => scrollHandler.scrollToEdge(elem, keyCode);
+export var maybeScrollOnFocus = (nextElemData, currentElemData, keyCode) => scrollHandler.maybeScrollOnFocus(nextElemData, currentElemData, keyCode);

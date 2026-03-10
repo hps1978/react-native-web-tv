@@ -182,7 +182,7 @@ const View: React.AbstractComponent<ViewProps, HTMLElement & PlatformMethods> =
     );
 
     supportedProps.ref = setRef;
-    supportedProps.isContainer = props.isContainer === true;
+    supportedProps.isContainer = ((props: any).isContainer: ?boolean) === true;
     return createElement(component, supportedProps, { writingDirection });
   });
 
