@@ -12,13 +12,12 @@ It is intended for TV browser runtimes, while keeping React Native for Web compa
   - `TVEventHandler`
   - `TVEventControl`
   - `useTVEventHandler`
-  - `TVTextScrollView`
   - `TVRemoteEvent` (type)
 - TV focus and directional props available in core components (for example `View`, `Pressable`, `TextInput`):
   - `tvFocusable`, `isTVSelectable`
   - `hasTVPreferredFocus`, `autoFocus`
   - `trapFocusUp`, `trapFocusDown`, `trapFocusLeft`, `trapFocusRight`
-  - `nextFocusUp`, `nextFocusDown`, `nextFocusLeft`, `nextFocusRight`, `nextFocusForward`
+  - `nextFocusUp`, `nextFocusDown`, `nextFocusLeft`, `nextFocusRight`, `nextFocusForward`: To be implemented.
   - `destinations` (for `TVFocusGuideView` and focus guide flows)
 - TV-enabled list/focus integrations in `VirtualizedList` pathways.
 
