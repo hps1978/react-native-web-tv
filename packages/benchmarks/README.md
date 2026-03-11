@@ -2,6 +2,9 @@
 
 Try the [benchmarks app](https://necolas.github.io/react-native-web/benchmarks) online.
 
+This package benchmarks rendering/style performance scenarios and does not
+currently include dedicated TV spatial-navigation benchmarks.
+
 To work on the benchmarks locally from monorepo root:
 
 ```

@@ -1,5 +1,6 @@
 import _classPrivateFieldLooseBase from "@babel/runtime/helpers/classPrivateFieldLooseBase";
 import _classPrivateFieldLooseKey from "@babel/runtime/helpers/classPrivateFieldLooseKey";
+var _MutationObserverManager;
 var _instance = /*#__PURE__*/_classPrivateFieldLooseKey("_instance");
 var _hasMutationObserver = /*#__PURE__*/_classPrivateFieldLooseKey("hasMutationObserver");
 /**
@@ -86,6 +87,7 @@ class MutationObserverManager {
 }
 
 // Export static functions for compatibility
+_MutationObserverManager = MutationObserverManager;
 Object.defineProperty(MutationObserverManager, _instance, {
   writable: true,
   value: null
@@ -95,5 +97,9 @@ Object.defineProperty(MutationObserverManager, _hasMutationObserver, {
   value: typeof MutationObserver !== 'undefined'
 });
 var mutationObserverManager = new MutationObserverManager();
-export var startObserving = mutationObserverManager.startObserving.bind(mutationObserverManager);
-export var stopObserving = mutationObserverManager.stopObserving.bind(mutationObserverManager);
+export var startObserving = (targetNode, childNode, callback) => {
+  mutationObserverManager.startObserving(targetNode, childNode, callback);
+};
+export var stopObserving = () => {
+  mutationObserverManager.stopObserving();
+};

@@ -11,6 +11,14 @@
 // API capability detection (one-time check at module load).
 // TV platforms may lack modern APIs, so we detect and fall back gracefully.
 // This avoids repeated try-catch blocks on every scroll operation.
+export type ElemData = {
+  elem: HTMLElement | null,
+  parentContainer: HTMLElement | null,
+};
+export type ScrollableAncestorInfo = {
+  scrollable: any,
+  isWindowScroll: boolean,
+};
 const _hasPerformance = typeof performance !== 'undefined' && typeof performance.now === 'function';
 const _hasRequestAnimationFrame = typeof requestAnimationFrame === 'function';
 const _hasGetComputedStyle = typeof window !== 'undefined' && typeof window.getComputedStyle === 'function';
@@ -24,8 +32,8 @@ const _windowScrollable = typeof window !== 'undefined' ? {
   },
   clientHeight: window.innerHeight,
   clientWidth: window.innerWidth,
-  scrollHeight: document.documentElement.scrollHeight,
-  scrollWidth: document.documentElement.scrollWidth,
+  scrollHeight: document.documentElement && document.documentElement.scrollHeight || document.body && document.body.scrollHeight || 0,
+  scrollWidth: document.documentElement && document.documentElement.scrollWidth || document.body && document.body.scrollWidth || 0,
   getBoundingClientRect: () => ({
     top: 0,
     left: 0,
@@ -54,11 +62,10 @@ declare export function getCurrentTime(): number;
  * Schedules a callback for the next animation frame.
  * Uses requestAnimationFrame if available, falls back to 30fps setTimeout simulation.
  * @param {() => void} callback - Function to execute on next animation frame
- * @returns {number} Animation frame ID for cancellation with cancelScheduledFrame()
+ * @returns {any} Animation frame ID for cancellation with cancelScheduledFrame()
  */
-declare export function scheduleAnimationFrame(callback: () => void): number;
-export const cancelScheduledFrame = _hasRequestAnimationFrame ? cancelAnimationFrame : clearTimeout;
-
+declare export function scheduleAnimationFrame(callback: () => void): any;
+declare export function cancelScheduledFrame(frameId: any): void;
 /**
  * findScrollableAncestor
  * Traverses DOM ancestors to find a scrollable parent element in specified direction.
@@ -66,9 +73,9 @@ export const cancelScheduledFrame = _hasRequestAnimationFrame ? cancelAnimationF
  * Falls back to window scrollable if no ancestor can scroll in the direction.
  * @param {HTMLElement | null} elem - Starting element for ancestor traversal
  * @param {'vertical' | 'horizontal'} direction - Direction to check scrollability
- * @returns {HTMLElement | null} Scrollable ancestor or window scrollable; null if not found
+ * @returns {ScrollableAncestorInfo} Scrollable ancestor info (falls back to window scrollable)
  */
-declare export function findScrollableAncestor(elem: HTMLElement | null, direction: 'vertical' | 'horizontal'): HTMLElement | null;
+declare export function findScrollableAncestor(elem: HTMLElement | null, direction: 'vertical' | 'horizontal'): ScrollableAncestorInfo;
 /**
  * isElementInWindowViewport
  * Checks if an element intersects with the window viewport.
@@ -111,15 +118,17 @@ declare export function inferScrollDirection(scrollContainer: HTMLElement | null
 /**
  * getBoundingRectangles
  * Resolves element and container viewport-relative bounding rectangles.
+ * Sets up target as parent container if it's within a scrollable to allow scrolling
+ * to bring a parent container into visibilty instead of the element itself.
  * Falls back to offset dimensions if getBoundingClientRect unavailable.
  * @param {any} scrollableH - Horizontal scrollable container
  * @param {boolean} isWindowScrollH - If true, scrollableH is the window
  * @param {any} scrollableV - Vertical scrollable container
  * @param {boolean} isWindowScrollV - If true, scrollableV is the window
  * @param {HTMLElement} elem - The target element to measure
- * @returns {Object} Object with horizontalRects, verticalRects, and targetRect
+ * @returns {Object} Object with horizontalRects, verticalRects, targetHRect, targetVRect
  */
-declare export function getBoundingRectangles(scrollableH: any, isWindowScrollH: boolean, scrollableV: any, isWindowScrollV: boolean, elem: HTMLElement): any;
+declare export function getBoundingRectangles(scrollableH: any, isWindowScrollH: boolean, scrollableV: any, isWindowScrollV: boolean, elemData: ElemData): any;
 /**
  * getAxisScrollDelta
  * Calculates scroll distance needed to keep an element visible within container.

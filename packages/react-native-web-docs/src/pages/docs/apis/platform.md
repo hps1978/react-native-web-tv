@@ -29,6 +29,10 @@ import { Platform } from 'react-native';
 This value will be `"web"` when running in a Web browser.
 {% endcall %}
 
+{% call macro.prop('isTV', 'boolean') %}
+Whether TV navigation mode is enabled. In this fork, this currently resolves to `true` to enable TV-first focus behavior on web runtimes.
+{% endcall %}
+
 ### Static methods
 
 {% call macro.prop('select', '(config) => any') %}

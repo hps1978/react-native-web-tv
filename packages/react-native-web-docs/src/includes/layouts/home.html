@@ -10,13 +10,13 @@ section: page
     <div class="view w-full">
       <div class="view flex-1">
         <h1 class="view flex-row items-center font-bold">
-          <span aria-hidden="true" rclass="block mr-2" style="width:50px;height:50px;margin-left:-6px;color:var(--docs-theme-color)">
-            {{ '/src/includes/assets/svg/logo.svg' | svgContents("w-full") | safe }}
+          <span aria-hidden="true" rclass="block mr-3" style="width:78px;height:56px;margin-left:-6px;color:var(--docs-theme-color)">
+            {{ '/src/includes/assets/svg/logo-tv-web.svg' | svgContents("w-full") | safe }}
           </span>
           <span class="text" style="color:var(--docs-theme-color); font-size:1.75rem;">{{ site.name }}</span>
         </h1>
-        <h2 class="text my-8 text-3xl">React Native Components and APIs on the Web</h2>
-        <p class="text mb-8 text-2xl">{{ site.name }} is an accessible implementation of React Native's Components and APIs that is interoperable with React DOM.</p>
+        <h2 class="text my-8 text-3xl">React Native Web for TV</h2>
+        <p class="text mb-8 text-2xl">React Native Web for TV is an extension of React Native Web with TV-specific components, focus APIs, and remote event handling for browser-based TV platforms.</p>
       </div>
     </div>
     <div class="view flex-row flex-wrap">
@@ -30,11 +30,26 @@ section: page
 
     <div class="markdown mt-6">
       <ul style="font-size:1.25rem;">
+        <li><strong>TV navigation primitives</strong>. Build 10-foot experiences with <code>TVFocusGuideView</code>, spatial focus, and explicit directional navigation props.</li>
+        <li><strong>Remote control events</strong>. Handle TV remote actions with <code>TVEventHandler</code>, <code>TVEventControl</code>, and <code>useTVEventHandler</code>.</li>
+        <li><strong>Web-first TV targets</strong>. Run React Native UI patterns on browser-based TV environments while preserving web interoperability.</li>
         <li><strong>Accessible HTML</strong>. Support different devices and input modes, render semantic tags.</li>
-        <li><strong>High-quality interactions</strong>. Support gestures and multiple input modes (touch, mouse, keyboard).</li>
+        <li><strong>Remote Control interactions</strong>. Support LRUD configurable navigation.</li>
         <li><strong>Reliable styles</strong>. Rely on scoped styles and automatic vendor-prefixing. Support RTL layouts.</li>
         <li><strong>Responsive containers</strong>. Respond to element resize events.</li>
         <li><strong>Incremental adoption</strong>. Interoperates with existing React DOM components. Bundle only what you use.</li>
+      </ul>
+
+      <h2>TV highlights</h2>
+
+      <p>Use the TV docs to migrate patterns from React Native tvOS while targeting web-based TV platforms.</p>
+
+      <ul>
+        <li><a href="{{ '/docs/tv-navigation' | url }}">TV navigation model and focus behavior</a></li>
+        <li><a href="{{ '/docs/tv-focus-guide-view' | url }}">TVFocusGuideView component reference</a></li>
+        <li><a href="{{ '/docs/tv-event-handler' | url }}">TVEventHandler API</a></li>
+        <li><a href="{{ '/docs/tv-event-control' | url }}">TVEventControl API</a></li>
+        <li><a href="{{ '/docs/use-tv-event-handler' | url }}">useTVEventHandler hook</a></li>
       </ul>
 
       <h2>Try it out!</h2>

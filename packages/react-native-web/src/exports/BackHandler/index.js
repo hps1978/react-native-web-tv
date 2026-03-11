@@ -25,7 +25,11 @@ type TBackHandler = {
   addEventListener(
     eventName: BackPressEventName,
     handler: BackPressHandler
-  ): { remove: () => void, ... }
+  ): { remove: () => void, ... },
+  removeEventListener(
+    eventName: BackPressEventName,
+    handler: BackPressHandler
+  ): void
 };
 
 let BackHandler: TBackHandler = {
@@ -40,6 +44,15 @@ let BackHandler: TBackHandler = {
     return {
       remove: emptyFunction
     };
+  },
+  removeEventListener: function (
+    eventName: BackPressEventName,
+    handler: BackPressHandler
+  ): void {
+    console.warn(
+      'BackHandler is only supported if window.appConfig.keyMap.Back is configured for Web TV platforms.'
+    );
+    return;
   }
 };
 

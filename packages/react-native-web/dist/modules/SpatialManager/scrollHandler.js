@@ -1,6 +1,7 @@
 import _objectSpread from "@babel/runtime/helpers/objectSpread2";
 import _classPrivateFieldLooseBase from "@babel/runtime/helpers/classPrivateFieldLooseBase";
 import _classPrivateFieldLooseKey from "@babel/runtime/helpers/classPrivateFieldLooseKey";
+var _ScrollHandler;
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
@@ -19,7 +20,6 @@ var DEFAULT_SPATIAL_SCROLL_CONFIG = {
   scrollThrottleMs: 80,
   // not used for now
   smoothScrollEnabled: false,
-  scrollAnimationDurationMs: 0,
   scrollAnimationDurationMsVertical: 0,
   scrollAnimationDurationMsHorizontal: 0
 };
@@ -98,10 +98,17 @@ class ScrollHandler {
       var easedT = easingFunction(t);
       var value = startOffset + delta * easedT;
       if (typeof scrollable.scrollTo === 'function') {
-        scrollable.scrollTo({
-          [isVertical ? 'y' : 'x']: value,
-          animated: false
-        });
+        if (isVertical) {
+          scrollable.scrollTo({
+            y: value,
+            animated: false
+          });
+        } else {
+          scrollable.scrollTo({
+            x: value,
+            animated: false
+          });
+        }
       } else if (isVertical) {
         scrollable.scrollTop = value;
       } else {
@@ -186,28 +193,30 @@ class ScrollHandler {
    * Implements 'AlignLeft' focus mode: aligns element to focus X position on right navigation.
    * Other directions use default visibility behavior to avoid boundary breaking.
    * Falls back to default behavior at content boundaries when alignment space is insufficient.
-   * @param {HTMLElement | null} elem - The target element to align
+   * @param {ElemData} elemData - The target element data to align
    * @param {string} keyCode - Navigation key code (e.g., 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight')
-   * @param {HTMLElement | null} currentElem - The currently focused element
+   * @param {ElemData | null} currentElemData - The currently focused element data
    * @param {Object} verticalScroll - Vertical scrollable container info {scrollable, isWindowScroll}
    * @param {Object} horizontalScroll - Horizontal scrollable container info {scrollable, isWindowScroll}
    * @returns {null}
    */
-  scrollToAlignLeft(elem, keyCode, currentElem, verticalScroll, horizontalScroll) {
+  scrollToAlignLeft(elemData, keyCode, currentElemData, verticalScroll, horizontalScroll) {
+    var elem = elemData.elem;
     if (!elem || typeof window === 'undefined') return;
     var computeAlignLeftDeltas = () => {
-      var _getBoundingRectangle = getBoundingRectangles(horizontalScroll.scrollable, horizontalScroll.isWindowScroll, verticalScroll.scrollable, verticalScroll.isWindowScroll, elem),
+      var _getBoundingRectangle = getBoundingRectangles(horizontalScroll.scrollable, horizontalScroll.isWindowScroll, verticalScroll.scrollable, verticalScroll.isWindowScroll, elemData),
         verticalRects = _getBoundingRectangle.verticalRects,
         horizontalRects = _getBoundingRectangle.horizontalRects,
-        targetRect = _getBoundingRectangle.targetRect;
+        targetHRect = _getBoundingRectangle.targetHRect,
+        targetVRect = _getBoundingRectangle.targetVRect;
 
       // Vertical nav computation
       if (keyCode === 'ArrowUp' || keyCode === 'ArrowDown') {
         // Make sure the target is fully visible
-        var vertical = getAxisScrollDelta(targetRect, verticalRects.visibleContainerRect, 'vertical', this._scrollConfig.topEdgePaddingPx, this._scrollConfig.leftEdgePaddingPx);
+        var vertical = getAxisScrollDelta(targetVRect, verticalRects.visibleContainerRect, 'vertical', this._scrollConfig.topEdgePaddingPx, this._scrollConfig.leftEdgePaddingPx);
 
         // We may still need horizontal scroll to maintain target within the visible area
-        var horizontal = getAxisScrollDelta(targetRect, horizontalRects.visibleContainerRect, 'horizontal', this._scrollConfig.topEdgePaddingPx, this._scrollConfig.leftEdgePaddingPx);
+        var horizontal = getAxisScrollDelta(targetHRect, horizontalRects.visibleContainerRect, 'horizontal', this._scrollConfig.topEdgePaddingPx, this._scrollConfig.leftEdgePaddingPx);
         return {
           horizontalDelta: horizontal.scrollDelta,
           verticalDelta: vertical.scrollDelta,
@@ -225,7 +234,7 @@ class ScrollHandler {
         //    - there is scroll required to bring the target into the visible area
         var horizontalDelta = 0;
         var needsHorizontalScroll = false;
-        var desiredDelta = targetRect.left - horizontalRects.visibleContainerRect.left - this._scrollConfig.leftEdgePaddingPx;
+        var desiredDelta = targetHRect.left - horizontalRects.visibleContainerRect.left - this._scrollConfig.leftEdgePaddingPx;
         var scrollable = horizontalScroll.scrollable;
         var currentScrollPosition = scrollable.scrollLeft;
         var maxScroll = Math.max(0, scrollable.scrollWidth - scrollable.clientWidth);
@@ -237,13 +246,13 @@ class ScrollHandler {
           needsHorizontalScroll = desiredDelta !== 0;
         } else {
           // Not enough space: get defaults which bring the target into the visible area.
-          var _horizontal = getAxisScrollDelta(targetRect, horizontalRects.visibleContainerRect, 'horizontal', this._scrollConfig.topEdgePaddingPx, this._scrollConfig.leftEdgePaddingPx);
+          var _horizontal = getAxisScrollDelta(targetHRect, horizontalRects.visibleContainerRect, 'horizontal', this._scrollConfig.topEdgePaddingPx, this._scrollConfig.leftEdgePaddingPx);
           horizontalDelta = _horizontal.scrollDelta;
           needsHorizontalScroll = _horizontal.needsScroll;
         }
 
         // We may still need vertical scroll to maintain target within the visible area
-        var _vertical = getAxisScrollDelta(targetRect, verticalRects.visibleContainerRect, 'vertical', this._scrollConfig.topEdgePaddingPx, this._scrollConfig.leftEdgePaddingPx);
+        var _vertical = getAxisScrollDelta(targetVRect, verticalRects.visibleContainerRect, 'vertical', this._scrollConfig.topEdgePaddingPx, this._scrollConfig.leftEdgePaddingPx);
         return {
           horizontalDelta,
           verticalDelta: _vertical.scrollDelta,
@@ -255,10 +264,10 @@ class ScrollHandler {
       } else {
         // On left navigation:
         // - default to keeping the target fully visible (including leftEdgePaddingPx)
-        var _horizontal2 = getAxisScrollDelta(targetRect, horizontalRects.visibleContainerRect, 'horizontal', this._scrollConfig.topEdgePaddingPx, this._scrollConfig.leftEdgePaddingPx);
+        var _horizontal2 = getAxisScrollDelta(targetHRect, horizontalRects.visibleContainerRect, 'horizontal', this._scrollConfig.topEdgePaddingPx, this._scrollConfig.leftEdgePaddingPx);
 
         // We may still need vertical scroll to maintain target within the visible area
-        var _vertical2 = getAxisScrollDelta(targetRect, verticalRects.visibleContainerRect, 'vertical', this._scrollConfig.topEdgePaddingPx, this._scrollConfig.leftEdgePaddingPx);
+        var _vertical2 = getAxisScrollDelta(targetVRect, verticalRects.visibleContainerRect, 'vertical', this._scrollConfig.topEdgePaddingPx, this._scrollConfig.leftEdgePaddingPx);
         return {
           horizontalDelta: _horizontal2.scrollDelta,
           verticalDelta: _vertical2.scrollDelta,
@@ -306,25 +315,27 @@ class ScrollHandler {
    * Main scroll-on-focus entry point dispatching to AlignLeft or default behavior.
    * Ensures focused element is visible in viewport by scrolling container as needed.
    * Handles both single and multi-axis scrolling with proper sequencing.
-   * @param {HTMLElement | null} nextElem - The element about to receive focus
-   * @param {HTMLElement | null} currentElem - The currently focused element
+   * @param {ElemData} nextElemData - The element about to receive focus
+   * @param {ElemData | null} currentElemData - The currently focused element
    * @param {string} keyCode - Navigation key code that triggered focus change
    * @returns {null}
    */
-  maybeScrollOnFocus(nextElem, currentElem, keyCode) {
-    if (!nextElem || typeof window === 'undefined') return null;
-    var verticalScroll = findScrollableAncestor(nextElem, 'vertical');
-    var horizontalScroll = findScrollableAncestor(nextElem, 'horizontal');
+  maybeScrollOnFocus(nextElemData, currentElemData, keyCode) {
+    var elem = nextElemData.elem;
+    if (!elem || typeof window === 'undefined') return null;
+    var verticalScroll = findScrollableAncestor(elem, 'vertical');
+    var horizontalScroll = findScrollableAncestor(elem, 'horizontal');
     if (this._focusMode === 'AlignLeft') {
-      return this.scrollToAlignLeft(nextElem, keyCode, currentElem, verticalScroll, horizontalScroll);
+      return this.scrollToAlignLeft(nextElemData, keyCode, currentElemData, verticalScroll, horizontalScroll);
     }
     var computeDeltas = () => {
-      var _getBoundingRectangle2 = getBoundingRectangles(horizontalScroll.scrollable, horizontalScroll.isWindowScroll, verticalScroll.scrollable, verticalScroll.isWindowScroll, nextElem),
+      var _getBoundingRectangle2 = getBoundingRectangles(horizontalScroll.scrollable, horizontalScroll.isWindowScroll, verticalScroll.scrollable, verticalScroll.isWindowScroll, nextElemData),
         verticalRects = _getBoundingRectangle2.verticalRects,
         horizontalRects = _getBoundingRectangle2.horizontalRects,
-        targetRect = _getBoundingRectangle2.targetRect;
-      var vertical = getAxisScrollDelta(targetRect, verticalRects.visibleContainerRect, 'vertical', this._scrollConfig.topEdgePaddingPx, this._scrollConfig.leftEdgePaddingPx);
-      var horizontal = getAxisScrollDelta(targetRect, horizontalRects.visibleContainerRect, 'horizontal', this._scrollConfig.topEdgePaddingPx, this._scrollConfig.leftEdgePaddingPx);
+        targetHRect = _getBoundingRectangle2.targetHRect,
+        targetVRect = _getBoundingRectangle2.targetVRect;
+      var vertical = getAxisScrollDelta(targetVRect, verticalRects.visibleContainerRect, 'vertical', this._scrollConfig.topEdgePaddingPx, this._scrollConfig.leftEdgePaddingPx);
+      var horizontal = getAxisScrollDelta(targetHRect, horizontalRects.visibleContainerRect, 'horizontal', this._scrollConfig.topEdgePaddingPx, this._scrollConfig.leftEdgePaddingPx);
       return {
         vertical,
         horizontal,
@@ -406,7 +417,7 @@ class ScrollHandler {
 
         // Call maybeScrollOnFocus to bring currentFocus fully into view
         // This maintains focus continuity while respecting app-initiated scroll
-        this.maybeScrollOnFocus(currentFocus.elem, currentFocus.elem,
+        this.maybeScrollOnFocus(currentFocus, currentFocus,
         // TODO: Handle this better: navigationFrom is currentFocus itself
         scrollDirection);
         return;
@@ -464,13 +475,44 @@ class ScrollHandler {
       }
     };
   }
+
+  /**
+   * scrollToEdge
+   * Scrolled to the edge of an elements scrollable, if available
+   * @param {HTMLElement | null} elem Referece element
+   * @param {string} keyCode Key code to derive direction from
+   * @return {null}
+   */
+  scrollToEdge(elem, keyCode) {
+    if (!elem) {
+      return null;
+    }
+    var isVertical = keyCode === 'ArrowUp' || keyCode === 'ArrowDown';
+    var scrollInfo = findScrollableAncestor(elem, isVertical ? 'vertical' : 'horizontal');
+    if (!scrollInfo || !scrollInfo.scrollable) {
+      return null;
+    }
+    var scrollable = scrollInfo.scrollable,
+      isWindowScroll = scrollInfo.isWindowScroll;
+    var currentOffset = isVertical ? scrollable.scrollTop : scrollable.scrollLeft;
+    var maxOffset = isVertical ? Math.max(0, scrollable.scrollHeight - scrollable.clientHeight) : Math.max(0, scrollable.scrollWidth - scrollable.clientWidth);
+    var targetOffset = keyCode === 'ArrowUp' || keyCode === 'ArrowLeft' ? 0 : maxOffset;
+    var delta = targetOffset - currentOffset;
+    if (delta === 0) {
+      return null;
+    }
+    this.scrollAxis(scrollable, isWindowScroll, isVertical, delta, true);
+    return null;
+  }
 }
+_ScrollHandler = ScrollHandler;
 Object.defineProperty(ScrollHandler, _instance, {
   writable: true,
   value: null
 });
 var scrollHandler = new ScrollHandler();
-export var setupScrollHandler = scrollHandler.setupScrollHandler.bind(scrollHandler);
-export var setupAppInitiatedScrollHandler = scrollHandler.setupAppInitiatedScrollHandler.bind(scrollHandler);
+export var setupScrollHandler = config => scrollHandler.setupScrollHandler(config);
+export var setupAppInitiatedScrollHandler = (container, getCurrentFocus, onScrollRefocus) => scrollHandler.setupAppInitiatedScrollHandler(container, getCurrentFocus, onScrollRefocus);
 export { isElementInWindowViewport };
-export var maybeScrollOnFocus = scrollHandler.maybeScrollOnFocus.bind(scrollHandler);
+export var scrollToEdge = (elem, keyCode) => scrollHandler.scrollToEdge(elem, keyCode);
+export var maybeScrollOnFocus = (nextElemData, currentElemData, keyCode) => scrollHandler.maybeScrollOnFocus(nextElemData, currentElemData, keyCode);

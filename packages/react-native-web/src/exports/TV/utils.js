@@ -10,7 +10,7 @@
 
 const ID_LIMIT = 100000; // big enough to wrap around!
 let nextId = 0;
-function setupNodeId(node: HTMLElement) {
+function setupNodeId(node: HTMLElement): string {
   let id = node.id?.length > 0 ? node.id : null;
   if (!id) {
     // Use a simple incremented number as id

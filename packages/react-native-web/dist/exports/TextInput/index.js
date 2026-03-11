@@ -22,6 +22,7 @@ import useResponderEvents from '../../modules/useResponderEvents';
 import { getLocaleDirection, useLocaleContext } from '../../modules/useLocale';
 import StyleSheet from '../StyleSheet';
 import TextInputState from '../../modules/TextInputState';
+import { setFocus } from '../../modules/SpatialManager';
 //import { warnOnce } from '../../modules/warnOnce';
 
 /**
@@ -53,7 +54,8 @@ var forwardPropsList = Object.assign({}, forwardedProps.defaultProps, forwardedP
   autoCapitalize: true,
   autoComplete: true,
   autoCorrect: true,
-  autoFocus: true,
+  autoFocus: false,
+  // Handling this directly on mount along with hasTVPreferredFocus
   defaultValue: true,
   disabled: true,
   lang: true,
@@ -83,13 +85,17 @@ var TextInput = /*#__PURE__*/React.forwardRef((props, forwardedRef) => {
     autoCompleteType = props.autoCompleteType,
     _props$autoCorrect = props.autoCorrect,
     autoCorrect = _props$autoCorrect === void 0 ? true : _props$autoCorrect,
+    autoFocus = props.autoFocus,
     blurOnSubmit = props.blurOnSubmit,
     caretHidden = props.caretHidden,
     clearTextOnFocus = props.clearTextOnFocus,
     dir = props.dir,
     editable = props.editable,
     enterKeyHint = props.enterKeyHint,
+    focusable = props.focusable,
+    hasTVPreferredFocus = props.hasTVPreferredFocus,
     inputMode = props.inputMode,
+    isTVSelectable = props.isTVSelectable,
     keyboardType = props.keyboardType,
     _props$multiline = props.multiline,
     multiline = _props$multiline === void 0 ? false : _props$multiline,
@@ -182,6 +188,18 @@ var TextInput = /*#__PURE__*/React.forwardRef((props, forwardedRef) => {
   var hostRef = React.useRef(null);
   var prevSelection = React.useRef(null);
   var prevSecureTextEntry = React.useRef(false);
+
+  // On mount trigger focus event
+  React.useEffect(() => {
+    var _hostRef$current;
+    // The only possible way to (accurately) get this is from the tabindex
+    // attribute, as the current code in CreateDOMProps uses the other props
+    // to finally derive whether an element can be focussed or not.
+    var isFocusable = ((_hostRef$current = hostRef.current) == null ? void 0 : _hostRef$current.getAttribute('tabindex')) === '0';
+    if ((hasTVPreferredFocus || autoFocus) && isFocusable) {
+      setFocus(hostRef.current);
+    }
+  }, [hasTVPreferredFocus, autoFocus]);
   React.useEffect(() => {
     if (hostRef.current && prevSelection.current) {
       setSelection(hostRef.current, prevSelection.current);
@@ -383,6 +401,7 @@ var TextInput = /*#__PURE__*/React.forwardRef((props, forwardedRef) => {
   supportedProps.virtualkeyboardpolicy = showSoftInputOnFocus === false ? 'manual' : 'auto';
   var platformMethodsRef = usePlatformMethods(supportedProps);
   var setRef = useMergeRefs(hostRef, platformMethodsRef, imperativeRef, forwardedRef);
+  supportedProps.tabIndex = focusable !== false && isTVSelectable !== false ? 0 : -1;
   supportedProps.ref = setRef;
   var langDirection = props.lang != null ? getLocaleDirection(props.lang) : null;
   var componentDirection = props.dir || langDirection;

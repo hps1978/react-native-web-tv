@@ -92,6 +92,18 @@ Specifies what action label (or icon) to present for the enter key on virtual ke
 Equivalent to [HTMLElement.id](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/id).
 {% endcall %}
 
+{% call macro.prop('focusable', '?boolean') %}
+Controls whether the input participates in keyboard/remote focus navigation.
+{% endcall %}
+
+{% call macro.prop('isTVSelectable', '?boolean') %}
+TV compatibility prop that affects remote focusability. When set to `false`, the input is excluded from directional navigation.
+{% endcall %}
+
+{% call macro.prop('hasTVPreferredFocus', '?boolean') %}
+If `true`, requests focus on mount in TV mode when the input is focusable.
+{% endcall %}
+
 {% call macro.prop('inputMode', '?string') %}
 Hints at the type of data that might be entered by the user while editing the element or its contents. Equivalent to [HTMLElement.inputMode](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/inputmode). Safari iOS requires an ancestral `<form action>` element to display the search keyboard. (Not available when multiline is true.)
 {% endcall %}

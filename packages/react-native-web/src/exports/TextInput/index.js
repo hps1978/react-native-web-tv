@@ -25,6 +25,7 @@ import useResponderEvents from '../../modules/useResponderEvents';
 import { getLocaleDirection, useLocaleContext } from '../../modules/useLocale';
 import StyleSheet from '../StyleSheet';
 import TextInputState from '../../modules/TextInputState';
+import { setFocus } from '../../modules/SpatialManager';
 //import { warnOnce } from '../../modules/warnOnce';
 
 /**
@@ -64,7 +65,7 @@ const forwardPropsList = Object.assign(
     autoCapitalize: true,
     autoComplete: true,
     autoCorrect: true,
-    autoFocus: true,
+    autoFocus: false, // Handling this directly on mount along with hasTVPreferredFocus
     defaultValue: true,
     disabled: true,
     lang: true,
@@ -100,13 +101,17 @@ const TextInput: React.AbstractComponent<
     autoComplete,
     autoCompleteType,
     autoCorrect = true,
+    autoFocus,
     blurOnSubmit,
     caretHidden,
     clearTextOnFocus,
     dir,
     editable,
     enterKeyHint,
+    focusable,
+    hasTVPreferredFocus,
     inputMode,
+    isTVSelectable,
     keyboardType,
     multiline = false,
     numberOfLines,
@@ -198,6 +203,18 @@ const TextInput: React.AbstractComponent<
   const hostRef = React.useRef(null);
   const prevSelection = React.useRef(null);
   const prevSecureTextEntry = React.useRef(false);
+
+  // On mount trigger focus event
+  React.useEffect(() => {
+    // The only possible way to (accurately) get this is from the tabindex
+    // attribute, as the current code in CreateDOMProps uses the other props
+    // to finally derive whether an element can be focussed or not.
+    const isFocusable = hostRef.current?.getAttribute('tabindex') === '0';
+
+    if ((hasTVPreferredFocus || autoFocus) && isFocusable) {
+      setFocus(hostRef.current);
+    }
+  }, [hasTVPreferredFocus, autoFocus]);
 
   React.useEffect(() => {
     if (hostRef.current && prevSelection.current) {
@@ -442,6 +459,8 @@ const TextInput: React.AbstractComponent<
     forwardedRef
   );
 
+  supportedProps.tabIndex =
+    focusable !== false && isTVSelectable !== false ? 0 : -1;
   supportedProps.ref = setRef;
 
   const langDirection =

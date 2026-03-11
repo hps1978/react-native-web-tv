@@ -10,28 +10,24 @@ import * as React from 'react';
 
 // import { findNodeHandle } from '../findNodeHandle';
 
-export type ComponentOrHandleType = ?(
-  | React.ElementRef<React.ElementType>
-  | number
-);
+export type ComponentOrHandleType = ?React.ElementRef<React.ElementType>;
 
 export type TagForComponentOrHandleType = (
   component: ComponentOrHandleType
-) => ?number;
+) => ?HTMLElement;
 
 const tagForComponentOrHandle: TagForComponentOrHandleType = (component) => {
   if (component === null || component === undefined) {
     return undefined;
   }
 
-  // For web, we'll always expect a ref to a DOM element
-  // we'll return the element tilself as it is after a check
-  if (component instanceof HTMLElement) {
-    return component;
-  }
+  // if (component.id) {
+  //   return component.id;
+  // }
 
-  return undefined;
+  // return undefined;
 
+  return ((component: any): ?HTMLElement);
   // return findNodeHandle(component, true); // suppress warning
   /*
   if (typeof component === 'number') {

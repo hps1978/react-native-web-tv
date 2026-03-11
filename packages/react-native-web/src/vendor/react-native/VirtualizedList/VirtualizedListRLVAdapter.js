@@ -23,6 +23,7 @@ function ensureRLVLoaded() {
   if (RecyclerListView) return;
   
   try {
+    // $FlowFixMe[cannot-resolve-module] Optional dependency loaded only when available.
     const rlv = require('recyclerlistview');
     RecyclerListView = rlv.RecyclerListView;
     RLVDataProvider = rlv.DataProvider;
@@ -46,7 +47,7 @@ const DEFAULT_WINDOW_SIZE = 21;
 /**
  * Normalizes RecyclerListView scroll events to React Native Web format
  */
-function normalizeScrollEvent(offset, contentSize, visibleSize) {
+function normalizeScrollEvent(offset: any, contentSize: any, visibleSize: any): any {
   return {
     nativeEvent: {
       contentOffset: {
@@ -255,6 +256,8 @@ class RNWLayoutProvider {
   _dimensionCallback: any;
   _isGridMode: boolean;
   _numColumns: number;
+  _headerHeight: number;
+  _footerHeight: number;
 
   constructor(
     getItemLayout,
@@ -385,6 +388,15 @@ class RNWLayoutProvider {
     return meta.type;
   }
 
+  getLayoutForIndex(index) {
+    const type = this.getLayoutTypeForIndex(index);
+    const dimensions = this.getDimensionForType(type);
+    return {
+      type,
+      dimensions
+    };
+  }
+
   // Return dimensions for a given layout type
   getDimensionForType(type) {
     if (this._isLayoutProviderFormat) {
@@ -513,8 +525,8 @@ class RNWLayoutProvider {
  */
 class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
   _listRef: any;
-  _dataProvider: RNWDataProvider;
-  _layoutProvider: RNWLayoutProvider;
+  _dataProvider: RNWDataProvider = (null: any);
+  _layoutProvider: RNWLayoutProvider = (null: any);
   _scrollEventLastTick: number = 0;
   _viewabilityHelper: any;
   _onViewableItemsChanged: any;
@@ -534,15 +546,12 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
   _headerMeasured: boolean = false;
   _footerMeasured: boolean = false;
   _isGridMode: boolean = false;
+  state: State = {};
   
-  state = {};
-
   constructor(props: Props) {
     super(props);
 
     // Initialize providers lazily - only on client side
-    this._dataProvider = null;
-    this._layoutProvider = null;
     this._scrollEventLastTick = 0;
     this._viewabilityHelper = null;
     this._onViewableItemsChanged = null;
@@ -616,7 +625,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
         viewabilityConfig ||
         (viewabilityConfigCallbackPairs && viewabilityConfigCallbackPairs[0]
           ? viewabilityConfigCallbackPairs[0].viewabilityConfig
-          : ViewabilityHelper.DEFAULT_VIEWABILITY_CONFIG);
+          : {});
 
       this._viewabilityHelper = new ViewabilityHelper(config);
       
@@ -635,8 +644,8 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
     this._measureContainer();
     
     // Measure header/footer after DOM is laid out
-    const hasHeader = this._layoutProvider && this._layoutProvider._hasHeader;
-    const hasFooter = this._layoutProvider && this._layoutProvider._hasFooter;
+    const hasHeader = !!(this._layoutProvider && this._layoutProvider._hasHeader);
+    const hasFooter = !!(this._layoutProvider && this._layoutProvider._hasFooter);
     
     if (hasHeader || hasFooter) {
       // Use requestAnimationFrame to ensure DOM has been painted and laid out
@@ -661,10 +670,12 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
 
     // Update data provider if data changed
     if (data !== prevProps.data || rowHasChanged !== prevProps.rowHasChanged) {
-      this._dataProvider = this._dataProvider.cloneWithRows(
-        data,
-        rowHasChanged,
-      );
+      if (this._dataProvider) {
+        this._dataProvider = this._dataProvider.cloneWithRows(
+          data,
+          rowHasChanged,
+        );
+      }
     }
 
     // Update viewability if callbacks changed
@@ -685,7 +696,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
   }
 
   // Public ref methods
-  scrollToIndex = (params: any) => {
+  scrollToIndex: (params: any) => void = (params: any) => {
     const { animated, index, viewOffset = 0, viewPosition = 0 } = params || {};
 
     if (this._listRef && index != null) {
@@ -698,7 +709,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
     }
   };
 
-  scrollToOffset = (params: any) => {
+  scrollToOffset: (params: any) => void = (params: any) => {
     const { animated, offset } = params || {};
 
     if (this._listRef && offset != null) {
@@ -710,32 +721,32 @@ class VirtualizedListRLVAdapter extends React.PureComponent<Props, State> {
     }
   };
 
-  scrollToEnd = (params: any = {}) => {
+  scrollToEnd: (params?: any) => void = (params: any = {}) => {
     const { animated = true } = params;
-    const size = this._dataProvider.getSize();
+    const size = this._dataProvider ? this._dataProvider.getSize() : 0;
 
     if (this._listRef && size > 0) {
       this._listRef.scrollToIndex(size - 1, animated);
     }
   };
 
-  recordInteraction = () => {
+  recordInteraction: () => void = () => {
     this._hasInteracted = true;
   };
 
-  flashScrollIndicators = () => {
+  flashScrollIndicators: () => void = () => {
     // No-op on web
   };
 
-  getScrollResponder = () => {
+  getScrollResponder: () => any = () => {
     return this._listRef;
   };
 
-  getNativeScrollRef = () => {
+  getNativeScrollRef: () => any = () => {
     return this._listRef;
   };
 
-  getScrollableNode = () => {
+  getScrollableNode: () => any = () => {
     if (this._listRef && this._listRef.getScrollableNode) {
       return this._listRef.getScrollableNode();
     }

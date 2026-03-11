@@ -1170,6 +1170,9 @@ class VirtualizedList extends StateSafePureComponent {
       }
     }, Platform.isTV ? /*#__PURE__*/React.createElement(TVFocusGuideView, _extends({
       style: this.props.style
+      // $FlowFixMe[incompatible-type] Internal sentinel used to identify VirtualizedList TVFocusGuideView
+      ,
+      tabIndex: -999 // To uniquely identify this as coming from FlatList
     }, trapFocusHorizontal, {
       trapFocusUp: !horizontalOrDefault(this.props.horizontal) && this.state.cellsAroundViewport.first > 0,
       trapFocusDown: !horizontalOrDefault(this.props.horizontal) && this._hasMore

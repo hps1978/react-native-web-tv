@@ -1,7 +1,7 @@
 const packageJson = require('../../package.json');
 
 module.exports = {
-  name: 'React Native for Web',
+  name: 'React Native Web for TV',
   description: '',
   footer: 'Copyright © Nicolas Gallagher and Meta Platforms, Inc.',
   url: 'https://necolas.github.io/react-native-web',

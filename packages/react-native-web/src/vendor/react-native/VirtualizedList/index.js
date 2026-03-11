@@ -1135,6 +1135,8 @@ class VirtualizedList extends StateSafePureComponent<Props, State> {
         {Platform.isTV ? (
           <TVFocusGuideView
             style={this.props.style}
+            // $FlowFixMe[incompatible-type] Internal sentinel used to identify VirtualizedList TVFocusGuideView
+            tabIndex={-999} // To uniquely identify this as coming from FlatList
             {...trapFocusHorizontal}
             trapFocusUp={
               !horizontalOrDefault(this.props.horizontal) &&

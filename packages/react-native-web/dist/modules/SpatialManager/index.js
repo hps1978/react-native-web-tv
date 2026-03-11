@@ -1,6 +1,7 @@
 import _objectSpread from "@babel/runtime/helpers/objectSpread2";
 import _classPrivateFieldLooseBase from "@babel/runtime/helpers/classPrivateFieldLooseBase";
 import _classPrivateFieldLooseKey from "@babel/runtime/helpers/classPrivateFieldLooseKey";
+var _SpatialManager;
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
@@ -11,11 +12,11 @@ import _classPrivateFieldLooseKey from "@babel/runtime/helpers/classPrivateField
  * @format
  */
 
-import { setConfig as setLrudConfig, getNextFocus, getFocusableParentContainer, getParentContainer, updateAncestorsAutoFocus, findDestinationOrAutofocus, getNextFocusInViewport } from '@bbc/tv-lrud-spatial';
+import { setConfig as setLrudConfig, getNextFocus, getParentContainer, updateAncestorsAutoFocus, findDestinationOrAutofocus, getNextFocusInViewport } from '@bbc/tv-lrud-spatial';
 import { addEventListener } from '../addEventListener';
 import { setupNodeId } from '../../exports/TV/utils';
 import { startObserving, stopObserving } from './mutationObserver';
-import { maybeScrollOnFocus, setupAppInitiatedScrollHandler, isElementInWindowViewport, setupScrollHandler } from './scrollHandler';
+import { maybeScrollOnFocus, setupAppInitiatedScrollHandler, isElementInWindowViewport, setupScrollHandler, scrollToEdge } from './scrollHandler';
 var _instance = /*#__PURE__*/_classPrivateFieldLooseKey("_instance");
 /**
  * SpatialManager
@@ -23,6 +24,8 @@ var _instance = /*#__PURE__*/_classPrivateFieldLooseKey("_instance");
  * Implements singleton pattern to ensure only one instance exists across the app.
  */
 class SpatialManager {
+  // _pendingFocusCount: number;
+
   /**
    * constructor
    * Initializes or returns the singleton instance of SpatialManager.
@@ -36,9 +39,9 @@ class SpatialManager {
     this._spatialNavigationContainer = null;
     this._currentFocus = {
       elem: null,
-      parentHasAutofocus: false
+      parentContainer: null
     };
-    this._pendingFocusCount = 0;
+    // this._pendingFocusCount = 0;
     this._keydownThrottleMs = 0;
     this.keyDownListener = null;
     this.appInitiatedScrollCleanup = null;
@@ -118,14 +121,14 @@ class SpatialManager {
     // Current focused element (or it's ancestor) is removed from the DOM, we need to find a new focus
     this._currentFocus = {
       elem: null,
-      parentHasAutofocus: false
+      parentContainer: null
     };
     var nextFocus = getNextFocus(null,
     // No current focus since it's removed
     'ArrowDown',
     // No directional input, just find the next best focus
     targetNode);
-    this._pendingFocusCount = 1;
+    // this._pendingFocusCount = 1;
     this.triggerFocus(nextFocus);
   }
 
@@ -133,16 +136,18 @@ class SpatialManager {
    * triggerFocus
    * Applies focus to the specified element after handling scroll positioning.
    * Updates spatial manager state and sets up mutation observation on the new focus target.
-   * @param {FocusState} nextFocus - Object containing elem (target element) and parentHasAutofocus flag
+   * @param {ElemData} nextFocus - Object containing elem (target element) and it's LRUD parentContainer
    * @param {string} [keyCode] - Optional key code that triggered the focus change (e.g., 'ArrowUp')
    * @returns {boolean} True if focus was successfully applied, false if nextFocus or elem is invalid
    */
   triggerFocus(nextFocus, keyCode) {
     if (nextFocus && nextFocus.elem) {
+      var nextElem = nextFocus.elem;
       // let scrollPromise = null;
+      var finalKeyCode = keyCode || 'ArrowDown'; // Default to ArrowDown if not provided
 
       // scrollPromise = maybeScrollOnFocus(
-      maybeScrollOnFocus(nextFocus.elem, this._currentFocus.elem, keyCode);
+      maybeScrollOnFocus(nextFocus, this._currentFocus, finalKeyCode);
       var applyFocus = () => {
         if (!nextFocus.elem) {
           return;
@@ -150,29 +155,30 @@ class SpatialManager {
 
         // Stop observing mutations on current focus
         stopObserving();
-        this._currentFocus.elem = nextFocus.elem;
-        this._currentFocus.parentHasAutofocus = nextFocus.parentHasAutofocus;
+        this._currentFocus.elem = nextElem;
+        this._currentFocus.parentContainer = nextFocus.parentContainer;
         // set id first
-        setupNodeId(nextFocus.elem);
-        updateAncestorsAutoFocus(nextFocus.elem, this._spatialNavigationContainer);
+        setupNodeId(nextElem);
+        updateAncestorsAutoFocus(nextElem, this._spatialNavigationContainer);
 
         // const preventScroll = scrollPromise != null;
         var preventScroll = true;
-        if (this._pendingFocusCount > 0) {
-          this._pendingFocusCount--;
-        }
-        if (this._pendingFocusCount === 0) {
-          // We focus only on the last pending focus to avoid unnecessary intermediate focuses
-          // during rapid navigation
-          nextFocus.elem.focus({
-            preventScroll
-          });
-        }
+
+        // if (this._pendingFocusCount > 0) {
+        //   this._pendingFocusCount--;
+        // }
+        // if (this._pendingFocusCount === 0) {
+        // We focus only on the last pending focus to avoid unnecessary intermediate focuses
+        // during rapid navigation
+        nextElem.focus({
+          preventScroll
+        });
+        // }
 
         // Start observing mutations
-        var parentContainer = getParentContainer(nextFocus.elem);
+        var parentContainer = getParentContainer(nextElem, true);
         if (parentContainer) {
-          startObserving(parentContainer, nextFocus.elem, this.handleCurrentFocusMutations.bind(this));
+          startObserving(parentContainer, nextElem, this.handleCurrentFocusMutations.bind(this));
         }
       };
       applyFocus();
@@ -190,9 +196,10 @@ class SpatialManager {
    */
   handlePageVisibilityChange(event) {
     if (event.type === 'focus') {
-      if (this._currentFocus.elem) {
+      var currentElem = this._currentFocus.elem;
+      if (currentElem) {
         setTimeout(() => {
-          this._currentFocus.elem.focus();
+          currentElem.focus();
         }, 200); // Workaround: Delay as react DOM tries to restore focus and then blurs it!!!
       }
     }
@@ -242,8 +249,8 @@ class SpatialManager {
       var nextFocus = getNextFocusInViewport(scrollContainer, isInViewportCallback);
       if (nextFocus != null && nextFocus.elem) {
         // Reset the pending focus count to 1 to indicate we need to focus the nextFocus element after scroll
-        this._pendingFocusCount = 1;
-        this.triggerFocus(nextFocus, null);
+        // this._pendingFocusCount = 1;
+        this.triggerFocus(nextFocus);
       }
     };
 
@@ -274,7 +281,6 @@ class SpatialManager {
       if (keyCode !== 'ArrowUp' && keyCode !== 'ArrowDown' && keyCode !== 'ArrowLeft' && keyCode !== 'ArrowRight') {
         return;
       }
-      event.preventDefault();
       if (this._keydownThrottleMs > 0) {
         var now = Date.now();
         if (now - this._lastKeydownAt < this._keydownThrottleMs) {
@@ -285,12 +291,16 @@ class SpatialManager {
       if (!this._currentFocus.elem) {
         console.warn('No initial focus. Trying to set one...');
       }
+      event.preventDefault();
       var nextFocus = getNextFocus(this._currentFocus.elem, keyCode, (container == null ? void 0 : container.ownerDocument) || window.document);
       if (nextFocus && nextFocus.elem) {
         // Increment pending focus count to indicate focus is required for this navigation action
-        this._pendingFocusCount += 1;
+        // this._pendingFocusCount += 1;
+        this.triggerFocus(nextFocus, keyCode);
+      } else {
+        // We may not be at the edge of the scroll
+        scrollToEdge(this._currentFocus.elem, keyCode);
       }
-      this.triggerFocus(nextFocus, keyCode);
     }, {
       capture: true
     });
@@ -306,23 +316,25 @@ class SpatialManager {
    * @returns {void}
    */
   setFocus(node) {
+    if (node == null) {
+      return;
+    }
     if (node && node.className.includes('lrud-container')) {
       // We are here if requestTVFocus is called with container as node
       var nextFocus = findDestinationOrAutofocus(this._currentFocus.elem, 'ArrowDown', node, true);
       if (nextFocus.elem) {
-        this._pendingFocusCount = 1;
+        // this._pendingFocusCount = 1;
         this.triggerFocus(nextFocus);
       } else {
         console.warn('No focusable destination for requestTVFocus: ', node);
       }
     } else {
       if (node && node.focus) {
-        var _getFocusableParentCo;
-        var parentHasAutofocus = ((_getFocusableParentCo = getFocusableParentContainer(node)) == null ? void 0 : _getFocusableParentCo.getAttribute('data-autofocus')) === 'true' || false;
-        this._pendingFocusCount = 1;
+        var parentContainer = getParentContainer(node, false);
+        // this._pendingFocusCount = 1;
         this.triggerFocus({
           elem: node,
-          parentHasAutofocus
+          parentContainer
         });
       }
     }
@@ -341,10 +353,6 @@ class SpatialManager {
     // Get ids from destinations, and if id not set, generate a new one and set all of them into 'data-destinations' attribute in the host element
     if (destinations && Array.isArray(destinations)) {
       var destinationIDs = destinations.map(dest => {
-        if (dest && !(dest instanceof HTMLElement)) {
-          console.error('Error: Argument appears to not be a ReactComponent', dest);
-          return null;
-        }
         return dest ? setupNodeId(dest) : null;
       }).filter(id => id != null);
       if (destinationIDs.length > 0) {
@@ -389,12 +397,13 @@ class SpatialManager {
     stopObserving();
     this._currentFocus = {
       elem: null,
-      parentHasAutofocus: false
+      parentContainer: null
     };
     this._isSpatialManagerReady = false;
     this._spatialNavigationContainer = null;
   }
 }
+_SpatialManager = SpatialManager;
 Object.defineProperty(SpatialManager, _instance, {
   writable: true,
   value: null

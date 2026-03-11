@@ -2,6 +2,9 @@
 
 A library for unit testing high-level interactions via simple pointer events, e.g., `pointerdown`, that produce realistic and complete DOM event sequences.
 
+In this React Native Web for TV fork, this library remains a shared DOM-event test
+utility and is not TV-platform specific.
+
 There are number of challenges involved in unit testing modules that work with DOM events.
 
 1. Testing environments with and without support for the `PointerEvent` API.

@@ -15,13 +15,13 @@ var tagForComponentOrHandle = component => {
     return undefined;
   }
 
-  // For web, we'll always expect a ref to a DOM element
-  // we'll return the element tilself as it is after a check
-  if (component instanceof HTMLElement) {
-    return component;
-  }
-  return undefined;
+  // if (component.id) {
+  //   return component.id;
+  // }
 
+  // return undefined;
+
+  return component;
   // return findNodeHandle(component, true); // suppress warning
   /*
   if (typeof component === 'number') {

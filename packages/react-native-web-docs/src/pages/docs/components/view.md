@@ -90,12 +90,34 @@ This is invoked when a component is mounted and when its layout changes. `x` and
 Set the styles of the view.
 {% endcall %}
 
+{% call macro.prop('focusable', '?boolean') %}
+Controls whether this view should be keyboard/remote focusable.
+{% endcall %}
+
+{% call macro.prop('hasTVPreferredFocus', '?boolean') %}
+If `true`, requests focus on mount in TV mode when the element is focusable.
+{% endcall %}
+
+{% call macro.prop('tvFocusable', '?boolean') %}
+TV navigation hint used by the web TV focus system. This is primarily used for focus containers (for example `TVFocusGuideView`).
+{% endcall %}
+
+{% call macro.prop('isTVSelectable', '?boolean') %}
+Legacy TV selectability prop. Prefer `focusable` for new code.
+{% endcall %}
+
 {% call macro.prop('tabIndex', '0 | -1') %}
 Set whether the view can receive keyboard focus.
 {% endcall %}
 
 {% call macro.prop('testID', '?string') %}
 Set the test selector label (via `data-testid`).
+{% endcall %}
+
+### Instance methods
+
+{% call macro.prop('requestTVFocus', '() => void') %}
+Imperatively requests focus for this view using the spatial navigation manager.
 {% endcall %}
 
 ---
