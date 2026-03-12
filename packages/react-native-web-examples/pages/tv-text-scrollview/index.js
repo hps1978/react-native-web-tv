@@ -195,7 +195,8 @@ const pageSizes = [0, 200, 600, 1000];
 
 const pageSizeLabels = ['default (half view height)', '200', '600', '1000'];
 
-const ITEMS = [...Array(12)].map(
+const ITEMS = Array.from(
+  { length: 12 },
   (
     _,
     i
@@ -215,16 +216,25 @@ const Button = ({
   label: string,
   onPress?: () => void,
   selected?: boolean
-}) => (
-  <TouchableOpacity
-    activeOpacity={0.5}
-    onPress={onPress}
-    style={selected ? styles.buttonSelected : styles.button}
-    tvParallaxProperties={{ pressMagnification: 1.1 }}
-  >
-    <Text style={styles.itemText}>{label}</Text>
-  </TouchableOpacity>
-);
+}) => {
+  const [isFocused, setFocused] = React.useState(false);
+  return (
+    <TouchableOpacity
+      activeOpacity={0.5}
+      onBlur={() => setFocused(false)}
+      onFocus={() => setFocused(true)}
+      onPress={onPress}
+      style={
+        selected
+          ? [styles.buttonSelected, isFocused && styles.buttonFocused]
+          : [styles.button, isFocused && styles.buttonFocused]
+      }
+      tvParallaxProperties={{ pressMagnification: 1.1 }}
+    >
+      <Text style={styles.itemText}>{label}</Text>
+    </TouchableOpacity>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -269,6 +279,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#ccccff',
     borderRadius: 4 * scale
+  },
+  buttonFocused: {
+    borderWidth: 2,
+    borderColor: '#6666ff'
   },
   row: {
     flexDirection: 'row',

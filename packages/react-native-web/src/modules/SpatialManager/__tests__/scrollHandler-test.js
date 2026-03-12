@@ -180,7 +180,7 @@ describe('modules/SpatialManager/scrollHandler', () => {
     cleanup();
   });
 
-  test('maybeScrollOnFocus prioritizes axis with larger delta first', () => {
+  test('scrollToElement prioritizes axis with larger delta first', () => {
     const scrollOrder = [];
     const verticalScrollable = {
       scrollTop: 10,
@@ -217,13 +217,13 @@ describe('modules/SpatialManager/scrollHandler', () => {
           : { needsScroll: true, scrollDelta: 20 }
       );
 
-    const { maybeScrollOnFocus } = loadScrollHandler({
+    const { scrollToElement } = loadScrollHandler({
       findScrollableAncestor,
       getAxisScrollDelta
     });
 
     const nextElem = document.createElement('button');
-    maybeScrollOnFocus(
+    scrollToElement(
       { elem: nextElem, parentContainer: null },
       null,
       'ArrowDown'

@@ -15,7 +15,7 @@ import * as lrudSpatial from '@bbc/tv-lrud-spatial';
 import { setupScrollHandler } from '../scrollHandler';
 
 jest.mock('../scrollHandler', () => ({
-  maybeScrollOnFocus: jest.fn(),
+  scrollToElement: jest.fn(),
   setupAppInitiatedScrollHandler: jest.fn(() => () => {}),
   isElementInWindowViewport: jest.fn(() => true),
   setupScrollHandler: jest.fn(),

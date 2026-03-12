@@ -11,6 +11,7 @@
 import type { ScrollViewProps } from '../ScrollView/types';
 import tagForComponentOrHandle from './tagForComponentOrHandle';
 import ScrollView from '../ScrollView';
+import { scrollContainer, leaveKeyHandlerControl, takeKeyHandlerControl } from '../../modules/SpatialManager';
 import * as React from 'react';
 const {
   tvFocusEventHandler
@@ -63,8 +64,13 @@ declare class TVTextScrollView extends React.Component<{
 }> {
   _subscription: any,
   _scrollViewRef: ?React.ElementRef<typeof ScrollView>,
+  _keyControlOwner: ?HTMLElement,
   _setScrollViewRef: any,
   getScrollViewRef(): ?React.ElementRef<typeof ScrollView>,
+  _getScrollableNode(): ?HTMLElement,
+  _handleDirectionalKeyFromSpatial: any,
+  _takeDirectionalKeyControl: any,
+  _releaseDirectionalKeyControl: any,
   componentDidMount(): any,
   componentWillUnmount(): any,
   render(): $FlowFixMe,

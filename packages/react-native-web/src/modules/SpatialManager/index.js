@@ -26,9 +26,10 @@ import {
 } from './mutationObserver';
 import {
   type SpatialScrollConfigType,
-  type getCurrentFocusType,
-  type onScrollRefocusType,
-  maybeScrollOnFocus,
+  type GetCurrentFocusType,
+  type OnScrollRefocusType,
+  scrollContainer,
+  scrollToElement,
   setupAppInitiatedScrollHandler,
   isElementInWindowViewport,
   setupScrollHandler,
@@ -54,6 +55,8 @@ class SpatialManager {
   _isSpatialManagerReady: boolean;
   _spatialNavigationContainer: Document | HTMLElement | null;
   _currentFocus: ElemData;
+  _keyHandlerControlOwner: HTMLElement | null;
+  _keyHandlerControlCallback: ((keyCode: string) => ?boolean) | null;
   // _pendingFocusCount: number;
   _keydownThrottleMs: number;
   keyDownListener: ((event: any) => void) | null;
@@ -75,6 +78,8 @@ class SpatialManager {
       elem: null,
       parentContainer: null
     };
+    this._keyHandlerControlOwner = null;
+    this._keyHandlerControlCallback = null;
     // this._pendingFocusCount = 0;
     this._keydownThrottleMs = 0;
     this.keyDownListener = null;
@@ -193,8 +198,8 @@ class SpatialManager {
       // let scrollPromise = null;
       const finalKeyCode = keyCode || 'ArrowDown'; // Default to ArrowDown if not provided
 
-      // scrollPromise = maybeScrollOnFocus(
-      maybeScrollOnFocus(nextFocus, this._currentFocus, finalKeyCode);
+      // scrollPromise = scrollToElement(
+      scrollToElement(nextFocus, this._currentFocus, finalKeyCode);
 
       const applyFocus = () => {
         if (!nextFocus.elem) {
@@ -288,9 +293,9 @@ class SpatialManager {
    * @returns {void}
    */
   setupAppInitiatedScrollTracking() {
-    const getCurrentFocus: getCurrentFocusType = () => this._currentFocus;
+    const getCurrentFocus: GetCurrentFocusType = () => this._currentFocus;
 
-    const onScrollRefocus: onScrollRefocusType = ({
+    const onScrollRefocus: OnScrollRefocusType = ({
       currentFocus,
       scrollContainer
     }) => {
@@ -357,7 +362,6 @@ class SpatialManager {
       'keydown',
       (event: any) => {
         const keyCode = event.key || event.code;
-
         if (
           keyCode !== 'ArrowUp' &&
           keyCode !== 'ArrowDown' &&
@@ -375,30 +379,81 @@ class SpatialManager {
           this._lastKeydownAt = now;
         }
 
+        if (this._keyHandlerControlOwner) {
+          const owner = this._keyHandlerControlOwner;
+          const focusedElem = this._currentFocus.elem;
+          if (
+            owner &&
+            focusedElem &&
+            (focusedElem === owner || owner.contains(focusedElem))
+          ) {
+            if (this._keyHandlerControlCallback) {
+              const wasHandled =
+                this._keyHandlerControlCallback(keyCode) === true;
+              if (wasHandled) {
+                // this needs to be done by handler/owner
+                // event.preventDefault();
+                return;
+              }
+            }
+          } else {
+            // Assume control owner is no longer relevant
+            this._keyHandlerControlOwner = null;
+            this._keyHandlerControlCallback = null;
+          }
+        }
+
         if (!this._currentFocus.elem) {
           console.warn('No initial focus. Trying to set one...');
         }
 
-        event.preventDefault();
-
         const nextFocus = getNextFocus(
           this._currentFocus.elem,
           keyCode,
-          container?.ownerDocument || window.document
+          this._spatialNavigationContainer
         );
 
         if (nextFocus && nextFocus.elem) {
-          // Increment pending focus count to indicate focus is required for this navigation action
-          // this._pendingFocusCount += 1;
+          event.preventDefault();
           this.triggerFocus(nextFocus, keyCode);
-        } else {
-          // We may not be at the edge of the scroll
-          scrollToEdge(this._currentFocus.elem, keyCode);
+          return;
         }
+        if (this._currentFocus.elem) {
+          event.preventDefault();
+          scrollToEdge(this._currentFocus.elem, keyCode);
+          return;
+        }
+        // Let it default to browser behaviour
+        return;
       },
       { capture: true }
     );
     this._isSpatialManagerReady = true;
+  }
+
+  takeKeyHandlerControl(
+    owner: ?HTMLElement,
+    onDirectionalKey?: (keyCode: string) => ?boolean
+  ): void {
+    if (!owner) {
+      return;
+    }
+    this._keyHandlerControlOwner = owner;
+    this._keyHandlerControlCallback =
+      typeof onDirectionalKey === 'function' ? onDirectionalKey : null;
+  }
+
+  leaveKeyHandlerControl(owner: ?HTMLElement): void {
+    if (!owner) {
+      return;
+    }
+
+    if (this._keyHandlerControlOwner !== owner) {
+      return;
+    }
+
+    this._keyHandlerControlOwner = null;
+    this._keyHandlerControlCallback = null;
   }
 
   /**
@@ -500,6 +555,8 @@ class SpatialManager {
     }
     stopObserving();
     this._currentFocus = { elem: null, parentContainer: null };
+    this._keyHandlerControlOwner = null;
+    this._keyHandlerControlCallback = null;
     this._isSpatialManagerReady = false;
     this._spatialNavigationContainer = null;
   }
@@ -514,5 +571,12 @@ export const setDestinations: (
   host: HTMLElement,
   destinations: ?Array<?HTMLElement>
 ) => void = spatialManager.setDestinations.bind(spatialManager);
+export const takeKeyHandlerControl: (
+  owner: ?HTMLElement,
+  onDirectionalKey?: (keyCode: string) => ?boolean
+) => void = spatialManager.takeKeyHandlerControl.bind(spatialManager);
+export const leaveKeyHandlerControl: (owner: ?HTMLElement) => void =
+  spatialManager.leaveKeyHandlerControl.bind(spatialManager);
 export const teardownSpatialNavigation: () => void =
   spatialManager.teardownSpatialNavigation.bind(spatialManager);
+export { scrollContainer };

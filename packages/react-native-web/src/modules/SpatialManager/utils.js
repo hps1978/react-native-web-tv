@@ -246,7 +246,7 @@ export function getElementVisibilityRatio(elem: HTMLElement): number {
 
 /**
  * Infer scroll direction from scrollContainer's scroll capability.
- * Used to provide directional hint to maybeScrollOnFocus.
+ * Used to provide directional hint to scrollToElement.
  *
  * @param {HTMLElement} scrollContainer The container that scrolled
  * @return {'ArrowDown' | 'ArrowRight'} Direction hint
@@ -254,7 +254,7 @@ export function getElementVisibilityRatio(elem: HTMLElement): number {
 /**
  * inferScrollDirection
  * Determines primary scroll axis capability of a container.
- * Used to provide directional hints to maybeScrollOnFocus for optimal behavior.
+ * Used to provide directional hints to scrollToElement for optimal behavior.
  * @param {HTMLElement | null} scrollContainer - The container being evaluated
  * @returns {'ArrowDown' | 'ArrowRight'} Direction hint based on scroll capability
  */

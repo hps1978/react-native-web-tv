@@ -12,6 +12,7 @@ import _objectSpread from "@babel/runtime/helpers/objectSpread2";
 
 import tagForComponentOrHandle from './tagForComponentOrHandle';
 import ScrollView from '../ScrollView';
+import { scrollContainer, leaveKeyHandlerControl, takeKeyHandlerControl } from '../../modules/SpatialManager';
 import * as React from 'react';
 var _require = require('./TVFocusEventHandler'),
   tvFocusEventHandler = _require.tvFocusEventHandler;
@@ -34,9 +35,38 @@ class TVTextScrollView extends React.Component {
     this._setScrollViewRef = ref => {
       this._scrollViewRef = ref;
     };
+    this._handleDirectionalKeyFromSpatial = keyCode => {
+      var scrollableNode = this._keyControlOwner;
+      if (!scrollableNode) {
+        return false;
+      }
+      return scrollContainer(scrollableNode, keyCode, {
+        horizontal: this.props.horizontal === true,
+        pageSize: this.props.pageSize,
+        scrollDurationMs: Math.max(0, (this.props.scrollDuration || 0) * 1000),
+        snapToStart: this.props.snapToStart !== false,
+        snapToEnd: this.props.snapToEnd !== false
+      });
+    };
+    this._takeDirectionalKeyControl = () => {
+      var owner = this._getScrollableNode();
+      this._keyControlOwner = owner;
+      takeKeyHandlerControl(owner, this._handleDirectionalKeyFromSpatial);
+    };
+    this._releaseDirectionalKeyControl = () => {
+      leaveKeyHandlerControl(this._keyControlOwner);
+      this._keyControlOwner = null;
+    };
   }
   getScrollViewRef() {
     return this._scrollViewRef;
+  }
+  _getScrollableNode() {
+    var scrollViewRef = this._scrollViewRef;
+    if (scrollViewRef && typeof scrollViewRef.getScrollableNode === 'function') {
+      return scrollViewRef.getScrollableNode();
+    }
+    return null;
   }
   componentDidMount() {
     var cmp = this; // eslint-disable-line consistent-this
@@ -44,14 +74,17 @@ class TVTextScrollView extends React.Component {
     tvFocusEventHandler == null || tvFocusEventHandler.register(myTag, function (evt) {
       if (myTag === evt.tag) {
         if (evt.eventType === 'focus') {
+          cmp._takeDirectionalKeyControl();
           cmp.props.onFocus && cmp.props.onFocus(evt);
         } else if (evt.eventType === 'blur') {
+          cmp._releaseDirectionalKeyControl();
           cmp.props.onBlur && cmp.props.onBlur(evt);
         }
       }
     });
   }
   componentWillUnmount() {
+    this._releaseDirectionalKeyControl();
     var myTag = tagForComponentOrHandle(this._scrollViewRef);
     tvFocusEventHandler == null || tvFocusEventHandler.unregister(myTag);
   }
