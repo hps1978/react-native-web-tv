@@ -26,6 +26,7 @@ This fork extends React Native for Web with APIs inspired by React Native tvOS, 
 ## Primary building blocks
 
 - [`TVFocusGuideView`]({{ '/docs/tv-focus-guide-view' | url }}) for focus groups, traps, and destination routing.
+- [`TVTextScrollView`]({{ '/docs/tv-text-scroll-view' | url }}) for predictable remote-driven paging in text-heavy or low-focusability layouts.
 - [`TVEventHandler`]({{ '/docs/tv-event-handler' | url }}) and [`useTVEventHandler`]({{ '/docs/use-tv-event-handler' | url }}) for remote event handling.
 - TV focus props on core components such as [`View`]({{ '/docs/view' | url }}), [`Pressable`]({{ '/docs/pressable' | url }}), and [`TextInput`]({{ '/docs/text-input' | url }}).
 

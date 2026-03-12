@@ -54,13 +54,13 @@ const NativeTVNavigationEventEmitter = {
     window.addEventListener('keydown', this._keydownHandler);
     if (typeof document !== 'undefined') {
       // Use capture phase to catch per-element focus/blur once at the top.
-      this._onFocusHandler = e => {
+      this._onFocusHandler = (e: FocusEvent) => {
         RCTDeviceEventEmitter.emit(EVENT_NAME, {
           eventType: 'focus',
           tag: e.target
         });
       };
-      this._onBlurHandler = e => {
+      this._onBlurHandler = (e: FocusEvent) => {
         RCTDeviceEventEmitter.emit(EVENT_NAME, {
           eventType: 'blur',
           tag: e.target

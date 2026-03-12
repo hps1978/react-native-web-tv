@@ -315,15 +315,15 @@ class SpatialManager {
       if (nextFocus && nextFocus.elem) {
         event.preventDefault();
         this.triggerFocus(nextFocus, keyCode);
-        return true;
+        return;
       }
       if (this._currentFocus.elem) {
         event.preventDefault();
         scrollToEdge(this._currentFocus.elem, keyCode);
-        return true;
+        return;
       }
       // Let it default to browser behaviour
-      return true;
+      return;
     }, {
       capture: true
     });
