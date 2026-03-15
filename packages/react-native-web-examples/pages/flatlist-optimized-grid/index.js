@@ -72,7 +72,7 @@ export default function OptimizedFlatListGridExample() {
       offset: ITEM_HEIGHT * index,
       index
     }),
-    [ITEM_HEIGHT]
+    []
   );
 
   const GridFlatListMemo = React.memo(
