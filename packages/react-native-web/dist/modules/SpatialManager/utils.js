@@ -192,7 +192,7 @@ export function getElementVisibilityRatio(elem) {
 
 /**
  * Infer scroll direction from scrollContainer's scroll capability.
- * Used to provide directional hint to maybeScrollOnFocus.
+ * Used to provide directional hint to scrollToElement.
  *
  * @param {HTMLElement} scrollContainer The container that scrolled
  * @return {'ArrowDown' | 'ArrowRight'} Direction hint
@@ -200,7 +200,7 @@ export function getElementVisibilityRatio(elem) {
 /**
  * inferScrollDirection
  * Determines primary scroll axis capability of a container.
- * Used to provide directional hints to maybeScrollOnFocus for optimal behavior.
+ * Used to provide directional hints to scrollToElement for optimal behavior.
  * @param {HTMLElement | null} scrollContainer - The container being evaluated
  * @returns {'ArrowDown' | 'ArrowRight'} Direction hint based on scroll capability
  */
@@ -268,13 +268,21 @@ export function getBoundingRectangles(scrollableH, isWindowScrollH, scrollableV,
   // Check if parent container of the next element is within the scrollable area of either axis.
   var isParentInVScroll = !!parentContainer && (isWindowScrollV || scrollableV.contains(parentContainer));
   var isParentInHScroll = !!parentContainer && (isWindowScrollH || scrollableH.contains(parentContainer));
+  var canUseParentRectForAxis = (parentRect, containerRect, axis) => {
+    if (!parentRect || !containerRect) {
+      return false;
+    }
+    var parentSize = axis === 'vertical' ? parentRect.bottom - parentRect.top : parentRect.right - parentRect.left;
+    var containerSize = axis === 'vertical' ? containerRect.bottom - containerRect.top : containerRect.right - containerRect.left;
+    return parentSize <= containerSize;
+  };
   if (_hasGetBoundingClientRect) {
     var targetElemRect = elem.getBoundingClientRect();
     var parentContainerRect = parentContainer ? parentContainer.getBoundingClientRect() : null;
     containerRectH = scrollableH.getBoundingClientRect();
     containerRectV = scrollableV.getBoundingClientRect();
-    targetHRect = isParentInHScroll ? parentContainerRect : targetElemRect;
-    targetVRect = isParentInVScroll ? parentContainerRect : targetElemRect;
+    targetHRect = isParentInHScroll && canUseParentRectForAxis(parentContainerRect, containerRectH, 'horizontal') ? parentContainerRect : targetElemRect;
+    targetVRect = isParentInVScroll && canUseParentRectForAxis(parentContainerRect, containerRectV, 'vertical') ? parentContainerRect : targetElemRect;
   } else {
     // Fallback: use offset dimensions
     containerRectH = {
@@ -304,8 +312,8 @@ export function getBoundingRectangles(scrollableH, isWindowScrollH, scrollableV,
         right: (parentContainer.offsetLeft || 0) + (parentContainer.offsetWidth || 0)
       };
     }
-    targetHRect = isParentInHScroll ? _parentContainerRect : _targetElemRect;
-    targetVRect = isParentInVScroll ? _parentContainerRect : _targetElemRect;
+    targetHRect = isParentInHScroll && canUseParentRectForAxis(_parentContainerRect, containerRectH, 'horizontal') ? _parentContainerRect : _targetElemRect;
+    targetVRect = isParentInVScroll && canUseParentRectForAxis(_parentContainerRect, containerRectV, 'vertical') ? _parentContainerRect : _targetElemRect;
   }
 
   // Clamp container rect to viewport bounds so we don't scroll outside the visible area.

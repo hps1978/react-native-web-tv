@@ -187,6 +187,58 @@ class ScrollHandler {
     var nextOffset = isWindowScroll ? Math.min(currentOffset + scrollDelta, maxOffset) : currentOffset + scrollDelta;
     this.performScroll(scrollable, isVertical, nextOffset, liveNextOffset, animate);
   }
+  scrollContainer(scrollable, keyCode, options) {
+    if (!scrollable) {
+      return false;
+    }
+    var horizontal = (options == null ? void 0 : options.horizontal) === true;
+    if (horizontal && keyCode !== 'ArrowLeft' && keyCode !== 'ArrowRight') {
+      return false;
+    }
+    if (!horizontal && keyCode !== 'ArrowUp' && keyCode !== 'ArrowDown') {
+      return false;
+    }
+    var currentOffset = horizontal ? scrollable.scrollLeft : scrollable.scrollTop;
+    var viewportSize = horizontal ? scrollable.clientWidth : scrollable.clientHeight;
+    var maxOffset = horizontal ? Math.max(0, scrollable.scrollWidth - scrollable.clientWidth) : Math.max(0, scrollable.scrollHeight - scrollable.clientHeight);
+    if (maxOffset <= 0) {
+      return false;
+    }
+    var configuredPageSize = options == null ? void 0 : options.pageSize;
+    var pageSize = typeof configuredPageSize === 'number' && configuredPageSize > 0 ? configuredPageSize : viewportSize * 0.5;
+    var isForward = keyCode === 'ArrowDown' || keyCode === 'ArrowRight';
+    var direction = isForward ? 1 : -1;
+    var atStart = currentOffset <= 0;
+    var atEnd = currentOffset >= maxOffset;
+    var snapToStart = (options == null ? void 0 : options.snapToStart) !== false;
+    var snapToEnd = (options == null ? void 0 : options.snapToEnd) !== false;
+    if (direction < 0 && atStart && !snapToStart) {
+      return false;
+    }
+    if (direction > 0 && atEnd && !snapToEnd) {
+      return false;
+    }
+    var targetOffset = currentOffset + direction * pageSize;
+    if (direction < 0 && atStart) {
+      targetOffset = 0;
+    } else if (direction > 0 && atEnd) {
+      targetOffset = maxOffset;
+    } else {
+      targetOffset = Math.max(0, Math.min(maxOffset, targetOffset));
+    }
+    if (targetOffset === currentOffset) {
+      return false;
+    }
+    this._isSpatialManagerInitiatedScroll = true;
+    var durationMs = typeof (options == null ? void 0 : options.scrollDurationMs) === 'number' && options.scrollDurationMs > 0 ? options.scrollDurationMs : 0;
+    if (durationMs > 0) {
+      this.animateScrollTo(scrollable, !horizontal, targetOffset, durationMs);
+      return true;
+    }
+    var delta = targetOffset - currentOffset;
+    this.scrollAxis(scrollable, false, !horizontal, delta, false);
+    return true;
+  }
 
   /**
    * scrollToAlignLeft
@@ -235,9 +287,9 @@ class ScrollHandler {
         var horizontalDelta = 0;
         var needsHorizontalScroll = false;
         var desiredDelta = targetHRect.left - horizontalRects.visibleContainerRect.left - this._scrollConfig.leftEdgePaddingPx;
-        var scrollable = horizontalScroll.scrollable;
-        var currentScrollPosition = scrollable.scrollLeft;
-        var maxScroll = Math.max(0, scrollable.scrollWidth - scrollable.clientWidth);
+        var _scrollable = horizontalScroll.scrollable;
+        var currentScrollPosition = _scrollable.scrollLeft;
+        var maxScroll = Math.max(0, _scrollable.scrollWidth - _scrollable.clientWidth);
         var nextDesiredScroll = currentScrollPosition + desiredDelta;
         var canAchieveAlignment = nextDesiredScroll >= 0 && nextDesiredScroll <= maxScroll;
         if (canAchieveAlignment) {
@@ -311,7 +363,7 @@ class ScrollHandler {
   }
 
   /**
-   * maybeScrollOnFocus
+   * scrollToElement
    * Main scroll-on-focus entry point dispatching to AlignLeft or default behavior.
    * Ensures focused element is visible in viewport by scrolling container as needed.
    * Handles both single and multi-axis scrolling with proper sequencing.
@@ -320,7 +372,7 @@ class ScrollHandler {
    * @param {string} keyCode - Navigation key code that triggered focus change
    * @returns {null}
    */
-  maybeScrollOnFocus(nextElemData, currentElemData, keyCode) {
+  scrollToElement(nextElemData, currentElemData, keyCode) {
     var elem = nextElemData.elem;
     if (!elem || typeof window === 'undefined') return null;
     var verticalScroll = findScrollableAncestor(elem, 'vertical');
@@ -383,8 +435,8 @@ class ScrollHandler {
    * Uses debounced scroll listener only.
    * Distinguishes between SpatialManager-initiated and app-initiated scrolls.
    * @param {HTMLElement | Document} container - The container element or document to observe
-   * @param {getCurrentFocusType} getCurrentFocus - Callback retrieving current focus state
-   * @param {onScrollRefocusType} onScrollRefocus - Callback for app-initiated scroll refocus
+   * @param {GetCurrentFocusType} getCurrentFocus - Callback retrieving current focus state
+   * @param {OnScrollRefocusType} onScrollRefocus - Callback for app-initiated scroll refocus
    * @returns {() => void} Cleanup function to remove event listeners and cancel timeouts
    */
   setupAppInitiatedScrollHandler(container, getCurrentFocus, onScrollRefocus) {
@@ -415,9 +467,9 @@ class ScrollHandler {
         // Infer scroll direction from scrollContainer
         var scrollDirection = inferScrollDirection(scrollContainer);
 
-        // Call maybeScrollOnFocus to bring currentFocus fully into view
+        // Call scrollToElement to bring currentFocus fully into view
         // This maintains focus continuity while respecting app-initiated scroll
-        this.maybeScrollOnFocus(currentFocus, currentFocus,
+        this.scrollToElement(currentFocus, currentFocus,
         // TODO: Handle this better: navigationFrom is currentFocus itself
         scrollDirection);
         return;
@@ -515,4 +567,5 @@ export var setupScrollHandler = config => scrollHandler.setupScrollHandler(confi
 export var setupAppInitiatedScrollHandler = (container, getCurrentFocus, onScrollRefocus) => scrollHandler.setupAppInitiatedScrollHandler(container, getCurrentFocus, onScrollRefocus);
 export { isElementInWindowViewport };
 export var scrollToEdge = (elem, keyCode) => scrollHandler.scrollToEdge(elem, keyCode);
-export var maybeScrollOnFocus = (nextElemData, currentElemData, keyCode) => scrollHandler.maybeScrollOnFocus(nextElemData, currentElemData, keyCode);
+export var scrollToElement = (nextElemData, currentElemData, keyCode) => scrollHandler.scrollToElement(nextElemData, currentElemData, keyCode);
+export var scrollContainer = (scrollable, keyCode, options) => scrollHandler.scrollContainer(scrollable, keyCode, options);

@@ -1,6 +1,6 @@
 import _extends from "@babel/runtime/helpers/extends";
 import _objectWithoutPropertiesLoose from "@babel/runtime/helpers/objectWithoutPropertiesLoose";
-var _excluded = ["onScroll", "onTouchMove", "onWheel", "scrollEnabled", "scrollEventThrottle", "showsHorizontalScrollIndicator", "showsVerticalScrollIndicator", "style"];
+var _excluded = ["focusable", "isTVSelectable", "onScroll", "onTouchMove", "onWheel", "scrollEnabled", "scrollEventThrottle", "showsHorizontalScrollIndicator", "showsVerticalScrollIndicator", "style"];
 /**
  * Copyright (c) Nicolas Gallagher.
  *
@@ -54,7 +54,9 @@ function shouldEmitScrollEvent(lastTick, eventThrottle) {
  * Encapsulates the Web-specific scroll throttling and disabling logic
  */
 var ScrollViewBase = /*#__PURE__*/React.forwardRef((props, forwardedRef) => {
-  var onScroll = props.onScroll,
+  var focusable = props.focusable,
+    isTVSelectable = props.isTVSelectable,
+    onScroll = props.onScroll,
     onTouchMove = props.onTouchMove,
     onWheel = props.onWheel,
     _props$scrollEnabled = props.scrollEnabled,
@@ -124,7 +126,8 @@ var ScrollViewBase = /*#__PURE__*/React.forwardRef((props, forwardedRef) => {
     onTouchMove: createPreventableScrollHandler(onTouchMove),
     onWheel: createPreventableScrollHandler(onWheel),
     ref: useMergeRefs(scrollRef, forwardedRef),
-    style: [style, !scrollEnabled && styles.scrollDisabled, hideScrollbar && styles.hideScrollbar]
+    style: [style, !scrollEnabled && styles.scrollDisabled, hideScrollbar && styles.hideScrollbar],
+    tabIndex: focusable === true || isTVSelectable === true ? 0 : undefined
   }));
 });
 

@@ -90,6 +90,22 @@ Supported config fields:
 * `scrollConfig.scrollAnimationDurationMsVertical`: vertical animation duration override.
 * `scrollConfig.scrollAnimationDurationMsHorizontal`: horizontal animation duration override.
 
+## TVTextScrollView
+
+`TVTextScrollView` is intended for text-heavy or static layouts that need predictable directional scrolling on TV, including cases with few or no focusable descendants.
+
+It works with SpatialManager key handling and supports page-style behavior through props:
+* `scrollDuration` (seconds): directional scroll animation duration.
+* `pageSize` (px): per-action scroll distance; defaults to half the viewport size.
+* `snapToStart`: when enabled, allows snapping to the start edge.
+* `snapToEnd`: when enabled, allows snapping to the end edge.
+
+Import:
+
+```js
+import { TVTextScrollView } from 'react-native';
+```
+
 ## TV examples in this repo
 
 Run examples from monorepo root:
@@ -102,6 +118,7 @@ Try routes including:
 
 * `/tv-event-handler`
 * `/tv-focus-guide-view`
+* `/tv-text-scrollview`
 * `/flatlist-tv-scroll`
 * `/rlv-flatlist-tv-scroll`
 ## Contributing

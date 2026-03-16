@@ -8,7 +8,7 @@ When the user navigates with the arrow keys, the SpatialManager determines the n
 ## How scrolling is triggered
 1. A keydown event is received (ArrowUp/ArrowDown/ArrowLeft/ArrowRight).
 2. The next focusable element is computed by the LRUD engine.
-3. `maybeScrollOnFocus()` runs before focusing the element.
+3. `scrollToElement()` runs before focusing the element.
 4. The target element’s bounding rect is compared with the visible container rect.
 5. If the element is outside the visible area (with padding), the scroll offset is updated to bring it fully into view.
 

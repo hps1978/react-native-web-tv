@@ -33,6 +33,8 @@ declare function shouldEmitScrollEvent(lastTick: number, eventThrottle: number):
  */
 const ScrollViewBase: React.AbstractComponent<Props, React.ElementRef<typeof View>> = React.forwardRef((props, forwardedRef) => {
   const {
+    focusable,
+    isTVSelectable,
     onScroll,
     onTouchMove,
     onWheel,
@@ -55,7 +57,7 @@ const ScrollViewBase: React.AbstractComponent<Props, React.ElementRef<typeof Vie
   declare function handleScrollTick(e: Object): any;
   declare function handleScrollEnd(e: Object): any;
   const hideScrollbar = showsHorizontalScrollIndicator === false || showsVerticalScrollIndicator === false;
-  return <View {...rest} onScroll={handleScroll} onTouchMove={createPreventableScrollHandler(onTouchMove)} onWheel={createPreventableScrollHandler(onWheel)} ref={useMergeRefs(scrollRef, forwardedRef)} style={[style, !scrollEnabled && styles.scrollDisabled, hideScrollbar && styles.hideScrollbar]} />;
+  return <View {...rest} onScroll={handleScroll} onTouchMove={createPreventableScrollHandler(onTouchMove)} onWheel={createPreventableScrollHandler(onWheel)} ref={useMergeRefs(scrollRef, forwardedRef)} style={[style, !scrollEnabled && styles.scrollDisabled, hideScrollbar && styles.hideScrollbar]} tabIndex={focusable === true || isTVSelectable === true ? 0 : undefined} />;
 });
 
 // Chrome doesn't support e.preventDefault in this case; touch-action must be

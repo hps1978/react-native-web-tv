@@ -13,7 +13,7 @@ import { addEventListener } from '../addEventListener';
 import { setupNodeId } from '../../exports/TV/utils';
 import type { ElemData } from './utils';
 import { startObserving, stopObserving, type MutationDetails } from './mutationObserver';
-import { type SpatialScrollConfigType, type getCurrentFocusType, type onScrollRefocusType, maybeScrollOnFocus, setupAppInitiatedScrollHandler, isElementInWindowViewport, setupScrollHandler, scrollToEdge } from './scrollHandler';
+import { type SpatialScrollConfigType, type GetCurrentFocusType, type OnScrollRefocusType, scrollContainer, scrollToElement, setupAppInitiatedScrollHandler, isElementInWindowViewport, setupScrollHandler, scrollToEdge } from './scrollHandler';
 type SpatialNavigationConfigType = {
   keyMap?: {
     [key: string]: string
@@ -34,6 +34,8 @@ declare class SpatialManager {
   _isSpatialManagerReady: boolean,
   _spatialNavigationContainer: Document | HTMLElement | null,
   _currentFocus: ElemData,
+  _keyHandlerControlOwner: HTMLElement | null,
+  _keyHandlerControlCallback: ((keyCode: string) => ?boolean) | null,
   _keydownThrottleMs: number,
   keyDownListener: ((event: any) => void) | null,
   appInitiatedScrollCleanup: (() => void) | null,
@@ -48,6 +50,8 @@ declare class SpatialManager {
   setupAppVisibilityListeners(): any,
   setupAppInitiatedScrollTracking(): any,
   setupSpatialNavigation(container?: HTMLElement): any,
+  takeKeyHandlerControl(owner: ?HTMLElement, onDirectionalKey?: (keyCode: string) => ?boolean): void,
+  leaveKeyHandlerControl(owner: ?HTMLElement): void,
   setFocus(node: ?HTMLElement): any,
   setDestinations(host: HTMLElement, destinations: ?Array<?HTMLElement>): any,
   teardownSpatialNavigation(): any,
@@ -56,4 +60,7 @@ const spatialManager = new SpatialManager();
 export const setupSpatialNavigation: (container?: HTMLElement) => void = spatialManager.setupSpatialNavigation.bind(spatialManager);
 export const setFocus: (node: ?HTMLElement) => void = spatialManager.setFocus.bind(spatialManager);
 export const setDestinations: (host: HTMLElement, destinations: ?Array<?HTMLElement>) => void = spatialManager.setDestinations.bind(spatialManager);
+export const takeKeyHandlerControl: (owner: ?HTMLElement, onDirectionalKey?: (keyCode: string) => ?boolean) => void = spatialManager.takeKeyHandlerControl.bind(spatialManager);
+export const leaveKeyHandlerControl: (owner: ?HTMLElement) => void = spatialManager.leaveKeyHandlerControl.bind(spatialManager);
 export const teardownSpatialNavigation: () => void = spatialManager.teardownSpatialNavigation.bind(spatialManager);
+export { scrollContainer };

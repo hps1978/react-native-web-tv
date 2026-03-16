@@ -16,7 +16,7 @@ import { setConfig as setLrudConfig, getNextFocus, getParentContainer, updateAnc
 import { addEventListener } from '../addEventListener';
 import { setupNodeId } from '../../exports/TV/utils';
 import { startObserving, stopObserving } from './mutationObserver';
-import { maybeScrollOnFocus, setupAppInitiatedScrollHandler, isElementInWindowViewport, setupScrollHandler, scrollToEdge } from './scrollHandler';
+import { scrollContainer, scrollToElement, setupAppInitiatedScrollHandler, isElementInWindowViewport, setupScrollHandler, scrollToEdge } from './scrollHandler';
 var _instance = /*#__PURE__*/_classPrivateFieldLooseKey("_instance");
 /**
  * SpatialManager
@@ -41,6 +41,8 @@ class SpatialManager {
       elem: null,
       parentContainer: null
     };
+    this._keyHandlerControlOwner = null;
+    this._keyHandlerControlCallback = null;
     // this._pendingFocusCount = 0;
     this._keydownThrottleMs = 0;
     this.keyDownListener = null;
@@ -146,8 +148,8 @@ class SpatialManager {
       // let scrollPromise = null;
       var finalKeyCode = keyCode || 'ArrowDown'; // Default to ArrowDown if not provided
 
-      // scrollPromise = maybeScrollOnFocus(
-      maybeScrollOnFocus(nextFocus, this._currentFocus, finalKeyCode);
+      // scrollPromise = scrollToElement(
+      scrollToElement(nextFocus, this._currentFocus, finalKeyCode);
       var applyFocus = () => {
         if (!nextFocus.elem) {
           return;
@@ -288,23 +290,61 @@ class SpatialManager {
         }
         this._lastKeydownAt = now;
       }
+      if (this._keyHandlerControlOwner) {
+        var _owner = this._keyHandlerControlOwner;
+        var focusedElem = this._currentFocus.elem;
+        if (_owner && focusedElem && (focusedElem === _owner || _owner.contains(focusedElem))) {
+          if (this._keyHandlerControlCallback) {
+            var wasHandled = this._keyHandlerControlCallback(keyCode) === true;
+            if (wasHandled) {
+              // this needs to be done by handler/owner
+              // event.preventDefault();
+              return;
+            }
+          }
+        } else {
+          // Assume control owner is no longer relevant
+          this._keyHandlerControlOwner = null;
+          this._keyHandlerControlCallback = null;
+        }
+      }
       if (!this._currentFocus.elem) {
         console.warn('No initial focus. Trying to set one...');
       }
-      event.preventDefault();
-      var nextFocus = getNextFocus(this._currentFocus.elem, keyCode, (container == null ? void 0 : container.ownerDocument) || window.document);
+      var nextFocus = getNextFocus(this._currentFocus.elem, keyCode, this._spatialNavigationContainer);
       if (nextFocus && nextFocus.elem) {
-        // Increment pending focus count to indicate focus is required for this navigation action
-        // this._pendingFocusCount += 1;
+        event.preventDefault();
         this.triggerFocus(nextFocus, keyCode);
-      } else {
-        // We may not be at the edge of the scroll
-        scrollToEdge(this._currentFocus.elem, keyCode);
+        return;
       }
+      if (this._currentFocus.elem) {
+        event.preventDefault();
+        scrollToEdge(this._currentFocus.elem, keyCode);
+        return;
+      }
+      // Let it default to browser behaviour
+      return;
     }, {
       capture: true
     });
     this._isSpatialManagerReady = true;
+  }
+  takeKeyHandlerControl(owner, onDirectionalKey) {
+    if (!owner) {
+      return;
+    }
+    this._keyHandlerControlOwner = owner;
+    this._keyHandlerControlCallback = typeof onDirectionalKey === 'function' ? onDirectionalKey : null;
+  }
+  leaveKeyHandlerControl(owner) {
+    if (!owner) {
+      return;
+    }
+    if (this._keyHandlerControlOwner !== owner) {
+      return;
+    }
+    this._keyHandlerControlOwner = null;
+    this._keyHandlerControlCallback = null;
   }
 
   /**
@@ -399,6 +439,8 @@ class SpatialManager {
       elem: null,
       parentContainer: null
     };
+    this._keyHandlerControlOwner = null;
+    this._keyHandlerControlCallback = null;
     this._isSpatialManagerReady = false;
     this._spatialNavigationContainer = null;
   }
@@ -412,4 +454,7 @@ var spatialManager = new SpatialManager();
 export var setupSpatialNavigation = spatialManager.setupSpatialNavigation.bind(spatialManager);
 export var setFocus = spatialManager.setFocus.bind(spatialManager);
 export var setDestinations = spatialManager.setDestinations.bind(spatialManager);
+export var takeKeyHandlerControl = spatialManager.takeKeyHandlerControl.bind(spatialManager);
+export var leaveKeyHandlerControl = spatialManager.leaveKeyHandlerControl.bind(spatialManager);
 export var teardownSpatialNavigation = spatialManager.teardownSpatialNavigation.bind(spatialManager);
+export { scrollContainer };

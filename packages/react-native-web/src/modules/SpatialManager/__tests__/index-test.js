@@ -14,8 +14,16 @@ import {
 import * as lrudSpatial from '@bbc/tv-lrud-spatial';
 import { setupScrollHandler } from '../scrollHandler';
 
+jest.mock('@bbc/tv-lrud-spatial', () => {
+  const actual = jest.requireActual('@bbc/tv-lrud-spatial');
+  return {
+    ...actual,
+    setConfig: jest.fn((...args) => actual.setConfig(...args))
+  };
+});
+
 jest.mock('../scrollHandler', () => ({
-  maybeScrollOnFocus: jest.fn(),
+  scrollToElement: jest.fn(),
   setupAppInitiatedScrollHandler: jest.fn(() => () => {}),
   isElementInWindowViewport: jest.fn(() => true),
   setupScrollHandler: jest.fn(),
@@ -56,8 +64,6 @@ describe('modules/SpatialManager', () => {
   });
 
   test('applies app config keyMap, scrollConfig, and AlignLeft focus mode', () => {
-    const setConfigSpy = jest.spyOn(lrudSpatial, 'setConfig');
-
     window.appConfig = {
       keyMap: {
         UP: 'ArrowUp'
@@ -75,7 +81,7 @@ describe('modules/SpatialManager', () => {
 
     setupSpatialNavigation(container);
 
-    expect(setConfigSpy).toHaveBeenCalledWith(
+    expect(lrudSpatial.setConfig).toHaveBeenCalledWith(
       expect.objectContaining({
         keyMap: {
           UP: 'ArrowUp'
@@ -92,14 +98,12 @@ describe('modules/SpatialManager', () => {
   });
 
   test('uses default setup values when app config is missing', () => {
-    const setConfigSpy = jest.spyOn(lrudSpatial, 'setConfig');
-
     const container = document.createElement('div');
     document.body.appendChild(container);
 
     setupSpatialNavigation(container);
 
-    expect(setConfigSpy).toHaveBeenCalledWith(
+    expect(lrudSpatial.setConfig).toHaveBeenCalledWith(
       expect.objectContaining({
         keyMap: null,
         noValidDestinationCallback: expect.any(Function)

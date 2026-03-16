@@ -11,6 +11,7 @@ It is intended for TV browser runtimes, while keeping React Native for Web compa
   - `TVFocusGuideView`
   - `TVEventHandler`
   - `TVEventControl`
+  - `TVTextScrollView`
   - `useTVEventHandler`
   - `TVRemoteEvent` (type)
 - TV focus and directional props available in core components (for example `View`, `Pressable`, `TextInput`):
@@ -99,6 +100,23 @@ Supported fields:
 - `scrollConfig.scrollAnimationDurationMsVertical`: vertical scroll animation duration override.
 - `scrollConfig.scrollAnimationDurationMsHorizontal`: horizontal scroll animation duration override.
 
+## TVTextScrollView
+
+`TVTextScrollView` is a TV-friendly wrapper for long-form scrollable content where there may be few or no focusable children.
+
+It integrates with SpatialManager directional key handling and supports page-based scroll behavior:
+
+- `scrollDuration` (seconds): animation duration for directional scroll.
+- `pageSize` (px): distance moved per directional action. Defaults to half of visible size.
+- `snapToStart`: when `true`, allows snapping to start edge on directional exit.
+- `snapToEnd`: when `true`, allows snapping to end edge on directional exit.
+
+Import example:
+
+```js
+import { TVTextScrollView } from 'react-native';
+```
+
 ## Try TV examples
 
 Run the examples workspace:
@@ -111,6 +129,7 @@ Then open the local dev URL and try TV-focused routes such as:
 
 - `/tv-event-handler`
 - `/tv-focus-guide-view`
+- `/tv-text-scrollview`
 - `/flatlist-tv-scroll`
 - `/rlv-flatlist-tv-scroll`
 
@@ -122,6 +141,7 @@ Then open the local dev URL and try TV-focused routes such as:
   - `TVFocusGuideView`
   - `TVEventHandler`
   - `TVEventControl`
+  - `TVTextScrollView`
   - `useTVEventHandler`
 
 ## Contributing

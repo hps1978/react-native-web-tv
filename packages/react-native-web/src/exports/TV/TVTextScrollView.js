@@ -13,6 +13,11 @@ import type { ScrollViewProps } from '../ScrollView/types';
 import tagForComponentOrHandle from './tagForComponentOrHandle';
 
 import ScrollView from '../ScrollView';
+import {
+  scrollContainer,
+  leaveKeyHandlerControl,
+  takeKeyHandlerControl
+} from '../../modules/SpatialManager';
 import * as React from 'react';
 const { tvFocusEventHandler } = require('./TVFocusEventHandler');
 
@@ -63,15 +68,63 @@ class TVTextScrollView extends React.Component<{
   onBlur?: (evt: Event) => void
 }> {
   _subscription: any;
+  _scrollViewRef: ?React.ElementRef<typeof ScrollView>;
+  _keyControlOwner: ?HTMLElement;
+
+  _setScrollViewRef = (ref: ?React.ElementRef<typeof ScrollView>) => {
+    this._scrollViewRef = ref;
+  };
+
+  getScrollViewRef(): ?React.ElementRef<typeof ScrollView> {
+    return this._scrollViewRef;
+  }
+
+  _getScrollableNode(): ?HTMLElement {
+    const scrollViewRef: any = this._scrollViewRef;
+    if (
+      scrollViewRef &&
+      typeof scrollViewRef.getScrollableNode === 'function'
+    ) {
+      return scrollViewRef.getScrollableNode();
+    }
+    return null;
+  }
+
+  _handleDirectionalKeyFromSpatial = (keyCode: string): ?boolean => {
+    const scrollableNode = this._keyControlOwner;
+    if (!scrollableNode) {
+      return false;
+    }
+    return scrollContainer(scrollableNode, keyCode, {
+      horizontal: this.props.horizontal === true,
+      pageSize: this.props.pageSize,
+      scrollDurationMs: Math.max(0, (this.props.scrollDuration || 0) * 1000),
+      snapToStart: this.props.snapToStart !== false,
+      snapToEnd: this.props.snapToEnd !== false
+    });
+  };
+
+  _takeDirectionalKeyControl = () => {
+    const owner = this._getScrollableNode();
+    this._keyControlOwner = owner;
+    takeKeyHandlerControl(owner, this._handleDirectionalKeyFromSpatial);
+  };
+
+  _releaseDirectionalKeyControl = () => {
+    leaveKeyHandlerControl(this._keyControlOwner);
+    this._keyControlOwner = null;
+  };
 
   componentDidMount() {
     const cmp = this; // eslint-disable-line consistent-this
-    const myTag = tagForComponentOrHandle(this);
+    const myTag = tagForComponentOrHandle(this._scrollViewRef);
     tvFocusEventHandler?.register(myTag, function (evt) {
       if (myTag === evt.tag) {
         if (evt.eventType === 'focus') {
+          cmp._takeDirectionalKeyControl();
           cmp.props.onFocus && cmp.props.onFocus(evt);
         } else if (evt.eventType === 'blur') {
+          cmp._releaseDirectionalKeyControl();
           cmp.props.onBlur && cmp.props.onBlur(evt);
         }
       }
@@ -79,7 +132,8 @@ class TVTextScrollView extends React.Component<{
   }
 
   componentWillUnmount() {
-    const myTag = tagForComponentOrHandle(this);
+    this._releaseDirectionalKeyControl();
+    const myTag = tagForComponentOrHandle(this._scrollViewRef);
     tvFocusEventHandler?.unregister(myTag);
   }
 
@@ -94,7 +148,11 @@ class TVTextScrollView extends React.Component<{
       removeClippedSubviews: false,
       automaticallyAdjustContentInsets: false
     };
-    return <ScrollView {...props}>{this.props.children}</ScrollView>;
+    return (
+      <ScrollView {...props} ref={this._setScrollViewRef}>
+        {this.props.children}
+      </ScrollView>
+    );
   }
 }
 
