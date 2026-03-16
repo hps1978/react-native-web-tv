@@ -3,11 +3,14 @@ import { ScrollView, StyleSheet, Text, Pressable, View } from 'react-native';
 import Button from '../../shared/button';
 import Example from '../../shared/example';
 
-const ITEMS = [...Array(12)].map((_, i) => `Item ${i}`);
+const ITEMS = Array.from({ length: 12 }, (_, i) => `Item ${i}`);
 
 function createItemRow(msg, index) {
   return (
-    <Pressable key={index} style={[styles.item]}>
+    <Pressable
+      key={index}
+      style={(state) => [styles.item, state.focused && styles.itemFocused]}
+    >
       <Text style={styles.text}>{msg}</Text>
     </Pressable>
   );
@@ -81,7 +84,8 @@ export default function ScrollViewPage() {
 
 const styles = StyleSheet.create({
   container: {
-    alignSelf: 'stretch'
+    alignSelf: 'stretch',
+    flex: 1
   },
   scrollView: {
     backgroundColor: '#eeeeee',
@@ -96,6 +100,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#cccccc',
     borderRadius: 3,
     minWidth: 96
+  },
+  itemFocused: {
+    backgroundColor: '#aaaaaa'
   },
   text: {
     fontSize: 16,
