@@ -1,7 +1,7 @@
 {
   "private": true,
   "version": "0.0.0",
-  "name": "react-ui-monorepo",
+  "name": "react-native-web-tv",
   "scripts": {
     "clean": "del-cli ./packages/*/dist",
     "build": "npm run clean && npm run build --workspaces --if-present",
