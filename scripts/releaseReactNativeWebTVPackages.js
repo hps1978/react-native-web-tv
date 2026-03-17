@@ -17,6 +17,7 @@ const argv = minimist(args);
 const version = argv._[0];
 const skipGit = argv['skip-git'];
 const oneTimeCode = argv.otp;
+const publishTag = argv.tag;
 
 console.log(`Publishing react-native-web-tv@${version}`);
 
@@ -32,10 +33,14 @@ function run(command, options = {}) {
 function ensureVersionProvided() {
   if (!version) {
     console.error(
-      'Usage: npm run release -- <version> [--otp=<otp-code>] [--skip-git]'
+      'Usage: npm run release -- <version> [--otp=<otp-code>] [--tag=<dist-tag>] [--skip-git]'
     );
     process.exit(1);
   }
+}
+
+function isPrereleaseVersion(value) {
+  return /-/.test(value);
 }
 
 function ensureCleanWorkingTree() {
@@ -62,6 +67,14 @@ ensureVersionProvided();
 ensureCleanWorkingTree();
 if (!skipGit) {
   ensureReleaseBranch();
+}
+
+let resolvedPublishTag = publishTag;
+if (isPrereleaseVersion(version) && !resolvedPublishTag) {
+  resolvedPublishTag = 'beta';
+  console.log(
+    `Detected prerelease version (${version}); defaulting npm dist-tag to "${resolvedPublishTag}".`
+  );
 }
 
 // Collect explicitly publishable workspaces and their package manifests
@@ -136,7 +149,8 @@ if (!skipGit) {
 workspaces.forEach(({ directory, packageJson }) => {
   if (!packageJson.private) {
     const otpArg = oneTimeCode ? ` --otp ${oneTimeCode}` : '';
-    execSync(`npm publish${otpArg}`, {
+    const tagArg = resolvedPublishTag ? ` --tag ${resolvedPublishTag}` : '';
+    execSync(`npm publish${tagArg}${otpArg}`, {
       cwd: directory,
       stdio: 'inherit'
     });
