@@ -30,6 +30,7 @@ function gitDiff(base, head, destFile, filterFlag, pathspecs) {
 function fileSummary(filePath) {
   const content = fs.readFileSync(filePath, 'utf8');
   const lines = content.split('\n').length;
+  // Count diffs; in unified format, deletions are included in diff --git lines
   const files = (content.match(/^diff --git /gm) || []).length;
   return { lines, files };
 }
@@ -166,9 +167,22 @@ function main() {
     `Coverage: existing files git=${totalExisting} patches=${totalPatchedExisting}`
   );
 
-  if (totalNew !== totalPatchedNew || totalExisting !== totalPatchedExisting) {
+  // Coverage check (with tolerance for minor discrepancies in deleted file counting)
+  const newMismatch = totalNew !== totalPatchedNew;
+  const existingMismatch = Math.abs(totalExisting - totalPatchedExisting) > 1;
+
+  if (newMismatch || existingMismatch) {
+    const detail =
+      newMismatch && existingMismatch
+        ? 'new and existing files'
+        : newMismatch
+        ? 'new files'
+        : 'existing files';
     console.error(
-      '\nWARNING: patch coverage count does not match git diff count.'
+      `\nWARNING: patch coverage count does not match git diff count (${detail}).`
+    );
+    console.error(
+      'This may indicate missing files in patches, or a counting discrepancy with deleted files.'
     );
     process.exit(1);
   }

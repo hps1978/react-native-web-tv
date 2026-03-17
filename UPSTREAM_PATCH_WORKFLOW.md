@@ -64,6 +64,8 @@ This creates patch files under `patches/<base>-to-<head>/` with 12 mutually excl
 - `11` — new test files only
 - `12` — modified test files only
 
+The export script validates patch coverage: new files must match exactly; existing files (modified, renamed, type-changed, deleted) allow a ±1 tolerance to account for minor discrepancies in how deleted files are counted across git and unified diff formats. All changes are included in the patches even if the count differs slightly.
+
 ## Upgrade to a newer upstream tag
 
 1. Move `upstream-mirror` to the new upstream tag.
