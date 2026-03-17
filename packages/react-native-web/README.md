@@ -6,11 +6,21 @@
 
 ## Documentation
 
-The [documentation site](https://necolas.github.io/react-native-web/) ([source](https://github.com/necolas/react-native-web/blob/master/packages/react-native-web-docs)) covers installation, guides, and APIs.
+The documentation site is hosted at `https://hps1978.github.io/react-native-web-tv/`. Documentation source lives in `packages/react-native-web-docs` and can also be built locally from the monorepo.
+
+## Versioning
+
+This fork keeps the upstream React Native Web version as the base and appends a TV-specific semver suffix:
+
+```text
+<upstream-version>-tv.<tv-release>
+```
+
+For example, `0.21.2-tv.1` is the first TV fork release built on upstream `0.21.2`.
 
 ## Example
 
-The [examples app](https://p9t5cp.sse.codesandbox.io/) ([source](https://github.com/necolas/react-native-web/blob/master/packages/react-native-web-examples)) demonstrates many available features. Fork the [codesandbox](https://codesandbox.io/s/github/necolas/react-native-web/tree/master/packages/react-native-web-examples) to make changes and see the results.
+The examples app source lives in `packages/react-native-web-examples` and can be run locally from the monorepo.
 
 You'll notice that there is no reference to `react-dom` in components. The `App` component that is shown below is defined using the APIs and Components of React Native, but it can also be rendered on the web using React Native for Web.
 
@@ -141,11 +151,14 @@ To help you get you familiar with the contribution process, there is a list of [
 
 React Native for Web is [MIT licensed](./LICENSE). By contributing to React Native for Web, you agree that your contributions will be licensed under its MIT license.
 
-[package-badge]: https://img.shields.io/npm/v/react-native-web.svg?style=flat
-[package-url]: https://www.npmjs.com/package/react-native-web
-[ci-badge]: https://github.com/necolas/react-native-web/workflows/tests/badge.svg
-[ci-url]: https://github.com/necolas/react-native-web/actions
+This fork also depends on Apache-2.0 licensed TV navigation code via `@bbc/tv-lrud-spatial`.
+See [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) and [APACHE-2.0.txt](./APACHE-2.0.txt) for redistribution details.
+
+[package-badge]: https://img.shields.io/npm/v/@hps1978/react-native-web-tv.svg?style=flat
+[package-url]: https://www.npmjs.com/package/@hps1978/react-native-web-tv
+[ci-badge]: https://github.com/hps1978/react-native-web-tv/workflows/tests/badge.svg
+[ci-url]: https://github.com/hps1978/react-native-web-tv/actions
 [react-native-url]: https://reactnative.dev/
-[contributing-url]: https://github.com/necolas/react-native-web/blob/master/.github/CONTRIBUTING.md
-[good-first-issue-url]: https://github.com/necolas/react-native-web/labels/good%20first%20issue
+[contributing-url]: https://github.com/hps1978/react-native-web-tv/blob/tv-main/.github/CONTRIBUTING.md
+[good-first-issue-url]: https://github.com/hps1978/react-native-web-tv/labels/good%20first%20issue
 [code-of-conduct]: https://opensource.fb.com/code-of-conduct/

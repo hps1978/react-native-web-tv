@@ -1,14 +1,14 @@
 {
   "private": true,
   "name": "react-native-web-docs",
-  "version": "0.21.2",
-  "description": "Documentation website for React Native for Web",
+  "version": "0.21.2-tv.1",
+  "description": "Documentation website for React Native Web for TV",
   "scripts": {
     "dev": "eleventy --serve",
     "build": "ELEVENTY_PRODUCTION=true eleventy",
     "debug": "DEBUG=* eleventy"
   },
-  "homepage": "https://github.com/necolas/react-native-web",
+  "homepage": "https://hps1978.github.io/react-native-web-tv/",
   "devDependencies": {
     "@11ty/eleventy": "^1.0.1",
     "@11ty/eleventy-navigation": "^0.3.3",

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - "master"
+      - "tv-main"
   pull_request:
     types: [opened, synchronize, reopened]
 

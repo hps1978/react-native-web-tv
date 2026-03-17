@@ -2,16 +2,21 @@
 
 ## Reporting Issues and Asking Questions
 
-Before opening an issue, please search the [issue tracker](https://github.com/necolas/react-native-web/issues) to make sure your issue hasn't already been reported. Please note that your issue may be closed if it doesn't include the information requested in the issue template.
+Before opening an issue, please search the [issue tracker](https://github.com/hps1978/react-native-web-tv/issues) to make sure your issue hasn't already been reported. Please note that your issue may be closed if it doesn't include the information requested in the issue template.
 
 ## Getting started
 
-Visit the [Issue tracker](https://github.com/necolas/react-native-web/issues) to find a list of open issues that need attention.
+Visit the [Issue tracker](https://github.com/hps1978/react-native-web-tv/issues) to find a list of open issues that need attention.
+
+Branch model used in this fork:
+
+- `tv-main`: daily development branch.
+- `master`: release branch.
 
 Fork, then clone the repo:
 
 ```
-git clone https://github.com/your-username/react-native-web.git
+git clone https://github.com/your-username/react-native-web-tv.git
 ```
 
 Install dependencies (requires Node.js >= 16.0):
@@ -94,7 +99,7 @@ Please open an issue with a proposal for a new feature or refactoring before sta
 
 **Before submitting a pull request**, please make sure the following is done:
 
-1. Fork the repository and create your branch from `master`.
+1. Fork the repository and create your branch from `tv-main`.
 2. If you've added code that should be tested, add tests!
 3. If you've changed APIs, update the documentation.
 4. Ensure the tests pass (`npm run test`).
@@ -111,13 +116,33 @@ Thank you for contributing!
 
 ## Releases
 
-To commit, publish, and push a final version:
+Release flow for this fork:
+
+- Prepare and validate release candidates on `tv-main`.
+- Merge or fast-forward the validated release state to `master`.
+- Run the release command from a clean `master` working tree.
+- The release script publishes `@hps1978/react-native-web-tv`.
+- After publish, docs are deployed to `gh-pages` via `postrelease`.
+
+Versioning convention for this fork:
+
+- Keep the upstream RNW version as the base.
+- Append the TV-specific release suffix as `-tv.<n>`.
+- Example: `0.21.2-tv.1` means "first TV fork release built on upstream 0.21.2".
+- Do not use underscore-based package versions such as `0.21.2_1`; npm publishing expects semver-compatible version strings.
+
+To commit, publish, and push a final version from `master`:
 
 ```
 npm run release -- <version> --otp=<otp-code>
 ```
 
-Release candidates or versions that you'd like to publish to npm, but do not want to produce a commit and push it to GitHub:
+Requirements:
+
+- Run from `master` unless you are using `--skip-git`.
+- Start from a clean working tree.
+
+Release candidates or versions that you'd like to publish to npm, but do not want to produce a commit and push to GitHub:
 
 ```
 npm run release -- <version> --skip-git

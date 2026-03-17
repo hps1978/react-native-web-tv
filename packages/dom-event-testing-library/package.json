@@ -6,5 +6,5 @@
   "description": "Browser event sequences for unit tests",
   "author": "Nicolas Gallagher",
   "license": "MIT",
-  "homepage": "https://github.com/necolas/react-native-web/tree/master/packages/dom-event-testing-library"
+  "homepage": "https://github.com/hps1978/react-native-web-tv/tree/tv-main/packages/dom-event-testing-library"
 }

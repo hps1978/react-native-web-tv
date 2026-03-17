@@ -18,6 +18,20 @@ React Native for Web can be used for multi-platform and web-only applications. I
 npm install react-dom {{ site.packageName }}
 ```
 
+If you want to keep the dependency key as `react-native-web` in an app while consuming this fork, install it using an npm alias:
+
+```shell
+npm install react-dom react-native-web@npm:{{ site.packageName }}@{{ site.packageVersion }}
+```
+
+Fork release versions follow this convention:
+
+```text
+<upstream-version>-tv.<tv-release>
+```
+
+Example: `0.21.2-tv.1` means the first TV fork release built from upstream `0.21.2`.
+
 The Babel plugin is recommended for build-time optimizations.
 
 ```shell

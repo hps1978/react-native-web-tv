@@ -181,7 +181,7 @@ module.exports = function (eleventyConfig) {
       data: 'data',
       output: 'dist'
     },
-    // Matches the GitHub Pages subdirectory of the site (necolas.github.io/react-native-web)
-    pathPrefix: '/react-native-web/'
+    // Matches the GitHub Pages subdirectory of the site (hps1978.github.io/react-native-web-tv)
+    pathPrefix: '/react-native-web-tv/'
   };
 };

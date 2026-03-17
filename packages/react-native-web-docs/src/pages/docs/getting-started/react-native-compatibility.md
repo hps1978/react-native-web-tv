@@ -63,7 +63,7 @@ Visit the [React Native Directory](https://reactnative.directory/?web=true) to f
 | Dimensions               | ✓      |  |
 | Easing                   | ✓      |  |
 | Geolocation              | ✓      |  |
-| I18nManager              | (✓)    | Mock. See [localization](https://necolas.github.io/react-native-web/docs/localization/) for preferred approach. |
+| I18nManager              | (✓)    | Mock. See [localization](../localization/) for preferred approach. |
 | InteractionManager       | (✓)    |  |
 | Keyboard                 | (✓)    | Mock. |
 | LayoutAnimation          | (✓)    | Missing translation to web animations. |

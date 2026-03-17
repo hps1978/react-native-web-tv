@@ -44,6 +44,32 @@ npm run build
 npm run test
 ```
 
+To consume this fork while keeping the dependency key as `react-native-web`, install with npm alias:
+
+```bash
+npm install react-native-web@npm:@hps1978/react-native-web-tv@<version>
+```
+
+## Versioning convention
+
+Published TV fork versions keep the upstream React Native Web version as the base and append a TV-specific semver suffix:
+
+```text
+<upstream-version>-tv.<tv-release>
+```
+
+Example:
+
+```text
+0.21.2-tv.1
+```
+
+Notes:
+
+- `0.21.2` stays aligned with the upstream RNW version.
+- `tv.1` is the first fork-specific release for that upstream base.
+- The suffix uses `-tv.<n>` rather than `_n` so published package versions remain semver-compatible with npm.
+
 Useful workspace-specific commands:
 
 ```bash
@@ -57,6 +83,15 @@ npm run dev -w react-native-web-examples
 npm run dev -w react-native-web-docs
 npm run build -w react-native-web-docs
 ```
+
+## Upstream patch queue workflow
+
+This fork uses a patch-queue model for upstream upgrades.
+
+- Full guide: `UPSTREAM_PATCH_WORKFLOW.md`
+- Preflight checks: `npm run patches:check`
+- Export grouped TV patches: `npm run patches:export`
+- Replay patches onto an integration branch: `npm run patches:replay -- --patch-dir patches/<series-folder>`
 
 ## TV spatial navigation configuration
 
@@ -135,6 +170,7 @@ Then open the local dev URL and try TV-focused routes such as:
 
 ## Docs
 
+- Documentation site: `https://hps1978.github.io/react-native-web-tv/`
 - Docs workspace source: `packages/react-native-web-docs`
 - TV docs include:
   - TV navigation concepts
@@ -160,6 +196,6 @@ Read the [contributing guide][contributing-url] to learn how to propose and ship
 
 Get started with [good first issues][good-first-issue-url].
 
-[contributing-url]: https://github.com/necolas/react-native-web/blob/master/.github/CONTRIBUTING.md
-[good-first-issue-url]: https://github.com/necolas/react-native-web/labels/good%20first%20issue
+[contributing-url]: https://github.com/hps1978/react-native-web-tv/blob/tv-main/.github/CONTRIBUTING.md
+[good-first-issue-url]: https://github.com/hps1978/react-native-web-tv/labels/good%20first%20issue
 [code-of-conduct]: https://opensource.fb.com/code-of-conduct/
