@@ -139,8 +139,13 @@ execSync('npm install', { stdio: 'inherit' });
 if (!skipGit) {
   // add changes
   execSync('git add .', { stdio: 'inherit' });
-  // commit
-  execSync(`git commit -m "${version}" --no-verify`, { stdio: 'inherit' });
+  // commit only when there are staged changes
+  const stagedFiles = run('git diff --cached --name-only');
+  if (stagedFiles.length > 0) {
+    execSync(`git commit -m "${version}" --no-verify`, { stdio: 'inherit' });
+  } else {
+    console.log('No version changes to commit; continuing with tag/publish.');
+  }
   // tag
   execSync(`git tag -fam ${version} "${version}"`, { stdio: 'inherit' });
 }
