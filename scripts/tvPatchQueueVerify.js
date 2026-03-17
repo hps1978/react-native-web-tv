@@ -15,7 +15,7 @@ function run(command) {
 function parseArgs(argv) {
   const args = {
     patchDir: null,
-    base: 'upstream/master'
+    base: 'upstream-mirror'
   };
   for (let i = 2; i < argv.length; i += 1) {
     if (argv[i] === '--patch-dir') {
