@@ -1,0 +1,235 @@
+diff --git a/README.md b/README.md
+index 319235e0..d45ae38f 100644
+--- a/README.md
++++ b/README.md
+@@ -1,49 +1,201 @@
+-# Development monorepo
++# React Native Web for TV monorepo
+ 
+-This is the development monorepo for "React Native for Web" and related projects.
++This repository is a customized React Native for Web fork that adds TV-first APIs and focus navigation for web-based TV platforms.
+ 
+-## Structure
++It is intended for TV browser runtimes, while keeping React Native for Web compatibility for shared app code.
+ 
+-* `.github`
+-  * Contains workflows used by GitHub Actions.
+-  * Contains issue templates.
+-* `configs`
+-  * Contains configuration files used by the monorepo tooling (compiling, linting, testing, etc.)
+-* `packages`
+-  * [react-native-web](https://github.com/necolas/react-native-web/blob/master/packages/react-native-web)
+-  * Contains the individual packages managed in the monorepo.
+-* `scripts`
+-  * Contains Node.js scripts for miscellaneous tasks.
++## What's included in this fork
+ 
+-## Tasks
++- TV spatial navigation via [@bbc/tv-lrud-spatial-rnw](https://github.com/hps1978/lrud-spatial-rnw), integrated through `SpatialManager`.
++- TV exports from `react-native-web`:
++  - `TVFocusGuideView`
++  - `TVEventHandler`
++  - `TVEventControl`
++  - `TVTextScrollView`
++  - `useTVEventHandler`
++  - `TVRemoteEvent` (type)
++- TV focus and directional props available in core components (for example `View`, `Pressable`, `TextInput`):
++  - `tvFocusable`, `isTVSelectable`
++  - `hasTVPreferredFocus`, `autoFocus`
++  - `trapFocusUp`, `trapFocusDown`, `trapFocusLeft`, `trapFocusRight`
++  - `nextFocusUp`, `nextFocusDown`, `nextFocusLeft`, `nextFocusRight`, `nextFocusForward`: To be implemented.
++  - `destinations` (for `TVFocusGuideView` and focus guide flows)
++- TV-enabled list/focus integrations in `VirtualizedList` pathways.
+ 
+-* `build`
+-  * Use `npm run build` to run the build script in every package.
+-  * Use `npm run build -w <package-name>` to run the build script for a specific package.
+-* `dev`
+-  * Use `npm run dev` to run the dev script in every package.
+-  * Use `npm run dev -w <package-name>` to run the dev script for a specific package.
+-* `test`
+-  * Use `npm run test` to run tests for every package.
++Current implementation notes:
+ 
+-More details can be found in the contributing guide below.
++- `Platform.isTV` is forced to `true` for TV first support.
++- `TVEventControl` API surface exists for compatibility; methods currently warn as not implemented on web.
++
++## Monorepo structure
++
++- `.github`: GitHub workflows and templates.
++- `configs`: shared Babel/Jest/ESLint/Flow configuration.
++- `packages`: workspace packages (`react-native-web`, docs, examples, plugin, etc.).
++- `scripts`: repository scripts (release/build helpers).
++
++## Quick start
++
++From repository root:
++
++```bash
++npm install
++npm run build
++npm run test
++```
++
++To consume this fork while keeping the dependency key as `react-native-web`, install with npm alias:
++
++```bash
++npm install react-native-web@npm:@hps1978/react-native-web-tv@<version>
++```
++
++## Versioning convention
++
++Published TV fork versions keep the upstream React Native Web version as the base and append a TV-specific semver suffix:
++
++```text
++<upstream-version>-tv.<tv-release>
++```
++
++Example:
++
++```text
++0.21.2-tv.1
++```
++
++Notes:
++
++- `0.21.2` stays aligned with the upstream RNW version.
++- `tv.1` is the first fork-specific release for that upstream base.
++- The suffix uses `-tv.<n>` rather than `_n` so published package versions remain semver-compatible with npm.
++
++Useful workspace-specific commands:
++
++```bash
++# Core package
++npm run dev -w react-native-web
++
++# Examples app
++npm run dev -w react-native-web-examples
++
++# Docs site (Eleventy)
++npm run dev -w react-native-web-docs
++npm run build -w react-native-web-docs
++```
++
++## Upstream patch queue workflow
++
++This fork uses a patch-queue model for upstream upgrades.
++
++- Full guide: `UPSTREAM_PATCH_WORKFLOW.md`
++- Preflight checks: `npm run patches:check`
++- Export grouped TV patches: `npm run patches:export`
++- Replay patches onto an integration branch: `npm run patches:replay -- --patch-dir patches/<series-folder>`
++
++## TV spatial navigation configuration
++
++Configure TV behavior before `AppRegistry.runApplication()` using `window.appConfig`.
++
++```html
++<script>
++  window.appConfig = {
++    keyMap: {
++      // Optional custom key mappings for TV remotes.
++      // Add Back/Menu keyCodes per platform as needed.
++      Back: 461,
++      Menu: 10009
++    },
++    keydownThrottleMs: 0,
++    focusConfig: {
++      // 'default' or 'AlignLeft'
++      mode: 'default'
++    },
++    scrollConfig: {
++      leftEdgePaddingPx: 10,
++      topEdgePaddingPx: 15,
++      scrollThrottleMs: 80, // currently not implemented
++      smoothScrollEnabled: true,
++      scrollAnimationDurationMsVertical: 0,
++      scrollAnimationDurationMsHorizontal: 0
++    }
++  };
++</script>
++```
++
++Supported fields:
++
++- `keyMap`: map remote keys to navigation/back/menu behavior.
++- `keydownThrottleMs`: minimum delay between keydown events.
++- `focusConfig.mode`: focus-scroll behavior (`default` or `AlignLeft`).
++- `scrollConfig.leftEdgePaddingPx`: left boundary padding while scrolling.
++- `scrollConfig.topEdgePaddingPx`: top boundary padding while scrolling.
++- `scrollConfig.scrollThrottleMs`: minimum delay between scroll operations (currently not implemented).
++- `scrollConfig.smoothScrollEnabled`: enable/disable smooth scrolling where supported.
++- `scrollConfig.scrollAnimationDurationMsVertical`: vertical scroll animation duration override.
++- `scrollConfig.scrollAnimationDurationMsHorizontal`: horizontal scroll animation duration override.
++
++## TVTextScrollView
++
++`TVTextScrollView` is a TV-friendly wrapper for long-form scrollable content where there may be few or no focusable children.
++
++It integrates with SpatialManager directional key handling and supports page-based scroll behavior:
++
++- `scrollDuration` (seconds): animation duration for directional scroll.
++- `pageSize` (px): distance moved per directional action. Defaults to half of visible size.
++- `snapToStart`: when `true`, allows snapping to start edge on directional exit.
++- `snapToEnd`: when `true`, allows snapping to end edge on directional exit.
++
++Import example:
++
++```js
++import { TVTextScrollView } from 'react-native';
++```
++
++## Try TV examples
++
++Run the examples workspace:
++
++```bash
++npm run dev -w react-native-web-examples
++```
++
++Then open the local dev URL and try TV-focused routes such as:
++
++- `/tv-event-handler`
++- `/tv-focus-guide-view`
++- `/tv-text-scrollview`
++- `/flatlist-tv-scroll`
++- `/rlv-flatlist-tv-scroll`
++
++## Docs
++
++- Documentation site: `https://hps1978.github.io/react-native-web-tv/`
++- Docs workspace source: `packages/react-native-web-docs`
++- TV docs include:
++  - TV navigation concepts
++  - `TVFocusGuideView`
++  - `TVEventHandler`
++  - `TVEventControl`
++  - `TVTextScrollView`
++  - `useTVEventHandler`
+ 
+ ## Contributing
+ 
+-Development happens in the open on GitHub and we are grateful for contributions including bugfixes, improvements, and ideas.
++Development happens in the open on GitHub and contributions are welcome.
+ 
+ ### Code of conduct
+ 
+-This project expects all participants to adhere to Meta's OSS [Code of Conduct][code-of-conduct]. Please read the full text so that you can understand what actions will and will not be tolerated.
++This project expects all participants to adhere to Meta's OSS [Code of Conduct][code-of-conduct].
+ 
+ ### Contributing guide
+ 
+-Read the [contributing guide][contributing-url] to learn about the development process, how to propose bugfixes and improvements, and how to build and test your changes to React Native for Web.
++Read the [contributing guide][contributing-url] to learn how to propose and ship changes.
+ 
+ ### Good first issues
+ 
+-To help you get you familiar with the contribution process, there is a list of [good first issues][good-first-issue-url] that contain bugs which have a relatively limited scope. This is a great place to get started.
++Get started with [good first issues][good-first-issue-url].
+ 
+-[contributing-url]: https://github.com/necolas/react-native-web/blob/master/.github/CONTRIBUTING.md
+-[good-first-issue-url]: https://github.com/necolas/react-native-web/labels/good%20first%20issue
++[contributing-url]: https://github.com/hps1978/react-native-web-tv/blob/tv-main/.github/CONTRIBUTING.md
++[good-first-issue-url]: https://github.com/hps1978/react-native-web-tv/labels/good%20first%20issue
+ [code-of-conduct]: https://opensource.fb.com/code-of-conduct/

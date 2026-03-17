@@ -1,0 +1,13 @@
+diff --git a/packages/benchmarks/README.md b/packages/benchmarks/README.md
+index eb51c9f1..3762be79 100644
+--- a/packages/benchmarks/README.md
++++ b/packages/benchmarks/README.md
+@@ -1,6 +1,7 @@
+ # Benchmarks
+ 
+-Try the [benchmarks app](https://necolas.github.io/react-native-web/benchmarks) online.
++This package benchmarks rendering/style performance scenarios and does not
++currently include dedicated TV spatial-navigation benchmarks.
+ 
+ To work on the benchmarks locally from monorepo root:
+ 
