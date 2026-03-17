@@ -30,7 +30,7 @@ Fork release versions follow this convention:
 <upstream-version>-tv.<tv-release>
 ```
 
-Example: `0.21.2-tv.1` means the first TV fork release built from upstream `0.21.2`.
+Example: `0.21.2-tv.0` means the initial TV fork release built from upstream `0.21.2`.
 
 The Babel plugin is recommended for build-time optimizations.
 

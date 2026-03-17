@@ -128,7 +128,7 @@ Versioning convention for this fork:
 
 - Keep the upstream RNW version as the base.
 - Append the TV-specific release suffix as `-tv.<n>`.
-- Example: `0.21.2-tv.1` means "first TV fork release built on upstream 0.21.2".
+- Example: `0.21.2-tv.0` means "initial TV fork release built on upstream 0.21.2".
 - Do not use underscore-based package versions such as `0.21.2_1`; npm publishing expects semver-compatible version strings.
 
 To commit, publish, and push a final version from `master`:

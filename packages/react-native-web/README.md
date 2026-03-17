@@ -16,7 +16,7 @@ This fork keeps the upstream React Native Web version as the base and appends a 
 <upstream-version>-tv.<tv-release>
 ```
 
-For example, `0.21.2-tv.1` is the first TV fork release built on upstream `0.21.2`.
+For example, `0.21.2-tv.0` is the initial TV fork release built on upstream `0.21.2`.
 
 ## Example
 
@@ -53,7 +53,7 @@ AppRegistry.runApplication('App', { rootTag: document.getElementById('react-root
 This fork adds Web TV spatial navigation and TV-specific APIs.
 
 Highlights:
-* TV spatial navigation via [@bbc/tv-lrud-spatial-rnw](https://github.com/hps1978/lrud-spatial-rnw) which is inspired by and a heavy re-write of `@bbc/tv-lrud-spatial` to address React Native Web components on TV. It's wired into React Native Web through SpatialManager (another new module).
+* TV spatial navigation via a forked `@bbc/tv-lrud-spatial` implementation from [hps1978/lrud-spatial-rnw](https://github.com/hps1978/lrud-spatial-rnw). It's wired into React Native Web through SpatialManager.
 * New TV exports: `TVEventHandler`, `TVEventControl`, `TVFocusGuideView`, `TVTextScrollView`, `useTVEventHandler`, and `TVRemoteEvent`.
 * TV focus props include `tvFocusable`, `isTVSelectable`, `hasTVPreferredFocus`, `autoFocus`, `trapFocusUp/Down/Left/Right`, `destinations`, and directional focus routing (`nextFocusUp/Down/Left/Right/Forward`).
 * RecyclerListView adapter for `VirtualizedList`/`FlatList` (via `recyclerlistview`) to improve large-list performance on TV. NOTE: Disabled at the moment to fix some issues.
@@ -121,7 +121,7 @@ import { TVTextScrollView } from 'react-native';
 Run examples from monorepo root:
 
 ```bash
-npm run dev -w react-native-web-examples
+npm run dev -w packages/react-native-web-examples
 ```
 
 Try routes including:

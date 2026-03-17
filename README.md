@@ -6,7 +6,7 @@ It is intended for TV browser runtimes, while keeping React Native for Web compa
 
 ## What's included in this fork
 
-- TV spatial navigation via [@bbc/tv-lrud-spatial-rnw](https://github.com/hps1978/lrud-spatial-rnw), integrated through `SpatialManager`.
+- TV spatial navigation via a forked `@bbc/tv-lrud-spatial` implementation from [hps1978/lrud-spatial-rnw](https://github.com/hps1978/lrud-spatial-rnw), integrated through `SpatialManager`.
 - TV exports from `react-native-web`:
   - `TVFocusGuideView`
   - `TVEventHandler`
@@ -61,27 +61,27 @@ Published TV fork versions keep the upstream React Native Web version as the bas
 Example:
 
 ```text
-0.21.2-tv.1
+0.21.2-tv.0
 ```
 
 Notes:
 
 - `0.21.2` stays aligned with the upstream RNW version.
-- `tv.1` is the first fork-specific release for that upstream base.
+- `tv.0` is the initial fork-specific release for that upstream base.
 - The suffix uses `-tv.<n>` rather than `_n` so published package versions remain semver-compatible with npm.
 
 Useful workspace-specific commands:
 
 ```bash
 # Core package
-npm run dev -w react-native-web
+npm run dev -w packages/react-native-web
 
 # Examples app
-npm run dev -w react-native-web-examples
+npm run dev -w packages/react-native-web-examples
 
 # Docs site (Eleventy)
-npm run dev -w react-native-web-docs
-npm run build -w react-native-web-docs
+npm run dev -w packages/react-native-web-docs
+npm run build -w packages/react-native-web-docs
 ```
 
 ## Upstream patch queue workflow
@@ -146,18 +146,12 @@ It integrates with SpatialManager directional key handling and supports page-bas
 - `snapToStart`: when `true`, allows snapping to start edge on directional exit.
 - `snapToEnd`: when `true`, allows snapping to end edge on directional exit.
 
-Import example:
-
-```js
-import { TVTextScrollView } from 'react-native';
-```
-
 ## Try TV examples
 
 Run the examples workspace:
 
 ```bash
-npm run dev -w react-native-web-examples
+npm run dev -w packages/react-native-web-examples
 ```
 
 Then open the local dev URL and try TV-focused routes such as:
@@ -166,7 +160,6 @@ Then open the local dev URL and try TV-focused routes such as:
 - `/tv-focus-guide-view`
 - `/tv-text-scrollview`
 - `/flatlist-tv-scroll`
-- `/rlv-flatlist-tv-scroll`
 
 ## Docs
 

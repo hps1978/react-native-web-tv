@@ -7,19 +7,19 @@ Markdown pages and an Eleventy static site generator.
 From monorepo root:
 
 ```bash
-npm run dev -w react-native-web-docs
+npm run dev -w packages/react-native-web-docs
 ```
 
 Production build:
 
 ```bash
-npm run build -w react-native-web-docs
+npm run build -w packages/react-native-web-docs
 ```
 
 Debug mode:
 
 ```bash
-npm run debug -w react-native-web-docs
+npm run debug -w packages/react-native-web-docs
 ```
 
 ## TV docs in this fork

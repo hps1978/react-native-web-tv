@@ -18,7 +18,7 @@ Releases from this fork use the upstream React Native Web version as the base an
 Example:
 
 ```text
-0.21.2-tv.1
+0.21.2-tv.0
 ```
 
 This keeps fork releases clearly tied to the upstream base while staying semver-compatible for npm publishing.

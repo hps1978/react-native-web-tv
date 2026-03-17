@@ -7,7 +7,7 @@ Next.js pages and React Native components. Provides interactive examples for the
 From monorepo root:
 
 ```bash
-npm run dev -w react-native-web-examples
+npm run dev -w packages/react-native-web-examples
 ```
 
 ## Webpack browser mode
@@ -15,19 +15,19 @@ npm run dev -w react-native-web-examples
 This package also supports a simple webpack browser build without changing the current `pages/` structure.
 
 ```bash
-npm run dev:webpack -w react-native-web-examples
+npm run dev:webpack -w packages/react-native-web-examples
 ```
 
 Production build:
 
 ```bash
-npm run build:webpack -w react-native-web-examples
+npm run build:webpack -w packages/react-native-web-examples
 ```
 
 Serving production build:
 
 ```bash
-npm run serve:webpack -w react-native-web-examples
+npm run serve:webpack -w packages/react-native-web-examples
 ```
 
 Webpack output is generated in `packages/react-native-web-examples/dist-webpack/`.

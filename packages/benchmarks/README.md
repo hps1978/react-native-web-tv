@@ -6,7 +6,7 @@ currently include dedicated TV spatial-navigation benchmarks.
 To work on the benchmarks locally from monorepo root:
 
 ```
-npm run dev -w react-native-web
+npm run dev -w packages/react-native-web
 npm run build -w benchmarks
 open ./packages/benchmarks/dist/index.html
 ```
