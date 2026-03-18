@@ -5,7 +5,7 @@
  */
 
 import { useEffect } from 'react';
-import { setupSpatialNavigation } from 'react-native-web/dist/modules/SpatialManager';
+import { setupSpatialNavigation } from 'react-native-web/dist/cjs/modules/SpatialManager';
 
 export default function App({ Component, pageProps }) {
   useEffect(() => {
