@@ -56,7 +56,7 @@ const style: ViewStyle = {
 };
 
 <View
-  href="https://hps1978.github.io/react-native-web-tv/" // RNW prop
+  href="https://hps1978.github.io/react-native-web-tv/docs/" // RNW prop
   style={style}
 />
 ```

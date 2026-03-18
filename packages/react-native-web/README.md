@@ -2,9 +2,9 @@
 
 [![npm version][package-badge]][package-url] [![Build Status][ci-badge]][ci-url] [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://reactjs.org/docs/how-to-contribute.html#your-first-pull-request)
 
-"React Native Web for TV" makes it possible to run [React Native][react-native-url] components and APIs on the web using React DOM.
+"React Native Web for TV" makes it possible to run [React Native][react-native-url] components and APIs on the web based TVs using React Native Web.
 
-It is derived from [React Native Web](https://github.com/necolas/react-native-web), and this fork remains intentionally close to that project while extending it for browser-based TV platforms. Thanks to the RNW project for the foundation this fork builds on.
+It is derived from [React Native Web](https://github.com/necolas/react-native-web), and this fork remains intentionally close to that project while extending it for browser-based TV platforms. Thanks to the RNW project for the foundation this fork builds on 🙏.
 
 ## Documentation
 
