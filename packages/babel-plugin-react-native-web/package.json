@@ -4,7 +4,7 @@
   },
   "name": "babel-plugin-react-native-web",
   "version": "0.21.2-tv.0",
-  "description": "Babel plugin for React Native for Web",
+  "description": "Babel plugin for React Native Web for TV",
   "main": "index.js",
   "devDependencies": {
     "babel-plugin-tester": "^10.1.0"

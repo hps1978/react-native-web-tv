@@ -4,6 +4,8 @@ This repository is a customized React Native for Web fork that adds TV-first API
 
 It is intended for TV browser runtimes, while keeping React Native for Web compatibility for shared app code.
 
+It is derived from the [React Native Web](https://github.com/necolas/react-native-web) project. Thanks to the RNW project for the foundation this fork builds on while extending it with TV-specific behavior, APIs, and focus/navigation support.
+
 ## What's included in this fork
 
 - TV spatial navigation via a forked `@bbc/tv-lrud-spatial` implementation from [hps1978/lrud-spatial-rnw](https://github.com/hps1978/lrud-spatial-rnw), integrated through `SpatialManager`.
@@ -154,7 +156,11 @@ Run the examples workspace:
 npm run dev -w packages/react-native-web-examples
 ```
 
-Then open the local dev URL and try TV-focused routes such as:
+This fork keeps the broader React Native Web example surface and adds TV-specific routes on top of it.
+
+Some inherited examples are still general RNW demos and are not yet adapted for LRUD or remote-focus behavior. The TV-focused routes, along with the examples already updated for focus handling, can be exercised directly in a browser for testing and debugging.
+
+Open the local dev URL and try TV-focused routes such as:
 
 - `/tv-event-handler`
 - `/tv-focus-guide-view`
@@ -163,7 +169,7 @@ Then open the local dev URL and try TV-focused routes such as:
 
 ## Docs
 
-- Documentation site: `https://hps1978.github.io/react-native-web-tv/`
+- Documentation site: [https://hps1978.github.io/react-native-web-tv/](https://hps1978.github.io/react-native-web-tv/)
 - Docs workspace source: `packages/react-native-web-docs`
 - TV docs include:
   - TV navigation concepts

@@ -5,7 +5,7 @@
   },
   "name": "@hps1978/react-native-web-tv",
   "version": "0.21.2-tv.0",
-  "description": "React Native for Web with TV support",
+  "description": "React Native Web for TV",
   "module": "dist/index.js",
   "main": "dist/cjs/index.js",
   "sideEffects": false,

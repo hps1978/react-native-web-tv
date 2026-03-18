@@ -18,8 +18,12 @@ const version = argv._[0];
 const skipGit = argv['skip-git'];
 const oneTimeCode = argv.otp;
 const publishTag = argv.tag;
+const rootPackageJson = require('../package.json');
 
-console.log(`Publishing react-native-web-tv@${version}`);
+console.log(
+  `Release workflow package: ${rootPackageJson.name}@${rootPackageJson.version}`
+);
+console.log(`Requested publish version: ${version}`);
 
 function run(command, options = {}) {
   return execSync(command, {
@@ -115,6 +119,13 @@ if (workspaces.length === 0) {
   process.exit(1);
 }
 
+console.log('Publish targets:');
+workspaces.forEach(({ directory, packageJson }) => {
+  console.log(
+    `- ${packageJson.name} -> ${path.relative(process.cwd(), directory)}`
+  );
+});
+
 // Update each package version and its dependencies
 const workspaceNames = workspaces.map(({ packageJson }) => packageJson.name);
 workspaces.forEach(({ directory, packageJson, packageJsonPath }) => {
@@ -155,6 +166,11 @@ workspaces.forEach(({ directory, packageJson }) => {
   if (!packageJson.private) {
     const otpArg = oneTimeCode ? ` --otp ${oneTimeCode}` : '';
     const tagArg = resolvedPublishTag ? ` --tag ${resolvedPublishTag}` : '';
+    console.log(
+      `Publishing workspace package ${packageJson.name}@${
+        packageJson.version
+      } from ${path.relative(process.cwd(), directory)}`
+    );
     execSync(`npm publish${tagArg}${otpArg}`, {
       cwd: directory,
       stdio: 'inherit'

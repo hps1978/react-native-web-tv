@@ -1,12 +1,14 @@
-# React Native for Web
+# React Native Web for TV
 
 [![npm version][package-badge]][package-url] [![Build Status][ci-badge]][ci-url] [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://reactjs.org/docs/how-to-contribute.html#your-first-pull-request)
 
-"React Native for Web" makes it possible to run [React Native][react-native-url] components and APIs on the web using React DOM.
+"React Native Web for TV" makes it possible to run [React Native][react-native-url] components and APIs on the web using React DOM.
+
+It is derived from [React Native Web](https://github.com/necolas/react-native-web), and this fork remains intentionally close to that project while extending it for browser-based TV platforms. Thanks to the RNW project for the foundation this fork builds on.
 
 ## Documentation
 
-The documentation site is hosted at `https://hps1978.github.io/react-native-web-tv/`. Documentation source lives in `packages/react-native-web-docs` and can also be built locally from the monorepo.
+The documentation site is hosted at [https://hps1978.github.io/react-native-web-tv/](https://hps1978.github.io/react-native-web-tv/). Documentation source lives in `packages/react-native-web-docs` and can also be built locally from the monorepo.
 
 ## Versioning
 
@@ -18,35 +20,20 @@ This fork keeps the upstream React Native Web version as the base and appends a 
 
 For example, `0.21.2-tv.0` is the initial TV fork release built on upstream `0.21.2`.
 
-## Example
+## Examples in this fork
 
 The examples app source lives in `packages/react-native-web-examples` and can be run locally from the monorepo.
 
-You'll notice that there is no reference to `react-dom` in components. The `App` component that is shown below is defined using the APIs and Components of React Native, but it can also be rendered on the web using React Native for Web.
+This fork keeps the broader React Native Web example surface and adds TV-specific examples on top of it.
 
-```js
-// Example component
-import React from 'react';
-import { AppRegistry, StyleSheet, Text, View } from 'react-native';
+Some inherited examples are still general RNW demos and are not yet adapted for LRUD or remote-focus behavior. The TV-focused routes, along with the examples already updated for focus handling, can be exercised directly in a browser for testing and debugging.
 
-class App extends React.Component {
-  render() {
-    return (
-      <View style={styles.box}>
-        <Text style={styles.text}>Hello, world!</Text>
-      </View>
-    );
-  }
-}
+Useful TV-oriented routes include:
 
-const styles = StyleSheet.create({
-  box: { padding: 10 },
-  text: { fontWeight: 'bold' }
-});
-
-AppRegistry.registerComponent('App', () => App);
-AppRegistry.runApplication('App', { rootTag: document.getElementById('react-root') });
-```
+* `/tv-event-handler`
+* `/tv-focus-guide-view`
+* `/tv-text-scrollview`
+* `/flatlist-tv-scroll`
 
 ## Web TV support in this fork
 
@@ -110,30 +97,9 @@ It works with SpatialManager key handling and supports page-style behavior throu
 * `snapToStart`: when enabled, allows snapping to the start edge.
 * `snapToEnd`: when enabled, allows snapping to the end edge.
 
-Import:
-
-```js
-import { TVTextScrollView } from 'react-native';
-```
-
-## TV examples in this repo
-
-Run examples from monorepo root:
-
-```bash
-npm run dev -w packages/react-native-web-examples
-```
-
-Try routes including:
-
-* `/tv-event-handler`
-* `/tv-focus-guide-view`
-* `/tv-text-scrollview`
-* `/flatlist-tv-scroll`
-* `/rlv-flatlist-tv-scroll`
 ## Contributing
 
-Development happens in the open on GitHub and we are grateful for contributions including bugfixes, improvements, and ideas. Read below to learn how you can take part in improving React Native for Web.
+Development happens in the open on GitHub and we are grateful for contributions including bugfixes, improvements, and ideas. Read below to learn how you can take part in improving React Native Web for TV.
 
 ### Code of conduct
 
@@ -141,7 +107,7 @@ This project expects all participants to adhere to Meta's OSS [Code of Conduct][
 
 ### Contributing guide
 
-Read the [contributing guide][contributing-url] to learn about the development process, how to propose bugfixes and improvements, and how to build and test your changes to React Native for Web.
+Read the [contributing guide][contributing-url] to learn about the development process, how to propose bugfixes and improvements, and how to build and test your changes to React Native Web for TV.
 
 ### Good first issues
 
@@ -149,7 +115,7 @@ To help you get you familiar with the contribution process, there is a list of [
 
 ## License
 
-React Native for Web is [MIT licensed](./LICENSE). By contributing to React Native for Web, you agree that your contributions will be licensed under its MIT license.
+React Native Web for TV is [MIT licensed](./LICENSE). By contributing to React Native Web for TV, you agree that your contributions will be licensed under its MIT license.
 
 This fork also depends on Apache-2.0 licensed TV navigation code via `@bbc/tv-lrud-spatial`.
 See [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) and [APACHE-2.0.txt](./APACHE-2.0.txt) for redistribution details.

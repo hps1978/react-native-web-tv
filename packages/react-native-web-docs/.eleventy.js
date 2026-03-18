@@ -14,6 +14,8 @@ const markdownFootnote = require('markdown-it-footnote');
 const markdownTasks = require('markdown-it-task-lists');
 const UglifyJS = require('uglify-es');
 
+const PATH_PREFIX = '/react-native-web-tv/';
+
 /**
  * Markdown plugin
  * Add classes to markdown elements by default
@@ -66,6 +68,38 @@ module.exports = function (eleventyConfig) {
     }
     return content;
   });
+
+  // Normalize internal docs links to trailing-slash URLs for GitHub Pages.
+  eleventyConfig.addTransform(
+    'normalizeInternalDocsLinks',
+    function (content, outputPath) {
+      if (typeof outputPath !== 'string' || !outputPath.includes('.html')) {
+        return content;
+      }
+
+      const docsBasePath = `${PATH_PREFIX.replace(/\/$/, '')}/docs`;
+
+      return content.replace(/href="([^"]+)"/g, (fullMatch, hrefValue) => {
+        if (!hrefValue.startsWith(docsBasePath)) {
+          return fullMatch;
+        }
+
+        if (
+          hrefValue.endsWith('/') ||
+          hrefValue.includes('#') ||
+          hrefValue.includes('?')
+        ) {
+          return fullMatch;
+        }
+
+        if (/\.[A-Za-z0-9]+$/.test(hrefValue)) {
+          return fullMatch;
+        }
+
+        return `href="${hrefValue}/"`;
+      });
+    }
+  );
 
   // FILTERS -----
 
@@ -182,6 +216,6 @@ module.exports = function (eleventyConfig) {
       output: 'dist'
     },
     // Matches the GitHub Pages subdirectory of the site (hps1978.github.io/react-native-web-tv)
-    pathPrefix: '/react-native-web-tv/'
+    pathPrefix: PATH_PREFIX
   };
 };
