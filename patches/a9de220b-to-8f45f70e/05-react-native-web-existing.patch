@@ -1,0 +1,1155 @@
+diff --git a/packages/react-native-web/README.md b/packages/react-native-web/README.md
+index 4eb51b64..cd18b19b 100644
+--- a/packages/react-native-web/README.md
++++ b/packages/react-native-web/README.md
+@@ -1,46 +1,105 @@
+-# React Native for Web
++# React Native Web for TV
+ 
+ [![npm version][package-badge]][package-url] [![Build Status][ci-badge]][ci-url] [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://reactjs.org/docs/how-to-contribute.html#your-first-pull-request)
+ 
+-"React Native for Web" makes it possible to run [React Native][react-native-url] components and APIs on the web using React DOM.
++"React Native Web for TV" makes it possible to run [React Native][react-native-url] components and APIs on the web based TVs using React Native Web.
++
++It is derived from [React Native Web](https://github.com/necolas/react-native-web), and this fork remains intentionally close to that project while extending it for browser-based TV platforms. Thanks to the RNW project for the foundation this fork builds on 🙏.
+ 
+ ## Documentation
+ 
+-The [documentation site](https://necolas.github.io/react-native-web/) ([source](https://github.com/necolas/react-native-web/blob/master/packages/react-native-web-docs)) covers installation, guides, and APIs.
++The documentation site is hosted at [https://hps1978.github.io/react-native-web-tv/](https://hps1978.github.io/react-native-web-tv/). Documentation source lives in `packages/react-native-web-docs` and can also be built locally from the monorepo.
++
++## Versioning
+ 
+-## Example
++This fork keeps the upstream React Native Web version as the base and appends a TV-specific semver suffix:
+ 
+-The [examples app](https://p9t5cp.sse.codesandbox.io/) ([source](https://github.com/necolas/react-native-web/blob/master/packages/react-native-web-examples)) demonstrates many available features. Fork the [codesandbox](https://codesandbox.io/s/github/necolas/react-native-web/tree/master/packages/react-native-web-examples) to make changes and see the results.
++```text
++<upstream-version>-tv.<tv-release>
++```
+ 
+-You'll notice that there is no reference to `react-dom` in components. The `App` component that is shown below is defined using the APIs and Components of React Native, but it can also be rendered on the web using React Native for Web.
++For example, `0.21.2-tv.0` is the initial TV fork release built on upstream `0.21.2`.
++
++## Examples in this fork
++
++The examples app source lives in `packages/react-native-web-examples` and can be run locally from the monorepo.
++
++This fork keeps the broader React Native Web example surface and adds TV-specific examples on top of it.
++
++Some inherited examples are still general RNW demos and are not yet adapted for LRUD or remote-focus behavior. The TV-focused routes, along with the examples already updated for focus handling, can be exercised directly in a browser for testing and debugging.
++
++Useful TV-oriented routes include:
++
++* `/tv-event-handler`
++* `/tv-focus-guide-view`
++* `/tv-text-scrollview`
++* `/flatlist-tv-scroll`
++
++## Web TV support in this fork
++
++This fork adds Web TV spatial navigation and TV-specific APIs.
++
++Highlights:
++* TV spatial navigation via a forked `@bbc/tv-lrud-spatial` implementation from [hps1978/lrud-spatial-rnw](https://github.com/hps1978/lrud-spatial-rnw). It's wired into React Native Web through SpatialManager.
++* New TV exports: `TVEventHandler`, `TVEventControl`, `TVFocusGuideView`, `TVTextScrollView`, `useTVEventHandler`, and `TVRemoteEvent`.
++* TV focus props include `tvFocusable`, `isTVSelectable`, `hasTVPreferredFocus`, `autoFocus`, `trapFocusUp/Down/Left/Right`, `destinations`, and directional focus routing (`nextFocusUp/Down/Left/Right/Forward`).
++* RecyclerListView adapter for `VirtualizedList`/`FlatList` (via `recyclerlistview`) to improve large-list performance on TV. NOTE: Disabled at the moment to fix some issues.
++* `Platform.isTV` is currently forced to `true` in this fork (TV detection is TODO).
++* `TVEventControl` methods currently exist as compatibility stubs on web and emit warnings.
++
++## Spatial navigation configuration
++
++TV apps can configure spatial navigation before `AppRegistry.runApplication()` by setting `window.appConfig`.
++
++```html
++<script>
++  window.appConfig = {
++    keyMap: {
++      // Optional: map device-specific keys to ArrowUp/Down/Left/Right
++      // Map Back/Menu keyCodes per TV platform as needed
++      Back: 461,
++      Menu: 10009
++    },
++    keydownThrottleMs: 0,
++    focusConfig: {
++      mode: 'default' // 'default' or 'AlignLeft'
++    },
++    scrollConfig: {
++      leftEdgePaddingPx: 10,
++      topEdgePaddingPx: 15,
++      scrollThrottleMs: 80, // Not implemented
++      smoothScrollEnabled: true,
++      scrollAnimationDurationMsVertical: 0,
++      scrollAnimationDurationMsHorizontal: 0
++    }
++  };
++</script>
++```
+ 
+-```js
+-// Example component
+-import React from 'react';
+-import { AppRegistry, StyleSheet, Text, View } from 'react-native';
++Supported config fields:
++* `keyMap`: optional key mapping for LRUD input and TV-specific Back/Menu key support.
++* `keydownThrottleMs`: minimum time between keydown events (ms).
++* `focusConfig.mode`: focus-scroll mode (`default` or `AlignLeft`).
++* `scrollConfig.leftEdgePaddingPx`: padding from scroll container left edge.
++* `scrollConfig.topEdgePaddingPx`: padding from scroll container top edge.
++* `scrollConfig.scrollThrottleMs`: minimum time between scrolls. NOTE: not implemented.
++* `scrollConfig.smoothScrollEnabled`: enables smooth scroll where supported.
++* `scrollConfig.scrollAnimationDurationMsVertical`: vertical animation duration override.
++* `scrollConfig.scrollAnimationDurationMsHorizontal`: horizontal animation duration override.
+ 
+-class App extends React.Component {
+-  render() {
+-    return (
+-      <View style={styles.box}>
+-        <Text style={styles.text}>Hello, world!</Text>
+-      </View>
+-    );
+-  }
+-}
++## TVTextScrollView
+ 
+-const styles = StyleSheet.create({
+-  box: { padding: 10 },
+-  text: { fontWeight: 'bold' }
+-});
++`TVTextScrollView` is intended for text-heavy or static layouts that need predictable directional scrolling on TV, including cases with few or no focusable descendants.
+ 
+-AppRegistry.registerComponent('App', () => App);
+-AppRegistry.runApplication('App', { rootTag: document.getElementById('react-root') });
+-```
++It works with SpatialManager key handling and supports page-style behavior through props:
++* `scrollDuration` (seconds): directional scroll animation duration.
++* `pageSize` (px): per-action scroll distance; defaults to half the viewport size.
++* `snapToStart`: when enabled, allows snapping to the start edge.
++* `snapToEnd`: when enabled, allows snapping to the end edge.
+ 
+ ## Contributing
+ 
+-Development happens in the open on GitHub and we are grateful for contributions including bugfixes, improvements, and ideas. Read below to learn how you can take part in improving React Native for Web.
++Development happens in the open on GitHub and we are grateful for contributions including bugfixes, improvements, and ideas. Read below to learn how you can take part in improving React Native Web for TV.
+ 
+ ### Code of conduct
+ 
+@@ -48,7 +107,7 @@ This project expects all participants to adhere to Meta's OSS [Code of Conduct][
+ 
+ ### Contributing guide
+ 
+-Read the [contributing guide][contributing-url] to learn about the development process, how to propose bugfixes and improvements, and how to build and test your changes to React Native for Web.
++Read the [contributing guide][contributing-url] to learn about the development process, how to propose bugfixes and improvements, and how to build and test your changes to React Native Web for TV.
+ 
+ ### Good first issues
+ 
+@@ -56,13 +115,16 @@ To help you get you familiar with the contribution process, there is a list of [
+ 
+ ## License
+ 
+-React Native for Web is [MIT licensed](./LICENSE). By contributing to React Native for Web, you agree that your contributions will be licensed under its MIT license.
++React Native Web for TV is [MIT licensed](./LICENSE). By contributing to React Native Web for TV, you agree that your contributions will be licensed under its MIT license.
++
++This fork also depends on Apache-2.0 licensed TV navigation code via `@bbc/tv-lrud-spatial`.
++See [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) and [APACHE-2.0.txt](./APACHE-2.0.txt) for redistribution details.
+ 
+-[package-badge]: https://img.shields.io/npm/v/react-native-web.svg?style=flat
+-[package-url]: https://www.npmjs.com/package/react-native-web
+-[ci-badge]: https://github.com/necolas/react-native-web/workflows/tests/badge.svg
+-[ci-url]: https://github.com/necolas/react-native-web/actions
++[package-badge]: https://img.shields.io/npm/v/@hps1978/react-native-web-tv.svg?style=flat
++[package-url]: https://www.npmjs.com/package/@hps1978/react-native-web-tv
++[ci-badge]: https://github.com/hps1978/react-native-web-tv/workflows/tests/badge.svg
++[ci-url]: https://github.com/hps1978/react-native-web-tv/actions
+ [react-native-url]: https://reactnative.dev/
+-[contributing-url]: https://github.com/necolas/react-native-web/blob/master/.github/CONTRIBUTING.md
+-[good-first-issue-url]: https://github.com/necolas/react-native-web/labels/good%20first%20issue
++[contributing-url]: https://github.com/hps1978/react-native-web-tv/blob/tv-main/.github/CONTRIBUTING.md
++[good-first-issue-url]: https://github.com/hps1978/react-native-web-tv/labels/good%20first%20issue
+ [code-of-conduct]: https://opensource.fb.com/code-of-conduct/
+diff --git a/packages/react-native-web/package.json b/packages/react-native-web/package.json
+index 914be31f..14ce897b 100644
+--- a/packages/react-native-web/package.json
++++ b/packages/react-native-web/package.json
+@@ -1,14 +1,19 @@
+ {
+   "publishConfig": {
+-    "registry": "https://registry.npmjs.org/"
++    "registry": "https://registry.npmjs.org/",
++    "access": "public"
+   },
+-  "name": "react-native-web",
+-  "version": "0.21.2",
+-  "description": "React Native for Web",
++  "name": "@hps1978/react-native-web-tv",
++  "version": "0.21.2-tv.1",
++  "description": "React Native Web for TV",
+   "module": "dist/index.js",
+   "main": "dist/cjs/index.js",
+   "sideEffects": false,
+   "files": [
++    "APACHE-2.0.txt",
++    "LICENSE",
++    "README.md",
++    "THIRD_PARTY_NOTICES.md",
+     "dist",
+     "src",
+     "!**/__tests__"
+@@ -23,6 +28,7 @@
+   },
+   "dependencies": {
+     "@babel/runtime": "^7.18.6",
++    "@bbc/tv-lrud-spatial": "github:hps1978/lrud-spatial-rnw",
+     "@react-native/normalize-colors": "^0.74.1",
+     "fbjs": "^3.0.4",
+     "inline-style-prefixer": "^7.0.1",
+@@ -39,7 +45,7 @@
+   "license": "MIT",
+   "repository": {
+     "type": "git",
+-    "url": "git://github.com/necolas/react-native-web.git"
++    "url": "git://github.com/hps1978/react-native-web-tv.git"
+   },
+   "tags": [
+     "react"
+@@ -48,6 +54,7 @@
+     "react",
+     "react-component",
+     "react-native",
+-    "web"
++    "web",
++    "tv"
+   ]
+ }
+diff --git a/packages/react-native-web/src/exports/AppRegistry/index.js b/packages/react-native-web/src/exports/AppRegistry/index.js
+index 53a0af51..06003992 100644
+--- a/packages/react-native-web/src/exports/AppRegistry/index.js
++++ b/packages/react-native-web/src/exports/AppRegistry/index.js
+@@ -12,6 +12,7 @@
+ 
+ import type { Application } from './renderApplication';
+ import type { ComponentType, Node } from 'react';
++import { setupSpatialNavigation } from '../../modules/SpatialManager';
+ 
+ import invariant from 'fbjs/lib/invariant';
+ import unmountComponentAtNode from '../unmountComponentAtNode';
+@@ -131,7 +132,8 @@ export default class AppRegistry {
+       `Application "${appKey}" has not been registered. ` +
+         'This is either due to an import error during initialization or failure to call AppRegistry.registerComponent.'
+     );
+-
++    // TODO: Find a better place to do this
++    setupSpatialNavigation(appParameters.rootTag);
+     return runnables[appKey].run(appParameters);
+   }
+ 
+diff --git a/packages/react-native-web/src/exports/BackHandler/index.js b/packages/react-native-web/src/exports/BackHandler/index.js
+index 205fc58a..d3b8522c 100644
+--- a/packages/react-native-web/src/exports/BackHandler/index.js
++++ b/packages/react-native-web/src/exports/BackHandler/index.js
+@@ -8,19 +8,101 @@
+  * @flow
+  */
+ 
+-function emptyFunction() {}
++// On Web this basically uses ios stub implementation.
++// But for Web TV platforms we will allow App to configure the key through window.appConfig.keyMap
++// with keyMap.Back set to the keycode of the key they want to use as back button for specific TV platform.
+ 
+-const BackHandler = {
++import TVEventHandler from '../TV/TVEventHandler';
++import Platform from '../Platform';
++
++type BackPressEventName = 'backPress' | 'hardwareBackPress';
++type BackPressHandler = () => ?boolean;
++
++function emptyFunction(): void {}
++
++type TBackHandler = {
++  exitApp(): void,
++  addEventListener(
++    eventName: BackPressEventName,
++    handler: BackPressHandler
++  ): { remove: () => void, ... },
++  removeEventListener(
++    eventName: BackPressEventName,
++    handler: BackPressHandler
++  ): void
++};
++
++let BackHandler: TBackHandler = {
+   exitApp: emptyFunction,
+-  addEventListener(): {| remove: () => void |} {
+-    console.error(
+-      'BackHandler is not supported on web and should not be used.'
++  addEventListener: function (
++    _eventName: BackPressEventName,
++    _handler: BackPressHandler
++  ): { remove: () => void, ... } {
++    console.warn(
++      'BackHandler is only supported if window.appConfig.keyMap.Back is configured for Web TV platforms.'
+     );
+     return {
+       remove: emptyFunction
+     };
+   },
+-  removeEventListener: emptyFunction
++  removeEventListener: function (
++    eventName: BackPressEventName,
++    handler: BackPressHandler
++  ): void {
++    console.warn(
++      'BackHandler is only supported if window.appConfig.keyMap.Back is configured for Web TV platforms.'
++    );
++    return;
++  }
+ };
+ 
++if (
++  Platform.isTV &&
++  typeof window !== 'undefined' &&
++  window?.appConfig?.keyMap?.['Back']
++) {
++  const _backPressSubscriptions = new Set<() => ?boolean>();
++
++  TVEventHandler.addListener(function (evt) {
++    if (evt && evt.keyCode === window?.appConfig?.keyMap?.['Back']) {
++      let invokeDefault = true;
++      const subscriptions = Array.from(
++        _backPressSubscriptions.values()
++      ).reverse();
++
++      for (let i = 0; i < subscriptions.length; ++i) {
++        if (subscriptions[i]()) {
++          invokeDefault = false;
++          break;
++        }
++      }
++
++      if (invokeDefault) {
++        BackHandler.exitApp();
++      }
++    }
++  });
++
++  BackHandler = {
++    exitApp: emptyFunction,
++
++    addEventListener: function (
++      _eventName: BackPressEventName,
++      _handler: () => ?boolean
++    ): { remove: () => void, ... } {
++      _backPressSubscriptions.add(_handler);
++      return {
++        remove: () => BackHandler.removeEventListener(_eventName, _handler)
++      };
++    },
++
++    removeEventListener: function (
++      _eventName: BackPressEventName,
++      _handler: () => ?boolean
++    ) {
++      _backPressSubscriptions.delete(_handler);
++    }
++  };
++}
++
+ export default BackHandler;
+diff --git a/packages/react-native-web/src/exports/Button/index.js b/packages/react-native-web/src/exports/Button/index.js
+index a5940eb2..58fd205f 100644
+--- a/packages/react-native-web/src/exports/Button/index.js
++++ b/packages/react-native-web/src/exports/Button/index.js
+@@ -18,6 +18,7 @@ type ButtonProps = {|
+   accessibilityLabel?: ?string,
+   color?: ?string,
+   disabled?: boolean,
++  hasTVPreferredFocus?: ?boolean,
+   onPress?: ?(e: any) => void,
+   testID?: ?string,
+   title: string
+@@ -29,7 +30,15 @@ const Button: React.AbstractComponent<
+ > = React.forwardRef((props, forwardedRef) => {
+   // warnOnce('Button', 'Button is deprecated. Please use Pressable.');
+ 
+-  const { accessibilityLabel, color, disabled, onPress, testID, title } = props;
++  const {
++    accessibilityLabel,
++    color,
++    disabled,
++    hasTVPreferredFocus,
++    onPress,
++    testID,
++    title
++  } = props;
+ 
+   return (
+     <TouchableOpacity
+@@ -37,6 +46,7 @@ const Button: React.AbstractComponent<
+       accessibilityRole="button"
+       disabled={disabled}
+       focusable={!disabled}
++      hasTVPreferredFocus={hasTVPreferredFocus}
+       onPress={onPress}
+       ref={forwardedRef}
+       style={[
+diff --git a/packages/react-native-web/src/exports/I18nManager/index.js b/packages/react-native-web/src/exports/I18nManager/index.js
+index ba4b6bda..65c0fcb5 100644
+--- a/packages/react-native-web/src/exports/I18nManager/index.js
++++ b/packages/react-native-web/src/exports/I18nManager/index.js
+@@ -11,6 +11,7 @@
+ type I18nManagerStatus = {
+   allowRTL: (allowRTL: boolean) => void,
+   forceRTL: (forceRTL: boolean) => void,
++  isRTL: boolean,
+   getConstants: () => Constants
+ };
+ 
+@@ -25,6 +26,7 @@ const I18nManager: I18nManagerStatus = {
+   forceRTL() {
+     return;
+   },
++  isRTL: false,
+   getConstants(): Constants {
+     return { isRTL: false };
+   }
+diff --git a/packages/react-native-web/src/exports/Platform/index.js b/packages/react-native-web/src/exports/Platform/index.js
+index ef729649..639e4876 100644
+--- a/packages/react-native-web/src/exports/Platform/index.js
++++ b/packages/react-native-web/src/exports/Platform/index.js
+@@ -10,6 +10,7 @@
+ 
+ const Platform = {
+   OS: 'web',
++  isTV: true, // TODO: detect TV platforms
+   select: (obj: Object): any => ('web' in obj ? obj.web : obj.default),
+   get isTesting(): boolean {
+     if (process.env.NODE_ENV === 'test') {
+diff --git a/packages/react-native-web/src/exports/Pressable/index.js b/packages/react-native-web/src/exports/Pressable/index.js
+index 28118ddc..42bda8ab 100644
+--- a/packages/react-native-web/src/exports/Pressable/index.js
++++ b/packages/react-native-web/src/exports/Pressable/index.js
+@@ -12,6 +12,10 @@
+ import type { HoverEventsConfig } from '../../modules/useHover';
+ import type { PressResponderConfig } from '../../modules/usePressEvents/PressResponder';
+ import type { ViewProps } from '../View';
++import type {
++  FocusEvent,
++  BlurEvent
++} from '../../vendor/react-native/Types/CoreEventTypes';
+ 
+ import * as React from 'react';
+ import { forwardRef, memo, useMemo, useState, useRef } from 'react';
+@@ -61,7 +65,10 @@ type Props = {
+    * Used only for documentation or testing (e.g. snapshot testing).
+    */
+   testOnly_hovered?: ?boolean,
+-  testOnly_pressed?: ?boolean
++  testOnly_pressed?: ?boolean,
++  // Additional TV Props
++  onFocusCapture?: ?(event: FocusEvent) => void,
++  onBlurCapture?: ?(event: BlurEvent) => void
+ };
+ 
+ /**
+@@ -90,6 +97,8 @@ function Pressable(props: Props, forwardedRef): React.Node {
+     tabIndex,
+     testOnly_hovered,
+     testOnly_pressed,
++    focusable,
++    isTVSelectable,
+     ...rest
+   } = props;
+ 
+@@ -190,11 +199,13 @@ function Pressable(props: Props, forwardedRef): React.Node {
+     [onKeyDown, onKeyDownPress]
+   );
+ 
++  // Use tabindex to handle focusable
++  // as LRUD focus handling depends on it
+   let _tabIndex;
+   if (tabIndex !== undefined) {
+     _tabIndex = tabIndex;
+   } else {
+-    _tabIndex = disabled ? -1 : 0;
++    _tabIndex = focusable !== false && isTVSelectable !== false ? 0 : -1;
+   }
+ 
+   return (
+diff --git a/packages/react-native-web/src/exports/ScrollView/ScrollViewBase.js b/packages/react-native-web/src/exports/ScrollView/ScrollViewBase.js
+index a006d2b4..9707bd63 100644
+--- a/packages/react-native-web/src/exports/ScrollView/ScrollViewBase.js
++++ b/packages/react-native-web/src/exports/ScrollView/ScrollViewBase.js
+@@ -74,6 +74,8 @@ const ScrollViewBase: React.AbstractComponent<
+   React.ElementRef<typeof View>
+ > = React.forwardRef((props, forwardedRef) => {
+   const {
++    focusable,
++    isTVSelectable,
+     onScroll,
+     onTouchMove,
+     onWheel,
+@@ -162,6 +164,7 @@ const ScrollViewBase: React.AbstractComponent<
+         !scrollEnabled && styles.scrollDisabled,
+         hideScrollbar && styles.hideScrollbar
+       ]}
++      tabIndex={focusable === true || isTVSelectable === true ? 0 : undefined}
+     />
+   );
+ });
+diff --git a/packages/react-native-web/src/exports/ScrollView/index.js b/packages/react-native-web/src/exports/ScrollView/index.js
+index 6b56e894..9658f0db 100644
+--- a/packages/react-native-web/src/exports/ScrollView/index.js
++++ b/packages/react-native-web/src/exports/ScrollView/index.js
+@@ -10,8 +10,7 @@
+ 
+ 'use client';
+ 
+-import type { ViewProps, ViewStyle } from '../View/types';
+-
++import type { ScrollViewProps } from './types';
+ import Dimensions from '../Dimensions';
+ import dismissKeyboard from '../../modules/dismissKeyboard';
+ import invariant from 'fbjs/lib/invariant';
+@@ -25,21 +24,6 @@ import View from '../View';
+ import React from 'react';
+ import warning from 'fbjs/lib/warning';
+ 
+-type ScrollViewProps = {
+-  ...ViewProps,
+-  centerContent?: boolean,
+-  contentContainerStyle?: ViewStyle,
+-  horizontal?: boolean,
+-  keyboardDismissMode?: 'none' | 'interactive' | 'on-drag',
+-  onContentSizeChange?: (e: any) => void,
+-  onScroll?: (e: any) => void,
+-  pagingEnabled?: boolean,
+-  refreshControl?: any,
+-  scrollEnabled?: boolean,
+-  scrollEventThrottle?: number,
+-  stickyHeaderIndices?: Array<number>
+-};
+-
+ type Event = Object;
+ 
+ const emptyObject = {};
+diff --git a/packages/react-native-web/src/exports/TextInput/index.js b/packages/react-native-web/src/exports/TextInput/index.js
+index 8f8de0bf..65b392f9 100644
+--- a/packages/react-native-web/src/exports/TextInput/index.js
++++ b/packages/react-native-web/src/exports/TextInput/index.js
+@@ -25,6 +25,7 @@ import useResponderEvents from '../../modules/useResponderEvents';
+ import { getLocaleDirection, useLocaleContext } from '../../modules/useLocale';
+ import StyleSheet from '../StyleSheet';
+ import TextInputState from '../../modules/TextInputState';
++import { setFocus } from '../../modules/SpatialManager';
+ //import { warnOnce } from '../../modules/warnOnce';
+ 
+ /**
+@@ -64,7 +65,7 @@ const forwardPropsList = Object.assign(
+     autoCapitalize: true,
+     autoComplete: true,
+     autoCorrect: true,
+-    autoFocus: true,
++    autoFocus: false, // Handling this directly on mount along with hasTVPreferredFocus
+     defaultValue: true,
+     disabled: true,
+     lang: true,
+@@ -100,13 +101,17 @@ const TextInput: React.AbstractComponent<
+     autoComplete,
+     autoCompleteType,
+     autoCorrect = true,
++    autoFocus,
+     blurOnSubmit,
+     caretHidden,
+     clearTextOnFocus,
+     dir,
+     editable,
+     enterKeyHint,
++    focusable,
++    hasTVPreferredFocus,
+     inputMode,
++    isTVSelectable,
+     keyboardType,
+     multiline = false,
+     numberOfLines,
+@@ -199,6 +204,18 @@ const TextInput: React.AbstractComponent<
+   const prevSelection = React.useRef(null);
+   const prevSecureTextEntry = React.useRef(false);
+ 
++  // On mount trigger focus event
++  React.useEffect(() => {
++    // The only possible way to (accurately) get this is from the tabindex
++    // attribute, as the current code in CreateDOMProps uses the other props
++    // to finally derive whether an element can be focussed or not.
++    const isFocusable = hostRef.current?.getAttribute('tabindex') === '0';
++
++    if ((hasTVPreferredFocus || autoFocus) && isFocusable) {
++      setFocus(hostRef.current);
++    }
++  }, [hasTVPreferredFocus, autoFocus]);
++
+   React.useEffect(() => {
+     if (hostRef.current && prevSelection.current) {
+       setSelection(hostRef.current, prevSelection.current);
+@@ -442,6 +459,8 @@ const TextInput: React.AbstractComponent<
+     forwardedRef
+   );
+ 
++  supportedProps.tabIndex =
++    focusable !== false && isTVSelectable !== false ? 0 : -1;
+   supportedProps.ref = setRef;
+ 
+   const langDirection =
+diff --git a/packages/react-native-web/src/exports/TouchableHighlight/index.js b/packages/react-native-web/src/exports/TouchableHighlight/index.js
+index e65c3513..b6770a6e 100644
+--- a/packages/react-native-web/src/exports/TouchableHighlight/index.js
++++ b/packages/react-native-web/src/exports/TouchableHighlight/index.js
+@@ -13,6 +13,7 @@
+ import type { ColorValue } from '../../types';
+ import type { Props as TouchableWithoutFeedbackProps } from '../TouchableWithoutFeedback';
+ import type { ViewProps } from '../View';
++import type { TVViewProps } from '../TV/types';
+ 
+ import * as React from 'react';
+ import { useCallback, useMemo, useState, useRef } from 'react';
+@@ -26,6 +27,7 @@ type ViewStyle = $PropertyType<ViewProps, 'style'>;
+ 
+ type Props = $ReadOnly<{|
+   ...TouchableWithoutFeedbackProps,
++  ...TVViewProps,
+   activeOpacity?: ?number,
+   onHideUnderlay?: ?() => void,
+   onShowUnderlay?: ?() => void,
+@@ -86,6 +88,7 @@ function TouchableHighlight(props: Props, forwardedRef): React.Node {
+     delayLongPress,
+     disabled,
+     focusable,
++    isTVSelectable,
+     onHideUnderlay,
+     onLongPress,
+     onPress,
+@@ -185,6 +188,7 @@ function TouchableHighlight(props: Props, forwardedRef): React.Node {
+         !disabled && styles.actionable,
+         extraStyles && extraStyles.underlay
+       ]}
++      tabIndex={focusable !== false && isTVSelectable !== false ? 0 : -1}
+     >
+       {React.cloneElement(child, {
+         style: [child.props.style, extraStyles && extraStyles.child]
+diff --git a/packages/react-native-web/src/exports/TouchableOpacity/index.js b/packages/react-native-web/src/exports/TouchableOpacity/index.js
+index 5cb3cd8a..e12086d9 100644
+--- a/packages/react-native-web/src/exports/TouchableOpacity/index.js
++++ b/packages/react-native-web/src/exports/TouchableOpacity/index.js
+@@ -11,6 +11,7 @@
+ 'use client';
+ 
+ import type { Props as TouchableWithoutFeedbackProps } from '../TouchableWithoutFeedback';
++import type { TVViewProps } from '../TV/types';
+ import type { ViewProps } from '../View';
+ 
+ import * as React from 'react';
+@@ -25,6 +26,7 @@ type ViewStyle = $PropertyType<ViewProps, 'style'>;
+ 
+ type Props = $ReadOnly<{|
+   ...TouchableWithoutFeedbackProps,
++  ...TVViewProps,
+   activeOpacity?: ?number,
+   style?: ?ViewStyle
+ |}>;
+@@ -48,6 +50,7 @@ function TouchableOpacity(props: Props, forwardedRef): React.Node {
+     delayLongPress,
+     disabled,
+     focusable,
++    isTVSelectable,
+     onLongPress,
+     onPress,
+     onPressIn,
+@@ -143,6 +146,7 @@ function TouchableOpacity(props: Props, forwardedRef): React.Node {
+         opacityOverride != null && { opacity: opacityOverride },
+         { transitionDuration: duration }
+       ]}
++      tabIndex={focusable !== false && isTVSelectable !== false ? 0 : -1}
+     />
+   );
+ }
+diff --git a/packages/react-native-web/src/exports/TouchableWithoutFeedback/index.js b/packages/react-native-web/src/exports/TouchableWithoutFeedback/index.js
+index e2ef7d08..a3e44d80 100644
+--- a/packages/react-native-web/src/exports/TouchableWithoutFeedback/index.js
++++ b/packages/react-native-web/src/exports/TouchableWithoutFeedback/index.js
+@@ -11,6 +11,7 @@
+ 'use client';
+ 
+ import type { PressResponderConfig } from '../../modules/usePressEvents/PressResponder';
++import type { TVParallaxPropertiesType } from '../TV/types';
+ import type { ViewProps } from '../View';
+ 
+ import * as React from 'react';
+@@ -39,7 +40,9 @@ export type Props = $ReadOnly<{|
+   onPressIn?: $PropertyType<PressResponderConfig, 'onPressStart'>,
+   onPressOut?: $PropertyType<PressResponderConfig, 'onPressEnd'>,
+   rejectResponderTermination?: ?boolean,
+-  testID?: $PropertyType<ViewProps, 'testID'>
++  testID?: $PropertyType<ViewProps, 'testID'>,
++  // Not used yet, probably never will be is is for iOS only
++  tvParallaxProperties?: TVParallaxPropertiesType
+ |}>;
+ 
+ const forwardPropsList = {
+diff --git a/packages/react-native-web/src/exports/View/index.js b/packages/react-native-web/src/exports/View/index.js
+index cec4d582..b33a55f5 100644
+--- a/packages/react-native-web/src/exports/View/index.js
++++ b/packages/react-native-web/src/exports/View/index.js
+@@ -24,6 +24,8 @@ import useResponderEvents from '../../modules/useResponderEvents';
+ import StyleSheet from '../StyleSheet';
+ import TextAncestorContext from '../Text/TextAncestorContext';
+ import { useLocaleContext, getLocaleDirection } from '../../modules/useLocale';
++import Platform from '../Platform';
++import { setFocus } from '../../modules/SpatialManager';
+ 
+ const forwardPropsList = Object.assign(
+   {},
+@@ -32,6 +34,8 @@ const forwardPropsList = Object.assign(
+   forwardedProps.clickProps,
+   forwardedProps.focusProps,
+   forwardedProps.keyboardProps,
++  forwardedProps.tvViewProps,
++  forwardedProps.tvFocusGuideViewProps,
+   forwardedProps.mouseProps,
+   forwardedProps.touchProps,
+   forwardedProps.styleProps,
+@@ -67,6 +71,7 @@ const View: React.AbstractComponent<ViewProps, HTMLElement & PlatformMethods> =
+       onSelectionChangeShouldSetResponderCapture,
+       onStartShouldSetResponder,
+       onStartShouldSetResponderCapture,
++      hasTVPreferredFocus,
+       ...rest
+     } = props;
+ 
+@@ -135,11 +140,49 @@ const View: React.AbstractComponent<ViewProps, HTMLElement & PlatformMethods> =
+       }
+     }
+ 
++    const requestTVFocus = React.useCallback(() => {
++      setFocus(hostRef.current);
++    }, []);
++
++    const setLocalRef = React.useCallback(
++      (instance: /*HostInstance*/ any | null) => {
++        // $FlowExpectedError[incompatible-type]
++        hostRef.current = instance;
++
++        if (instance != null) {
++          // $FlowFixMe[prop-missing]
++          // $FlowFixMe[unsafe-object-assign]
++          Object.assign(instance, {
++            requestTVFocus
++          });
++        }
++      },
++      [requestTVFocus]
++    );
++
++    // On mount trigger focus event
++    // if hasTVPreferredFocus is set (TV platforms only)
++    React.useEffect(() => {
++      // The only possible way to (accurately) get this is from the tabindex
++      // attribute, as the current code in CreateDOMProps uses the other props
++      // to finally derive whether an element can be focussed or not.
++      const isFocusable = hostRef.current?.getAttribute('tabindex') === '0';
++
++      if (Platform.isTV && hasTVPreferredFocus && isFocusable) {
++        setFocus(hostRef.current);
++      }
++    }, [hasTVPreferredFocus]);
++
+     const platformMethodsRef = usePlatformMethods(supportedProps);
+-    const setRef = useMergeRefs(hostRef, platformMethodsRef, forwardedRef);
++    const setRef = useMergeRefs(
++      hostRef,
++      platformMethodsRef,
++      forwardedRef,
++      setLocalRef
++    );
+ 
+     supportedProps.ref = setRef;
+-
++    supportedProps.isContainer = ((props: any).isContainer: ?boolean) === true;
+     return createElement(component, supportedProps, { writingDirection });
+   });
+ 
+diff --git a/packages/react-native-web/src/exports/View/types.js b/packages/react-native-web/src/exports/View/types.js
+index 7dbf99c9..e384635a 100644
+--- a/packages/react-native-web/src/exports/View/types.js
++++ b/packages/react-native-web/src/exports/View/types.js
+@@ -10,6 +10,8 @@
+ 
+ import type { ColorValue, GenericStyleProp, LayoutEvent } from '../../types';
+ 
++import type { TVViewProps } from '../TV/types';
++
+ import type {
+   AnimationStyles,
+   BorderStyles,
+@@ -229,6 +231,7 @@ export type ViewStyle = {
+ export type ViewProps = {
+   ...AccessibilityProps,
+   ...EventProps,
++  ...TVViewProps,
+   children?: ?any,
+   dataSet?: { ... },
+   dir?: 'ltr' | 'rtl',
+diff --git a/packages/react-native-web/src/index.js b/packages/react-native-web/src/index.js
+index f1a6f23f..651045ef 100644
+--- a/packages/react-native-web/src/index.js
++++ b/packages/react-native-web/src/index.js
+@@ -68,3 +68,12 @@ export { default as DeviceEventEmitter } from './exports/DeviceEventEmitter';
+ export { default as useColorScheme } from './exports/useColorScheme';
+ export { default as useLocaleContext } from './exports/useLocaleContext';
+ export { default as useWindowDimensions } from './exports/useWindowDimensions';
++
++// #region TV
++export { default as TVEventHandler } from './exports/TV/TVEventHandler';
++export { default as TVEventControl } from './exports/TV/TVEventControl';
++export { default as TVFocusGuideView } from './exports/TV/TVFocusGuideView';
++export type { TVRemoteEvent } from './exports/TV/types';
++export { default as TVTextScrollView } from './exports/TV/TVTextScrollView';
++export { default as useTVEventHandler } from './exports/TV/useTVEventHandler';
++// #endregion
+diff --git a/packages/react-native-web/src/modules/createDOMProps/index.js b/packages/react-native-web/src/modules/createDOMProps/index.js
+index 4144dbc6..bf4203d2 100644
+--- a/packages/react-native-web/src/modules/createDOMProps/index.js
++++ b/packages/react-native-web/src/modules/createDOMProps/index.js
+@@ -10,6 +10,7 @@
+ import AccessibilityUtil from '../AccessibilityUtil';
+ import StyleSheet from '../../exports/StyleSheet';
+ import { warnOnce } from '../warnOnce';
++import { setupNodeId } from '../../exports/TV/utils';
+ 
+ const emptyObject = {};
+ const hasOwnProperty = Object.prototype.hasOwnProperty;
+@@ -149,6 +150,15 @@ const createDOMProps = (elementType, props, options) => {
+     style,
+     tabIndex,
+     testID,
++    // TV View props
++    autoFocus,
++    destinations,
++    trapFocusDown,
++    trapFocusLeft,
++    trapFocusRight,
++    trapFocusUp,
++    tvFocusable,
++    isContainer, // This may be a container
+     // Rest
+     ...domProps
+   } = props;
+@@ -841,6 +851,7 @@ const createDOMProps = (elementType, props, options) => {
+     if (focusable === false) {
+       domProps.tabIndex = '-1';
+     }
++
+     if (
+       // These native elements are keyboard focusable by default
+       elementType === 'a' ||
+@@ -894,6 +905,55 @@ const createDOMProps = (elementType, props, options) => {
+     domProps.style = inlineStyle;
+   }
+ 
++  if (isContainer) {
++    // TV View
++    // setup attributes and classes for tv focusable elements
++    // based on @bbc/@bbc/tv-lrud-spatial library requirements
++
++    // 1. Mark it as a container for LRUD navigation by adding "lrud-container" class
++    if (domProps.className) {
++      domProps.className += ' lrud-container';
++    } else {
++      domProps.className = 'lrud-container';
++    }
++
++    // 2. Consider this container as a TV Focusable container for LRUD navigation only if:
++    // destinations are defined OR 3. autoFocus is defined
++    if (autoFocus === true || destinations?.length > 0) {
++      // focusable container should be in the tab order
++      domProps.tabIndex = '0';
++
++      // setup autoFocus: default is true
++      domProps['data-autofocus'] = autoFocus === false ? 'false' : 'true';
++      // setup destinations: get ids of destination elements
++      if (destinations && destinations.length > 0) {
++        const destinationString = destinations
++          .map((dest) => (dest && dest.id ? dest.id : setupNodeId(dest)))
++          .filter((id) => id != null)
++          .join(' ');
++        domProps['data-destinations'] = destinationString;
++      }
++    } else {
++      // non focusable container should be out of the tab order,
++      // but it's chrildren could still be focusable based on their own props
++      domProps.tabIndex = tabIndex === -999 ? '-999' : '-1'; // -999 identifies a FlatList container
++    }
++
++    // 3. setup data-block-exit attributes for trapFocus* props
++    const trapFocusString = `${trapFocusUp ? 'up' : ''}${
++      trapFocusDown ? ' down' : ''
++    }${trapFocusLeft ? ' left' : ''}${trapFocusRight ? ' right' : ''}`;
++    if (trapFocusString.trim().length > 0) {
++      domProps['data-block-exit'] = trapFocusString;
++    }
++
++    // 4. setup lrud-ignore class if tvFocusable is false
++    if (tvFocusable === false) {
++      // this also means focusable is false
++      domProps.className += ' lrud-ignore';
++    }
++  }
++
+   // OTHER
+   // Native element ID
+   /*
+diff --git a/packages/react-native-web/src/modules/forwardedProps/index.js b/packages/react-native-web/src/modules/forwardedProps/index.js
+index c3408216..6cfab22b 100644
+--- a/packages/react-native-web/src/modules/forwardedProps/index.js
++++ b/packages/react-native-web/src/modules/forwardedProps/index.js
+@@ -118,20 +118,21 @@ export const accessibilityProps = {
+   accessibilityValueText: true
+ };
+ 
++// For the moment disabling click and touch events on TV platforms
+ export const clickProps = {
+-  onClick: true,
+-  onAuxClick: true,
+-  onContextMenu: true,
+-  onGotPointerCapture: true,
+-  onLostPointerCapture: true,
+-  onPointerCancel: true,
+-  onPointerDown: true,
+-  onPointerEnter: true,
+-  onPointerMove: true,
+-  onPointerLeave: true,
+-  onPointerOut: true,
+-  onPointerOver: true,
+-  onPointerUp: true
++  onClick: false,
++  onAuxClick: false,
++  onContextMenu: false,
++  onGotPointerCapture: false,
++  onLostPointerCapture: false,
++  onPointerCancel: false,
++  onPointerDown: false,
++  onPointerEnter: false,
++  onPointerMove: false,
++  onPointerLeave: false,
++  onPointerOut: false,
++  onPointerOver: false,
++  onPointerUp: false
+ };
+ 
+ export const focusProps = {
+@@ -146,6 +147,22 @@ export const keyboardProps = {
+   onKeyUpCapture: true
+ };
+ 
++// TV props
++export const tvViewProps = {
++  tvFocusable: true
++};
++
++export const tvFocusGuideViewProps = {
++  autoFocus: true,
++  destinations: false, // SpatialManager handles this
++  // focusable: true, Very important for TVFocusGuideView but handled in defaultProps
++  trapFocusDown: true,
++  trapFocusLeft: true,
++  trapFocusRight: true,
++  trapFocusUp: true
++};
++
++// TODO: work on a solution to disable mouse/touch events on TV platforms
+ export const mouseProps = {
+   onMouseDown: true,
+   onMouseEnter: true,
+diff --git a/packages/react-native-web/src/vendor/react-native/EventEmitter/NativeEventEmitter.js b/packages/react-native-web/src/vendor/react-native/EventEmitter/NativeEventEmitter.js
+index f7f23ac0..234a75a9 100644
+--- a/packages/react-native-web/src/vendor/react-native/EventEmitter/NativeEventEmitter.js
++++ b/packages/react-native-web/src/vendor/react-native/EventEmitter/NativeEventEmitter.js
+@@ -41,11 +41,14 @@ export default class NativeEventEmitter<TEventToArgsMap: {...}>
+   _nativeModule: ?NativeModule;
+ 
+   constructor(nativeModule: ?NativeModule) {
+-    if (Platform.OS === 'ios') {
+-      invariant(
+-        nativeModule != null,
+-        '`new NativeEventEmitter()` requires a non-null argument.',
+-      );
++    if (Platform.OS === 'ios' || Platform.OS === 'web') {
++      // Avoiding this check for web as there are 3rd party modules for web which are failing for this
++      if (Platform.OS === 'ios') {
++        invariant(
++          nativeModule != null,
++          '`new NativeEventEmitter()` requires a non-null argument.',
++        );
++      }
+       this._nativeModule = nativeModule;
+     }
+   }
+diff --git a/packages/react-native-web/src/vendor/react-native/FlatList/index.js b/packages/react-native-web/src/vendor/react-native/FlatList/index.js
+index eefb7894..21c9aaa2 100644
+--- a/packages/react-native-web/src/vendor/react-native/FlatList/index.js
++++ b/packages/react-native-web/src/vendor/react-native/FlatList/index.js
+@@ -148,6 +148,17 @@ type OptionalProps<ItemT> = {|
+    * Enable an optimization to memoize the item renderer to prevent unnecessary rerenders.
+    */
+   strictMode?: boolean,
++  /**
++   * RecyclerListView optimization: Provide explicit layout for items upfront.
++   * Enables RLV adapter for better performance. Format: (index) => {width, height}
++   */
++  layoutProvider?: ?(index: number) => {width: number, height: number},
++  /**
++   * RecyclerListView optimization: Per-row change detection for better performance.
++   * Replaces reliance on extraData for finer-grained update control.
++   * Format: (prevRow, nextRow) => boolean (return true if rows are different)
++   */
++  rowHasChanged?: ?(prevRow: any, nextRow: any) => boolean,
+ |};
+ 
+ /**
+@@ -677,6 +688,9 @@ class FlatList<ItemT> extends React.PureComponent<Props<ItemT>, void> {
+         removeClippedSubviews={removeClippedSubviewsOrDefault(
+           _removeClippedSubviews,
+         )}
++        _originalRenderItem={this.props.renderItem}
++        _numColumns={numColumnsOrDefault(numColumns)}
++        _columnWrapperStyle={columnWrapperStyle}
+         {...renderer(
+           this.props.ListItemComponent,
+           this.props.renderItem,
+diff --git a/packages/react-native-web/src/vendor/react-native/VirtualizedList/VirtualizedListProps.js b/packages/react-native-web/src/vendor/react-native/VirtualizedList/VirtualizedListProps.js
+index e2d511cc..d3370bf2 100644
+--- a/packages/react-native-web/src/vendor/react-native/VirtualizedList/VirtualizedListProps.js
++++ b/packages/react-native-web/src/vendor/react-native/VirtualizedList/VirtualizedListProps.js
+@@ -286,6 +286,17 @@ type OptionalProps = {|
+    * The legacy implementation is no longer supported.
+    */
+   legacyImplementation?: empty,
++  /**
++   * RecyclerListView optimization: Provide explicit layout for items upfront.
++   * Enables RLV adapter for better performance. Format: (index) => {width, height}
++   */
++  layoutProvider?: ?(index: number) => {width: number, height: number},
++  /**
++   * RecyclerListView optimization: Per-row change detection for better performance.
++   * Replaces reliance on extraData for finer-grained update control.
++   * Format: (prevRow, nextRow) => boolean (return true if rows are different)
++   */
++  rowHasChanged?: ?(prevRow: Item, nextRow: Item) => boolean,
+ |};
+ 
+ export type Props = {|
+diff --git a/packages/react-native-web/src/vendor/react-native/VirtualizedList/index.js b/packages/react-native-web/src/vendor/react-native/VirtualizedList/index.js
+index 97c817f0..0ded2831 100644
+--- a/packages/react-native-web/src/vendor/react-native/VirtualizedList/index.js
++++ b/packages/react-native-web/src/vendor/react-native/VirtualizedList/index.js
+@@ -24,6 +24,7 @@ import type {
+ 
+ import RefreshControl from '../../../exports/RefreshControl';
+ import ScrollView from '../../../exports/ScrollView';
++import TVFocusGuideView from '../../../exports/TV/TVFocusGuideView';
+ import View, { type ViewProps } from '../../../exports/View';
+ import StyleSheet from '../../../exports/StyleSheet';
+ 
+@@ -48,6 +49,9 @@ import {
+ import invariant from 'fbjs/lib/invariant';
+ import nullthrows from 'nullthrows';
+ import * as React from 'react';
++// import VirtualizedListRLVAdapter from './VirtualizedListRLVAdapter';
++import I18nManager from '../../../exports/I18nManager';
++import Platform from '../../../exports/Platform';
+ 
+ export type {RenderItemProps, RenderItemType, Separators};
+ 
+@@ -420,7 +424,6 @@ class VirtualizedList extends StateSafePureComponent<Props, State> {
+   constructor(props: Props) {
+     super(props);
+     this._checkProps(props);
+-
+     this._fillRateHelper = new FillRateHelper(this._getFrameMetrics);
+     this._updateCellsToRenderBatcher = new Batchinator(
+       this._updateCellsToRender,
+@@ -906,6 +909,12 @@ class VirtualizedList extends StateSafePureComponent<Props, State> {
+   }
+ 
+   render(): React.Node {
++    // Use RLV adapter if layoutProvider prop is provided or if env var enables it
++    // const useRLVEngine = this.props.layoutProvider || process.env.RNW_USE_RLV_ENGINE === 'true';
++    // if (useRLVEngine) {
++    //   return <VirtualizedListRLVAdapter {...this.props} />;
++    // }
++
+     this._checkProps(this.props);
+     const {ListEmptyComponent, ListFooterComponent, ListHeaderComponent} =
+       this.props;
+@@ -1097,6 +1106,22 @@ class VirtualizedList extends StateSafePureComponent<Props, State> {
+ 
+     this._hasMore = this.state.cellsAroundViewport.last < itemCount - 1;
+ 
++    const trapFocusHorizontal = I18nManager.isRTL
++      ? {
++          trapFocusRight:
++            horizontalOrDefault(this.props.horizontal) &&
++            this.state.cellsAroundViewport.first > 0,
++          trapFocusLeft:
++            horizontalOrDefault(this.props.horizontal) && this._hasMore,
++        }
++      : {
++          trapFocusLeft:
++            horizontalOrDefault(this.props.horizontal) &&
++            this.state.cellsAroundViewport.first > 0,
++          trapFocusRight:
++            horizontalOrDefault(this.props.horizontal) && this._hasMore,
++        };
++
+     const innerRet = (
+       <VirtualizedListContextProvider
+         value={{
+@@ -1107,6 +1132,19 @@ class VirtualizedList extends StateSafePureComponent<Props, State> {
+           registerAsNestedChild: this._registerAsNestedChild,
+           unregisterAsNestedChild: this._unregisterAsNestedChild,
+         }}>
++        {Platform.isTV ? (
++          <TVFocusGuideView
++            style={[{flexGrow: 1, flexShrink: 1}, this.props.style]}
++            // $FlowFixMe[incompatible-type] Internal sentinel used to identify VirtualizedList TVFocusGuideView
++            tabIndex={-999} // To uniquely identify this as coming from FlatList
++            {...trapFocusHorizontal}
++            trapFocusUp={
++              !horizontalOrDefault(this.props.horizontal) &&
++              this.state.cellsAroundViewport.first > 0
++            }
++            trapFocusDown={
++              !horizontalOrDefault(this.props.horizontal) && this._hasMore
++            }>
+         {React.cloneElement(
+           (
+             this.props.renderScrollComponent ||
+@@ -1116,6 +1154,19 @@ class VirtualizedList extends StateSafePureComponent<Props, State> {
+             ref: this._captureScrollRef,
+           },
+           cells,
++            )}
++          </TVFocusGuideView>
++        ) : (
++        React.cloneElement(
++          (
++            this.props.renderScrollComponent ||
++            this._defaultRenderScrollComponent
++          )(scrollProps),
++          {
++            ref: this._captureScrollRef,
++          },
++          cells,
++            )
+         )}
+       </VirtualizedListContextProvider>
+     );
