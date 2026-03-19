@@ -35,6 +35,18 @@ function fileSummary(filePath) {
   return { lines, files };
 }
 
+function removeExistingGroupedPatchDirs(patchesRoot) {
+  if (!fs.existsSync(patchesRoot)) return;
+
+  fs.readdirSync(patchesRoot)
+    .filter((entry) => /^([0-9a-f]+)-to-([0-9a-f]+)$/.test(entry))
+    .map((entry) => path.join(patchesRoot, entry))
+    .filter((entryPath) => fs.statSync(entryPath).isDirectory())
+    .forEach((entryPath) =>
+      fs.rmSync(entryPath, { recursive: true, force: true })
+    );
+}
+
 function main() {
   const base = 'upstream-mirror';
   const head = 'tv-main';
@@ -45,6 +57,9 @@ function main() {
   const shortBase = run(`git rev-parse --short ${base}`);
   const shortHead = run(`git rev-parse --short ${head}`);
   const outDir = `patches/${shortBase}-to-${shortHead}`;
+
+  // Keep a single grouped patch series so verify cannot pick a stale folder.
+  removeExistingGroupedPatchDirs(path.join(rootDir, 'patches'));
   fs.mkdirSync(outDir, { recursive: true });
 
   // Remove previous patches
