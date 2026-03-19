@@ -120,8 +120,8 @@ React Native Web for TV is [MIT licensed](./LICENSE). By contributing to React N
 This fork also depends on Apache-2.0 licensed TV navigation code via `@bbc/tv-lrud-spatial`.
 See [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) and [APACHE-2.0.txt](./APACHE-2.0.txt) for redistribution details.
 
-[package-badge]: https://img.shields.io/npm/v/@hps1978/react-native-web-tv.svg?style=flat
-[package-url]: https://www.npmjs.com/package/@hps1978/react-native-web-tv
+[package-badge]: https://img.shields.io/npm/v/react-native-web-tv.svg?style=flat
+[package-url]: https://www.npmjs.com/package/react-native-web-tv
 [ci-badge]: https://github.com/hps1978/react-native-web-tv/workflows/tests/badge.svg
 [ci-url]: https://github.com/hps1978/react-native-web-tv/actions
 [react-native-url]: https://reactnative.dev/

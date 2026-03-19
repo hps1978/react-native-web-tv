@@ -5,7 +5,7 @@
 const execSync = require('child_process').execSync;
 const minimist = require('minimist');
 
-const PACKAGE_NAME = '@hps1978/react-native-web-tv';
+const PACKAGE_NAME = 'react-native-web-tv';
 const argv = minimist(process.argv.slice(2));
 
 function printUsage() {

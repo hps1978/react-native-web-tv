@@ -15,7 +15,7 @@
     "next": "^12.2.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "react-native-web": "npm:@hps1978/react-native-web-tv@0.21.2-tv.0"
+    "react-native-web": "npm:react-native-web-tv@0.21.2-tv.2"
   },
   "devDependencies": {
     "@babel/core": "^7.18.6",

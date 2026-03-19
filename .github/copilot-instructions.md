@@ -5,7 +5,7 @@
 This monorepo is a React Native for Web fork with TV-focused behavior and APIs.
 
 Core publish target:
-- `@hps1978/react-native-web-tv` from `packages/react-native-web`
+- `react-native-web-tv` from `packages/react-native-web`
 
 Supporting workspaces:
 - `packages/babel-plugin-react-native-web`

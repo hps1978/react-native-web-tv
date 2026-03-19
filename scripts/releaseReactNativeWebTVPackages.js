@@ -9,7 +9,7 @@ const minimist = require('minimist');
 const path = require('path');
 
 const RELEASE_BRANCH = 'master';
-const PUBLISH_PACKAGE_NAMES = ['@hps1978/react-native-web-tv'];
+const PUBLISH_PACKAGE_NAMES = ['react-native-web-tv'];
 
 const args = process.argv.slice(2);
 const argv = minimist(args);

@@ -49,7 +49,7 @@ npm run test
 To consume this fork while keeping the dependency key as `react-native-web`, install with npm alias:
 
 ```bash
-npm install react-native-web@npm:@hps1978/react-native-web-tv@<version>
+npm install react-native-web@npm:react-native-web-tv@<version>
 ```
 
 ## Versioning convention
