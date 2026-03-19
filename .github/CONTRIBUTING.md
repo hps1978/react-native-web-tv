@@ -121,7 +121,7 @@ Release flow for this fork:
 - Prepare and validate release candidates on `tv-main`.
 - Merge or fast-forward the validated release state to `master`.
 - Run the release command from a clean `master` working tree.
-- The release script publishes `@hps1978/react-native-web-tv`.
+- The release script publishes `react-native-web-tv`.
 - After publish, docs are deployed to `gh-pages` via `postrelease`.
 
 Versioning convention for this fork:

@@ -10,6 +10,20 @@ It is derived from [React Native Web](https://github.com/necolas/react-native-we
 
 The documentation site is hosted at [https://hps1978.github.io/react-native-web-tv/](https://hps1978.github.io/react-native-web-tv/). Documentation source lives in `packages/react-native-web-docs` and can also be built locally from the monorepo.
 
+## Installation
+
+Install the published package directly in a new project with:
+
+```bash
+npm install react-native-web-tv
+```
+
+If you want to replace an existing `react-native-web` dependency while keeping current import paths unchanged, use an npm alias:
+
+```bash
+npm install react-native-web@npm:react-native-web-tv@<version>
+```
+
 ## Versioning
 
 This fork keeps the upstream React Native Web version as the base and appends a TV-specific semver suffix:
@@ -120,8 +134,8 @@ React Native Web for TV is [MIT licensed](./LICENSE). By contributing to React N
 This fork also depends on Apache-2.0 licensed TV navigation code via `@bbc/tv-lrud-spatial`.
 See [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) and [APACHE-2.0.txt](./APACHE-2.0.txt) for redistribution details.
 
-[package-badge]: https://img.shields.io/npm/v/@hps1978/react-native-web-tv.svg?style=flat
-[package-url]: https://www.npmjs.com/package/@hps1978/react-native-web-tv
+[package-badge]: https://img.shields.io/npm/v/react-native-web-tv.svg?style=flat
+[package-url]: https://www.npmjs.com/package/react-native-web-tv
 [ci-badge]: https://github.com/hps1978/react-native-web-tv/workflows/tests/badge.svg
 [ci-url]: https://github.com/hps1978/react-native-web-tv/actions
 [react-native-url]: https://reactnative.dev/

@@ -36,16 +36,20 @@ function findLatestGroupedDir(rootDir) {
   const dirs = fs
     .readdirSync(patchesRoot)
     .filter((d) => /^([0-9a-f]+)-to-([0-9a-f]+)$/.test(d))
-    .map((d) => path.join(patchesRoot, d))
-    .filter((d) => {
-      if (!fs.statSync(d).isDirectory()) return false;
-      const expected = ['01-new-files.patch', '12-existing-test-files.patch'];
-      return expected.every((f) => fs.existsSync(path.join(d, f)));
+    .map((d) => {
+      const dirPath = path.join(patchesRoot, d);
+      return {
+        dirPath,
+        modifiedTime: fs.statSync(dirPath).mtimeMs
+      };
     })
-    .filter((d) => fs.statSync(d).isDirectory())
-    .sort()
-    .reverse();
-  return dirs[0] || null;
+    .filter(({ dirPath }) => {
+      if (!fs.statSync(dirPath).isDirectory()) return false;
+      const expected = ['01-new-files.patch', '12-existing-test-files.patch'];
+      return expected.every((f) => fs.existsSync(path.join(dirPath, f)));
+    })
+    .sort((left, right) => right.modifiedTime - left.modifiedTime);
+  return dirs[0]?.dirPath || null;
 }
 
 function getPatchFiles(patchDir) {

@@ -5,7 +5,7 @@
 const execSync = require('child_process').execSync;
 const minimist = require('minimist');
 
-const PACKAGE_NAME = '@hps1978/react-native-web-tv';
+const PACKAGE_NAME = 'react-native-web-tv';
 const argv = minimist(process.argv.slice(2));
 
 function printUsage() {
@@ -13,7 +13,7 @@ function printUsage() {
     'Usage: npm run release:dist-tag -- <version> [--tag=<dist-tag>] [--otp=<otp-code>]'
   );
   console.log(
-    'Example: npm run release:dist-tag -- 0.21.2-tv.1 --tag=latest --otp=123456'
+    'Example: npm run release:dist-tag -- 0.21.2-tv.2 --tag=latest --otp=123456'
   );
 }
 
