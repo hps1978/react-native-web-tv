@@ -14,15 +14,19 @@ An overview of how to install and use {{ site.name }}.
 
 React Native for Web can be used for multi-platform and web-only applications. It can be incrementally adopted by existing React Web apps and integrated with existing React Native apps. Preact is also supported.
 
+Use the published package name directly in a new project:
+
 ```shell
 npm install react-dom {{ site.packageName }}
 ```
 
-If you want to keep the dependency key as `react-native-web` in an app while consuming this fork, install it using an npm alias:
+If you are replacing an existing `react-native-web` dependency and want to keep current import paths unchanged, install this fork using an npm alias:
 
 ```shell
 npm install react-dom react-native-web@npm:{{ site.packageName }}@{{ site.packageVersion }}
 ```
+
+That keeps `react-native-web` as the dependency key in your app while resolving it to `{{ site.packageName }}` from npm.
 
 Fork release versions follow this convention:
 
@@ -53,6 +57,6 @@ npm install --save-dev babel-plugin-react-native-web
 ```shell
 npx create-react-app my-app
 cd my-app
-npm install react-native-web
+npm install react-native-web@npm:{{ site.packageName }}@{{ site.packageVersion }}
 npm start
 ```

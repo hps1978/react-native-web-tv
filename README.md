@@ -46,7 +46,13 @@ npm run build
 npm run test
 ```
 
-To consume this fork while keeping the dependency key as `react-native-web`, install with npm alias:
+Install the published package directly in a new project with:
+
+```bash
+npm install react-native-web-tv
+```
+
+To replace an existing `react-native-web` dependency without changing import paths, install this fork with an npm alias:
 
 ```bash
 npm install react-native-web@npm:react-native-web-tv@<version>

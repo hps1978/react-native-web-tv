@@ -783,7 +783,7 @@ class VirtualizedListRLVAdapter extends React.PureComponent {
     this._isGridMode,
     // Pass grid mode flag
     numColumns) // Pass numColumns
-    ;
+;
 
     // Initialize viewability helper if needed
     if (onViewableItemsChanged || viewabilityConfigCallbackPairs) {

@@ -10,6 +10,20 @@ It is derived from [React Native Web](https://github.com/necolas/react-native-we
 
 The documentation site is hosted at [https://hps1978.github.io/react-native-web-tv/](https://hps1978.github.io/react-native-web-tv/). Documentation source lives in `packages/react-native-web-docs` and can also be built locally from the monorepo.
 
+## Installation
+
+Install the published package directly in a new project with:
+
+```bash
+npm install react-native-web-tv
+```
+
+If you want to replace an existing `react-native-web` dependency while keeping current import paths unchanged, use an npm alias:
+
+```bash
+npm install react-native-web@npm:react-native-web-tv@<version>
+```
+
 ## Versioning
 
 This fork keeps the upstream React Native Web version as the base and appends a TV-specific semver suffix:

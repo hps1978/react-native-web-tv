@@ -13,7 +13,7 @@ function printUsage() {
     'Usage: npm run release:dist-tag -- <version> [--tag=<dist-tag>] [--otp=<otp-code>]'
   );
   console.log(
-    'Example: npm run release:dist-tag -- 0.21.2-tv.1 --tag=latest --otp=123456'
+    'Example: npm run release:dist-tag -- 0.21.2-tv.2 --tag=latest --otp=123456'
   );
 }
 

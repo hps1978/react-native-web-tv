@@ -1,4 +1,4 @@
-const packageJson = require('../../package.json');
+const packageJson = require('../../../react-native-web/package.json');
 
 module.exports = {
   name: 'React Native Web for TV',
