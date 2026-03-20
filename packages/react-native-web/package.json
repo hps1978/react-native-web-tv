@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.18.6",
-    "@bbc/tv-lrud-spatial": "github:hps1978/lrud-spatial-rnw",
+    "@hps1978/tv-lrud-spatial": "^0.0.17",
     "@react-native/normalize-colors": "^0.74.1",
     "fbjs": "^3.0.4",
     "inline-style-prefixer": "^7.0.1",

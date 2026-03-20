@@ -15,7 +15,7 @@ import {
   updateAncestorsAutoFocus,
   findDestinationOrAutofocus,
   getNextFocusInViewport
-} from '@bbc/tv-lrud-spatial';
+} from '@hps1978/tv-lrud-spatial';
 import { addEventListener } from '../addEventListener';
 import { setupNodeId } from '../../exports/TV/utils';
 import type { ElemData } from './utils';
@@ -47,7 +47,7 @@ type SpatialNavigationConfigType = {
 
 /**
  * SpatialManager
- * Manages spatial navigation for TV platforms using the @bbc/tv-lrud-spatial library.
+ * Manages spatial navigation for TV platforms using the @hps1978/tv-lrud-spatial library.
  * Implements singleton pattern to ensure only one instance exists across the app.
  */
 class SpatialManager {

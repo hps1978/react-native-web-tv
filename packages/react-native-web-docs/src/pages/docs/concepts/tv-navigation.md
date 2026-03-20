@@ -13,6 +13,30 @@ eleventyNavigation:
 TV-first focus and remote navigation for web-based TV platforms.
 :::
 
+---
+
+## 🚀 Out-of-the-box Spatial Navigation for Web-based TV
+
+
+**Built-in LRUD spatial navigation and remote focus for web-based TV platforms (e.g., Samsung Tizen TV, LG webOS TV, and other browser-based TV environments).**
+
+> **ℹ️ Note:** This package provides built-in spatial navigation logic (LRUD) and remote focus, but your app must ensure that platform-specific remote keys (such as arrow, OK, Back, Menu) are registered and delivered to the browser. On some TV platforms, this requires a one-time setup in your app or hosting environment. Once keys are registered, no extra libraries are needed for spatial navigation.
+
+The spatial navigation layer is integrated and enabled by default once remote key events reach the browser.
+
+### Configurability
+
+Spatial navigation and remote key handling can be customized for your app or platform. See the [Configuration](#configuration) section below for details and examples.
+
+For advanced use cases, you can:
+- Remap remote keys for different TV platforms
+- Adjust focus and scroll behavior
+
+See below and the [TV Navigation documentation](/docs/tv-navigation/) for more platform-specific tips, best practices, and migration notes.
+
+---
+:::
+
 This fork extends React Native for Web with APIs inspired by React Native tvOS, targeting web TV environments such as Samsung and LG browser runtimes.
 
 ## Scope

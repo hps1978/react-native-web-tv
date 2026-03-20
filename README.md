@@ -8,7 +8,7 @@ It is derived from the [React Native Web](https://github.com/necolas/react-nativ
 
 ## What's included in this fork
 
-- TV spatial navigation via a forked `@bbc/tv-lrud-spatial` implementation from [hps1978/lrud-spatial-rnw](https://github.com/hps1978/lrud-spatial-rnw), integrated through `SpatialManager`.
+- TV spatial navigation via a forked `@hps1978/tv-lrud-spatial` implementation from [hps1978/lrud-spatial-rnw](https://github.com/hps1978/lrud-spatial-rnw), integrated through `SpatialManager`.
 - TV exports from `react-native-web`:
   - `TVFocusGuideView`
   - `TVEventHandler`

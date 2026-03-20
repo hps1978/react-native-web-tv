@@ -37,7 +37,7 @@ Release script is expected to run from `master`.
 - `Platform.isTV` is currently forced `true` in this fork.
 - TV exports include `TVFocusGuideView`, `TVEventHandler`, `TVEventControl`, `TVTextScrollView`, and `useTVEventHandler`.
 - TV focus props include `tvFocusable`, `isTVSelectable`, `hasTVPreferredFocus`, `autoFocus`, `trapFocus*`, and `nextFocus*` props.
-- Spatial navigation is implemented via `SpatialManager` with a forked `@bbc/tv-lrud-spatial` dependency source.
+- Spatial navigation is implemented via `SpatialManager` with a forked `@hps1978/tv-lrud-spatial` dependency source.
 
 ## Commands
 

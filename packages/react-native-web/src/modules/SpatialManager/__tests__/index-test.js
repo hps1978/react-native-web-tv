@@ -11,11 +11,11 @@ import {
   setDestinations,
   teardownSpatialNavigation
 } from '../index';
-import * as lrudSpatial from '@bbc/tv-lrud-spatial';
+import * as lrudSpatial from '@hps1978/tv-lrud-spatial';
 import { setupScrollHandler } from '../scrollHandler';
 
-jest.mock('@bbc/tv-lrud-spatial', () => {
-  const actual = jest.requireActual('@bbc/tv-lrud-spatial');
+jest.mock('@hps1978/tv-lrud-spatial', () => {
+  const actual = jest.requireActual('@hps1978/tv-lrud-spatial');
   return {
     ...actual,
     setConfig: jest.fn((...args) => actual.setConfig(...args))

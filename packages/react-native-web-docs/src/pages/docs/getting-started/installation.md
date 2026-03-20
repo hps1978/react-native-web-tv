@@ -12,6 +12,21 @@ eleventyNavigation:
 An overview of how to install and use {{ site.name }}.
 :::
 
+---
+
+## 🚀 Out-of-the-box Spatial Navigation for Web-based TV
+
+
+**Built-in LRUD spatial navigation and remote focus for web-based TV platforms (e.g., Samsung Tizen TV, LG webOS TV, and other browser-based TV environments).**
+
+> **ℹ️ Note:** This package provides built-in spatial navigation logic (LRUD) and remote focus, but your app must ensure that platform-specific remote keys (such as arrow, OK, Back, Menu) are registered and delivered to the browser. On some TV platforms, this requires a one-time setup in your app or hosting environment. Once keys are registered, no extra libraries are needed for spatial navigation.
+
+The spatial navigation layer is integrated and enabled by default once remote key events reach the browser.
+
+For configuration and advanced usage, see the [TV Navigation documentation](/docs/tv-navigation/).
+
+---
+
 React Native for Web can be used for multi-platform and web-only applications. It can be incrementally adopted by existing React Web apps and integrated with existing React Native apps. Preact is also supported.
 
 Use the published package name directly in a new project:

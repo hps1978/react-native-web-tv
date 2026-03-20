@@ -2,9 +2,32 @@
 
 [![npm version][package-badge]][package-url] [![Build Status][ci-badge]][ci-url] [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://reactjs.org/docs/how-to-contribute.html#your-first-pull-request)
 
-"React Native Web for TV" makes it possible to run [React Native][react-native-url] components and APIs on the web based TVs using React Native Web.
+"React Native Web for TV" makes it possible to run [React Native][react-native-url] components and APIs on the web based TVs using React Native Web with spatial navigation enabled by default.
 
 It is derived from [React Native Web](https://github.com/necolas/react-native-web), and this fork remains intentionally close to that project while extending it for browser-based TV platforms. Thanks to the RNW project for the foundation this fork builds on 🙏.
+
+---
+
+## 🚀 Out-of-the-box Spatial Navigation for Web-based TV
+
+
+**Built-in LRUD spatial navigation and remote focus for web-based TV platforms (e.g., Samsung Tizen TV, LG webOS TV, and other browser-based TV environments).**
+
+> **ℹ️ Note:** This package provides built-in spatial navigation logic (LRUD) and remote focus, but your app must ensure that platform-specific remote keys (such as arrow, OK, Back, Menu) are registered and delivered to the browser. On some TV platforms, this requires a one-time setup in your app or hosting environment. Once keys are registered, no extra libraries are needed for spatial navigation.
+
+The spatial navigation layer is integrated and enabled by default once remote key events reach the browser.
+
+### Configurability
+
+Spatial navigation and remote key handling can be customized for your app or platform. See the [Spatial navigation configuration](#spatial-navigation-configuration) section below for details and examples.
+
+For advanced use cases, you can:
+- Remap remote keys for different TV platforms
+- Adjust focus and scroll behavior
+
+See the [TV Navigation documentation](https://hps1978.github.io/react-native-web-tv/docs/tv-navigation/) for more platform-specific tips, best practices, and migration notes.
+
+---
 
 ## Documentation
 
@@ -42,7 +65,7 @@ This fork keeps the broader React Native Web example surface and adds TV-specifi
 
 Some inherited examples are still general RNW demos and are not yet adapted for LRUD or remote-focus behavior. The TV-focused routes, along with the examples already updated for focus handling, can be exercised directly in a browser for testing and debugging.
 
-Useful TV-oriented routes include:
+Useful TV-oriented examples include:
 
 * `/tv-event-handler`
 * `/tv-focus-guide-view`
@@ -54,7 +77,7 @@ Useful TV-oriented routes include:
 This fork adds Web TV spatial navigation and TV-specific APIs.
 
 Highlights:
-* TV spatial navigation via a forked `@bbc/tv-lrud-spatial` implementation from [hps1978/lrud-spatial-rnw](https://github.com/hps1978/lrud-spatial-rnw). It's wired into React Native Web through SpatialManager.
+* TV spatial navigation via a forked `@hps1978/tv-lrud-spatial` implementation from [hps1978/lrud-spatial-rnw](https://github.com/hps1978/lrud-spatial-rnw). It's wired into React Native Web through SpatialManager.
 * New TV exports: `TVEventHandler`, `TVEventControl`, `TVFocusGuideView`, `TVTextScrollView`, `useTVEventHandler`, and `TVRemoteEvent`.
 * TV focus props include `tvFocusable`, `isTVSelectable`, `hasTVPreferredFocus`, `autoFocus`, `trapFocusUp/Down/Left/Right`, `destinations`, and directional focus routing (`nextFocusUp/Down/Left/Right/Forward`).
 * RecyclerListView adapter for `VirtualizedList`/`FlatList` (via `recyclerlistview`) to improve large-list performance on TV. NOTE: Disabled at the moment to fix some issues.
@@ -131,7 +154,7 @@ To help you get you familiar with the contribution process, there is a list of [
 
 React Native Web for TV is [MIT licensed](./LICENSE). By contributing to React Native Web for TV, you agree that your contributions will be licensed under its MIT license.
 
-This fork also depends on Apache-2.0 licensed TV navigation code via `@bbc/tv-lrud-spatial`.
+This fork also depends on Apache-2.0 licensed TV navigation code via `@hps1978/tv-lrud-spatial`.
 See [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) and [APACHE-2.0.txt](./APACHE-2.0.txt) for redistribution details.
 
 [package-badge]: https://img.shields.io/npm/v/react-native-web-tv.svg?style=flat
