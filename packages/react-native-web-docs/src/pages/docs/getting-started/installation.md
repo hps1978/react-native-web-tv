@@ -23,7 +23,7 @@ An overview of how to install and use {{ site.name }}.
 
 The spatial navigation layer is integrated and enabled by default once remote key events reach the browser.
 
-For configuration and advanced usage, see the [TV Navigation documentation](/docs/tv-navigation/).
+For configuration and advanced usage, see the [TV Navigation documentation]({{ '/docs/tv-navigation/' | url }}).
 
 ---
 

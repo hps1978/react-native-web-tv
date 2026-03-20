@@ -24,7 +24,7 @@ Subscribe to remote control key events on TV platforms.
 
 The event pipeline is integrated and enabled by default once remote key events reach the browser.
 
-For configuration and advanced usage, see the [TV Navigation documentation](/docs/tv-navigation/).
+For configuration and advanced usage, see the [TV Navigation documentation]({{ '/docs/tv-navigation/' | url }}).
 
 ---
 :::

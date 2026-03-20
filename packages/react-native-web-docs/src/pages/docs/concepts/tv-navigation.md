@@ -32,7 +32,7 @@ For advanced use cases, you can:
 - Remap remote keys for different TV platforms
 - Adjust focus and scroll behavior
 
-See below and the [TV Navigation documentation](/docs/tv-navigation/) for more platform-specific tips, best practices, and migration notes.
+See below and the [TV Navigation documentation]({{ '/docs/tv-navigation/' | url }}) for more platform-specific tips, best practices, and migration notes.
 
 ---
 :::
