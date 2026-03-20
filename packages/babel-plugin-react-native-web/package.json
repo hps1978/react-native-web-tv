@@ -3,7 +3,7 @@
     "registry": "https://registry.npmjs.org/"
   },
   "name": "babel-plugin-react-native-web",
-  "version": "0.21.2-tv.3",
+  "version": "0.21.2-tv.4",
   "description": "Babel plugin for React Native Web for TV",
   "main": "index.js",
   "devDependencies": {
