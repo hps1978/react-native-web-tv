@@ -12,7 +12,7 @@ var _SpatialManager;
  * @format
  */
 
-import { setConfig as setLrudConfig, getNextFocus, getParentContainer, updateAncestorsAutoFocus, findDestinationOrAutofocus, getNextFocusInViewport } from '@bbc/tv-lrud-spatial';
+import { setConfig as setLrudConfig, getNextFocus, getParentContainer, updateAncestorsAutoFocus, findDestinationOrAutofocus, getNextFocusInViewport } from '@hps1978/tv-lrud-spatial';
 import { addEventListener } from '../addEventListener';
 import { setupNodeId } from '../../exports/TV/utils';
 import { startObserving, stopObserving } from './mutationObserver';
@@ -20,7 +20,7 @@ import { scrollContainer, scrollToElement, setupAppInitiatedScrollHandler, isEle
 var _instance = /*#__PURE__*/_classPrivateFieldLooseKey("_instance");
 /**
  * SpatialManager
- * Manages spatial navigation for TV platforms using the @bbc/tv-lrud-spatial library.
+ * Manages spatial navigation for TV platforms using the @hps1978/tv-lrud-spatial library.
  * Implements singleton pattern to ensure only one instance exists across the app.
  */
 class SpatialManager {
