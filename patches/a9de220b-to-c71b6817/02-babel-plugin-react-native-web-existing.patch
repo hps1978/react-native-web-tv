@@ -1,0 +1,79 @@
+diff --git a/packages/babel-plugin-react-native-web/README.md b/packages/babel-plugin-react-native-web/README.md
+index 191d57db..f7cf4751 100644
+--- a/packages/babel-plugin-react-native-web/README.md
++++ b/packages/babel-plugin-react-native-web/README.md
+@@ -5,10 +5,18 @@
+ A Babel plugin that will alias `react-native` to `react-native-web` and exclude
+ any modules not required by your app (keeping bundle size down).
+ 
++In this TV fork, the plugin behavior is unchanged and works for TV exports as well
++(for example `TVFocusGuideView`, `TVEventHandler`, and `useTVEventHandler`) when
++they are imported from `react-native`.
++
+ ## Installation
+ 
++
+ ```
+-npm install --save-dev babel-plugin-react-native-web
++# For the TV fork:
++npm install --save-dev babel-plugin-react-native-web-tv
++# For upstream:
++# npm install --save-dev babel-plugin-react-native-web
+ ```
+ 
+ ## Usage
+@@ -18,7 +26,7 @@ npm install --save-dev babel-plugin-react-native-web
+ ```
+ {
+   "plugins": [
+-    ["react-native-web", { commonjs: true }]
++    ["react-native-web-tv", { commonjs: true }]
+   ]
+ }
+ ```
+diff --git a/packages/babel-plugin-react-native-web/index.js b/packages/babel-plugin-react-native-web/index.js
+index 3fc77982..ef33fe7d 100644
+--- a/packages/babel-plugin-react-native-web/index.js
++++ b/packages/babel-plugin-react-native-web/index.js
+@@ -1 +1,5 @@
+-module.exports = require('./src');
++// Allow dynamic package name for publish-time renaming
++const plugin = require('./src');
++// Always rewrite react-native and react-native-web imports to the correct TV fork paths
++plugin.packageName = require('./package.json').name;
++module.exports = plugin;
+diff --git a/packages/babel-plugin-react-native-web/package.json b/packages/babel-plugin-react-native-web/package.json
+index a71eddfd..f7528917 100644
+--- a/packages/babel-plugin-react-native-web/package.json
++++ b/packages/babel-plugin-react-native-web/package.json
+@@ -3,8 +3,8 @@
+     "registry": "https://registry.npmjs.org/"
+   },
+   "name": "babel-plugin-react-native-web",
+-  "version": "0.21.2",
+-  "description": "Babel plugin for React Native for Web",
++  "version": "0.21.2-tv.2",
++  "description": "Babel plugin for React Native Web for TV",
+   "main": "index.js",
+   "devDependencies": {
+     "babel-plugin-tester": "^10.1.0"
+@@ -13,6 +13,6 @@
+   "license": "MIT",
+   "repository": {
+     "type": "git",
+-    "url": "git://github.com/necolas/react-native-web.git"
++    "url": "git://github.com/hps1978/react-native-web-tv.git"
+   }
+ }
+diff --git a/packages/babel-plugin-react-native-web/src/moduleMap.js b/packages/babel-plugin-react-native-web/src/moduleMap.js
+index a83dd77e..6e341735 100644
+--- a/packages/babel-plugin-react-native-web/src/moduleMap.js
++++ b/packages/babel-plugin-react-native-web/src/moduleMap.js
+@@ -42,6 +42,7 @@ module.exports = {
+   StatusBar: true,
+   StyleSheet: true,
+   Switch: true,
++  TV: true,
+   Text: true,
+   TextInput: true,
+   Touchable: true,
