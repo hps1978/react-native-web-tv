@@ -6,10 +6,11 @@ const getDistLocation = (importName, opts) => {
   const format = isCommonJS(opts) ? 'cjs/' : '';
   const internalName =
     importName === 'unstable_createElement' ? 'createElement' : importName;
+  const target = opts.target || 'react-native-web-tv';
   if (internalName === 'index') {
-    return `react-native-web/dist/${format}index`;
+    return `${target}/dist/${format}index`;
   } else if (internalName && moduleMap[internalName]) {
-    return `react-native-web/dist/${format}exports/${internalName}`;
+    return `${target}/dist/${format}exports/${internalName}`;
   }
 };
 
@@ -26,18 +27,56 @@ const isReactNativeRequire = (t, node) => {
     init.callee.name === 'require' &&
     init.arguments.length === 1 &&
     (init.arguments[0].value === 'react-native' ||
-      init.arguments[0].value === 'react-native-web')
+      init.arguments[0].value === 'react-native-web' ||
+      init.arguments[0].value === 'react-native-web-tv')
   );
 };
 
 const isReactNativeModule = ({ source, specifiers }) =>
   source &&
-  (source.value === 'react-native' || source.value === 'react-native-web') &&
+  (source.value === 'react-native' ||
+    source.value === 'react-native-web' ||
+    source.value === 'react-native-web-tv') &&
   specifiers.length;
 
 module.exports = function ({ types: t }) {
   return {
-    name: 'Rewrite react-native to react-native-web',
+    name: 'Rewrite react-native to react-native-web-tv',
+    pre(file) {
+      // Warn if misconfigured
+      const opts =
+        file.opts.plugins.find(
+          (p) =>
+            Array.isArray(p) &&
+            p[0] &&
+            (p[0] === 'react-native-web-tv' ||
+              p[0] === 'babel-plugin-react-native-web-tv')
+        )?.[1] || {};
+      const target = opts.target || 'react-native-web-tv';
+      try {
+        const pkg = require(`${process.cwd()}/package.json`);
+        const hasTV =
+          pkg.dependencies?.['react-native-web-tv'] ||
+          pkg.devDependencies?.['react-native-web-tv'];
+        const hasWeb =
+          pkg.dependencies?.['react-native-web'] ||
+          pkg.devDependencies?.['react-native-web'];
+        if (target === 'react-native-web-tv' && !hasTV) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            '[babel-plugin-react-native-web-tv] WARNING: target is react-native-web-tv but react-native-web-tv is not a dependency.'
+          );
+        }
+        if (target === 'react-native-web' && !hasWeb) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            '[babel-plugin-react-native-web-tv] WARNING: target is react-native-web but react-native-web is not a dependency.'
+          );
+        }
+      } catch (e) {
+        // ignore
+      }
+    },
     visitor: {
       ImportDeclaration(path, state) {
         const { specifiers } = path.node;

@@ -29,6 +29,13 @@ import * as ReactNativeModules from 'react-native-web';`,
     snapshot: true
   },
   {
+    title: 'import from "react-native-web-tv"',
+    code: `import { unstable_createElement } from 'react-native-web-tv';
+import { StyleSheet, View, Pressable, processColor } from 'react-native-web-tv';
+import * as ReactNativeModules from 'react-native-web-tv';`,
+    snapshot: true
+  },
+  {
     title: 'export from "react-native"',
     code: `export { View } from 'react-native';
 export { StyleSheet, Text, unstable_createElement } from 'react-native';`,
@@ -38,6 +45,12 @@ export { StyleSheet, Text, unstable_createElement } from 'react-native';`,
     title: 'export from "react-native-web"',
     code: `export { View } from 'react-native-web';
 export { StyleSheet, Text, unstable_createElement } from 'react-native-web';`,
+    snapshot: true
+  },
+  {
+    title: 'export from "react-native-web-tv"',
+    code: `export { View } from 'react-native-web-tv';
+export { StyleSheet, Text, unstable_createElement } from 'react-native-web-tv';`,
     snapshot: true
   },
   // require react-native
@@ -61,6 +74,13 @@ const { StyleSheet, Pressable } = require('react-native');`,
     code: `const ReactNative = require('react-native-web');
 const { unstable_createElement } = require('react-native-web');
 const { StyleSheet, View, Pressable, processColor } = require('react-native-web');`,
+    snapshot: true
+  },
+  {
+    title: 'require "react-native-web-tv"',
+    code: `const ReactNative = require('react-native-web-tv');
+const { unstable_createElement } = require('react-native-web-tv');
+const { StyleSheet, View, Pressable, processColor } = require('react-native-web-tv');`,
     snapshot: true
   }
 ];
