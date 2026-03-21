@@ -10,9 +10,13 @@ const os = require('os');
 const path = require('path');
 
 const RELEASE_BRANCH = 'master';
-const INTERNAL_PUBLISH_PACKAGE_NAMES = ['react-native-web'];
+const INTERNAL_PUBLISH_PACKAGE_NAMES = [
+  'react-native-web',
+  'babel-plugin-react-native-web'
+];
 const PUBLIC_PACKAGE_NAMES = {
-  'react-native-web': 'react-native-web-tv'
+  'react-native-web': 'react-native-web-tv',
+  'babel-plugin-react-native-web': 'babel-plugin-react-native-web-tv'
 };
 
 const args = process.argv.slice(2);

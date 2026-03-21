@@ -2,6 +2,7 @@ import _extends from "@babel/runtime/helpers/extends";
 import _objectSpread from "@babel/runtime/helpers/objectSpread2";
 /**
  * Copyright (c) Douglas Lowder.
+ * Modifications copyright (c) 2026 Harpreet Singh.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.

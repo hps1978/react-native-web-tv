@@ -3,6 +3,7 @@ import _objectWithoutPropertiesLoose from "@babel/runtime/helpers/objectWithoutP
 var _excluded = ["focusable", "isTVSelectable", "onScroll", "onTouchMove", "onWheel", "scrollEnabled", "scrollEventThrottle", "showsHorizontalScrollIndicator", "showsVerticalScrollIndicator", "style"];
 /**
  * Copyright (c) Nicolas Gallagher.
+ * Modifications copyright (c) 2026 Harpreet Singh.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.

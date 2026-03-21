@@ -1,10 +1,14 @@
+
 # React Native Web for TV monorepo
 
 This repository is a customized React Native for Web fork that adds TV-first APIs and focus navigation for web-based TV platforms.
 
 It is intended for TV browser runtimes, while keeping React Native for Web compatibility for shared app code.
 
+
 It is derived from the [React Native Web](https://github.com/necolas/react-native-web) project. Thanks to the RNW project for the foundation this fork builds on while extending it with TV-specific behavior, APIs, and focus/navigation support.
+
+TV-specific components and logic are adapted from the [react-native-tvos](https://github.com/react-native-tvos/react-native-tvos) project and its contributors, with modifications for web compatibility. Thanks to the react-native-tvos project and its maintainers for their foundation and inspiration for TV platform support.
 
 ## What's included in this fork
 
@@ -184,6 +188,15 @@ Open the local dev URL and try TV-focused routes such as:
   - `TVEventControl`
   - `TVTextScrollView`
   - `useTVEventHandler`
+
+[//]: # (TV-Specific Code Attribution)
+
+## Notice on TV-Specific Code Attribution
+
+Some TV-specific components and logic in this repository are adapted from the [react-native-tvos](https://github.com/react-native-tvos/react-native-tvos) project and its contributors. These adaptations have been modified for compatibility with React Native Web and web-based TV platforms. Original authors, including Douglas Lowder and others, are credited in the relevant source file headers and in THIRD_PARTY_NOTICES.md.
+
+If you use or redistribute this code, please retain all original copyright notices and comply with the MIT license.
+
 
 ## Contributing
 

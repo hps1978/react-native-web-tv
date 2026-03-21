@@ -1,0 +1,1676 @@
+diff --git a/packages/react-native-web/dist/modules/addEventListener/__tests__/index-test.js.flow b/packages/react-native-web/dist/modules/addEventListener/__tests__/index-test.js.flow
+new file mode 100644
+index 00000000..9eb61441
+--- /dev/null
++++ b/packages/react-native-web/dist/modules/addEventListener/__tests__/index-test.js.flow
+@@ -0,0 +1,191 @@
++/**
++ * Copyright (c) Meta Platforms, Inc. and affiliates.
++ *
++ * This source code is licensed under the MIT license found in the
++ * LICENSE file in the root directory of this source tree.
++ *
++ * @flow strict-local
++ */
++
++import * as React from 'react';
++import { act, render } from '@testing-library/react';
++import { createEventTarget } from 'dom-event-testing-library';
++import { addEventListener } from '..';
++describe('addEventListener', () => {
++  describe('addEventListener()', () => {
++    test('event dispatched on target', () => {
++      const listener = jest.fn();
++      const targetRef = React.createRef();
++      declare function Component(): any;
++      render(<Component />);
++      const target = createEventTarget(targetRef.current);
++      act(() => {
++        target.click();
++      });
++      expect(listener).toBeCalledTimes(1);
++    });
++    test('event dispatched on parent', () => {
++      const listener = jest.fn();
++      const listenerCapture = jest.fn();
++      const targetRef = React.createRef();
++      const parentRef = React.createRef();
++      declare function Component(): any;
++      render(<Component />);
++      const parent = createEventTarget(parentRef.current);
++      act(() => {
++        parent.click();
++      });
++      expect(listener).toBeCalledTimes(0);
++      expect(listenerCapture).toBeCalledTimes(0);
++    });
++    test('event dispatched on child', () => {
++      const log = [];
++      const listener = jest.fn(() => {
++        log.push('bubble');
++      });
++      const listenerCapture = jest.fn(() => {
++        log.push('capture');
++      });
++      const targetRef = React.createRef();
++      const childRef = React.createRef();
++      declare function Component(): any;
++      render(<Component />);
++      const child = createEventTarget(childRef.current);
++      act(() => {
++        child.click();
++      });
++      expect(listenerCapture).toBeCalledTimes(1);
++      expect(listener).toBeCalledTimes(1);
++      expect(log).toEqual(['capture', 'bubble']);
++    });
++    test('event dispatched on text node', () => {
++      const listener = jest.fn();
++      const targetRef = React.createRef();
++      const childRef = React.createRef();
++      declare function Component(): any;
++      render(<Component />);
++      const text = createEventTarget(childRef.current.firstChild);
++      act(() => {
++        text.click();
++      });
++      expect(listener).toBeCalledTimes(1);
++    });
++    test('listener can be attached to document', () => {
++      const listener = jest.fn();
++      const targetRef = React.createRef();
++      declare function Component(arg0: any): any;
++      render(<Component target={document} />);
++      const target = createEventTarget(targetRef.current);
++      act(() => {
++        target.click();
++      });
++      expect(listener).toBeCalledTimes(1);
++    });
++    test('listener can be attached to window ', () => {
++      const listener = jest.fn();
++      const targetRef = React.createRef();
++      declare function Component(arg0: any): any;
++      render(<Component target={window} />);
++      const target = createEventTarget(targetRef.current);
++      act(() => {
++        target.click();
++      });
++      expect(listener).toBeCalledTimes(1);
++    });
++    test('custom event dispatched on target', () => {
++      const listener = jest.fn();
++      const targetRef = React.createRef();
++      declare function Component(): any;
++      render(<Component />);
++      act(() => {
++        const event = new CustomEvent('magic-event', {
++          bubbles: true
++        });
++        targetRef.current.dispatchEvent(event);
++      });
++      expect(listener).toBeCalledTimes(1);
++    });
++    test('listeners can be set on multiple targets simultaneously', () => {
++      const log = [];
++      const targetRef = React.createRef();
++      const parentRef = React.createRef();
++      const childRef = React.createRef();
++      const listener = jest.fn(e => {
++        log.push(['bubble', e.currentTarget.id]);
++      });
++      const listenerCapture = jest.fn(e => {
++        log.push(['capture', e.currentTarget.id]);
++      });
++      declare function Component(): any;
++      render(<Component />);
++      const child = createEventTarget(childRef.current);
++      act(() => {
++        child.click();
++      });
++      expect(listenerCapture).toBeCalledTimes(2);
++      expect(listener).toBeCalledTimes(2);
++      expect(log).toEqual([['capture', 'parent'], ['capture', 'target'], ['bubble', 'target'], ['bubble', 'parent']]);
++    });
++    test('listeners are specific to each event handle', () => {
++      const log = [];
++      const targetRef = React.createRef();
++      const childRef = React.createRef();
++      const listener = jest.fn(e => {
++        log.push(['bubble', 'target']);
++      });
++      const listenerAlt = jest.fn(e => {
++        log.push(['bubble', 'target-alt']);
++      });
++      const listenerCapture = jest.fn(e => {
++        log.push(['capture', 'target']);
++      });
++      const listenerCaptureAlt = jest.fn(e => {
++        log.push(['capture', 'target-alt']);
++      });
++      declare function Component(): any;
++      render(<Component />);
++      const child = createEventTarget(childRef.current);
++      act(() => {
++        child.click();
++      });
++      expect(listenerCapture).toBeCalledTimes(1);
++      expect(listenerCaptureAlt).toBeCalledTimes(1);
++      expect(listener).toBeCalledTimes(1);
++      expect(listenerAlt).toBeCalledTimes(1);
++      expect(log).toEqual([['capture', 'target'], ['capture', 'target-alt'], ['bubble', 'target'], ['bubble', 'target-alt']]);
++    });
++  });
++  describe('stopPropagation and stopImmediatePropagation', () => {
++    test('stopPropagation works as expected', () => {
++      const childListener = jest.fn(e => {
++        e.stopPropagation();
++      });
++      const targetListener = jest.fn();
++      const targetRef = React.createRef();
++      const childRef = React.createRef();
++      declare function Component(): any;
++      render(<Component />);
++      const child = createEventTarget(childRef.current);
++      act(() => {
++        child.click();
++      });
++      expect(childListener).toBeCalledTimes(1);
++      expect(targetListener).toBeCalledTimes(0);
++    });
++    test('stopImmediatePropagation works as expected', () => {
++      const firstListener = jest.fn(e => {
++        e.stopImmediatePropagation();
++      });
++      const secondListener = jest.fn();
++      const targetRef = React.createRef();
++      declare function Component(): any;
++      render(<Component />);
++      const target = createEventTarget(targetRef.current);
++      act(() => {
++        target.click();
++      });
++      expect(firstListener).toBeCalledTimes(1);
++      expect(secondListener).toBeCalledTimes(0);
++    });
++  });
++});
+\ No newline at end of file
+diff --git a/packages/react-native-web/dist/modules/addEventListener/__tests__/index-test.node.js.flow b/packages/react-native-web/dist/modules/addEventListener/__tests__/index-test.node.js.flow
+new file mode 100644
+index 00000000..c1805b71
+--- /dev/null
++++ b/packages/react-native-web/dist/modules/addEventListener/__tests__/index-test.node.js.flow
+@@ -0,0 +1,21 @@
++/**
++ * Copyright (c) Meta Platforms, Inc. and affiliates.
++ *
++ * This source code is licensed under the MIT license found in the
++ * LICENSE file in the root directory of this source tree.
++ *
++ * @flow strict-local
++ */
++
++import * as React from 'react';
++import * as ReactDOMServer from 'react-dom/server';
++import { addEventListener } from '..';
++describe('addEventListener', () => {
++  test('can render correctly using ReactDOMServer', () => {
++    const listener = jest.fn();
++    const targetRef = React.createRef();
++    declare function Component(): any;
++    const output = ReactDOMServer.renderToString(<Component />);
++    expect(output).toBe('<div></div>');
++  });
++});
+\ No newline at end of file
+diff --git a/packages/react-native-web/dist/modules/useEvent/__tests__/index-test.js.flow b/packages/react-native-web/dist/modules/useEvent/__tests__/index-test.js.flow
+new file mode 100644
+index 00000000..9b57364c
+--- /dev/null
++++ b/packages/react-native-web/dist/modules/useEvent/__tests__/index-test.js.flow
+@@ -0,0 +1,247 @@
++/**
++ * Copyright (c) Meta Platforms, Inc. and affiliates.
++ *
++ * This source code is licensed under the MIT license found in the
++ * LICENSE file in the root directory of this source tree.
++ *
++ * @flow strict-local
++ */
++
++import * as React from 'react';
++import { act, render } from '@testing-library/react';
++import { createEventTarget } from 'dom-event-testing-library';
++import useEvent from '..';
++describe('use-event', () => {
++  describe('setListener()', () => {
++    test('event dispatched on target', () => {
++      const listener = jest.fn();
++      const targetRef = React.createRef();
++      declare function Component(): any;
++      render(<Component />);
++      const target = createEventTarget(targetRef.current);
++      act(() => {
++        target.click();
++      });
++      expect(listener).toBeCalledTimes(1);
++    });
++    test('event dispatched on parent', () => {
++      const listener = jest.fn();
++      const listenerCapture = jest.fn();
++      const targetRef = React.createRef();
++      const parentRef = React.createRef();
++      declare function Component(): any;
++      render(<Component />);
++      const parent = createEventTarget(parentRef.current);
++      act(() => {
++        parent.click();
++      });
++      expect(listener).toBeCalledTimes(0);
++      expect(listenerCapture).toBeCalledTimes(0);
++    });
++    test('event dispatched on child', () => {
++      const log = [];
++      const listener = jest.fn(() => {
++        log.push('bubble');
++      });
++      const listenerCapture = jest.fn(() => {
++        log.push('capture');
++      });
++      const targetRef = React.createRef();
++      const childRef = React.createRef();
++      declare function Component(): any;
++      render(<Component />);
++      const child = createEventTarget(childRef.current);
++      act(() => {
++        child.click();
++      });
++      expect(listenerCapture).toBeCalledTimes(1);
++      expect(listener).toBeCalledTimes(1);
++      expect(log).toEqual(['capture', 'bubble']);
++    });
++    test('event dispatched on text node', () => {
++      const listener = jest.fn();
++      const targetRef = React.createRef();
++      const childRef = React.createRef();
++      declare function Component(): any;
++      render(<Component />);
++      const text = createEventTarget(childRef.current.firstChild);
++      act(() => {
++        text.click();
++      });
++      expect(listener).toBeCalledTimes(1);
++    });
++    test('listener can be attached to document ', () => {
++      const listener = jest.fn();
++      const targetRef = React.createRef();
++      declare function Component(arg0: any): any;
++      render(<Component target={document} />);
++      const target = createEventTarget(targetRef.current);
++      act(() => {
++        target.click();
++      });
++      expect(listener).toBeCalledTimes(1);
++    });
++    test('listener can be attached to window ', () => {
++      const listener = jest.fn();
++      const targetRef = React.createRef();
++      declare function Component(arg0: any): any;
++      render(<Component target={window} />);
++      const target = createEventTarget(targetRef.current);
++      act(() => {
++        target.click();
++      });
++      expect(listener).toBeCalledTimes(1);
++    });
++    test('listener is replaceable', () => {
++      const listener = jest.fn();
++      const listenerAlt = jest.fn();
++      const targetRef = React.createRef();
++      declare function Component(arg0: any): any;
++      const {
++        rerender
++      } = render(<Component onClick={listener} />);
++      const target = createEventTarget(targetRef.current);
++      act(() => {
++        target.click();
++      });
++      expect(listener).toBeCalledTimes(1);
++      rerender(<Component onClick={listenerAlt} />);
++      act(() => {
++        target.click();
++      });
++      expect(listener).toBeCalledTimes(1);
++      expect(listenerAlt).toBeCalledTimes(1);
++    });
++    test('listener is removed when value is null', () => {
++      const listener = jest.fn();
++      const targetRef = React.createRef();
++      declare function Component(arg0: any): any;
++      const {
++        unmount
++      } = render(<Component off={false} />);
++      const target = createEventTarget(targetRef.current);
++      act(() => {
++        target.click();
++      });
++      expect(listener).toBeCalledTimes(1);
++
++      // this should unset the listener
++      unmount();
++      listener.mockClear();
++      act(() => {
++        target.click();
++      });
++      expect(listener).toBeCalledTimes(0);
++    });
++    test('custom event dispatched on target', () => {
++      const listener = jest.fn();
++      const targetRef = React.createRef();
++      declare function Component(): any;
++      render(<Component />);
++      act(() => {
++        const event = new CustomEvent('magic-event', {
++          bubbles: true
++        });
++        targetRef.current.dispatchEvent(event);
++      });
++      expect(listener).toBeCalledTimes(1);
++    });
++    test('listeners can be set on multiple targets simultaneously', () => {
++      const log = [];
++      const targetRef = React.createRef();
++      const parentRef = React.createRef();
++      const childRef = React.createRef();
++      const listener = jest.fn(e => {
++        log.push(['bubble', e.currentTarget.id]);
++      });
++      const listenerCapture = jest.fn(e => {
++        log.push(['capture', e.currentTarget.id]);
++      });
++      declare function Component(): any;
++      render(<Component />);
++      const child = createEventTarget(childRef.current);
++      act(() => {
++        child.click();
++      });
++      expect(listenerCapture).toBeCalledTimes(2);
++      expect(listener).toBeCalledTimes(2);
++      expect(log).toEqual([['capture', 'parent'], ['capture', 'target'], ['bubble', 'target'], ['bubble', 'parent']]);
++    });
++    test('listeners are specific to each event handle', () => {
++      const log = [];
++      const targetRef = React.createRef();
++      const childRef = React.createRef();
++      const listener = jest.fn(e => {
++        log.push(['bubble', 'target']);
++      });
++      const listenerAlt = jest.fn(e => {
++        log.push(['bubble', 'target-alt']);
++      });
++      const listenerCapture = jest.fn(e => {
++        log.push(['capture', 'target']);
++      });
++      const listenerCaptureAlt = jest.fn(e => {
++        log.push(['capture', 'target-alt']);
++      });
++      declare function Component(): any;
++      render(<Component />);
++      const child = createEventTarget(childRef.current);
++      act(() => {
++        child.click();
++      });
++      expect(listenerCapture).toBeCalledTimes(1);
++      expect(listenerCaptureAlt).toBeCalledTimes(1);
++      expect(listener).toBeCalledTimes(1);
++      expect(listenerAlt).toBeCalledTimes(1);
++      expect(log).toEqual([['capture', 'target'], ['capture', 'target-alt'], ['bubble', 'target'], ['bubble', 'target-alt']]);
++    });
++  });
++  describe('cleanup', () => {
++    test('removes all listeners for given event type from targets', () => {
++      const clickListener = jest.fn();
++      declare function Component(): any;
++      const {
++        unmount
++      } = render(<Component />);
++      unmount();
++      const target = createEventTarget(document);
++      act(() => {
++        target.click();
++      });
++      expect(clickListener).toBeCalledTimes(0);
++    });
++  });
++  describe('stopPropagation and stopImmediatePropagation', () => {
++    test('stopPropagation works as expected', () => {
++      const childListener = jest.fn(e => {
++        e.stopPropagation();
++      });
++      const targetListener = jest.fn();
++      const targetRef = React.createRef();
++      const childRef = React.createRef();
++      declare function Component(): any;
++      render(<Component />);
++      const child = createEventTarget(childRef.current);
++      act(() => {
++        child.click();
++      });
++      expect(childListener).toBeCalledTimes(1);
++      expect(targetListener).toBeCalledTimes(0);
++    });
++    test('stopImmediatePropagation works as expected', () => {
++      const firstListener = jest.fn(e => {
++        e.stopImmediatePropagation();
++      });
++      const secondListener = jest.fn();
++      const targetRef = React.createRef();
++      declare function Component(): any;
++      render(<Component />);
++      const target = createEventTarget(targetRef.current);
++      act(() => {
++        target.click();
++      });
++      expect(firstListener).toBeCalledTimes(1);
++      expect(secondListener).toBeCalledTimes(0);
++    });
++  });
++});
+\ No newline at end of file
+diff --git a/packages/react-native-web/dist/modules/useStable/__tests__/index-test.js.flow b/packages/react-native-web/dist/modules/useStable/__tests__/index-test.js.flow
+new file mode 100644
+index 00000000..49edfc6b
+--- /dev/null
++++ b/packages/react-native-web/dist/modules/useStable/__tests__/index-test.js.flow
+@@ -0,0 +1,54 @@
++/**
++ * Copyright (c) Meta Platforms, Inc. and affiliates.
++ *
++ * This source code is licensed under the MIT license found in the
++ * LICENSE file in the root directory of this source tree.
++ *
++ * @flow
++ */
++
++import * as React from 'react';
++import { render } from '@testing-library/react';
++import useStable from '..';
++describe('useStable', () => {
++  let spy = {};
++  declare var TestComponent: (arg0: any) => React.Node;
++  beforeEach(() => {
++    spy = {};
++  });
++  test('correctly sets the initial value', () => {
++    declare var initialValueCallback: () => any;
++    render(<TestComponent initialValueCallback={initialValueCallback} />);
++    expect(spy.value).toBe(5);
++  });
++  test('does not change the value', () => {
++    let counter = 0;
++    declare var initialValueCallback: () => any;
++    const {
++      rerender
++    } = render(<TestComponent initialValueCallback={initialValueCallback} />);
++    expect(spy.value).toBe(0);
++    rerender(<TestComponent initialValueCallback={initialValueCallback} />);
++    expect(spy.value).toBe(0);
++  });
++  test('only calls the callback once', () => {
++    let counter = 0;
++    declare var initialValueCallback: () => any;
++    const {
++      rerender
++    } = render(<TestComponent initialValueCallback={initialValueCallback} />);
++    expect(counter).toBe(1);
++    rerender(<TestComponent initialValueCallback={initialValueCallback} />);
++    expect(counter).toBe(1);
++  });
++  test('does not change the value if the callback initially returns null', () => {
++    let counter = 0;
++    declare var initialValueCallback: () => any;
++    const {
++      rerender
++    } = render(<TestComponent initialValueCallback={initialValueCallback} />);
++    expect(spy.value).toBe(null);
++    rerender(<TestComponent initialValueCallback={initialValueCallback} />);
++    expect(spy.value).toBe(null);
++  });
++});
+\ No newline at end of file
+diff --git a/packages/react-native-web/src/exports/FlatList/__tests__/FlatList.integration.test.js b/packages/react-native-web/src/exports/FlatList/__tests__/FlatList.integration.test.js
+new file mode 100644
+index 00000000..92ff131f
+--- /dev/null
++++ b/packages/react-native-web/src/exports/FlatList/__tests__/FlatList.integration.test.js
+@@ -0,0 +1,292 @@
++/**
++ * Copyright (c) Nicolas Gallagher.
++ *
++ * This source code is licensed under the MIT license found in the
++ * LICENSE file in the root directory of this source tree.
++ */
++
++import React from 'react';
++import { render } from '@testing-library/react';
++import FlatList from '../';
++import Text from '../../../Text';
++import View from '../../../View';
++
++describe('FlatList', () => {
++  describe('Backward Compatibility', () => {
++    test('renders legacy implementation without new props', () => {
++      const data = [
++        { key: '1', title: 'Item 1' },
++        { key: '2', title: 'Item 2' },
++        { key: '3', title: 'Item 3' }
++      ];
++
++      const { container } = render(
++        <FlatList
++          data={data}
++          keyExtractor={(item) => item.key}
++          renderItem={({ item }) => <Text>{item.title}</Text>}
++        />
++      );
++
++      expect(container.querySelectorAll('div').length).toBeGreaterThan(0);
++    });
++
++    test('works with getItemLayout prop (legacy optimization)', () => {
++      const data = Array.from({ length: 10 }, (_, i) => ({
++        key: `${i}`,
++        title: `Item ${i}`
++      }));
++
++      const getItemLayout = (data, index) => ({
++        length: 50,
++        offset: 50 * index,
++        index
++      });
++
++      const { container } = render(
++        <FlatList
++          data={data}
++          getItemLayout={getItemLayout}
++          keyExtractor={(item) => item.key}
++          renderItem={({ item }) => <Text>{item.title}</Text>}
++        />
++      );
++
++      expect(container.querySelectorAll('div').length).toBeGreaterThan(0);
++    });
++
++    test('renders empty component when data is empty', () => {
++      const { container } = render(
++        <FlatList
++          ListEmptyComponent={() => <Text>No items</Text>}
++          data={[]}
++          keyExtractor={(item) => item.key}
++          renderItem={({ item }) => <Text>{item.title}</Text>}
++        />
++      );
++
++      expect(container.textContent).toContain('No items');
++    });
++
++    test('renders header and footer components', () => {
++      const data = [{ key: '1', title: 'Item 1' }];
++
++      const { container } = render(
++        <FlatList
++          ListFooterComponent={() => <Text>Footer</Text>}
++          ListHeaderComponent={() => <Text>Header</Text>}
++          data={data}
++          keyExtractor={(item) => item.key}
++          renderItem={({ item }) => <Text>{item.title}</Text>}
++        />
++      );
++
++      expect(container.textContent).toContain('Header');
++      expect(container.textContent).toContain('Footer');
++    });
++  });
++
++  describe('RLV Adapter Optimization', () => {
++    test('uses RLV adapter when layoutProvider prop is provided', () => {
++      const data = Array.from({ length: 10 }, (_, i) => ({
++        key: `${i}`,
++        title: `Item ${i}`
++      }));
++
++      const layoutProvider = (index) => ({
++        width: '100%',
++        height: 50
++      });
++
++      const { container } = render(
++        <FlatList
++          data={data}
++          keyExtractor={(item) => item.key}
++          layoutProvider={layoutProvider}
++          renderItem={({ item }) => <Text>{item.title}</Text>}
++        />
++      );
++
++      expect(container.querySelectorAll('div').length).toBeGreaterThan(0);
++    });
++
++    test('uses rowHasChanged for per-item change detection', () => {
++      const data = Array.from({ length: 5 }, (_, i) => ({
++        key: `${i}`,
++        title: `Item ${i}`
++      }));
++
++      const rowHasChanged = (prev, next) => {
++        return prev.title !== next.title;
++      };
++
++      const { container, rerender } = render(
++        <FlatList
++          data={data}
++          keyExtractor={(item) => item.key}
++          layoutProvider={(index) => ({ width: '100%', height: 50 })}
++          renderItem={({ item }) => <Text>{item.title}</Text>}
++          rowHasChanged={rowHasChanged}
++        />
++      );
++
++      expect(container.querySelectorAll('div').length).toBeGreaterThan(0);
++
++      // Update data
++      const newData = [
++        ...data.slice(0, 2),
++        { ...data[2], title: 'Item 2 Updated' },
++        ...data.slice(3)
++      ];
++
++      rerender(
++        <FlatList
++          data={newData}
++          keyExtractor={(item) => item.key}
++          layoutProvider={(index) => ({ width: '100%', height: 50 })}
++          renderItem={({ item }) => <Text>{item.title}</Text>}
++          rowHasChanged={rowHasChanged}
++        />
++      );
++
++      expect(container.textContent).toContain('Item 2 Updated');
++    });
++
++    test('combines layoutProvider and rowHasChanged for full optimization', () => {
++      const data = Array.from({ length: 20 }, (_, i) => ({
++        key: `${i}`,
++        title: `Item ${i}`,
++        value: Math.random()
++      }));
++
++      const layoutProvider = (index) => ({
++        width: '100%',
++        height: 60
++      });
++
++      const rowHasChanged = (prev, next) => {
++        return prev.title !== next.title;
++      };
++
++      const { container } = render(
++        <FlatList
++          data={data}
++          keyExtractor={(item) => item.key}
++          layoutProvider={layoutProvider}
++          renderItem={({ item }) => <Text>{item.title}</Text>}
++          rowHasChanged={rowHasChanged}
++        />
++      );
++
++      expect(container.querySelectorAll('div').length).toBeGreaterThan(0);
++    });
++  });
++
++  describe('Item Separator Support', () => {
++    test('renders ItemSeparatorComponent', () => {
++      const data = [
++        { key: '1', title: 'Item 1' },
++        { key: '2', title: 'Item 2' }
++      ];
++
++      const { container } = render(
++        <FlatList
++          ItemSeparatorComponent={() => (
++            <View style={{ height: 1, backgroundColor: '#ccc' }} />
++          )}
++          data={data}
++          keyExtractor={(item) => item.key}
++          layoutProvider={(index) => ({ width: '100%', height: 50 })}
++          renderItem={({ item }) => <Text>{item.title}</Text>}
++        />
++      );
++
++      // Should render separator lines
++      const separators = container.querySelectorAll(
++        '[style*="backgroundColor"]'
++      );
++      expect(separators.length).toBeGreaterThan(0);
++    });
++  });
++
++  describe('Data Updates', () => {
++    test('updates list when data changes', () => {
++      const initialData = [
++        { key: '1', title: 'Item 1' },
++        { key: '2', title: 'Item 2' }
++      ];
++
++      const { container, rerender } = render(
++        <FlatList
++          data={initialData}
++          keyExtractor={(item) => item.key}
++          layoutProvider={(index) => ({ width: '100%', height: 50 })}
++          renderItem={({ item }) => <Text>{item.title}</Text>}
++        />
++      );
++
++      expect(container.textContent).toContain('Item 1');
++      expect(container.textContent).toContain('Item 2');
++
++      const newData = [
++        { key: '1', title: 'Item 1 Updated' },
++        { key: '2', title: 'Item 2' },
++        { key: '3', title: 'Item 3' }
++      ];
++
++      rerender(
++        <FlatList
++          data={newData}
++          keyExtractor={(item) => item.key}
++          layoutProvider={(index) => ({ width: '100%', height: 50 })}
++          renderItem={({ item }) => <Text>{item.title}</Text>}
++        />
++      );
++
++      expect(container.textContent).toContain('Item 1 Updated');
++      expect(container.textContent).toContain('Item 3');
++    });
++
++    test('handles large data sets efficiently', () => {
++      const data = Array.from({ length: 1000 }, (_, i) => ({
++        key: `${i}`,
++        title: `Item ${i}`
++      }));
++
++      const { container } = render(
++        <FlatList
++          data={data}
++          keyExtractor={(item) => item.key}
++          layoutProvider={(index) => ({ width: '100%', height: 50 })}
++          renderItem={({ item }) => <Text>{item.title}</Text>}
++        />
++      );
++
++      // Should render without crashing
++      expect(container.querySelectorAll('div').length).toBeGreaterThan(0);
++    });
++  });
++
++  describe('TV Support', () => {
++    test('marks focusable items with TV attributes', () => {
++      const data = [
++        { key: '1', title: 'Item 1', isTVSelectable: true },
++        { key: '2', title: 'Item 2', isTVSelectable: false }
++      ];
++
++      const { container } = render(
++        <FlatList
++          data={data}
++          keyExtractor={(item) => item.key}
++          layoutProvider={(index) => ({ width: '100%', height: 50 })}
++          renderItem={({ item }) => <Text>{item.title}</Text>}
++        />
++      );
++
++      const focusables = container.querySelectorAll(
++        '[data-rnw-focusable="true"]'
++      );
++      expect(focusables.length).toBeGreaterThan(0);
++    });
++  });
++});
+diff --git a/packages/react-native-web/src/modules/SpatialManager/__tests__/index-test.js b/packages/react-native-web/src/modules/SpatialManager/__tests__/index-test.js
+new file mode 100644
+index 00000000..87803429
+--- /dev/null
++++ b/packages/react-native-web/src/modules/SpatialManager/__tests__/index-test.js
+@@ -0,0 +1,353 @@
++/**
++ * Copyright (c) Meta Platforms, Inc. and affiliates.
++ *
++ * This source code is licensed under the MIT license found in the
++ * LICENSE file in the root directory of this source tree.
++ */
++
++import {
++  setupSpatialNavigation,
++  setFocus,
++  setDestinations,
++  teardownSpatialNavigation
++} from '../index';
++import * as lrudSpatial from '@hps1978/tv-lrud-spatial';
++import { setupScrollHandler } from '../scrollHandler';
++
++jest.mock('@hps1978/tv-lrud-spatial', () => {
++  const actual = jest.requireActual('@hps1978/tv-lrud-spatial');
++  return {
++    ...actual,
++    setConfig: jest.fn((...args) => actual.setConfig(...args))
++  };
++});
++
++jest.mock('../scrollHandler', () => ({
++  scrollToElement: jest.fn(),
++  setupAppInitiatedScrollHandler: jest.fn(() => () => {}),
++  isElementInWindowViewport: jest.fn(() => true),
++  setupScrollHandler: jest.fn(),
++  scrollToEdge: jest.fn()
++}));
++
++jest.mock('../mutationObserver', () => ({
++  startObserving: jest.fn(),
++  stopObserving: jest.fn()
++}));
++
++function setRect(node, rect) {
++  node.getBoundingClientRect = () => ({
++    ...rect,
++    x: rect.left,
++    y: rect.top,
++    toJSON: () => ({})
++  });
++}
++
++describe('modules/SpatialManager', () => {
++  afterEach(() => {
++    teardownSpatialNavigation();
++    document.body.innerHTML = '';
++    delete window.appConfig;
++    jest.clearAllMocks();
++    jest.restoreAllMocks();
++  });
++
++  test('setFocus focuses a plain focusable element', () => {
++    const elem = document.createElement('button');
++    elem.tabIndex = 0;
++    document.body.appendChild(elem);
++
++    setFocus(elem);
++
++    expect(document.activeElement).toBe(elem);
++  });
++
++  test('applies app config keyMap, scrollConfig, and AlignLeft focus mode', () => {
++    window.appConfig = {
++      keyMap: {
++        UP: 'ArrowUp'
++      },
++      scrollConfig: {
++        leftEdgePaddingPx: 24
++      },
++      focusConfig: {
++        mode: 'AlignLeft'
++      }
++    };
++
++    const container = document.createElement('div');
++    document.body.appendChild(container);
++
++    setupSpatialNavigation(container);
++
++    expect(lrudSpatial.setConfig).toHaveBeenCalledWith(
++      expect.objectContaining({
++        keyMap: {
++          UP: 'ArrowUp'
++        },
++        noValidDestinationCallback: expect.any(Function)
++      })
++    );
++    expect(setupScrollHandler).toHaveBeenCalledWith({
++      scrollConfig: {
++        leftEdgePaddingPx: 24
++      },
++      focusMode: 'AlignLeft'
++    });
++  });
++
++  test('uses default setup values when app config is missing', () => {
++    const container = document.createElement('div');
++    document.body.appendChild(container);
++
++    setupSpatialNavigation(container);
++
++    expect(lrudSpatial.setConfig).toHaveBeenCalledWith(
++      expect.objectContaining({
++        keyMap: null,
++        noValidDestinationCallback: expect.any(Function)
++      })
++    );
++    expect(setupScrollHandler).toHaveBeenCalledWith({
++      scrollConfig: {},
++      focusMode: 'default'
++    });
++  });
++
++  test('moves focus right using real LRUD on keydown', () => {
++    const container = document.createElement('div');
++    container.className = 'lrud-container';
++    container.tabIndex = 0;
++
++    const left = document.createElement('button');
++    left.tabIndex = 0;
++    const right = document.createElement('button');
++    right.tabIndex = 0;
++
++    setRect(left, {
++      left: 0,
++      right: 50,
++      top: 0,
++      bottom: 50,
++      width: 50,
++      height: 50
++    });
++    setRect(right, {
++      left: 200,
++      right: 250,
++      top: 0,
++      bottom: 50,
++      width: 50,
++      height: 50
++    });
++    setRect(container, {
++      left: 0,
++      right: 300,
++      top: 0,
++      bottom: 300,
++      width: 300,
++      height: 300
++    });
++
++    container.appendChild(left);
++    container.appendChild(right);
++    document.body.appendChild(container);
++
++    setupSpatialNavigation(container);
++    setFocus(left);
++
++    document.dispatchEvent(
++      new KeyboardEvent('keydown', {
++        key: 'ArrowRight',
++        bubbles: true,
++        cancelable: true
++      })
++    );
++
++    expect(document.activeElement).toBe(right);
++  });
++
++  test('setFocus(container) honors destinations with autofocus enabled', () => {
++    const container = document.createElement('div');
++    container.className = 'lrud-container';
++    container.tabIndex = 0;
++    container.setAttribute('data-autofocus', 'true');
++
++    const first = document.createElement('button');
++    first.tabIndex = 0;
++    first.id = 'first-destination';
++
++    const preferred = document.createElement('button');
++    preferred.tabIndex = 0;
++    preferred.id = 'preferred-destination';
++
++    container.setAttribute('data-destinations', preferred.id);
++    container.appendChild(first);
++    container.appendChild(preferred);
++    document.body.appendChild(container);
++
++    setFocus(container);
++
++    expect(document.activeElement).toBe(preferred);
++  });
++
++  test('throttles repeated keydown navigation using keydownThrottleMs', () => {
++    window.appConfig = {
++      keydownThrottleMs: 100
++    };
++
++    jest.spyOn(Date, 'now').mockImplementation(() => 1000);
++
++    const container = document.createElement('div');
++    container.className = 'lrud-container';
++    container.tabIndex = 0;
++
++    const left = document.createElement('button');
++    left.tabIndex = 0;
++    const right = document.createElement('button');
++    right.tabIndex = 0;
++
++    setRect(left, {
++      left: 0,
++      right: 50,
++      top: 0,
++      bottom: 50,
++      width: 50,
++      height: 50
++    });
++    setRect(right, {
++      left: 200,
++      right: 250,
++      top: 0,
++      bottom: 50,
++      width: 50,
++      height: 50
++    });
++    setRect(container, {
++      left: 0,
++      right: 300,
++      top: 0,
++      bottom: 300,
++      width: 300,
++      height: 300
++    });
++
++    container.appendChild(left);
++    container.appendChild(right);
++    document.body.appendChild(container);
++
++    setupSpatialNavigation(container);
++    setFocus(left);
++
++    document.dispatchEvent(
++      new KeyboardEvent('keydown', {
++        key: 'ArrowRight',
++        bubbles: true,
++        cancelable: true
++      })
++    );
++    expect(document.activeElement).toBe(right);
++
++    document.dispatchEvent(
++      new KeyboardEvent('keydown', {
++        key: 'ArrowLeft',
++        bubbles: true,
++        cancelable: true
++      })
++    );
++
++    // Second keydown is throttled and ignored, so focus remains on `right`.
++    expect(document.activeElement).toBe(right);
++  });
++
++  test('setDestinations assigns ids and makes host focusable', () => {
++    const host = document.createElement('div');
++    host.className = 'lrud-container';
++    host.tabIndex = -1;
++
++    const first = document.createElement('button');
++    first.tabIndex = 0;
++    const second = document.createElement('button');
++    second.tabIndex = 0;
++
++    host.appendChild(first);
++    host.appendChild(second);
++    document.body.appendChild(host);
++
++    setDestinations(host, [first, second]);
++
++    const destinations = host.getAttribute('data-destinations') || '';
++    expect(destinations.length).toBeGreaterThan(0);
++    expect(first.id).toBeTruthy();
++    expect(second.id).toBeTruthy();
++    expect(host.tabIndex).toBe(0);
++  });
++
++  test('setDestinations clears host and disables focus when no autofocus', () => {
++    const host = document.createElement('div');
++    host.className = 'lrud-container';
++    host.tabIndex = 0;
++    host.setAttribute('data-autofocus', 'false');
++    host.setAttribute('data-destinations', 'old-id');
++    document.body.appendChild(host);
++
++    setDestinations(host, []);
++
++    expect(host.getAttribute('data-destinations')).toBe('');
++    expect(host.tabIndex).toBe(-1);
++  });
++
++  test('ignores non-arrow keydown events', () => {
++    const container = document.createElement('div');
++    container.className = 'lrud-container';
++    container.tabIndex = 0;
++
++    const left = document.createElement('button');
++    left.tabIndex = 0;
++    const right = document.createElement('button');
++    right.tabIndex = 0;
++
++    setRect(left, {
++      left: 0,
++      right: 50,
++      top: 0,
++      bottom: 50,
++      width: 50,
++      height: 50
++    });
++    setRect(right, {
++      left: 200,
++      right: 250,
++      top: 0,
++      bottom: 50,
++      width: 50,
++      height: 50
++    });
++    setRect(container, {
++      left: 0,
++      right: 300,
++      top: 0,
++      bottom: 300,
++      width: 300,
++      height: 300
++    });
++
++    container.appendChild(left);
++    container.appendChild(right);
++    document.body.appendChild(container);
++
++    setupSpatialNavigation(container);
++    setFocus(left);
++
++    document.dispatchEvent(
++      new KeyboardEvent('keydown', {
++        key: 'Enter',
++        bubbles: true,
++        cancelable: true
++      })
++    );
++
++    expect(document.activeElement).toBe(left);
++  });
++});
+diff --git a/packages/react-native-web/src/modules/SpatialManager/__tests__/scrollHandler-test.js b/packages/react-native-web/src/modules/SpatialManager/__tests__/scrollHandler-test.js
+new file mode 100644
+index 00000000..02f1778b
+--- /dev/null
++++ b/packages/react-native-web/src/modules/SpatialManager/__tests__/scrollHandler-test.js
+@@ -0,0 +1,236 @@
++/**
++ * Copyright (c) Meta Platforms, Inc. and affiliates.
++ *
++ * This source code is licensed under the MIT license found in the
++ * LICENSE file in the root directory of this source tree.
++ */
++
++const createUtilsMock = (overrides = {}) => ({
++  getCurrentTime: jest.fn(() => 0),
++  scheduleAnimationFrame: jest.fn(),
++  cancelScheduledFrame: jest.fn(),
++  findScrollableAncestor: jest.fn((_, direction) => ({
++    scrollable: {
++      scrollTop: 0,
++      scrollLeft: 0,
++      scrollHeight: direction === 'vertical' ? 1000 : 100,
++      clientHeight: 100,
++      scrollWidth: direction === 'horizontal' ? 1000 : 100,
++      clientWidth: 100,
++      scrollTo: jest.fn()
++    },
++    isWindowScroll: false
++  })),
++  isElementInWindowViewport: jest.fn(() => true),
++  getElementVisibilityRatio: jest.fn(() => 1),
++  inferScrollDirection: jest.fn(() => 'ArrowDown'),
++  getBoundingRectangles: jest.fn(() => ({
++    verticalRects: {
++      visibleContainerRect: { top: 0, bottom: 100, left: 0, right: 100 }
++    },
++    horizontalRects: {
++      visibleContainerRect: { top: 0, bottom: 100, left: 0, right: 100 }
++    },
++    targetRect: { top: 0, bottom: 100, left: 0, right: 100 }
++  })),
++  getAxisScrollDelta: jest.fn((_, __, axis) => ({
++    needsScroll: false,
++    scrollDelta: axis === 'vertical' ? 0 : 0
++  })),
++  ...overrides
++});
++
++function loadScrollHandler(overrides = {}) {
++  jest.resetModules();
++  const utilsMock = createUtilsMock(overrides);
++
++  jest.doMock('../utils', () => utilsMock);
++
++  let moduleExports;
++  jest.isolateModules(() => {
++    // eslint-disable-next-line global-require
++    moduleExports = require('../scrollHandler');
++  });
++
++  return { ...moduleExports, utilsMock };
++}
++
++describe('modules/SpatialManager/scrollHandler', () => {
++  beforeEach(() => {
++    jest.useFakeTimers();
++  });
++
++  afterEach(() => {
++    jest.useRealTimers();
++    jest.clearAllMocks();
++    jest.restoreAllMocks();
++    document.body.innerHTML = '';
++  });
++
++  test('preserves partial visibility by invoking scroll recovery path', () => {
++    const target = document.createElement('button');
++    document.body.appendChild(target);
++
++    const scrollContainer = document.createElement('div');
++    document.body.appendChild(scrollContainer);
++
++    const { setupAppInitiatedScrollHandler, utilsMock } = loadScrollHandler({
++      isElementInWindowViewport: jest.fn(() => false),
++      getElementVisibilityRatio: jest.fn(() => 0.25),
++      inferScrollDirection: jest.fn(() => 'ArrowRight')
++    });
++
++    const getCurrentFocus = jest.fn(() => ({
++      elem: target,
++      parentContainer: null
++    }));
++    const onScrollRefocus = jest.fn();
++
++    const cleanup = setupAppInitiatedScrollHandler(
++      document,
++      getCurrentFocus,
++      onScrollRefocus
++    );
++
++    scrollContainer.dispatchEvent(new Event('scroll', { bubbles: true }));
++    jest.advanceTimersByTime(100);
++
++    expect(utilsMock.inferScrollDirection).toHaveBeenCalledWith(
++      scrollContainer
++    );
++    expect(onScrollRefocus).not.toHaveBeenCalled();
++
++    cleanup();
++  });
++
++  test('reacquires focus when focused element is fully out of viewport', () => {
++    const target = document.createElement('button');
++    document.body.appendChild(target);
++
++    const scrollContainer = document.createElement('div');
++    document.body.appendChild(scrollContainer);
++
++    const { setupAppInitiatedScrollHandler } = loadScrollHandler({
++      isElementInWindowViewport: jest.fn(() => false),
++      getElementVisibilityRatio: jest.fn(() => 0)
++    });
++
++    const getCurrentFocus = jest.fn(() => ({
++      elem: target,
++      parentContainer: null
++    }));
++    const onScrollRefocus = jest.fn();
++
++    const cleanup = setupAppInitiatedScrollHandler(
++      document,
++      getCurrentFocus,
++      onScrollRefocus
++    );
++
++    const event = new Event('scroll', { bubbles: true });
++    Object.defineProperty(event, 'target', {
++      value: scrollContainer,
++      configurable: true
++    });
++
++    window.dispatchEvent(event);
++    jest.advanceTimersByTime(100);
++
++    expect(onScrollRefocus).toHaveBeenCalledWith({
++      currentFocus: { elem: target, parentContainer: null },
++      scrollContainer
++    });
++
++    cleanup();
++  });
++
++  test('debounces burst scroll events and processes only once', () => {
++    const target = document.createElement('button');
++    document.body.appendChild(target);
++
++    const { setupAppInitiatedScrollHandler } = loadScrollHandler({
++      isElementInWindowViewport: jest.fn(() => false),
++      getElementVisibilityRatio: jest.fn(() => 0)
++    });
++
++    const getCurrentFocus = jest.fn(() => ({
++      elem: target,
++      parentContainer: null
++    }));
++    const onScrollRefocus = jest.fn();
++
++    const cleanup = setupAppInitiatedScrollHandler(
++      document,
++      getCurrentFocus,
++      onScrollRefocus
++    );
++
++    window.dispatchEvent(new Event('scroll', { bubbles: true }));
++    jest.advanceTimersByTime(60);
++    window.dispatchEvent(new Event('scroll', { bubbles: true }));
++    jest.advanceTimersByTime(60);
++    window.dispatchEvent(new Event('scroll', { bubbles: true }));
++
++    expect(onScrollRefocus).not.toHaveBeenCalled();
++
++    jest.advanceTimersByTime(100);
++
++    expect(onScrollRefocus).toHaveBeenCalledTimes(1);
++
++    cleanup();
++  });
++
++  test('scrollToElement prioritizes axis with larger delta first', () => {
++    const scrollOrder = [];
++    const verticalScrollable = {
++      scrollTop: 10,
++      scrollLeft: 0,
++      scrollHeight: 800,
++      clientHeight: 200,
++      scrollWidth: 200,
++      clientWidth: 200,
++      scrollTo: jest.fn(() => scrollOrder.push('vertical'))
++    };
++    const horizontalScrollable = {
++      scrollTop: 0,
++      scrollLeft: 10,
++      scrollHeight: 200,
++      clientHeight: 200,
++      scrollWidth: 800,
++      clientWidth: 200,
++      scrollTo: jest.fn(() => scrollOrder.push('horizontal'))
++    };
++
++    const findScrollableAncestor = jest
++      .fn()
++      .mockImplementation((_, direction) =>
++        direction === 'vertical'
++          ? { scrollable: verticalScrollable, isWindowScroll: false }
++          : { scrollable: horizontalScrollable, isWindowScroll: false }
++      );
++
++    const getAxisScrollDelta = jest
++      .fn()
++      .mockImplementation((_, __, axis) =>
++        axis === 'vertical'
++          ? { needsScroll: true, scrollDelta: 90 }
++          : { needsScroll: true, scrollDelta: 20 }
++      );
++
++    const { scrollToElement } = loadScrollHandler({
++      findScrollableAncestor,
++      getAxisScrollDelta
++    });
++
++    const nextElem = document.createElement('button');
++    scrollToElement(
++      { elem: nextElem, parentContainer: null },
++      null,
++      'ArrowDown'
++    );
++
++    expect(scrollOrder).toEqual(['vertical', 'horizontal']);
++    expect(verticalScrollable.scrollTo).toHaveBeenCalled();
++    expect(horizontalScrollable.scrollTo).toHaveBeenCalled();
++  });
++});
+diff --git a/packages/react-native-web/src/modules/SpatialManager/__tests__/utils-test.js b/packages/react-native-web/src/modules/SpatialManager/__tests__/utils-test.js
+new file mode 100644
+index 00000000..27bd1e68
+--- /dev/null
++++ b/packages/react-native-web/src/modules/SpatialManager/__tests__/utils-test.js
+@@ -0,0 +1,230 @@
++/**
++ * Copyright (c) Meta Platforms, Inc. and affiliates.
++ *
++ * This source code is licensed under the MIT license found in the
++ * LICENSE file in the root directory of this source tree.
++ */
++
++import { getBoundingRectangles } from '../utils';
++
++// Helper: build a mock scrollable with a controllable getBoundingClientRect
++// and a contains() that always returns true (simulating that elem/parent
++// are inside the scrollable) unless told otherwise.
++function makeScrollable(rect, contains = true) {
++  return {
++    getBoundingClientRect: () => rect,
++    contains: () => contains
++  };
++}
++
++// Helper: build a DOM element whose getBoundingClientRect returns the given rect.
++function makeElem(rect) {
++  const el = document.createElement('div');
++  el.getBoundingClientRect = () => ({
++    top: rect.top,
++    left: rect.left,
++    bottom: rect.bottom,
++    right: rect.right,
++    width: rect.right - rect.left,
++    height: rect.bottom - rect.top,
++    x: rect.left,
++    y: rect.top,
++    toJSON: () => ({})
++  });
++  return el;
++}
++
++// ---------------------------------------------------------------------------
++// Tests
++// ---------------------------------------------------------------------------
++
++describe('modules/SpatialManager/utils – getBoundingRectangles', () => {
++  // Vertical axis --------------------------------------------------------
++
++  describe('targetVRect – parentContainer vs scrollable vertical size', () => {
++    test('uses parentContainerRect when parent fits inside the vertical scroll container', () => {
++      // scrollable container: 600px tall (0 → 600)
++      const scrollableV = makeScrollable({
++        top: 0,
++        bottom: 600,
++        left: 0,
++        right: 800
++      });
++      // Parent container: 200px tall – fits inside scrollable
++      const parent = makeElem({ top: 100, bottom: 300, left: 0, right: 800 });
++      // Focused element (child of parent): 50px tall
++      const elem = makeElem({ top: 120, bottom: 170, left: 10, right: 200 });
++
++      const { targetVRect } = getBoundingRectangles(
++        scrollableV,
++        false, // horizontal axis (same scrollable, doesn't matter here)
++        scrollableV,
++        false, // vertical axis
++        { elem, parentContainer: parent }
++      );
++
++      // Parent fits → should scroll to bring parent into view
++      expect(targetVRect.top).toBe(100);
++      expect(targetVRect.bottom).toBe(300);
++    });
++
++    test('falls back to targetElemRect when parentContainer is taller than the scroll container', () => {
++      // scrollable container: 300px tall (0 → 300)
++      const scrollableV = makeScrollable({
++        top: 0,
++        bottom: 300,
++        left: 0,
++        right: 800
++      });
++      // Parent container: 500px tall – does NOT fit inside scrollable
++      const parent = makeElem({ top: 0, bottom: 500, left: 0, right: 800 });
++      // Focused element (child inside parent): 50px tall
++      const elem = makeElem({ top: 350, bottom: 400, left: 10, right: 200 });
++
++      const { targetVRect } = getBoundingRectangles(
++        scrollableV,
++        false,
++        scrollableV,
++        false,
++        { elem, parentContainer: parent }
++      );
++
++      // Parent overflows → fall back to element rect so scrolling is precise
++      expect(targetVRect.top).toBe(350);
++      expect(targetVRect.bottom).toBe(400);
++    });
++
++    test('falls back to targetElemRect when parent exactly equals container height (boundary)', () => {
++      // scrollable container: 300px tall
++      const scrollableV = makeScrollable({
++        top: 0,
++        bottom: 300,
++        left: 0,
++        right: 800
++      });
++      // Parent container: exactly 300px tall – equal, so parentSize <= containerSize → uses parent
++      const parent = makeElem({ top: 0, bottom: 300, left: 0, right: 800 });
++      const elem = makeElem({ top: 50, bottom: 100, left: 10, right: 200 });
++
++      const { targetVRect } = getBoundingRectangles(
++        scrollableV,
++        false,
++        scrollableV,
++        false,
++        { elem, parentContainer: parent }
++      );
++
++      // Exactly equal → condition is parentSize <= containerSize → true → uses parent
++      expect(targetVRect.top).toBe(0);
++      expect(targetVRect.bottom).toBe(300);
++    });
++  });
++
++  // Horizontal axis ------------------------------------------------------
++
++  describe('targetHRect – parentContainer vs scrollable horizontal size', () => {
++    test('uses parentContainerRect when parent fits inside the horizontal scroll container', () => {
++      const scrollableH = makeScrollable({
++        top: 0,
++        bottom: 100,
++        left: 0,
++        right: 800
++      });
++      const parent = makeElem({ top: 0, bottom: 100, left: 50, right: 350 }); // 300px wide, fits in 800px
++      const elem = makeElem({ top: 10, bottom: 90, left: 60, right: 120 });
++
++      const { targetHRect } = getBoundingRectangles(
++        scrollableH,
++        false,
++        scrollableH,
++        false,
++        { elem, parentContainer: parent }
++      );
++
++      expect(targetHRect.left).toBe(50);
++      expect(targetHRect.right).toBe(350);
++    });
++
++    test('falls back to targetElemRect when parentContainer is wider than the horizontal scroll container', () => {
++      const scrollableH = makeScrollable({
++        top: 0,
++        bottom: 100,
++        left: 0,
++        right: 400
++      }); // 400px wide
++      const parent = makeElem({ top: 0, bottom: 100, left: 0, right: 900 }); // 900px wide, overflows
++      const elem = makeElem({ top: 10, bottom: 90, left: 600, right: 700 });
++
++      const { targetHRect } = getBoundingRectangles(
++        scrollableH,
++        false,
++        scrollableH,
++        false,
++        { elem, parentContainer: parent }
++      );
++
++      expect(targetHRect.left).toBe(600);
++      expect(targetHRect.right).toBe(700);
++    });
++  });
++
++  // Mixed axes -----------------------------------------------------------
++
++  describe('mixed axes – parent fits on one axis but not the other', () => {
++    test('uses parent for H axis but element for V axis when parent is too tall', () => {
++      const scrollableH = makeScrollable({
++        top: 0,
++        bottom: 600,
++        left: 0,
++        right: 800
++      });
++      const scrollableV = makeScrollable({
++        top: 0,
++        bottom: 300,
++        left: 0,
++        right: 800
++      });
++      // parent: 100px wide (fits H: 800px container), but 500px tall (overflows V: 300px container)
++      const parent = makeElem({ top: 0, bottom: 500, left: 100, right: 200 });
++      const elem = makeElem({ top: 350, bottom: 400, left: 110, right: 190 });
++
++      const { targetHRect, targetVRect } = getBoundingRectangles(
++        scrollableH,
++        false,
++        scrollableV,
++        false,
++        { elem, parentContainer: parent }
++      );
++
++      expect(targetHRect.left).toBe(100); // uses parent on H
++      expect(targetHRect.right).toBe(200);
++      expect(targetVRect.top).toBe(350); // falls back to elem on V
++      expect(targetVRect.bottom).toBe(400);
++    });
++  });
++
++  // No parentContainer ---------------------------------------------------
++
++  describe('no parentContainer', () => {
++    test('always uses targetElemRect when parentContainer is null', () => {
++      const scrollableV = makeScrollable({
++        top: 0,
++        bottom: 600,
++        left: 0,
++        right: 800
++      });
++      const elem = makeElem({ top: 200, bottom: 250, left: 10, right: 200 });
++
++      const { targetVRect, targetHRect } = getBoundingRectangles(
++        scrollableV,
++        false,
++        scrollableV,
++        false,
++        { elem, parentContainer: null }
++      );
++
++      expect(targetVRect.top).toBe(200);
++      expect(targetHRect.top).toBe(200);
++    });
++  });
++});

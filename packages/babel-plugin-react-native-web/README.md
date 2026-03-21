@@ -11,8 +11,12 @@ they are imported from `react-native`.
 
 ## Installation
 
+
 ```
-npm install --save-dev babel-plugin-react-native-web
+# For the TV fork:
+npm install --save-dev babel-plugin-react-native-web-tv
+# For upstream:
+# npm install --save-dev babel-plugin-react-native-web
 ```
 
 ## Usage
@@ -22,7 +26,7 @@ npm install --save-dev babel-plugin-react-native-web
 ```
 {
   "plugins": [
-    ["react-native-web", { commonjs: true }]
+    ["react-native-web-tv", { commonjs: true }]
   ]
 }
 ```

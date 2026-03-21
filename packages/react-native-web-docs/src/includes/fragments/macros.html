@@ -28,11 +28,23 @@
   </div>
 {% endmacro %}
 
-{% macro codesandbox(path = '/') %}
+{% macro codesandbox(example = '/') %}
+  {#
+    Dynamically generate a CodeSandbox embed URL for the given example.
+    Uses Next.js example source from the repo (tv-main branch).
+    Example: 'pressable' → loads /pages/pressable/index.js
+  #}
+  {% set repo = 'hps1978/react-native-web-tv' %}
+  {% set branch = 'tv-main' %}
+  {% set folder = 'packages/react-native-web-examples' %}
+  {% set examplePath = 'pages/' ~ example ~ '/index.js' %}
+  {% set url =
+    'https://codesandbox.io/embed/github/' ~ repo ~ '/tree/' ~ branch ~ '/' ~ folder ~ '?file=/' ~ examplePath ~ '&codemirror=1&fontsize=12&hidedevtools=1&hidenavigation=1&theme=light'
+  %}
   <iframe
-  src="https://codesandbox.io/embed/github/hps1978/react-native-web-tv/tree/{{ site.githubBranch }}/packages/react-native-web-examples?codemirror=1&fontsize=12&hidedevtools=1&hidenavigation=1&initialpath=/{{ path }}&module=%2Fpages%2F{{ path }}%2Findex.js&theme=light"
-  style="width:100%; height:500px; border:1px solid var(--docs-border-color); border-radius:4px; overflow:hidden;"
-  title="React Native Web for TV: {{ path}} examples"
-  sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+    src="{{ url }}"
+    style="width:100%; height:500px; border:1px solid var(--docs-border-color); border-radius:4px; overflow:hidden;"
+    title="React Native Web for TV example: {{ example }}"
+    sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
   ></iframe>
 {% endmacro %}
