@@ -4,7 +4,7 @@
     "access": "public"
   },
   "name": "react-native-web",
-  "version": "0.21.2-tv.4",
+  "version": "0.21.2-tv.5",
   "description": "React Native Web for TV",
   "module": "dist/index.js",
   "main": "dist/cjs/index.js",

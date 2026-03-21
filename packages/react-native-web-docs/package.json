@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "react-native-web-docs",
-  "version": "0.21.2-tv.4",
+  "version": "0.21.2-tv.5",
   "description": "Documentation website for React Native Web for TV",
   "scripts": {
     "dev": "eleventy --serve",
