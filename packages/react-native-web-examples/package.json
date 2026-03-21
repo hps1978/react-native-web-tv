@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "react-native-web-tv-examples",
-  "version": "0.21.2-tv.5",
+  "version": "0.21.2-tv.6",
   "scripts": {
     "build": "webpack --config webpack.config.js --mode production",
     "dev": "webpack serve --config webpack.config.js --mode development",
@@ -11,11 +11,11 @@
     "serve:webpack": "npx serve -s dist-webpack -l 8080"
   },
   "dependencies": {
-    "babel-plugin-react-native-web": "0.21.2-tv.5",
+    "babel-plugin-react-native-web": "0.21.2-tv.6",
     "next": "^12.2.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "react-native-web": "0.21.2-tv.5"
+    "react-native-web": "0.21.2-tv.6"
   },
   "devDependencies": {
     "@babel/core": "^7.18.6",
