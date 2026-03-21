@@ -115,7 +115,7 @@ module.system.node.main_field=main
 
 ## Root element
 
-Full-screen React Native apps with a root `<ScrollView>` may require the following styles inlined in the HTML document shell. ([Example](https://codesandbox.io/s/52x1871vjl?file=/public/index.html:352-644).)
+Full-screen React Native apps with a root `<ScrollView>` may require the following styles inlined in the HTML document shell. ([Example](https://codesandbox.io/p/sandbox/rczgq3?file=/public/index.html:352-644).)
 
 ```css
 /* These styles make the body full-height */

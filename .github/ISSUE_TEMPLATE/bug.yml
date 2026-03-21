@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you for reporting an issue! Create a test case for your issue by forking this template https://codesandbox.io/s/6lx6ql1w5r
+        Thank you for reporting an issue! Create a test case for your issue by forking this template: https://codesandbox.io/p/sandbox/gracious-field-svyjjq
   - type: checkboxes
     attributes:
       label: Is there an existing issue for this?
@@ -39,7 +39,7 @@ body:
     attributes:
       label: Test case
       description: Please provide a link to a reduced test case that reproduces the issue.
-      placeholder: "https://codesandbox.io/s/6lx6ql1w5r"
+      placeholder: "https://codesandbox.io/p/sandbox/gracious-field-svyjjq"
     validations:
       required: true
   - type: textarea

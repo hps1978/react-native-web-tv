@@ -1,6 +1,15 @@
 # Third-Party Notices
 
-This repository is primarily licensed under the MIT license.
+
+This repository is primarily licensed under the MIT license. Portions of the code are derived from or include contributions from the following parties, under the MIT license:
+
+- Facebook, Inc. and its affiliates (see files with headers: "Copyright (c) Facebook, Inc. and its affiliates.")
+- Meta Platforms, Inc. and affiliates (see files with headers: "Copyright (c) Meta Platforms, Inc. and affiliates.")
+- Nicolas Gallagher (see files with headers: "Copyright (c) Nicolas Gallagher.")
+- Douglas Lowder (see files with headers: "Copyright (c) Douglas Lowder.")
+
+All such files retain their original copyright notices and are redistributed under the MIT license as described in the LICENSE file.
+
 
 The TV spatial navigation functionality in this fork depends on third-party code distributed under the Apache License 2.0.
 
