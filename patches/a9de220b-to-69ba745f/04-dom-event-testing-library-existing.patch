@@ -1,0 +1,25 @@
+diff --git a/packages/dom-event-testing-library/README.md b/packages/dom-event-testing-library/README.md
+index 45b3db8a..16f6bf3a 100644
+--- a/packages/dom-event-testing-library/README.md
++++ b/packages/dom-event-testing-library/README.md
+@@ -2,6 +2,9 @@
+ 
+ A library for unit testing high-level interactions via simple pointer events, e.g., `pointerdown`, that produce realistic and complete DOM event sequences.
+ 
++In this React Native Web for TV fork, this library remains a shared DOM-event test
++utility and is not TV-platform specific.
++
+ There are number of challenges involved in unit testing modules that work with DOM events.
+ 
+ 1. Testing environments with and without support for the `PointerEvent` API.
+diff --git a/packages/dom-event-testing-library/package.json b/packages/dom-event-testing-library/package.json
+index 1c96ceb6..dc4388cd 100644
+--- a/packages/dom-event-testing-library/package.json
++++ b/packages/dom-event-testing-library/package.json
+@@ -6,5 +6,5 @@
+   "description": "Browser event sequences for unit tests",
+   "author": "Nicolas Gallagher",
+   "license": "MIT",
+-  "homepage": "https://github.com/necolas/react-native-web/tree/master/packages/dom-event-testing-library"
++  "homepage": "https://github.com/hps1978/react-native-web-tv/tree/tv-main/packages/dom-event-testing-library"
+ }
