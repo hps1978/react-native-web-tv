@@ -98,12 +98,17 @@ npm run build -w packages/react-native-web-docs
 
 ## Upstream patch queue workflow
 
-This fork uses a patch-queue model for upstream upgrades.
+
+This fork uses a patch-queue model for upstream upgrades. Patch sets are now exported as compressed archives with checksums for robust, cross-platform handling.
 
 - Full guide: `UPSTREAM_PATCH_WORKFLOW.md`
 - Preflight checks: `npm run patches:check`
 - Export grouped TV patches: `npm run patches:export`
-- Replay patches onto an integration branch: `npm run patches:replay -- --patch-dir patches/<series-folder>`
+- Verify patch series (safe, isolated): `npm run patches:verify`
+- Replay patches onto an integration branch:
+  - From directory: `npm run patches:replay -- --patch-dir patches/<series-folder>`
+  - From archive: `npm run patches:replay -- --patch-archive patches/<series-folder>.tar.gz --checksum patches/<series-folder>.tar.gz.sha256`
+  - **Or simply:** `npm run patches:replay` (uses latest by default)
 
 ## TV spatial navigation configuration
 

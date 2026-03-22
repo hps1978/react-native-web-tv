@@ -203,6 +203,41 @@ function main() {
   }
 
   console.log('\nAll patches generated and coverage verified.');
+
+  // --- Patch compression and checksum ---
+  const tar = require('tar');
+  const { writeChecksum } = require('./patchChecksum');
+
+  const archivePath = `${outDir}.tar.gz`;
+  const checksumPath = `${archivePath}.sha256`;
+
+  // Remove any previous archive/checksum
+  if (fs.existsSync(archivePath)) fs.unlinkSync(archivePath);
+  if (fs.existsSync(checksumPath)) fs.unlinkSync(checksumPath);
+
+  // Create tar.gz archive of the patch directory
+  tar
+    .c(
+      {
+        gzip: true,
+        file: archivePath,
+        cwd: path.dirname(outDir)
+      },
+      [path.basename(outDir)]
+    )
+    .then(async () => {
+      // Write SHA256 checksum
+      await writeChecksum(archivePath, checksumPath);
+      console.log(`\nArchive created: ${archivePath}`);
+      console.log(`Checksum written: ${checksumPath}`);
+      // Always delete the patch directory after archiving
+      fs.rmSync(outDir, { recursive: true, force: true });
+      console.log(`Patch directory deleted: ${outDir}`);
+    })
+    .catch((err) => {
+      console.error('Error creating patch archive:', err);
+      process.exit(1);
+    });
 }
 
 main();

@@ -62,9 +62,11 @@ Patch workflow:
 ```bash
 npm run patches:check
 npm run patches:export
-npm run patches:verify
-npm run patches:replay -- --patch-dir patches/<series-folder>
+npm run patches:verify -- --patch-archive patches/<series-folder>.tar.gz --checksum patches/<series-folder>.tar.gz.sha256
+npm run patches:replay -- --patch-archive patches/<series-folder>.tar.gz --checksum patches/<series-folder>.tar.gz.sha256
 ```
+
+You can also use `--patch-dir` for legacy or manual workflows.
 
 ## Quality Standards
 

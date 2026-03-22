@@ -45,7 +45,11 @@ npm run patches:check -- --base <upstream-tag-or-commit> --head tv-main
 
 # Validate a patch folder before replay
 npm run patches:check -- --patch-dir patches/<series-folder>
+
+# Validate a patch archive before replay (with checksum)
+npm run patches:check -- --patch-archive patches/<series-folder>.tar.gz --checksum patches/<series-folder>.tar.gz.sha256
 ```
+
 
 ## Export patch series from TV branch
 
@@ -55,7 +59,13 @@ Use this whenever you want a portable series of your TV commits relative to an u
 npm run patches:export
 ```
 
-This creates patch files under `patches/<base>-to-<head>/` with 12 mutually exclusive patches:
+This creates:
+- Patch files under `patches/<base>-to-<head>/` (12 mutually exclusive patches)
+- A compressed archive: `patches/<base>-to-<head>.tar.gz`
+- A SHA256 checksum: `patches/<base>-to-<head>.tar.gz.sha256`
+ 
+Details of patch files:
+
 - `01-new-files.patch` — all new files (tests excluded)
 - `02–07` — existing changes per package (tests excluded)
 - `08` — root config and CI
@@ -63,8 +73,9 @@ This creates patch files under `patches/<base>-to-<head>/` with 12 mutually excl
 - `10` — lockfiles
 - `11` — new test files only
 - `12` — modified test files only
-
+ 
 The export script validates patch coverage: new files must match exactly; existing files (modified, renamed, type-changed, deleted) allow a ±1 tolerance to account for minor discrepancies in how deleted files are counted across git and unified diff formats. All changes are included in the patches even if the count differs slightly.
+
 
 ## Upgrade to a newer upstream tag
 
@@ -93,8 +104,11 @@ git checkout -b integration/<new-upstream-tag>
 # 4) Export fresh patches from tv-main (creates patches/<base>-to-<head>/)
 npm run patches:export
 
-# 5) Replay prior patch series
+# 5) Replay prior patch series (choose one):
+#   From directory:
 npm run patches:replay -- --patch-dir patches/<base>-to-<head>
+#   From archive (recommended):
+npm run patches:replay -- --patch-archive patches/<base>-to-<head>.tar.gz --checksum patches/<base>-to-<head>.tar.gz.sha256
 
 # If conflicts happen:
 # - Resolve files
@@ -116,7 +130,9 @@ npm run build
 
 ## Notes
 
+- `patches:export` now creates a compressed archive (`.tar.gz`) and checksum for each patch series.
+- `patches:replay`, `patches:verify`, and `patches:check` accept either a patch directory or a patch archive (`--patch-archive ...tar.gz --checksum ...sha256`).
 - `patches:replay` requires a clean working tree.
 - `patches:replay` uses `git am --3way` by default for better conflict recovery.
 - `patches:check -- --require-clean` enforces a clean working tree preflight when needed.
-- Keep patch directories in source control if you want reproducible upgrades.
+- Patch archives are much smaller and avoid GitHub LFS warnings.
