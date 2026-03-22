@@ -63,21 +63,68 @@ This creates:
 - Patch files under `patches/<base>-to-<head>/` (12 mutually exclusive patches)
 - A compressed archive: `patches/<base>-to-<head>.tar.gz`
 - A SHA256 checksum: `patches/<base>-to-<head>.tar.gz.sha256`
- 
+
 Details of patch files:
 
-- `01-new-files.patch` — all new files (tests excluded)
+- `01-new-files.patch` — all new files (tests and patch workflow scripts excluded)
 - `02–07` — existing changes per package (tests excluded)
 - `08` — root config and CI
 - `09` — root docs
 - `10` — lockfiles
 - `11` — new test files only
 - `12` — modified test files only
- 
-The export script validates patch coverage: new files must match exactly; existing files (modified, renamed, type-changed, deleted) allow a ±1 tolerance to account for minor discrepancies in how deleted files are counted across git and unified diff formats. All changes are included in the patches even if the count differs slightly.
+
+**Patch workflow scripts (`scripts/tvPatchQueueReplay.js`, `scripts/tvPatchQueueCheck.js`, `scripts/patchChecksum.js`) are intentionally excluded from the patch set.** These must be copied manually into the target branch for patch replay, as including them in the patch set causes conflicts if already present.
+
+The export script validates patch coverage:
+- For new files, the patch count must match the git diff count, except for the number of intentionally excluded patch workflow scripts (the script will fail if the difference does not match the number of exclusions).
 
 
 ## Upgrade to a newer upstream tag
+
+---
+
+### Example: Step-by-step patch replay workflow
+
+Suppose you want to upgrade to upstream tag `v0.21.2` and replay your TV patches. Here is an exact sequence of commands:
+
+```bash
+# 1. Fetch latest upstream tags
+git fetch upstream --tags
+
+# 2. Move upstream-mirror to the new upstream tag (force update)
+git checkout -B upstream-mirror v0.21.2
+
+# 3. Create a new integration branch from upstream-mirror
+git checkout -b integration/v0.21.2
+
+# 4. Export a fresh patch series from tv-main (if not already done)
+git checkout tv-main
+npm run patches:export
+
+# 5. Switch back to your integration branch
+git checkout integration/v0.21.2
+
+# 6. Replay the patch series (from archive is recommended)
+npm run patches:replay -- --patch-archive patches/<base>-to-<head>.tar.gz --checksum patches/<base>-to-<head>.tar.gz.sha256
+
+#    (Replace <base> and <head> with the actual short SHAs shown in the patches folder)
+
+# 7. If you hit conflicts:
+#    - Resolve the conflicted files manually
+#    - git add <resolved-files>
+#    - Re-run the replay command to continue applying remaining patches
+#    - To abort and reset: git reset --hard && git clean -fd
+
+# 8. When all patches apply cleanly, run tests and build
+npm test
+npm run build
+
+# 9. When satisfied, you can fast-forward or force-update tv-main if this is the new base
+#    (optional, depending on your workflow)
+```
+
+---
 
 1. Move `upstream-mirror` to the new upstream tag.
 2. Create a fresh integration branch from `upstream-mirror`.
@@ -110,12 +157,12 @@ npm run patches:replay -- --patch-dir patches/<base>-to-<head>
 #   From archive (recommended):
 npm run patches:replay -- --patch-archive patches/<base>-to-<head>.tar.gz --checksum patches/<base>-to-<head>.tar.gz.sha256
 
-# If conflicts happen:
-# - Resolve files
+# Patch replay now uses `git apply` (not `git am`). If conflicts happen:
+# - Resolve files manually
 # - git add <resolved-files>
-# - git am --continue
+# - Continue replay (re-run the replay script to apply remaining patches)
 # To abort replay:
-# - git am --abort
+# - git reset --hard && git clean -fd
 
 # 6) Validate
 npm test
@@ -125,7 +172,7 @@ npm run build
 ## Conflict handling rules
 
 - Keep commits focused and atomic in TV branch so replay is easier.
-- Resolve each conflict once during `git am`; avoid ad-hoc manual cherry-picking.
+- Resolve each conflict once during patch replay; avoid ad-hoc manual cherry-picking.
 - After successful integration, export a new patch series against the new upstream base.
 
 ## Notes
@@ -133,6 +180,6 @@ npm run build
 - `patches:export` now creates a compressed archive (`.tar.gz`) and checksum for each patch series.
 - `patches:replay`, `patches:verify`, and `patches:check` accept either a patch directory or a patch archive (`--patch-archive ...tar.gz --checksum ...sha256`).
 - `patches:replay` requires a clean working tree.
-- `patches:replay` uses `git am --3way` by default for better conflict recovery.
+- `patches:replay` uses `git apply` for patch replay (no longer `git am`).
 - `patches:check -- --require-clean` enforces a clean working tree preflight when needed.
 - Patch archives are much smaller and avoid GitHub LFS warnings.

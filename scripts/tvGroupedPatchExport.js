@@ -75,9 +75,22 @@ function main() {
     ':(exclude)**/*.spec.js'
   ];
 
+  // Exclude patch workflow scripts from new files patch.
+  // These scripts must be copied manually into the target branch for patch replay,
+  // and including them in the patch set causes conflicts if already present.
+  const PATCH_SCRIPT_EXCLUDES = [
+    ':(exclude)scripts/tvPatchQueueReplay.js',
+    ':(exclude)scripts/tvPatchQueueCheck.js',
+    ':(exclude)scripts/patchChecksum.js'
+  ];
+
   const patches = [
-    // New added files, excluding tests
-    { file: '01-new-files.patch', filter: 'A', paths: ['.', ...TX] },
+    // New added files, excluding tests and patch workflow scripts
+    {
+      file: '01-new-files.patch',
+      filter: 'A',
+      paths: ['.', ...TX, ...PATCH_SCRIPT_EXCLUDES]
+    },
     // Existing modified files per package, excluding tests
     {
       file: '02-babel-plugin-react-native-web-existing.patch',
@@ -182,11 +195,14 @@ function main() {
     `Coverage: existing files git=${totalExisting} patches=${totalPatchedExisting}`
   );
 
-  // Coverage check (with tolerance for minor discrepancies in deleted file counting)
+  // Coverage check: tolerate new file count mismatch ONLY if the difference exactly matches the number of intentionally excluded patch workflow scripts
+  const excludedScriptCount = PATCH_SCRIPT_EXCLUDES.length;
   const newMismatch = totalNew !== totalPatchedNew;
+  const newMismatchAllowed =
+    newMismatch && totalNew - totalPatchedNew === excludedScriptCount;
   const existingMismatch = Math.abs(totalExisting - totalPatchedExisting) > 1;
 
-  if (newMismatch || existingMismatch) {
+  if ((newMismatch && !newMismatchAllowed) || existingMismatch) {
     const detail =
       newMismatch && existingMismatch
         ? 'new and existing files'

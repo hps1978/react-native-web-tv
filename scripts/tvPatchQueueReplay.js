@@ -32,7 +32,6 @@ function findLatestPatchArchive(rootDir) {
 function parseArgs(argv) {
   const args = {
     patchDir: null,
-    threeWay: true,
     patchArchive: null,
     checksum: null
   };
@@ -42,8 +41,6 @@ function parseArgs(argv) {
     if (token === '--patch-dir') {
       args.patchDir = argv[i + 1];
       i += 1;
-    } else if (token === '--no-3way') {
-      args.threeWay = false;
     } else if (token === '--patch-archive') {
       args.patchArchive = argv[i + 1];
       i += 1;
@@ -100,7 +97,6 @@ function getPatchFiles(patchDir) {
 function main() {
   const {
     patchDir: argPatchDir,
-    threeWay,
     patchArchive,
     checksum
   } = parseArgs(process.argv);
@@ -151,7 +147,7 @@ function main() {
   } else {
     if (!patchDir) {
       console.error(
-        'Usage: npm run patches:replay -- --patch-dir <path-to-patches> [--no-3way]'
+        'Usage: npm run patches:replay -- --patch-dir <path-to-patches>'
       );
       process.exit(1);
     }
@@ -177,13 +173,15 @@ function main() {
     ensureCleanWorkingTree();
     const patchFiles = getPatchFiles(patchDir);
 
-    const command = ['git am'];
-    if (threeWay) {
-      command.push('--3way');
+    // Apply each patch file using git apply
+    for (const patchFile of patchFiles) {
+      try {
+        execSync(`git apply --index "${patchFile}"`, { stdio: 'inherit' });
+      } catch (err) {
+        console.error(`Failed to apply patch: ${patchFile}`);
+        process.exit(1);
+      }
     }
-    command.push(...patchFiles.map((file) => `"${file}"`));
-
-    execSync(command.join(' '), { stdio: 'inherit' });
 
     console.log('');
     console.log('Patch replay completed successfully.');
