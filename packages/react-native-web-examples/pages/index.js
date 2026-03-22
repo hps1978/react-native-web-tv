@@ -23,11 +23,11 @@ export default function IndexPage() {
           source={{ uri: logoUri }}
           style={styles.logo}
         />
-        <Text style={styles.title}>React Native for Web</Text>
+        <Text style={styles.title}>React Native Web for TV</Text>
       </View>
       <Text style={styles.text}>
-        <Link href="https://github.com/necolas/react-native-web">
-          React Native for Web
+        <Link href="https://github.com/hps1978/react-native-web-tv">
+          React Native Web for TV
         </Link>{' '}
         example app built on Next.js
       </Text>

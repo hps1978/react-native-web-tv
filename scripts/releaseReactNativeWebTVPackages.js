@@ -122,6 +122,13 @@ const publishWorkspaces = workspaces.filter(({ packageJson }) =>
   INTERNAL_PUBLISH_PACKAGE_NAMES.includes(packageJson.name)
 );
 
+// Only these packages need their dependencies on published TV packages updated.
+// Update this list if you add/remove packages that depend on react-native-web-tv or babel-plugin-react-native-web-tv.
+const PUBLISHED_DEPENDENCY_CONSUMERS = [
+  'react-native-web-tv-examples',
+  'benchmarks'
+];
+
 // Keep release-visible workspace package versions aligned even if they are private.
 const versionTrackedWorkspaces = workspaces.filter(
   ({ packageJson }) => packageJson.version !== '0.0.0'
@@ -177,29 +184,35 @@ function createPublishDirectory(directory, packageJson) {
 }
 
 // Update all workspace versions together and keep internal version references in sync.
-const workspaceNames = versionTrackedWorkspaces.map(
-  ({ packageJson }) => packageJson.name
-);
+
+const publishedNames = Object.values(PUBLIC_PACKAGE_NAMES);
 versionTrackedWorkspaces.forEach(
   ({ directory, packageJson, packageJsonPath }) => {
     packageJson.version = version;
-    workspaceNames.forEach((name) => {
-      if (packageJson.dependencies && packageJson.dependencies[name]) {
-        packageJson.dependencies[name] = version;
-      }
-      if (packageJson.devDependencies && packageJson.devDependencies[name]) {
-        packageJson.devDependencies[name] = version;
-      }
-      if (packageJson.peerDependencies && packageJson.peerDependencies[name]) {
-        packageJson.peerDependencies[name] = version;
-      }
-      if (
-        packageJson.optionalDependencies &&
-        packageJson.optionalDependencies[name]
-      ) {
-        packageJson.optionalDependencies[name] = version;
-      }
-    });
+    // Only update dependencies for examples and benchmarks packages
+    const pkgName = packageJson.name;
+    if (PUBLISHED_DEPENDENCY_CONSUMERS.includes(pkgName)) {
+      publishedNames.forEach((name) => {
+        if (packageJson.dependencies && packageJson.dependencies[name]) {
+          packageJson.dependencies[name] = version;
+        }
+        if (packageJson.devDependencies && packageJson.devDependencies[name]) {
+          packageJson.devDependencies[name] = version;
+        }
+        if (
+          packageJson.peerDependencies &&
+          packageJson.peerDependencies[name]
+        ) {
+          packageJson.peerDependencies[name] = version;
+        }
+        if (
+          packageJson.optionalDependencies &&
+          packageJson.optionalDependencies[name]
+        ) {
+          packageJson.optionalDependencies[name] = version;
+        }
+      });
+    }
     fs.writeFileSync(
       packageJsonPath,
       JSON.stringify(packageJson, null, 2) + '\n'

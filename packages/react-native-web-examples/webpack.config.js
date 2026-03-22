@@ -27,8 +27,7 @@ module.exports = (env, argv) => ({
         use: {
           loader: 'babel-loader',
           options: {
-            cacheDirectory: true,
-            extends: path.resolve(appDirectory, '../../configs/babel.config')
+            cacheDirectory: true
           }
         }
       }
@@ -36,7 +35,7 @@ module.exports = (env, argv) => ({
   },
   resolve: {
     alias: {
-      'react-native': 'react-native-web'
+      'react-native': 'react-native-web-tv'
     }
   },
   plugins: [
@@ -62,6 +61,7 @@ module.exports = (env, argv) => ({
       directory: path.resolve(appDirectory, 'public')
     },
     hot: true,
-    compress: true
+    compress: true,
+    allowedHosts: 'all'
   }
 });

@@ -4,6 +4,6 @@
     "@babel/preset-flow"
   ],
   "plugins": [
-    [ "react-native-web", { "commonjs": true } ]
+    [ "react-native-web-tv", {"target": "react-native-web-tv", "commonjs": true } ]
   ]
 }

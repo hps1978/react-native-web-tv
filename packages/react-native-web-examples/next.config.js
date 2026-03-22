@@ -9,7 +9,7 @@ const pages = fs
 module.exports = {
   env: { pages },
   webpack: (config, options) => {
-    config.resolve.alias['react-native'] = 'react-native-web';
+    config.resolve.alias['react-native'] = 'react-native-web-tv';
     return config;
   }
 };
