@@ -213,10 +213,13 @@ From the root of your repo, copy the following into the patch-replay-upstream-te
 - patches/<patch-archive>.tar.gz
 - patches/<patch-archive>.tar.gz.sha256
 
-Example:
+Example (using git checkout to copy files from tv-main):
 ```sh
 git checkout patch-replay-upstream-test
-cp scripts/tvPatchQueueReplay.js scripts/tvPatchQueueCheck.js scripts/patchChecksum.js patches/a9de220b-to-<tv-main-sha>.tar.gz patches/a9de220b-to-<tv-main-sha>.tar.gz.sha256 .
+# Copy required scripts and patch archive from tv-main into the test branch
+git checkout tv-main -- scripts/tvPatchQueueReplay.js scripts/tvPatchQueueCheck.js scripts/patchChecksum.js
+git checkout tv-main -- patches/a9de220b-to-<tv-main-sha>.tar.gz patches/a9de220b-to-<tv-main-sha>.tar.gz.sha256
+# Commit the copied files before running patch replay
 git add tvPatchQueueReplay.js tvPatchQueueCheck.js patchChecksum.js a9de220b-to-<tv-main-sha>.tar.gz a9de220b-to-<tv-main-sha>.tar.gz.sha256
 git commit -m "Add patch replay scripts and patch archive for test"
 ```
