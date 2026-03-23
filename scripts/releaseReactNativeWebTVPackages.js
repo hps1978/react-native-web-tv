@@ -78,6 +78,9 @@ function ensureReleaseBranch() {
   }
 }
 
+// Entry point selection
+const entry = argv.entry || 'all'; // 'plugin', 'main', or 'all' (default: all)
+
 ensureVersionProvided();
 ensureCleanWorkingTree();
 if (!skipGit) {
@@ -242,99 +245,108 @@ if (!skipGit) {
   execSync(`git tag -fam ${version} "${version}"`, { stdio: 'inherit' });
 }
 
-// Publish plugin first, then poll for availability, then publish main package
-async function pollNpmForVersion(
-  pkg,
-  version,
-  maxAttempts = 24,
-  delayMs = 5000
-) {
-  let attempts = 0;
-  while (attempts < maxAttempts) {
-    try {
-      const result = dryRun
-        ? version
-        : execSync(`npm view ${pkg}@${version} version`, {
-            stdio: ['ignore', 'pipe', 'ignore']
-          })
-            .toString()
-            .trim();
-      if (result === version) {
-        console.log(`\n${pkg}@${version} is now available on npm.`);
-        return true;
-      }
-    } catch (e) {
-      // Not available yet
-    }
-    attempts++;
-    console.log(
-      `Waiting for ${pkg}@${version} to be available on npm... (${attempts}/${maxAttempts})`
-    );
-    await new Promise((resolve) => setTimeout(resolve, delayMs));
-  }
-  console.error(
-    `\nERROR: ${pkg}@${version} did not appear on npm after ${
-      (maxAttempts * delayMs) / 1000
-    } seconds.`
-  );
-  process.exit(1);
-}
-
-async function main() {
-  // Publish plugin first
+async function publishPluginOnly() {
+  // Only publish the plugin
   const pluginWorkspace = publishWorkspaces.find(
     ({ packageJson }) => packageJson.name === 'babel-plugin-react-native-web'
   );
-  if (pluginWorkspace) {
-    const { directory, packageJson } = pluginWorkspace;
-    const otpArg = oneTimeCode ? ` --otp ${oneTimeCode}` : '';
-    const tagArg = resolvedPublishTag ? ` --tag ${resolvedPublishTag}` : '';
-    const publishDirectory = createPublishDirectory(directory, packageJson);
-    const publicPackageName = PUBLIC_PACKAGE_NAMES[packageJson.name];
+  if (!pluginWorkspace) {
+    console.error('No plugin workspace found.');
+    process.exit(1);
+  }
+  const { directory, packageJson } = pluginWorkspace;
+  const otpArg = oneTimeCode ? ` --otp ${oneTimeCode}` : '';
+  const tagArg = resolvedPublishTag ? ` --tag ${resolvedPublishTag}` : '';
+  const publishDirectory = createPublishDirectory(directory, packageJson);
+  const publicPackageName = PUBLIC_PACKAGE_NAMES[packageJson.name];
+  console.log(
+    `Publishing workspace package ${publicPackageName}@${
+      packageJson.version
+    } from ${path.relative(process.cwd(), directory)}`
+  );
+  if (!dryRun) {
+    execSync(`npm publish${tagArg}${otpArg}`, {
+      cwd: publishDirectory,
+      stdio: 'inherit'
+    });
+  } else {
     console.log(
-      `Publishing workspace package ${publicPackageName}@${
-        packageJson.version
-      } from ${path.relative(process.cwd(), directory)}`
+      `[dry-run] Would publish ${publicPackageName}@${packageJson.version}`
     );
-    if (!dryRun) {
-      execSync(`npm publish${tagArg}${otpArg}`, {
-        cwd: publishDirectory,
-        stdio: 'inherit'
-      });
-    } else {
-      console.log(
-        `[dry-run] Would publish ${publicPackageName}@${packageJson.version}`
-      );
+  }
+  // No polling here; just publish and exit
+}
+
+async function publishMainOnly() {
+  // Check plugin availability first
+  const pluginWorkspace = publishWorkspaces.find(
+    ({ packageJson }) => packageJson.name === 'babel-plugin-react-native-web'
+  );
+  if (!pluginWorkspace) {
+    console.error('No plugin workspace found.');
+    process.exit(1);
+  }
+  const pluginPublicName =
+    PUBLIC_PACKAGE_NAMES[pluginWorkspace.packageJson.name];
+  const pluginVersion = pluginWorkspace.packageJson.version;
+  // Check immediately (fail fast)
+  try {
+    const result = dryRun
+      ? pluginVersion
+      : execSync(`npm view ${pluginPublicName}@${pluginVersion} version`, {
+          stdio: ['ignore', 'pipe', 'ignore']
+        })
+          .toString()
+          .trim();
+    if (result !== pluginVersion) {
+      throw new Error('Version mismatch');
     }
-    // Poll for availability
-    await pollNpmForVersion(publicPackageName, packageJson.version);
+  } catch (e) {
+    console.error(
+      `ERROR: ${pluginPublicName}@${pluginVersion} is NOT available on npm. Aborting main package publish.`
+    );
+    process.exit(1);
   }
 
   // Publish main package
   const mainWorkspace = publishWorkspaces.find(
     ({ packageJson }) => packageJson.name === 'react-native-web'
   );
-  if (mainWorkspace) {
-    const { directory, packageJson } = mainWorkspace;
-    const otpArg = oneTimeCode ? ` --otp ${oneTimeCode}` : '';
-    const tagArg = resolvedPublishTag ? ` --tag ${resolvedPublishTag}` : '';
-    const publishDirectory = createPublishDirectory(directory, packageJson);
-    const publicPackageName = PUBLIC_PACKAGE_NAMES[packageJson.name];
+  if (!mainWorkspace) {
+    console.error('No main workspace found.');
+    process.exit(1);
+  }
+  const { directory, packageJson } = mainWorkspace;
+  const otpArg = oneTimeCode ? ` --otp ${oneTimeCode}` : '';
+  const tagArg = resolvedPublishTag ? ` --tag ${resolvedPublishTag}` : '';
+  const publishDirectory = createPublishDirectory(directory, packageJson);
+  const publicPackageName = PUBLIC_PACKAGE_NAMES[packageJson.name];
+  console.log(
+    `Publishing workspace package ${publicPackageName}@${
+      packageJson.version
+    } from ${path.relative(process.cwd(), directory)}`
+  );
+  if (!dryRun) {
+    execSync(`npm publish${tagArg}${otpArg}`, {
+      cwd: publishDirectory,
+      stdio: 'inherit'
+    });
+  } else {
     console.log(
-      `Publishing workspace package ${publicPackageName}@${
-        packageJson.version
-      } from ${path.relative(process.cwd(), directory)}`
+      `[dry-run] Would publish ${publicPackageName}@${packageJson.version}`
     );
-    if (!dryRun) {
-      execSync(`npm publish${tagArg}${otpArg}`, {
-        cwd: publishDirectory,
-        stdio: 'inherit'
-      });
-    } else {
-      console.log(
-        `[dry-run] Would publish ${publicPackageName}@${packageJson.version}`
-      );
-    }
+  }
+}
+
+async function main() {
+  if (entry === 'plugin') {
+    await publishPluginOnly();
+  } else if (entry === 'main') {
+    await publishMainOnly();
+  } else {
+    // Default: publish plugin, then main
+    await publishPluginOnly();
+    await publishMainOnly();
   }
 }
 
