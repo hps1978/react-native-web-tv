@@ -183,3 +183,69 @@ npm run build
 - `patches:replay` uses `git apply` for patch replay (no longer `git am`).
 - `patches:check -- --require-clean` enforces a clean working tree preflight when needed.
 - Patch archives are much smaller and avoid GitHub LFS warnings.
+
+## Manual Patch Replay Test (Validation)
+
+To validate that your patch series can be replayed cleanly, follow these exact steps:
+
+### 1. Preparation
+- Ensure your working tree is clean (no uncommitted changes).
+- Identify the patch archive and checksum you want to test (e.g., patches/a9de220b-to-<tv-main-sha>.tar.gz).
+
+### 2. Create Clean Test Branches
+```sh
+# Create a test branch from upstream-mirror (patch base)
+git checkout upstream-mirror
+git pull
+git checkout -b patch-replay-upstream-test
+
+# Create a test branch from tv-main (patch head, for comparison)
+git checkout tv-main
+git pull
+git checkout -b patch-replay-tv-main-test
+```
+
+### 3. Copy Required Scripts and Patch Archive
+From the root of your repo, copy the following into the patch-replay-upstream-test branch:
+- scripts/tvPatchQueueReplay.js
+- scripts/tvPatchQueueCheck.js
+- scripts/patchChecksum.js
+- patches/<patch-archive>.tar.gz
+- patches/<patch-archive>.tar.gz.sha256
+
+Example:
+```sh
+git checkout patch-replay-upstream-test
+cp scripts/tvPatchQueueReplay.js scripts/tvPatchQueueCheck.js scripts/patchChecksum.js patches/a9de220b-to-<tv-main-sha>.tar.gz patches/a9de220b-to-<tv-main-sha>.tar.gz.sha256 .
+git add tvPatchQueueReplay.js tvPatchQueueCheck.js patchChecksum.js a9de220b-to-<tv-main-sha>.tar.gz a9de220b-to-<tv-main-sha>.tar.gz.sha256
+git commit -m "Add patch replay scripts and patch archive for test"
+```
+
+### 4. Run Patch Replay
+```sh
+node tvPatchQueueReplay.js --patch-archive a9de220b-to-<tv-main-sha>.tar.gz --checksum a9de220b-to-<tv-main-sha>.tar.gz.sha256
+```
+- The script should apply all patches cleanly.
+- If there are errors, resolve them and re-run as needed.
+
+### 5. Validate Patch Replay
+- Compare the replayed branch to the tv-main test branch:
+```sh
+git checkout patch-replay-tv-main-test
+git pull
+git checkout patch-replay-upstream-test
+git diff patch-replay-tv-main-test
+```
+- There should be no differences (or only expected, intentional ones).
+
+### 6. Cleanup
+```sh
+git checkout tv-main
+git branch -D patch-replay-upstream-test
+git branch -D patch-replay-tv-main-test
+```
+
+**Notes:**
+- Always run these steps from the repo root.
+- Do not create extra subdirectories for the scripts or patch archive.
+- Commit the scripts and patch archive before running the replay script to ensure a clean working tree.
