@@ -11,8 +11,8 @@ const path = require('path');
 
 const RELEASE_BRANCH = 'master';
 const INTERNAL_PUBLISH_PACKAGE_NAMES = [
-  'react-native-web',
-  'babel-plugin-react-native-web'
+  'babel-plugin-react-native-web',
+  'react-native-web'
 ];
 const PUBLIC_PACKAGE_NAMES = {
   'react-native-web': 'react-native-web-tv',
@@ -26,12 +26,17 @@ const version = argv._[0];
 const skipGit = argv['skip-git'];
 const oneTimeCode = argv.otp;
 const publishTag = argv.tag;
+const dryRun = argv['dry-run'] || false;
 const rootPackageJson = require('../package.json');
 
 console.log(`Release workflow repo: ${rootPackageJson.name}`);
 console.log(`Requested publish version: ${version}`);
 
 function run(command, options = {}) {
+  if (dryRun) {
+    console.log(`[dry-run] Would run: ${command}`);
+    return '';
+  }
   return execSync(command, {
     stdio: ['inherit', 'pipe', 'inherit'],
     ...options
@@ -237,9 +242,51 @@ if (!skipGit) {
   execSync(`git tag -fam ${version} "${version}"`, { stdio: 'inherit' });
 }
 
-// Publish public packages
-publishWorkspaces.forEach(({ directory, packageJson }) => {
-  if (!packageJson.private) {
+// Publish plugin first, then poll for availability, then publish main package
+async function pollNpmForVersion(
+  pkg,
+  version,
+  maxAttempts = 24,
+  delayMs = 5000
+) {
+  let attempts = 0;
+  while (attempts < maxAttempts) {
+    try {
+      const result = dryRun
+        ? version
+        : execSync(`npm view ${pkg}@${version} version`, {
+            stdio: ['ignore', 'pipe', 'ignore']
+          })
+            .toString()
+            .trim();
+      if (result === version) {
+        console.log(`\n${pkg}@${version} is now available on npm.`);
+        return true;
+      }
+    } catch (e) {
+      // Not available yet
+    }
+    attempts++;
+    console.log(
+      `Waiting for ${pkg}@${version} to be available on npm... (${attempts}/${maxAttempts})`
+    );
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
+  }
+  console.error(
+    `\nERROR: ${pkg}@${version} did not appear on npm after ${
+      (maxAttempts * delayMs) / 1000
+    } seconds.`
+  );
+  process.exit(1);
+}
+
+async function main() {
+  // Publish plugin first
+  const pluginWorkspace = publishWorkspaces.find(
+    ({ packageJson }) => packageJson.name === 'babel-plugin-react-native-web'
+  );
+  if (pluginWorkspace) {
+    const { directory, packageJson } = pluginWorkspace;
     const otpArg = oneTimeCode ? ` --otp ${oneTimeCode}` : '';
     const tagArg = resolvedPublishTag ? ` --tag ${resolvedPublishTag}` : '';
     const publishDirectory = createPublishDirectory(directory, packageJson);
@@ -249,12 +296,49 @@ publishWorkspaces.forEach(({ directory, packageJson }) => {
         packageJson.version
       } from ${path.relative(process.cwd(), directory)}`
     );
-    execSync(`npm publish${tagArg}${otpArg}`, {
-      cwd: publishDirectory,
-      stdio: 'inherit'
-    });
+    if (!dryRun) {
+      execSync(`npm publish${tagArg}${otpArg}`, {
+        cwd: publishDirectory,
+        stdio: 'inherit'
+      });
+    } else {
+      console.log(
+        `[dry-run] Would publish ${publicPackageName}@${packageJson.version}`
+      );
+    }
+    // Poll for availability
+    await pollNpmForVersion(publicPackageName, packageJson.version);
   }
-});
+
+  // Publish main package
+  const mainWorkspace = publishWorkspaces.find(
+    ({ packageJson }) => packageJson.name === 'react-native-web'
+  );
+  if (mainWorkspace) {
+    const { directory, packageJson } = mainWorkspace;
+    const otpArg = oneTimeCode ? ` --otp ${oneTimeCode}` : '';
+    const tagArg = resolvedPublishTag ? ` --tag ${resolvedPublishTag}` : '';
+    const publishDirectory = createPublishDirectory(directory, packageJson);
+    const publicPackageName = PUBLIC_PACKAGE_NAMES[packageJson.name];
+    console.log(
+      `Publishing workspace package ${publicPackageName}@${
+        packageJson.version
+      } from ${path.relative(process.cwd(), directory)}`
+    );
+    if (!dryRun) {
+      execSync(`npm publish${tagArg}${otpArg}`, {
+        cwd: publishDirectory,
+        stdio: 'inherit'
+      });
+    } else {
+      console.log(
+        `[dry-run] Would publish ${publicPackageName}@${packageJson.version}`
+      );
+    }
+  }
+}
+
+main();
 
 // Push changes
 if (!skipGit) {
