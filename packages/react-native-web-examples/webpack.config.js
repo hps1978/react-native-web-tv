@@ -9,7 +9,7 @@ module.exports = (env, argv) => ({
   context: __dirname,
   entry: './webpack-entry.js',
   output: {
-    path: path.resolve(appDirectory, 'dist-webpack'),
+    path: path.resolve(appDirectory, 'dist'),
     filename: 'bundle.js',
     publicPath: '/',
     clean: true

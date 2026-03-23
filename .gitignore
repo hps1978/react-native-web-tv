@@ -3,6 +3,5 @@ build
 coverage
 dist
 
-packages/react-native-web-examples/dist-webpack
 node_modules
 .DS_Store

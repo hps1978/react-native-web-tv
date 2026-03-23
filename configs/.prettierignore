@@ -4,4 +4,3 @@
 ../node_modules
 ../packages/**/vendor/*
 ../packages/**/.next
-../packages/**/dist-webpack

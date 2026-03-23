@@ -30,7 +30,7 @@ Serving production build:
 npm run serve:webpack -w packages/react-native-web-examples
 ```
 
-Webpack output is generated in `packages/react-native-web-examples/dist-webpack/`.
+Webpack output is generated in `packages/react-native-web-examples/dist/`.
 
 ## Web TV pages
 

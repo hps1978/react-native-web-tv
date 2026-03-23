@@ -8,7 +8,7 @@
     "build:next": "next build",
     "dev:next": "next",
     "start": "next start",
-    "serve:webpack": "npx serve -s dist-webpack -l 8080"
+    "serve:webpack": "npx serve -s dist -l 8080"
   },
   "dependencies": {
     "babel-plugin-react-native-web-tv": "0.21.2-tv.6",

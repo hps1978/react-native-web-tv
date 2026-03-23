@@ -36,7 +36,6 @@
   "ignorePatterns": [
     "coverage",
     "dist",
-    "dist-webpack",
     "flow-typed",
     "node_modules",
     "packages/**/vendor/*",
