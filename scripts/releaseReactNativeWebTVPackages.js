@@ -9,14 +9,16 @@ const minimist = require('minimist');
 const os = require('os');
 const path = require('path');
 
+const rootPackageJson = require('../package.json');
+
 const RELEASE_BRANCH = 'master';
 const INTERNAL_PUBLISH_PACKAGE_NAMES = [
   'babel-plugin-react-native-web',
   'react-native-web'
 ];
 const PUBLIC_PACKAGE_NAMES = {
-  'react-native-web': 'react-native-web-tv',
-  'babel-plugin-react-native-web': 'babel-plugin-react-native-web-tv'
+  'babel-plugin-react-native-web': 'babel-plugin-react-native-web-tv',
+  'react-native-web': 'react-native-web-tv'
 };
 
 const args = process.argv.slice(2);
@@ -27,7 +29,8 @@ const skipGit = argv['skip-git'];
 const oneTimeCode = argv.otp;
 const publishTag = argv.tag;
 const dryRun = argv['dry-run'] || false;
-const rootPackageJson = require('../package.json');
+// Entry point selection
+const entry = argv.entry; // 'plugin' or 'main' only
 
 console.log(`Release workflow repo: ${rootPackageJson.name}`);
 console.log(`Requested publish version: ${version}`);
@@ -78,8 +81,10 @@ function ensureReleaseBranch() {
   }
 }
 
-// Entry point selection
-const entry = argv.entry || 'all'; // 'plugin', 'main', or 'all' (default: all)
+// Ensure prerequisites are met
+// 1. Version argument is provided
+// 2. Working tree is clean (no unstaged changes)
+// 3. On the correct release branch (e.g., master/main) if not skipping git steps
 
 ensureVersionProvided();
 ensureCleanWorkingTree();
@@ -96,34 +101,23 @@ if (isPrereleaseVersion(version) && !resolvedPublishTag) {
 }
 
 // Collect workspace package manifests once, then derive publishable targets.
-const workspacePaths = require('../package.json').workspaces.reduce(
-  (acc, w) => {
-    const resolvedPaths = glob.sync(w);
-    resolvedPaths.forEach((p) => {
-      const packageJsonPath = path.join(path.resolve(p), 'package.json');
-      if (!fs.existsSync(packageJsonPath)) {
-        return;
-      }
-      const packageJson = JSON.parse(
-        fs.readFileSync(packageJsonPath, { encoding: 'utf-8' })
-      );
-      if (packageJson.name && acc.indexOf(p) === -1) {
-        acc.push(p);
-      }
-    });
-    return acc;
-  },
-  []
-);
-
-const workspaces = workspacePaths.map((dir) => {
-  const directory = path.resolve(dir);
-  const packageJsonPath = path.join(directory, 'package.json');
-  const packageJson = JSON.parse(
-    fs.readFileSync(packageJsonPath, { encoding: 'utf-8' })
-  );
-  return { directory, packageJson, packageJsonPath };
-});
+const workspaces = rootPackageJson.workspaces.reduce((acc, w) => {
+  const resolvedPaths = glob.sync(w);
+  resolvedPaths.forEach((p) => {
+    const directory = path.resolve(p);
+    const packageJsonPath = path.join(directory, 'package.json');
+    if (!fs.existsSync(packageJsonPath)) {
+      return;
+    }
+    const packageJson = JSON.parse(
+      fs.readFileSync(packageJsonPath, { encoding: 'utf-8' })
+    );
+    if (packageJson.name && !acc.some((ws) => ws.directory === directory)) {
+      acc.push({ directory, packageJson, packageJsonPath });
+    }
+  });
+  return acc;
+}, []);
 
 // Only the internal core package is published; it is renamed in a staging dir.
 const publishWorkspaces = workspaces.filter(({ packageJson }) =>
@@ -228,8 +222,6 @@ versionTrackedWorkspaces.forEach(
   }
 );
 
-execSync('npm install', { stdio: 'inherit' });
-
 // Commit changes
 if (!skipGit) {
   // add changes
@@ -307,6 +299,8 @@ async function publishMainOnly() {
     );
     process.exit(1);
   }
+  // Only run npm install after plugin is confirmed available
+  execSync('npm install', { stdio: 'inherit' });
 
   // Publish main package
   const mainWorkspace = publishWorkspaces.find(
@@ -344,9 +338,8 @@ async function main() {
   } else if (entry === 'main') {
     await publishMainOnly();
   } else {
-    // Default: publish plugin, then main
-    await publishPluginOnly();
-    await publishMainOnly();
+    console.error('Invalid entry point. Use --entry=plugin or --entry=main');
+    process.exit(1);
   }
 }
 
