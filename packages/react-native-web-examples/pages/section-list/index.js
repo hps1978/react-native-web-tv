@@ -1,7 +1,6 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, SectionList, Text, View } from 'react-native';
 import Example from '../../shared/example';
-import { SectionList, Text, View } from 'react-native-web';
 
 function makeItems(length) {
   return Array(length)

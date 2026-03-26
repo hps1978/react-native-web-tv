@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet } from 'react-native-web';
+import { StyleSheet } from 'react-native-web-tv';
 
 function View(props) {
   const [className, inlineStyle] = StyleSheet([styles.root$raw, props.style]);

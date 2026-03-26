@@ -1,6 +1,6 @@
 import React from 'react';
 import View from './View';
-import { StyleSheet } from 'react-native-web';
+import { StyleSheet } from 'react-native-web-tv';
 
 const Box = ({
   color,

@@ -252,3 +252,25 @@ git branch -D patch-replay-tv-main-test
 - Always run these steps from the repo root.
 - Do not create extra subdirectories for the scripts or patch archive.
 - Commit the scripts and patch archive before running the replay script to ensure a clean working tree.
+
+## IMPORTANT: Clean up tags after patch replay or upstream sync
+
+After replaying patches or syncing with upstream, you will likely fetch upstream tags (e.g., old release tags from necolas/react-native-web). Before pushing tags to your remote, always delete any tags that do not belong to your TV fork (e.g., keep only tags containing '-tv').
+
+Example cleanup command:
+
+```bash
+# Delete all local tags except those containing '-tv'
+for tag in $(git tag | grep -v -- '-tv'); do git tag -d "$tag"; done
+```
+
+Repeat this cleanup on both tv-main and master branches before pushing tags:
+
+```bash
+git checkout tv-main
+# (run cleanup command)
+git checkout master
+# (run cleanup command)
+```
+
+This prevents accidental pushing of upstream tags to your fork's remote.

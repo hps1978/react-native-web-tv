@@ -6,7 +6,7 @@ import {
   StyleSheet,
   Button,
   Dimensions
-} from 'react-native-web';
+} from 'react-native';
 
 const NUM_COLUMNS = 3;
 const ITEM_HEIGHT = 60;

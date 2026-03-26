@@ -5,16 +5,12 @@
   "scripts": {
     "build": "webpack --config webpack.config.js --mode production",
     "dev": "webpack serve --config webpack.config.js --mode development",
-    "build:next": "next build",
-    "dev:next": "next",
-    "start": "next start",
     "serve:webpack": "npx serve -s dist -l 8080"
   },
   "dependencies": {
     "babel-plugin-react-native-web-tv": "0.21.2-tv.6",
-    "next": "^12.2.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
     "react-native-web-tv": "0.21.2-tv.6"
   },
   "devDependencies": {

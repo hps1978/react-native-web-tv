@@ -2,7 +2,7 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
-  "name": "babel-plugin-react-native-web",
+  "name": "babel-plugin-react-native-web-tv",
   "version": "0.21.2-tv.6",
   "description": "Babel plugin for React Native Web for TV",
   "main": "index.js",

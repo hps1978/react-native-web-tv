@@ -15,7 +15,7 @@
  */
 
 'use strict';
-
+import React from 'react';
 import { useState } from 'react';
 import {
   Dimensions,
