@@ -139,5 +139,6 @@ workspaces.forEach(({ directory, packageJson }) => {
 
 // Push changes
 if (!skipGit) {
-  execSync(`git push --tags origin ${RELEASE_BRANCH}`, { stdio: 'inherit' });
+  execSync(`git push origin ${RELEASE_BRANCH}`, { stdio: 'inherit' });
+  execSync(`git push origin ${version}`, { stdio: 'inherit' });
 }
