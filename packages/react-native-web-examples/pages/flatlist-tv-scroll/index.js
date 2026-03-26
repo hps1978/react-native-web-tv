@@ -14,7 +14,7 @@ import {
   StyleSheet,
   Image,
   Pressable
-} from 'react-native-web';
+} from 'react-native';
 
 const ROW_COUNT = 10;
 const ITEM_COUNT = 15;

@@ -54,7 +54,7 @@ Example: `0.21.2-tv.0` means the initial TV fork release built from upstream `0.
 The Babel plugin is recommended for build-time optimizations.
 
 ```shell
-npm install --save-dev babel-plugin-react-native-web
+npm install --save-dev babel-plugin-react-native-web-tv
 ```
 
 ---

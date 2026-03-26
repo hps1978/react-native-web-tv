@@ -1,8 +1,10 @@
 # React Native Web for TV examples
 
-Next.js pages and React Native components. Provides interactive examples for the documentation website.
 
-## Run locally
+React Native Web for TV examples using React Native components and a webpack build. Provides interactive examples for the documentation website.
+
+
+## Run locally (Webpack)
 
 From monorepo root:
 
@@ -10,18 +12,10 @@ From monorepo root:
 npm run dev -w packages/react-native-web-examples
 ```
 
-## Webpack browser mode
-
-This package also supports a simple webpack browser build without changing the current `pages/` structure.
-
-```bash
-npm run dev:webpack -w packages/react-native-web-examples
-```
-
 Production build:
 
 ```bash
-npm run build:webpack -w packages/react-native-web-examples
+npm run build -w packages/react-native-web-examples
 ```
 
 Serving production build:

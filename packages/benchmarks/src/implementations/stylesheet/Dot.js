@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet } from 'react-native-web';
+import { StyleSheet } from 'react-native-web-tv';
 
 const Dot = ({ size, x, y, children, color }) => {
   const [className, inlineStyle] = StyleSheet([

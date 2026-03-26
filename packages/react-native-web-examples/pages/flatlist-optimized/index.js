@@ -14,7 +14,7 @@ import {
   TextInput,
   Button,
   Dimensions
-} from 'react-native-web';
+} from 'react-native';
 
 // Fixed item height example data
 const generateListData = (size = 100) => {

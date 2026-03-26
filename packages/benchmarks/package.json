@@ -11,13 +11,13 @@
     "classnames": "^2.3.1",
     "d3-scale-chromatic": "^3.0.0",
     "prop-types": "^15.6.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-native-web": "file:../react-native-web"
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-native-web-tv": "0.21.2-tv.7"
   },
   "devDependencies": {
     "babel-loader": "^8.2.5",
-    "babel-plugin-react-native-web": "file:../babel-plugin-react-native-web",
+    "babel-plugin-react-native-web-tv": "0.21.2-tv.7",
     "css-loader": "^6.7.1",
     "style-loader": "^3.3.1",
     "url-loader": "^4.1.1",

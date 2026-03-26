@@ -32,11 +32,28 @@ describe('AppRegistry', () => {
       );
 
       expect(element).toMatchInlineSnapshot(`
-        <AppContainer
-          rootTag={{}}
-        >
-          <NoopComponent />
-        </AppContainer>
+        {
+          "$$typeof": Symbol(react.transitional.element),
+          "_owner": null,
+          "_store": {},
+          "key": null,
+          "props": {
+            "WrapperComponent": undefined,
+            "children": {
+              "$$typeof": Symbol(react.transitional.element),
+              "_owner": null,
+              "_store": {},
+              "key": null,
+              "props": {},
+              "type": [Function],
+            },
+            "rootTag": {},
+          },
+          "type": {
+            "$$typeof": Symbol(react.forward_ref),
+            "render": [Function],
+          },
+        }
       `);
       expect(styleElement).toMatchInlineSnapshot(`
         "<style id="react-native-stylesheet">[stylesheet-group="0"]{}

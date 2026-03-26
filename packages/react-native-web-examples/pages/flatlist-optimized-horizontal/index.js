@@ -6,14 +6,7 @@
  */
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import {
-  FlatList,
-  Text,
-  View,
-  StyleSheet,
-  Button,
-  Image
-} from 'react-native-web';
+import { FlatList, Text, View, StyleSheet, Button, Image } from 'react-native';
 
 const HORIZONTAL_ITEM_WIDTH = 180;
 const HORIZONTAL_ITEM_HEIGHT = 120;
