@@ -9,12 +9,60 @@ eleventyNavigation:
 ---
 
 :::lead
-React Native for Web provides compatibility with the vast majority of React Native's JavaScript API. Features deprecated in React Native should be considered *unsupported* in React Native for Web.
+This package builds React Native compatibility from React Native Web, then adds a TV compatibility layer inspired by React Native tvOS for browser-based TV platforms.
 :::
 
 **Best used with React Native >= 0.68**.
 
 Visit the [React Native Directory](https://reactnative.directory/?web=true) to find React Native packages with known web support.
+
+## How to read this page
+
+- The **Components** and **APIs** tables below are the React Native compatibility baseline inherited from React Native Web.
+- The **TV additions** section describes the additional React Native tvOS-style compatibility implemented on top, adapted for web TV runtimes.
+- API shape compatibility with React Native tvOS does not always mean full behavior parity on browser-based TV platforms.
+
+## TV additions
+
+This package extends the React Native Web baseline with TV-oriented modules and focus behavior inspired by React Native tvOS, adapted for browser-based TV platforms.
+
+| Area | Status | Notes |
+| :--- | :----- | :---- |
+| `TVFocusGuideView` | ✓ | Implemented for web TV focus containers, including destinations, autofocus, and trap-focus behavior in the spatial navigation layer. |
+| `TVEventHandler` | ✓ | Implemented listener API for remote/hardware key events when key events are delivered by the target environment. |
+| `useTVEventHandler` | ✓ | Implemented hook wrapper around `TVEventHandler`. |
+| `TVTextScrollView` | ✓ | Implemented for remote-driven paging in content-heavy scroll layouts. |
+| `TVEventControl` | (✓) | API shape is present for compatibility, but methods are currently stubs on web and log warnings. |
+| TV focus props on core components | (✓) | Support is implemented for key props used by this package (for example `focusable`, `hasTVPreferredFocus`, `isTVSelectable`, `tvFocusable`), but parity is not complete across all components and scenarios. |
+| `nextFocus*` style parity | ✘ | Not implemented yet in runtime behavior. Definitions currently exist at the type/API-shape level only. |
+
+For detailed TV behavior and known limitations, see [TV Navigation]({{ '/docs/tv-navigation/' | url }}), [TVFocusGuideView]({{ '/docs/tv-focus-guide-view/' | url }}), [TVEventHandler]({{ '/docs/tv-event-handler/' | url }}), and [TVEventControl]({{ '/docs/tv-event-control/' | url }}).
+
+## TV parity comparison
+
+The table below compares:
+
+- **This package** (`react-native-web-tv`) - [react-native-web-tv](https://github.com/hps1978/react-native-web-tv)
+- **React Native TVOS** (native TV reference behavior) - [react-native-tvos](https://github.com/react-native-tvos/react-native-tvos)
+
+| Area | `react-native-web-tv` | `react-native-tvos` |
+| :--- | :--- | :--- |
+| Core TV exports (`TVFocusGuideView`, `TVEventHandler`, `TVEventControl`, `TVTextScrollView`, `useTVEventHandler`) | Implemented for TV integration. | Present. |
+| `Platform.isTV` behavior | Set to `true` for TV integration behavior. No intention of adding environment-based detection in future work. | True on TV runtimes. |
+| `View` TV focus methods/props (`hasTVPreferredFocus`, `requestTVFocus`, container hints) | Implemented for web TV focus integration. | Implemented with native focus engines. |
+| `Pressable` / `Touchable*` TV focusability (`focusable`, `isTVSelectable`) | Implemented for tab-index and LRUD focus integration. | Implemented with native TV focus and event semantics. |
+| `TextInput` TV focus behavior (`hasTVPreferredFocus`, `isTVSelectable`, focusability) | Implemented for web TV focus integration. | Implemented with platform-native behavior and constraints. |
+| `ScrollView` / `VirtualizedList` TV focus-flow support | Implemented, including TV focus-guide wrapping and trap-focus integration for list flows. | Implemented with native TV focus handling. |
+| Directional `nextFocus*` props (`nextFocusUp/Down/Left/Right/Forward`) | Not implemented yet in runtime (types only). | Implemented and used in native TV component behavior. |
+| `TVFocusGuideView` destinations/autoFocus/trapFocus | Implemented via LRUD container attributes and spatial manager integration. | Implemented via native UIFocusGuide/Android TV behavior. |
+| `TVEventHandler` / `useTVEventHandler` | Implemented when remote key events are delivered to runtime. | Implemented. |
+| `TVEventControl` | API shape is present; methods are currently stubs on web and log warnings. | Implemented with native toggles. |
+| `BackHandler` TV back integration | Implemented conditionally via configured web TV key map (`window.appConfig.keyMap.Back`). | Implemented against native remote back/menu behavior. |
+
+
+
+_Note: tests are in place for the current implementation. If you find a gap, please open an issue. Help improving the existing implementation is welcome._
+
 
 ## Components
 
@@ -57,7 +105,7 @@ Visit the [React Native Directory](https://reactnative.directory/?web=true) to f
 | Appearance               | ✓      |  |
 | AppRegistry              | ✓      | Includes additional support for server rendering with `getApplication`. |
 | AppState                 | ✓      |  |
-| BackHandler              | (✓)    | Mock. No equivalent web APIs. |
+| BackHandler              | (✓)    | Browser-native parity is limited; in this package it can also handle TV-style back events when remote key events are available. |
 | Clipboard                | ✓      |  |
 | DeviceInfo               | (✓)    | Limited information. |
 | Dimensions               | ✓      |  |
@@ -73,7 +121,7 @@ Visit the [React Native Directory](https://reactnative.directory/?web=true) to f
 | NativeModules            | (✓)    | Mocked. Missing ability to load native modules. |
 | PanResponder             | ✓      |  |
 | PixelRatio               | ✓      |  |
-| Platform                 | ✓      |  |
+| Platform                 | ✓      | In this package, `Platform.isTV` is currently forced `true` for TV behavior compatibility. |
 | Settings                 | ✘      | No equivalent web APIs. |
 | Share                    | ✓      | Only available over HTTPS. Read about the [Web Share API](https://wicg.github.io/web-share/). |
 | StyleSheet               | ✓      |  |
@@ -81,3 +129,11 @@ Visit the [React Native Directory](https://reactnative.directory/?web=true) to f
 | Vibration                | ✓      |  |
 | useColorScheme           | ✓      |  |
 | useWindowDimensions      | ✓      |  |
+
+---
+
+## Compatibility guidance for TV apps
+
+- Treat this page as baseline + package extension guidance, not a full parity guarantee with native TV platforms.
+- Validate critical focus and remote-control behavior on each target TV runtime.
+- Expect additional integration work when app flows depend on third-party libraries or native-only modules.

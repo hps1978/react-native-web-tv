@@ -23,7 +23,7 @@ import { Text } from 'react-native';
 ```
 
 ::: callout
-**Did you know?** Text styling in {{ site.name }} has stricter rules than it does on the web. Read the [Styling]({{ '/docs/styling' | url }}) guide to learn more.
+**Did you know?** Text styling in React Native Web has stricter rules than it does on the web. Read the [Styling]({{ '/docs/styling' | url }}) guide to learn more.
 :::
 
 ---

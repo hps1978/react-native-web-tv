@@ -13,6 +13,10 @@ eleventyNavigation:
 Respond to changes in the viewport dimensions.
 :::
 
+:::callout
+**TV relevance:** Baseline React Native Web API. Frequently used in TV layouts for viewport-aware sizing.
+:::
+
 Dimensions may change (e.g., due to device rotation) so any rendering logic or styles that depend on these constants should try to call this function on every render, rather than caching the value.
 
 ```js

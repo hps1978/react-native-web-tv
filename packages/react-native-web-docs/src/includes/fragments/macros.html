@@ -5,7 +5,7 @@
 {% endmacro %}
 
 {% macro docbutton(text, href) %}
-  <a href="{{ href | url }}" class="view inline-flex flex-row items-center py-3 px-6 border rounded text-xl text-white font-bold no-underline" style="background-color:var(--docs-theme-color); border-color:var(--docs-theme-color); color:white; text-decoration:">
+  <a href="{{ href | url }}" class="view inline-flex flex-row items-center py-3 px-6 border rounded text-xl text-white font-bold no-underline" style="background-color:var(--docs-theme-color); border-color:var(--docs-theme-color); color:white; text-decoration:none;">
     <span class="view mr-2" style="width:20px;">
       {{ '/src/includes/assets/svg/documents.svg' | svgContents("w-full fill-current") | safe }}
     </span>
@@ -31,20 +31,34 @@
 {% macro codesandbox(example = '/') %}
   {#
     Dynamically generate a CodeSandbox embed URL for the given example.
-    Uses Next.js example source from the repo (tv-main branch).
+    Uses the webpack examples app source from the repo (tv-main branch).
     Example: 'pressable' → loads /pages/pressable/index.js
   #}
   {% set repo = 'hps1978/react-native-web-tv' %}
   {% set branch = 'tv-main' %}
   {% set folder = 'packages/react-native-web-examples' %}
   {% set examplePath = 'pages/' ~ example ~ '/index.js' %}
-  {% set url =
-    'https://codesandbox.io/embed/github/' ~ repo ~ '/tree/' ~ branch ~ '/' ~ folder ~ '?file=/' ~ examplePath ~ '&codemirror=1&fontsize=12&hidedevtools=1&hidenavigation=1&theme=light'
+  {% set exampleRoute = '' if example == '/' else example %}
+  {% set previewPath = ('/#/' ~ exampleRoute) | urlencode %}
+  {% set launchQuery =
+    '?file=/' ~ examplePath ~ '&module=/' ~ examplePath ~ '&initialpath=' ~ previewPath ~ '&view=preview&previewwindow=browser&moduleview=1&codemirror=1&fontsize=12&hidedevtools=1&hidenavigation=1&theme=light'
   %}
+  {% set localUrl = site.examplesLocalBaseUrl ~ '/' ~ launchQuery %}
+  {% set sandboxUrl =
+    'https://codesandbox.io/embed/github/' ~ repo ~ '/tree/' ~ branch ~ '/' ~ folder ~ launchQuery
+  %}
+  {% set url = sandboxUrl if site.useCodeSandboxEmbeds else localUrl %}
   <iframe
     src="{{ url }}"
     style="width:100%; height:500px; border:1px solid var(--docs-border-color); border-radius:4px; overflow:hidden;"
     title="React Native Web for TV example: {{ example }}"
     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
   ></iframe>
+  <p class="text-sm text-color-faint mt-2 mb-6">
+    {% if site.useCodeSandboxEmbeds %}
+      For TV Examples: LRUD navigation is already enabled in this sandbox. Use your keyboard arrow keys to move focus.
+    {% else %}
+      Local sandbox-emulation mode: this embed loads from {{ site.examplesLocalBaseUrl }} with CodeSandbox-style launch params. Start examples with `npm run dev -w packages/react-native-web-examples` and docs with `DOCS_EMBED_SOURCE=local npm run dev -w packages/react-native-web-docs`.
+    {% endif %}
+  </p>
 {% endmacro %}

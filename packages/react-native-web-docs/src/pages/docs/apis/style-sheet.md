@@ -13,6 +13,10 @@ eleventyNavigation:
 Work with strict styles that provide deterministic rendering and automatically adapt to localized writing direction.
 :::
 
+:::callout
+**TV relevance:** Baseline React Native Web API. Primary styling API for TV and non-TV web targets.
+:::
+
 The StyleSheet abstraction converts predefined styles to (vendor-prefixed) CSS without requiring a compile-time step. Styles that cannot be resolved outside of the render loop (e.g., dynamic positioning) are usually applied as inline styles.
 
 ```js

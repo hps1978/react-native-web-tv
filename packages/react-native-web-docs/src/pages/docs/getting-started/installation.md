@@ -12,22 +12,10 @@ eleventyNavigation:
 An overview of how to install and use {{ site.name }}.
 :::
 
----
+React Native Web for TV is built on top of React Native Web and can be used for multi-platform and web-only applications targeting browser-based TV environments. It can be incrementally adopted by existing React Web apps and integrated with existing React Native apps. React-compatible runtimes may work, but React is the primary supported target.
 
-## 🚀 Out-of-the-box Spatial Navigation for Web-based TV
+TV spatial navigation is built in, but your app must ensure remote key events reach the browser runtime. For configuration, platform notes, and focus behavior details, see the [TV Navigation documentation]({{ '/docs/tv-navigation/' | url }}).
 
-
-**Built-in LRUD spatial navigation and remote focus for web-based TV platforms (e.g., Samsung Tizen TV, LG webOS TV, and other browser-based TV environments).**
-
-> **ℹ️ Note:** This package provides built-in spatial navigation logic (LRUD) and remote focus, but your app must ensure that platform-specific remote keys (such as arrow, OK, Back, Menu) are registered and delivered to the browser. On some TV platforms, this requires a one-time setup in your app or hosting environment. Once keys are registered, no extra libraries are needed for spatial navigation.
-
-The spatial navigation layer is integrated and enabled by default once remote key events reach the browser.
-
-For configuration and advanced usage, see the [TV Navigation documentation]({{ '/docs/tv-navigation/' | url }}).
-
----
-
-React Native for Web can be used for multi-platform and web-only applications. It can be incrementally adopted by existing React Web apps and integrated with existing React Native apps. Preact is also supported.
 
 Use the published package name directly in a new project:
 
@@ -57,17 +45,50 @@ The Babel plugin is recommended for build-time optimizations.
 npm install --save-dev babel-plugin-react-native-web-tv
 ```
 
+The plugin supports both installation paths shown above. It rewrites imports from `react-native` to the package target you configure, so the `target` option should match the dependency name that exists in your app.
+
+If you installed the package directly as `react-native-web-tv`, configure Babel like this:
+
+```json
+{
+  "plugins": [
+    ["react-native-web-tv", { "target": "react-native-web-tv" }]
+  ]
+}
+```
+
+If you installed this fork through an npm alias such as `react-native-web@npm:react-native-web-tv@...`, keep the Babel target set to `react-native-web`:
+
+```json
+{
+  "plugins": [
+    ["react-native-web-tv", { "target": "react-native-web" }]
+  ]
+}
+```
+
+This keeps your application imports unchanged while allowing the plugin to rewrite to the correct package path for optimized bundle output.
+
+The plugin also accepts `commonjs: true` if you need CommonJS output for older bundlers.
+
 ---
 
 ## Quickstart
 
-### Expo
+This project supports two common starting points:
 
-[Expo](https://expo.dev) is a framework and a platform for universal React applications. [Expo for Web](https://docs.expo.dev/workflow/web/) uses React Native for Web, provides dozens of additional cross-platform APIs, includes web build optimizations, and is compatible with the broader React Native ecosystem. See the Expo docs for more information.
+- building a web-first application specifically for browser-based TV platforms;
+- adapting an existing React Native TV or `react-native-tvos` codebase to add a web TV target.
+
+### New web-based TV project
+
+If you are starting a new project specifically for web-based TVs, a lightweight web setup can be a good way to validate package installation, Babel configuration, and focus behavior early.
+
+For TV-specific configuration details (focus behavior, remote key handling, and platform tuning), use the [TV Navigation documentation]({{ '/docs/tv-navigation/' | url }}).
 
 ### Create React App
 
-[Create React App](https://github.com/facebook/create-react-app) is a basic way to setup a simple, web-only React app with built-in support for aliasing `react-native-web` to `react-native`. However, it's generally recommended that you use Expo.
+[Create React App](https://github.com/facebook/create-react-app) is a basic way to set up a simple web project for experimentation. It can be useful as a minimal validation environment for package installation and browser-based TV behavior.
 
 ```shell
 npx create-react-app my-app
@@ -75,3 +96,25 @@ cd my-app
 npm install react-native-web@npm:{{ site.packageName }}@{{ site.packageVersion }}
 npm start
 ```
+
+### Existing React Native TV (react-native-tvos) app
+
+Use this general flow:
+
+1. Install this fork using either the direct package name or the `react-native-web` npm alias shown above.
+2. Configure the Babel plugin `target` to match the package name your app resolves at runtime.
+3. Configure your bundler and compiler so `react-native` resolves correctly for the web target.
+4. Add a web entry point and any required `.web.js` platform-specific files.
+5. Confirm that TV remote keys are registered and delivered to the browser environment.
+
+This is intentionally a high-level flow. Real-world React Native TV apps are often more complex, especially when they depend on third-party libraries or native implementations that require additional web compatibility work.
+
+The rest of the setup is application-specific and depends on your bundler, Babel configuration, dependency graph, and how much of your native TV app is shared with the web target.
+
+For the underlying setup details, continue with:
+
+- [Setup]({{ '/docs/setup/' | url }}) for aliasing, Babel, Jest, Flow, and root element configuration.
+- [Multi-platform setup]({{ '/docs/multi-platform/' | url }}) for bundling an existing React Native app for the web.
+- [TV Navigation documentation]({{ '/docs/tv-navigation/' | url }}) for remote focus behavior and spatial navigation details.
+
+

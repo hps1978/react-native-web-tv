@@ -13,6 +13,10 @@ eleventyNavigation:
 AppState can tell you if the app is in the foreground or background, and notify you when the state changes.
 :::
 
+:::callout
+**TV relevance:** Baseline React Native Web API. Useful for handling foreground/background transitions in TV browser apps.
+:::
+
 States: active (the app is running in the foreground), background (the app is running in the background, i.e., the user has not focused the app's tab).
 
 

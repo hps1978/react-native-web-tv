@@ -18,8 +18,22 @@ export type ElemData = {
 
 export type ScrollableAncestorInfo = {
   scrollable: any,
-  isWindowScroll: boolean
+  isWindowScroll: boolean,
+  isNativeScroller: boolean
 };
+
+export function isNativeScrollerType(scrollable: any): boolean {
+  if (typeof scrollable?.scrollTo !== 'function') {
+    return true;
+  }
+
+  try {
+    // Native browser scrollTo includes [native code]; RNW patched scrollTo is JS.
+    return scrollable.scrollTo.toString().includes('[native code]');
+  } catch (_err) {
+    return true;
+  }
+}
 
 const _hasPerformance =
   typeof performance !== 'undefined' && typeof performance.now === 'function';
@@ -148,7 +162,11 @@ export function findScrollableAncestor(
       (direction === 'vertical' && canScrollY) ||
       (direction === 'horizontal' && canScrollX)
     ) {
-      return { scrollable: current, isWindowScroll: false };
+      return {
+        scrollable: current,
+        isWindowScroll: false,
+        isNativeScroller: isNativeScrollerType(current)
+      };
     }
 
     if (current === document.body || current === document.documentElement) {
@@ -158,7 +176,11 @@ export function findScrollableAncestor(
     current = ((current.parentElement: any): HTMLElement | null);
   }
   // Return window scrollable as fallback if no scrollable ancestor found
-  return { scrollable: _windowScrollable, isWindowScroll: true };
+  return {
+    scrollable: _windowScrollable,
+    isWindowScroll: true,
+    isNativeScroller: true
+  };
 }
 
 /**

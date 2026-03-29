@@ -13,6 +13,10 @@ eleventyNavigation:
 `PixelRatio` class gives access to the device pixel density.
 :::
 
+:::callout
+**TV relevance:** Baseline React Native Web API. Useful for typography and visual scaling across TV display densities.
+:::
+
 ```js
 import { PixelRatio } from 'react-native';
 ```

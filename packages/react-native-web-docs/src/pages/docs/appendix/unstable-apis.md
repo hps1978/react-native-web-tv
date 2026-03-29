@@ -15,29 +15,39 @@ The following APIs are unstable and subject to breaking changes. Use at your own
 
 ## Use with existing React DOM components
 
-React Native for Web exports a web-specific module called `unstable_createElement`, which can be used to wrap React DOM components. This allows you to use React Native's accessibility and style optimizations. Since this is a web-specific export it should always be imported from the `react-native-web` package.
+This package exports a web-specific API called `unstable_createElement`, which can be used to wrap React DOM components so they can accept React Native-style props (for example accessibility and style props).
+
+Import from the package key your app resolves for web:
+
+- `react-native` (when aliased to this package)
+- `react-native-web-tv` (direct install)
+- `react-native-web` (npm alias strategy)
 
 In the example below, `Video` will now accept common React Native props such as `accessibilityLabel`, `accessible`, `style`, and even the Responder event props.
 
 ```js
-import { unstable_createElement } from 'react-native-web';
+import { unstable_createElement } from 'react-native';
 const Video = (props) => unstable_createElement('video', props);
 ```
 
-This also works with composite components defined in your existing component gallery or dependencies ([live example](https://www.webpackbin.com/bins/-KiTSGFw3fB9Szg7quLI)).
+This also works with composite components from existing app code.
 
 ```js
-import RaisedButton from 'material-ui/RaisedButton';
-import { unstable_createElement, useLocaleContext } from 'react-native-web';
-import { StyleSheet, } from 'react-native';
+import { unstable_createElement, useLocaleContext } from 'react-native';
+import { StyleSheet } from 'react-native';
+
+function LegacyButton(props) {
+  return <button {...props} />;
+}
 
 const CustomButton = (props) => {
   const { direction } = useLocaleContext();
-  return unstable_createElement(RaisedButton, {
+  return unstable_createElement(LegacyButton, {
     ...props,
-    style: [ styles.button, props.style ]
+    style: [styles.button, props.style],
+    writingDirection: direction
   });
-}, { writingDirection: direction });
+};
 
 const styles = StyleSheet.create({
   button: {
@@ -50,10 +60,10 @@ Remember that React Native styles are not the same as React DOM styles, and care
 
 ## Use as a library framework
 
-The React Native (for Web) building blocks can be used to create higher-level components and abstractions. In the example below, a `styled` function provides an API inspired by styled-components ([live example](https://www.webpackbin.com/bins/-KjT9ziwv4O7FDZdvsnX)).
+The React Native (for Web) building blocks can be used to create higher-level components and abstractions. In the example below, a `styled` function provides a simple API inspired by styled-components.
 
 ```jsx
-import { unstable_createElement } from 'react-native-web';
+import { unstable_createElement, View } from 'react-native';
 import { StyleSheet } from 'react-native';
 
 /**
@@ -62,27 +72,18 @@ import { StyleSheet } from 'react-native';
 const styled = (Component, styler) => {
   const isDOMComponent = typeof Component === 'string';
 
-  class Styled extends React.Component {
-    static contextTypes = {
-      getTheme: React.PropTypes.func
+  return function Styled(props) {
+    const style = typeof styler === 'function' ? styler(props) : styler;
+    const nextProps = {
+      ...props,
+      style: [style, props.style]
     };
 
-    render() {
-      const theme = this.context.getTheme && this.context.getTheme();
-      const localProps = { ...this.props, theme };
-      const nextProps = { ...this.props }
-      const style = typeof styler === 'function' ? styler(localProps) : styler;
-      nextProps.style = [ style, this.props.style ];
-
-      return (
-        isDOMComponent
-          ? unstable_createElement(Component, nextProps)
-          : <Component {...nextProps} />
-      );
-    }
-  }
-  return Styled;
-}
+    return isDOMComponent
+      ? unstable_createElement(Component, nextProps)
+      : <Component {...nextProps} />;
+  };
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -95,3 +96,5 @@ const styles = StyleSheet.create({
 
 const StyledView = styled(View, styles.container);
 ```
+
+Because this API is unstable, prefer wrapping usage in a small local abstraction that you can update in one place if behavior changes.

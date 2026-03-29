@@ -17,7 +17,13 @@ class MyListItem extends React.PureComponent {
   render() {
     const textColor = this.props.selected ? 'red' : 'black';
     return (
-      <Pressable onPress={this._onPress}>
+      <Pressable
+        onPress={this._onPress}
+        style={({ focused }) => [
+          styles.listItemContainer,
+          focused && styles.listItemContainerFocused
+        ]}
+      >
         <View>
           <Text style={[styles.listItemText, { color: textColor }]}>
             {this.props.title}
@@ -120,5 +126,16 @@ const styles = StyleSheet.create({
   allExamplesHeader: { fontSize: 22, marginBottom: 20 },
   exampleContainer: { marginBottom: 20 },
   exampleHeaderText: { fontSize: 18, fontWeight: 'bold' },
+  listItemContainer: {
+    borderColor: 'transparent',
+    borderRadius: 4,
+    borderWidth: 2,
+    paddingHorizontal: 6,
+    paddingVertical: 4
+  },
+  listItemContainerFocused: {
+    backgroundColor: '#e8f0fe',
+    borderColor: '#1977f2'
+  },
   listItemText: { fontSize: 16 }
 });

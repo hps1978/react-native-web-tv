@@ -8,12 +8,12 @@ eleventyNavigation:
 ---
 
 :::lead
-Client and server rendering with {{ site.name }}.
+Client and server rendering with React Native Web.
 :::
 
-React Native for Web can be used for multi-platform and web-only applications. It can incrementally adopted by existing React Web apps and integrated with existing React Native apps. Preact is also supported.
+React Native for Web can be used for multi-platform and web-only applications. It can incrementally adopted by existing React Web apps and integrated with existing React Native apps. React-compatible runtimes may work, but React is the primary supported target.
 
-{{ site.name }} components interoperate with React DOM components. They can be incrementally introduced at any point in an application's component tree. One thing to be aware of is that external CSS applied to *all* tags in a document may interfere with the default rendering of some {{ site.name }} components.
+React Native Web components interoperate with React DOM components. They can be incrementally introduced at any point in an application's component tree. One thing to be aware of is that external CSS applied to *all* tags in a document may interfere with the default rendering of some React Native Web components.
 
 ---
 

@@ -70,7 +70,7 @@ Useful TV-oriented examples include:
 * `/tv-event-handler`
 * `/tv-focus-guide-view`
 * `/tv-text-scrollview`
-* `/flatlist-tv-scroll`
+* `/tv-flatlist`
 
 ## Web TV support in this fork
 

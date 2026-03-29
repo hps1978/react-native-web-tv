@@ -31,5 +31,5 @@ Webpack output is generated in `packages/react-native-web-examples/dist/`.
 TV-focused examples in this fork:
 * `/tv-event-handler`
 * `/tv-focus-guide-view`
-* `/flatlist-tv-scroll`
+* `/tv-flatlist`
 

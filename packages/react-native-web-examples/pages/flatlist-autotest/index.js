@@ -12,6 +12,7 @@ import {
   Button,
   Dimensions
 } from 'react-native';
+import Example from '../../shared/example';
 
 // Fixed item height example data
 const generateListData = (size = 100) => {
@@ -400,156 +401,165 @@ function AutoTestBenchmark() {
   );
 
   return (
-    <View data-testid="manual-container" style={styles.outerContainer}>
-      <View style={styles.controlPanel}>
-        <Text style={styles.title}>🧪 FlatList Manual Measurement</Text>
-        <Text style={styles.description}>
-          Press Start, scroll quickly, then press End to see metrics.
-        </Text>
+    <Example title="FlatList Auto Test">
+      <View data-testid="manual-container" style={styles.outerContainer}>
+        <View style={styles.controlPanel}>
+          <Text style={styles.title}>🧪 FlatList Manual Measurement</Text>
+          <Text style={styles.description}>
+            Press Start, scroll quickly, then press End to see metrics.
+          </Text>
 
-        <View style={styles.buttonRow}>
-          <Button
-            onPress={() =>
-              setRenderMode((m) => (m === 'optimized' ? 'legacy' : 'optimized'))
-            }
-            title={
-              renderMode === 'optimized'
-                ? 'Switch to Legacy'
-                : 'Switch to Optimized'
-            }
-          />
-          <Button
-            onPress={() => setListData(generateListData(2000))}
-            title="Reload (2000)"
-          />
-          <Button
-            disabled={isMeasuring}
-            onPress={startMeasurement}
-            title={isMeasuring ? 'Measuring...' : 'Start'}
-          />
-          <Button
-            disabled={!isMeasuring}
-            onPress={endMeasurement}
-            title="End"
-          />
+          <View style={styles.buttonRow}>
+            <Button
+              onPress={() =>
+                setRenderMode((m) =>
+                  m === 'optimized' ? 'legacy' : 'optimized'
+                )
+              }
+              title={
+                renderMode === 'optimized'
+                  ? 'Switch to Legacy'
+                  : 'Switch to Optimized'
+              }
+            />
+            <Button
+              onPress={() => setListData(generateListData(2000))}
+              title="Reload (2000)"
+            />
+            <Button
+              disabled={isMeasuring}
+              onPress={startMeasurement}
+              title={isMeasuring ? 'Measuring...' : 'Start'}
+            />
+            <Button
+              disabled={!isMeasuring}
+              onPress={endMeasurement}
+              title="End"
+            />
+          </View>
         </View>
-      </View>
 
-      {true && (
-        <View style={styles.resultsContainer}>
-          <Text style={styles.resultsTitle}>📊 Measurement Results</Text>
+        {true && (
+          <View style={styles.resultsContainer}>
+            <Text style={styles.resultsTitle}>📊 Measurement Results</Text>
 
-          <View style={styles.resultsRow}>
-            <View
-              style={[
-                styles.resultSubsection,
-                isMeasuring &&
-                  renderMode === 'optimized' && {
-                    backgroundColor: '#ffcccc',
-                    borderRadius: 8,
-                    padding: 8
-                  }
-              ]}
-            >
-              <Text style={styles.subsectionTitle}>RLV (Optimized)</Text>
-              <View style={styles.resultCard}>
-                <Text style={styles.metricText}>
-                  Duration:{' '}
-                  {(measurementResults.optimized.durationMs / 1000).toFixed(1)}s
-                </Text>
-                <Text style={styles.metricText}>
-                  Scroll gestures: {measurementResults.optimized.scrollCount}
-                </Text>
-                <Text style={styles.metricText}>
-                  Initial DOM Nodes:{' '}
-                  {measurementResults.optimized.initialDomNodes}
-                </Text>
-                <Text style={styles.metricText}>
-                  Final DOM Nodes: {measurementResults.optimized.finalDomNodes}
-                </Text>
-                <Text style={styles.metricText}>
-                  Avg DOM Nodes: {measurementResults.optimized.avgDomNodes}
-                </Text>
-                <Text style={styles.metricText}>
-                  Avg FPS: {measurementResults.optimized.fpsAvg}
-                </Text>
-                <Text style={styles.metricText}>
-                  Max FPS: {measurementResults.optimized.fpsMax}
-                </Text>
-                <Text style={styles.metricText}>
-                  Min FPS: {measurementResults.optimized.fpsMin}
-                </Text>
-                <Text style={styles.metricText}>
-                  Max DOM Nodes: {measurementResults.optimized.maxDomNodes}
-                </Text>
-                <Text style={styles.metricText}>
-                  Min DOM Nodes: {measurementResults.optimized.minDomNodes}
-                </Text>
+            <View style={styles.resultsRow}>
+              <View
+                style={[
+                  styles.resultSubsection,
+                  isMeasuring &&
+                    renderMode === 'optimized' && {
+                      backgroundColor: '#ffcccc',
+                      borderRadius: 8,
+                      padding: 8
+                    }
+                ]}
+              >
+                <Text style={styles.subsectionTitle}>RLV (Optimized)</Text>
+                <View style={styles.resultCard}>
+                  <Text style={styles.metricText}>
+                    Duration:{' '}
+                    {(measurementResults.optimized.durationMs / 1000).toFixed(
+                      1
+                    )}
+                    s
+                  </Text>
+                  <Text style={styles.metricText}>
+                    Scroll gestures: {measurementResults.optimized.scrollCount}
+                  </Text>
+                  <Text style={styles.metricText}>
+                    Initial DOM Nodes:{' '}
+                    {measurementResults.optimized.initialDomNodes}
+                  </Text>
+                  <Text style={styles.metricText}>
+                    Final DOM Nodes:{' '}
+                    {measurementResults.optimized.finalDomNodes}
+                  </Text>
+                  <Text style={styles.metricText}>
+                    Avg DOM Nodes: {measurementResults.optimized.avgDomNodes}
+                  </Text>
+                  <Text style={styles.metricText}>
+                    Avg FPS: {measurementResults.optimized.fpsAvg}
+                  </Text>
+                  <Text style={styles.metricText}>
+                    Max FPS: {measurementResults.optimized.fpsMax}
+                  </Text>
+                  <Text style={styles.metricText}>
+                    Min FPS: {measurementResults.optimized.fpsMin}
+                  </Text>
+                  <Text style={styles.metricText}>
+                    Max DOM Nodes: {measurementResults.optimized.maxDomNodes}
+                  </Text>
+                  <Text style={styles.metricText}>
+                    Min DOM Nodes: {measurementResults.optimized.minDomNodes}
+                  </Text>
+                </View>
               </View>
-            </View>
 
-            <View
-              style={[
-                styles.resultSubsection,
-                isMeasuring &&
-                  renderMode === 'legacy' && {
-                    backgroundColor: '#ffcccc',
-                    borderRadius: 8,
-                    padding: 8
-                  }
-              ]}
-            >
-              <Text style={styles.subsectionTitle}>Legacy</Text>
-              <View style={styles.resultCard}>
-                <Text style={styles.metricText}>
-                  Duration:{' '}
-                  {(measurementResults.legacy.durationMs / 1000).toFixed(1)}s
-                </Text>
-                <Text style={styles.metricText}>
-                  Scroll gestures: {measurementResults.legacy.scrollCount}
-                </Text>
-                <Text style={styles.metricText}>
-                  Initial DOM Nodes: {measurementResults.legacy.initialDomNodes}
-                </Text>
-                <Text style={styles.metricText}>
-                  Final DOM Nodes: {measurementResults.legacy.finalDomNodes}
-                </Text>
-                <Text style={styles.metricText}>
-                  Avg DOM Nodes: {measurementResults.legacy.avgDomNodes}
-                </Text>
-                <Text style={styles.metricText}>
-                  Avg FPS: {measurementResults.legacy.fpsAvg}
-                </Text>
-                <Text style={styles.metricText}>
-                  Max FPS: {measurementResults.legacy.fpsMax}
-                </Text>
-                <Text style={styles.metricText}>
-                  Min FPS: {measurementResults.legacy.fpsMin}
-                </Text>
-                <Text style={styles.metricText}>
-                  Max DOM Nodes: {measurementResults.legacy.maxDomNodes}
-                </Text>
-                <Text style={styles.metricText}>
-                  Min DOM Nodes: {measurementResults.legacy.minDomNodes}
-                </Text>
+              <View
+                style={[
+                  styles.resultSubsection,
+                  isMeasuring &&
+                    renderMode === 'legacy' && {
+                      backgroundColor: '#ffcccc',
+                      borderRadius: 8,
+                      padding: 8
+                    }
+                ]}
+              >
+                <Text style={styles.subsectionTitle}>Legacy</Text>
+                <View style={styles.resultCard}>
+                  <Text style={styles.metricText}>
+                    Duration:{' '}
+                    {(measurementResults.legacy.durationMs / 1000).toFixed(1)}s
+                  </Text>
+                  <Text style={styles.metricText}>
+                    Scroll gestures: {measurementResults.legacy.scrollCount}
+                  </Text>
+                  <Text style={styles.metricText}>
+                    Initial DOM Nodes:{' '}
+                    {measurementResults.legacy.initialDomNodes}
+                  </Text>
+                  <Text style={styles.metricText}>
+                    Final DOM Nodes: {measurementResults.legacy.finalDomNodes}
+                  </Text>
+                  <Text style={styles.metricText}>
+                    Avg DOM Nodes: {measurementResults.legacy.avgDomNodes}
+                  </Text>
+                  <Text style={styles.metricText}>
+                    Avg FPS: {measurementResults.legacy.fpsAvg}
+                  </Text>
+                  <Text style={styles.metricText}>
+                    Max FPS: {measurementResults.legacy.fpsMax}
+                  </Text>
+                  <Text style={styles.metricText}>
+                    Min FPS: {measurementResults.legacy.fpsMin}
+                  </Text>
+                  <Text style={styles.metricText}>
+                    Max DOM Nodes: {measurementResults.legacy.maxDomNodes}
+                  </Text>
+                  <Text style={styles.metricText}>
+                    Min DOM Nodes: {measurementResults.legacy.minDomNodes}
+                  </Text>
+                </View>
               </View>
             </View>
           </View>
-        </View>
-      )}
+        )}
 
-      <View style={styles.listContainer}>
-        <FlatListWithRef
-          ListHeaderComponent={ListHeaderComponent}
-          filteredData={listData}
-          layoutProvider={layoutProvider}
-          ref={flatListRef}
-          renderItem={renderItem}
-          renderMode={renderMode}
-          rowHasChanged={rowHasChanged}
-        />
+        <View style={styles.listContainer}>
+          <FlatListWithRef
+            ListHeaderComponent={ListHeaderComponent}
+            filteredData={listData}
+            layoutProvider={layoutProvider}
+            ref={flatListRef}
+            renderItem={renderItem}
+            renderMode={renderMode}
+            rowHasChanged={rowHasChanged}
+          />
+        </View>
       </View>
-    </View>
+    </Example>
   );
 }
 
@@ -557,7 +567,6 @@ const styles = StyleSheet.create({
   outerContainer: {
     flex: 1,
     width: '100%',
-    height: '100vh',
     backgroundColor: '#f5f5f5',
     flexDirection: 'column'
   },

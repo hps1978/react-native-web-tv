@@ -13,21 +13,23 @@ eleventyNavigation:
 Subscribe to remote control key events on TV platforms.
 :::
 
+:::callout
+**TV relevance:** TV-specific API. Primary low-level event subscription surface for TV remote input.
+:::
+
 ---
 
-## 🚀 Out-of-the-box Remote Event Support for Web-based TV
+## Remote Events On Web TV
 
+`react-native-web-tv` includes built-in TV focus navigation (LRUD) and remote input handling for browser-based TV environments.
 
-**Built-in LRUD spatial navigation and remote event support for web-based TV platforms (e.g., Samsung Tizen TV, LG webOS TV, and other browser-based TV environments).**
+`TVEventHandler` is the low-level event stream for custom handling (for example global shortcuts or app-specific Back/Menu behavior).
 
-> **ℹ️ Note:** This package provides built-in spatial navigation logic (LRUD) and remote event handling, but your app must ensure that platform-specific remote keys (such as arrow, OK, Back, Menu) are registered and delivered to the browser. On some TV platforms, this requires a one-time setup in your app or hosting environment. Once keys are registered, no extra libraries are needed for spatial navigation or remote event handling.
-
-The event pipeline is integrated and enabled by default once remote key events reach the browser.
+> **ℹ️ Note:** Your app or host platform must register remote keys (arrow, OK/Enter, Back, Menu) so those key events reach the browser. Once key delivery is configured, no additional remote-event library is required.
 
 For configuration and advanced usage, see the [TV Navigation documentation]({{ '/docs/tv-navigation/' | url }}).
 
 ---
-:::
 
 `TVEventHandler` exposes a low-level listener API for hardware remote events.
 

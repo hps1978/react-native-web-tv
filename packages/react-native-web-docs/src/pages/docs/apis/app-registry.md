@@ -13,6 +13,10 @@ eleventyNavigation:
 AppRegistry is the control point for registering, running, prerendering, and unmounting all apps.
 :::
 
+:::callout
+**TV relevance:** Baseline React Native Web API. Required for app bootstrapping in both TV and non-TV web apps.
+:::
+
 App root components should register themselves with `AppRegistry.`registerComponent. Apps can be run by invoking `AppRegistry.runApplication`.
 
 ```js

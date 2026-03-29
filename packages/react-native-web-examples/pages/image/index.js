@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, TVTextScrollView, View } from 'react-native';
 import React from 'react';
 import Example from '../../shared/example';
 
@@ -23,101 +23,103 @@ function Divider() {
 export default function ImagePage() {
   return (
     <Example title="Image">
-      <Divider />
-      <Image defaultSource={placeholder} style={styles.base} />
-      <Divider />
-      <Image
-        defaultSource={placeholder}
-        onError={() => {
-          console.log('error');
-        }}
-        onLoad={() => {
-          console.log('load');
-        }}
-        onLoadEnd={() => {
-          console.log('load-end');
-        }}
-        onLoadStart={() => {
-          console.log('load-start');
-        }}
-        source={source}
-        style={styles.base}
-      />
-      <Divider />
-      <View style={styles.row}>
-        <View style={styles.column}>
-          <Text style={styles.text}>Static image</Text>
-          <Image
-            resizeMode="cover"
-            source={'/image/ladybug.jpg'}
-            style={styles.image}
-          />
+      <TVTextScrollView style={styles.tvScroller}>
+        <Divider />
+        <Image defaultSource={placeholder} style={styles.base} />
+        <Divider />
+        <Image
+          defaultSource={placeholder}
+          onError={() => {
+            console.log('error');
+          }}
+          onLoad={() => {
+            console.log('load');
+          }}
+          onLoadEnd={() => {
+            console.log('load-end');
+          }}
+          onLoadStart={() => {
+            console.log('load-start');
+          }}
+          source={source}
+          style={styles.base}
+        />
+        <Divider />
+        <View style={styles.row}>
+          <View style={styles.column}>
+            <Text style={styles.text}>Static image</Text>
+            <Image
+              resizeMode="cover"
+              source={'/image/ladybug.jpg'}
+              style={styles.image}
+            />
+          </View>
+          <View style={styles.column}>
+            <Text style={styles.text}>Progressive JPEG</Text>
+            <Image source={pjpeg} style={styles.image} />
+          </View>
         </View>
-        <View style={styles.column}>
-          <Text style={styles.text}>Progressive JPEG</Text>
-          <Image source={pjpeg} style={styles.image} />
+        <Divider />
+        <View style={styles.row}>
+          <View style={styles.column}>
+            <Text style={styles.text}>Animated GIF</Text>
+            <Image source={agif} style={styles.image} />
+          </View>
+          <View style={styles.column}>
+            <Text style={styles.text}>PNG (base64)</Text>
+            <Image source={dataBase64Png} style={styles.image} />
+          </View>
         </View>
-      </View>
-      <Divider />
-      <View style={styles.row}>
-        <View style={styles.column}>
-          <Text style={styles.text}>Animated GIF</Text>
-          <Image source={agif} style={styles.image} />
+        <Divider />
+        <View style={styles.row}>
+          <View style={styles.column}>
+            <Text style={styles.text}>SVG (base64)</Text>
+            <Image source={dataBase64Svg} style={styles.image} />
+          </View>
+          <View style={styles.column}>
+            <Text style={styles.text}>SVG (inline data)</Text>
+            <Image source={dataSvg} style={styles.image} />
+          </View>
         </View>
-        <View style={styles.column}>
-          <Text style={styles.text}>PNG (base64)</Text>
-          <Image source={dataBase64Png} style={styles.image} />
+        <Divider />
+        <View style={styles.row}>
+          <View style={styles.column}>
+            <Text style={[styles.text]}>Center</Text>
+            <Image
+              resizeMode="center"
+              source={resizesource}
+              style={styles.resizeMode}
+            />
+          </View>
+          <View style={styles.column}>
+            <Text style={[styles.text]}>Contain</Text>
+            <Image
+              resizeMode="contain"
+              source={resizesource}
+              style={styles.resizeMode}
+            />
+          </View>
         </View>
-      </View>
-      <Divider />
-      <View style={styles.row}>
-        <View style={styles.column}>
-          <Text style={styles.text}>SVG (base64)</Text>
-          <Image source={dataBase64Svg} style={styles.image} />
+        <Divider />
+        <View style={styles.row}>
+          <View style={styles.column}>
+            <Text style={[styles.text]}>Cover</Text>
+            <Image
+              resizeMode="cover"
+              source={resizesource}
+              style={styles.resizeMode}
+            />
+          </View>
+          <View style={styles.column}>
+            <Text style={[styles.text]}>Stretch</Text>
+            <Image
+              resizeMode="stretch"
+              source={resizesource}
+              style={styles.resizeMode}
+            />
+          </View>
         </View>
-        <View style={styles.column}>
-          <Text style={styles.text}>SVG (inline data)</Text>
-          <Image source={dataSvg} style={styles.image} />
-        </View>
-      </View>
-      <Divider />
-      <View style={styles.row}>
-        <View style={styles.column}>
-          <Text style={[styles.text]}>Center</Text>
-          <Image
-            resizeMode="center"
-            source={resizesource}
-            style={styles.resizeMode}
-          />
-        </View>
-        <View style={styles.column}>
-          <Text style={[styles.text]}>Contain</Text>
-          <Image
-            resizeMode="contain"
-            source={resizesource}
-            style={styles.resizeMode}
-          />
-        </View>
-      </View>
-      <Divider />
-      <View style={styles.row}>
-        <View style={styles.column}>
-          <Text style={[styles.text]}>Cover</Text>
-          <Image
-            resizeMode="cover"
-            source={resizesource}
-            style={styles.resizeMode}
-          />
-        </View>
-        <View style={styles.column}>
-          <Text style={[styles.text]}>Stretch</Text>
-          <Image
-            resizeMode="stretch"
-            source={resizesource}
-            style={styles.resizeMode}
-          />
-        </View>
-      </View>
+      </TVTextScrollView>
     </Example>
   );
 }
@@ -126,6 +128,9 @@ const styles = StyleSheet.create({
   base: {
     height: 200,
     width: 300
+  },
+  tvScroller: {
+    height: '75vh'
   },
   divider: {
     height: '1rem'

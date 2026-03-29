@@ -13,12 +13,12 @@ eleventyNavigation:
 {{ site.name }}'s origins, evolution, and development.
 :::
 
-{{ site.name }} was started in 2015 by [Nicolas Gallagher](http://nicolasgallagher.com) during the development of [Twitter's Progressive Web App](https://blog.twitter.com/engineering/en_us/topics/open-source/2017/how-we-built-twitter-lite.html). It has evolved from a framework inspired by React Native into a mature and pragmatic compatibility layer between React DOM and React Native.
+This project builds on top of React Native Web.
 
-{{ site.name }} is currently used in production Web apps by companies including [Meta](https://www.meta.com/), [Twitter](https://twitter.com), and [Flipkart](https://twitter.com/naqvitalha/status/969577892991549440). Software engineers from Meta, Expo, and elsewhere continue to contribute design and patches to the project.
+React Native Web was started in 2015 by [Nicolas Gallagher](http://nicolasgallagher.com) during the development of [Twitter's Progressive Web App](https://blog.twitter.com/engineering/en_us/topics/open-source/2017/how-we-built-twitter-lite.html). Over time, it evolved into a mature compatibility layer between React DOM and React Native and is widely used in production web apps.
 
-Developing a Web compatibility layer for React Native involves balancing the needs of high-quality Web apps with the value of React Native API compatibility. There are instances where parts of the React Native API are co-opted to infer information that is necessary or beneficial to products running in Web browsers. Other times there are use cases that are not accomodated by the APIs provided; even when that information cannot be pragmatically incorporated into the existing React Native API design constraints, it still helps to inform which API changes are needed over the long term.
+`react-native-web-tv` is a TV-focused fork that preserves the React Native Web baseline while adding browser-TV behavior and APIs, including remote-input integration, LRUD-based focus navigation, and TV-specific exports.
 
-The evolution of React Native now involves developers who work on React Native for Android, iOS, Web, Windows, and macOS. We aim to help designers and developers with shared, platform-agnostic React APIs that reduce time to market for high-quality, multi-platform products.
+The goal of this fork is practical compatibility for web-based TV runtimes while keeping upstream alignment maintainable over time.
 
-Please browse the [source code]({{ site.githubUrl }}) and consider contributing your experience to the project.
+Please browse the [source code]({{ site.githubUrl }}) and consider contributing your experience, especially around TV runtime behavior, remote input, and focus/navigation edge cases.

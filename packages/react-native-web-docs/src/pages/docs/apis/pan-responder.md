@@ -14,6 +14,10 @@ PanResponder reconciles several pointers into a single gesture. It makes single-
 :::
 
 :::callout
+**TV relevance:** Baseline React Native Web API. Availability is unchanged, but pointer/touch gestures are typically secondary in remote-first TV experiences.
+:::
+
+:::callout
 **Note:** Using the `PanResponder` on components that contain text may cause native text selection events to interrupt the pan gesture. This can be avoided by setting `userSelect: 'none'` on the text elements while the gesture is active.
 :::
 

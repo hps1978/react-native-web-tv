@@ -180,7 +180,7 @@ Open the local dev URL and try TV-focused routes such as:
 - `/tv-event-handler`
 - `/tv-focus-guide-view`
 - `/tv-text-scrollview`
-- `/flatlist-tv-scroll`
+- `/tv-flatlist`
 
 ## Docs
 

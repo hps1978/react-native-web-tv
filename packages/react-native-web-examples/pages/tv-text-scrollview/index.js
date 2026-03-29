@@ -20,8 +20,10 @@ import {
   TVTextScrollView,
   View
 } from 'react-native';
+import Example from '../../shared/example';
 
 const screenHeight = Dimensions.get('window').height;
+const screenWidth = Dimensions.get('window').width;
 const scale = screenHeight / 1080;
 
 export default class TVTextScrollViewExample extends React.Component<{}> {
@@ -167,10 +169,11 @@ export default class TVTextScrollViewExample extends React.Component<{}> {
       }
     }
     return (
-      <View>
-        <View style={{ height: 400 * scale }} />
-        <BigTextBlock />
-      </View>
+      <Example title="TV Text ScrollView">
+        <View>
+          <BigTextBlock />
+        </View>
+      </Example>
     );
   }
 }
@@ -239,8 +242,7 @@ const Button = ({
 
 const styles = StyleSheet.create({
   container: {
-    height: '100%',
-    marginTop: -300 * scale
+    width: screenWidth
   },
   scrollView: {
     backgroundColor: '#eeeeee',

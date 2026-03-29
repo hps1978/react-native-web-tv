@@ -74,3 +74,9 @@ Deprecated compatibility prop.
 {% call macro.prop('setDestinations', '(destinations: Array<ComponentOrHandle>) => void') %}
 Imperatively updates the destination targets used by this focus guide.
 {% endcall %}
+
+---
+
+## Examples
+
+{{ macro.codesandbox('tv-focus-guide-view') }}

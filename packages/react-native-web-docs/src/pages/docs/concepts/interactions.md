@@ -14,7 +14,7 @@ eleventyNavigation:
 Interactions and gestures for the web.
 :::
 
-{{ site.name }} extends the interaction modes available in React Native to account for mouse, touch, and keyboard use. The Responder System is available for more advanced gesture recognition.
+React Native Web extends the interaction modes available in React Native to account for mouse, touch, and keyboard use. The Responder System is available for more advanced gesture recognition.
 
 ---
 

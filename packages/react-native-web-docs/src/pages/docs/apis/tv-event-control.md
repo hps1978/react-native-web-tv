@@ -13,6 +13,10 @@ eleventyNavigation:
 Runtime toggles for OS-level TV remote integration points.
 :::
 
+:::callout
+**TV relevance:** TV-specific compatibility API. Methods currently exist for API-shape parity and log web not-implemented warnings.
+:::
+
 `TVEventControl` mirrors the React Native TV API shape. In this web TV fork these methods are currently present for compatibility and warn that they are not implemented on web.
 
 ```js

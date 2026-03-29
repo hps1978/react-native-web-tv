@@ -67,3 +67,9 @@ Called when the scroll view loses TV focus.
 - Designed for TV directional input behavior.
 - Works with SpatialManager key routing in this fork.
 - Supports vertical and horizontal usage through `horizontal` from ScrollView props.
+
+---
+
+## Examples
+
+{{ macro.codesandbox('tv-text-scrollview') }}

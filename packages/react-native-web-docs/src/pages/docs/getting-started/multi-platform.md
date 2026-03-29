@@ -9,12 +9,21 @@ eleventyNavigation:
 ---
 
 :::lead
-How to integrate React Native for Web into an existing React Native codebase.
+How to integrate React Native Web for TV into an existing React Native codebase.
 :::
 
-Please read the [setup]({{ '/docs/setup' | url }}) guide first. If you have an existing React Native application, there are more areas that require attention and customization before most web bundlers can consume the non-standard JavaScript in packages produced by the React Native ecosystem. Additionally, 3rd party React Native packages with web support are listed in the [React Native Directory](https://reactnative.directory/?web=true).
+Please read the [setup]({{ '/docs/setup' | url }}) guide first. If you have an existing React Native TV application, there are more areas that require attention and customization before most web bundlers can consume the non-standard JavaScript in packages produced by the React Native ecosystem. Additionally, third-party React Native packages with web support are listed in the [React Native Directory](https://reactnative.directory/?web=true).
 
-If you are interested in making a multi-platform app it is *strongly recommended* that you use [Expo](https://expo.dev) (or learn from the source code for the Web integration). Expo includes [web support](https://docs.expo.dev/workflow/web/) and takes care of all the configuration work required.
+Choose one of the following package strategies and keep it consistent across bundler aliases and Babel plugin target:
+
+- direct package: `react-native-web-tv`
+- npm alias package key: `react-native-web` mapped to `react-native-web-tv`
+
+If you are interested in making a multi-platform app, [Expo](https://expo.dev) can be a helpful starting point for general web support. However, browser-based TV targets often require additional custom setup (for example bundler aliases, Babel target configuration, and remote-input handling).
+
+This page focuses on sharing application code and producing a web bundle. Packaging and deployment for specific TV environments is a separate concern and is usually platform-specific.
+
+Depending on your target environment, you may need additional steps for app packaging, signing, metadata/manifest requirements, and store or device deployment workflows.
 
 ---
 
@@ -95,8 +104,13 @@ const babelLoaderConfiguration = {
       cacheDirectory: true,
       // The '@react-native/babel-preset' preset is recommended to match React Native's packager
       presets: ['module:@react-native/babel-preset'],
-      // Re-write paths to import only the modules needed by the app
-      plugins: ['react-native-web']
+      // Rewrite paths to import only the modules needed by the app.
+      // Use target 'react-native-web-tv' for direct installs.
+      // Use target 'react-native-web' if you installed via npm alias.
+      plugins: [[
+        'react-native-web-tv',
+        { target: 'react-native-web-tv' }
+      ]]
     }
   }
 };
@@ -137,9 +151,11 @@ module.exports = {
   },
 
   resolve: {
-    // This will only alias the exact import "react-native"
+    // This will only alias the exact import "react-native".
+    // Choose one based on your installation path.
     alias: {
-      'react-native$': 'react-native-web'
+      'react-native$': 'react-native-web-tv',
+      // 'react-native$': 'react-native-web'
     },
     // If you're working on a multi-platform React Native app, web-specific
     // module implementations should be written in files using the extension

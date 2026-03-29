@@ -7,6 +7,7 @@ import {
   Button,
   Dimensions
 } from 'react-native';
+import Example from '../../shared/example';
 
 const NUM_COLUMNS = 3;
 const ITEM_HEIGHT = 60;
@@ -109,42 +110,48 @@ export default function OptimizedFlatListGridExample() {
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Grid FlatList (RLV vs Legacy)</Text>
-        <Text style={styles.subheading}>
-          Mode: {renderMode === 'optimized' ? '🚀 RLV' : '🐌 Legacy'}
-        </Text>
-        <View style={styles.buttonRow}>
-          <Button
-            onPress={() =>
-              setRenderMode((m) => (m === 'optimized' ? 'legacy' : 'optimized'))
-            }
-            title={
-              renderMode === 'optimized' ? 'Switch to Legacy' : 'Switch to RLV'
-            }
-          />
-          <Button onPress={handleRefresh} title="Refresh" />
-          <Button onPress={handleStressTest} title="Stress Test" />
+    <Example title="FlatList Optimized Grid">
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Grid FlatList (RLV vs Legacy)</Text>
+          <Text style={styles.subheading}>
+            Mode: {renderMode === 'optimized' ? '🚀 RLV' : '🐌 Legacy'}
+          </Text>
+          <View style={styles.buttonRow}>
+            <Button
+              onPress={() =>
+                setRenderMode((m) =>
+                  m === 'optimized' ? 'legacy' : 'optimized'
+                )
+              }
+              title={
+                renderMode === 'optimized'
+                  ? 'Switch to Legacy'
+                  : 'Switch to RLV'
+              }
+            />
+            <Button onPress={handleRefresh} title="Refresh" />
+            <Button onPress={handleStressTest} title="Stress Test" />
+          </View>
         </View>
-      </View>
 
-      <GridFlatListMemo
-        data={listData}
-        layoutProvider={layoutProvider}
-        renderItem={renderGridItem}
-        renderMode={renderMode}
-        rowHasChanged={rowHasChanged}
-      />
-    </View>
+        <GridFlatListMemo
+          data={listData}
+          layoutProvider={layoutProvider}
+          renderItem={renderGridItem}
+          renderMode={renderMode}
+          rowHasChanged={rowHasChanged}
+        />
+      </View>
+    </Example>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     overflow: 'hidden',
-    width: '100vw',
-    height: '100vh',
+    width: '100%',
     backgroundColor: '#f6f7fb'
   },
   header: {

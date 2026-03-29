@@ -15,6 +15,7 @@ import {
   Image,
   Pressable
 } from 'react-native';
+import Example from '../../shared/example';
 
 const ROW_COUNT = 10;
 const ITEM_COUNT = 15;
@@ -67,44 +68,46 @@ function FlatListTVScrollExample() {
   const keyExtractor = useCallback((item) => item.id, []);
 
   return (
-    <View style={styles.screen}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>TV FlatList Scroll Test</Text>
-        <Text style={styles.headerSubtitle}>
-          {ROW_COUNT} rows · {ITEM_COUNT} items per row
-        </Text>
-      </View>
+    <Example title="FlatList TV Scroll">
+      <View style={styles.screen}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>TV FlatList Scroll Test</Text>
+          <Text style={styles.headerSubtitle}>
+            {ROW_COUNT} rows · {ITEM_COUNT} items per row
+          </Text>
+        </View>
 
-      <ScrollView
-        contentContainerStyle={styles.verticalContent}
-        showsVerticalScrollIndicator
-        style={styles.verticalScroll}
-      >
-        {rows.map((rowData, rowIndex) => (
-          <View key={`row-${rowIndex}`} style={styles.rowSection}>
-            <Text style={styles.rowTitle}>Row {rowIndex + 1}</Text>
-            <FlatList
-              contentContainerStyle={styles.rowContent}
-              data={rowData}
-              horizontal
-              keyExtractor={keyExtractor}
-              maxToRenderPerBatch={5}
-              renderItem={renderItemForRow(rowIndex)}
-              showsHorizontalScrollIndicator
-              style={styles.rowList}
-              windowSize={2}
-            />
-          </View>
-        ))}
-      </ScrollView>
-    </View>
+        <ScrollView
+          contentContainerStyle={styles.verticalContent}
+          showsVerticalScrollIndicator
+          style={styles.verticalScroll}
+        >
+          {rows.map((rowData, rowIndex) => (
+            <View key={`row-${rowIndex}`} style={styles.rowSection}>
+              <Text style={styles.rowTitle}>Row {rowIndex + 1}</Text>
+              <FlatList
+                contentContainerStyle={styles.rowContent}
+                data={rowData}
+                horizontal
+                keyExtractor={keyExtractor}
+                maxToRenderPerBatch={5}
+                renderItem={renderItemForRow(rowIndex)}
+                showsHorizontalScrollIndicator
+                style={styles.rowList}
+                windowSize={2}
+              />
+            </View>
+          ))}
+        </ScrollView>
+      </View>
+    </Example>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
+    flex: 1,
     width: '100%',
-    height: '100vh',
     backgroundColor: '#0f172a'
   },
   header: {

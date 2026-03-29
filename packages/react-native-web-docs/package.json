@@ -4,7 +4,9 @@
   "version": "0.21.2-tv.9",
   "description": "Documentation website for React Native Web for TV",
   "scripts": {
-    "dev": "eleventy --serve",
+    "dev": "DOCS_EMBED_SOURCE=sandbox eleventy --serve --port=8081",
+    "dev:sandbox": "DOCS_EMBED_SOURCE=sandbox eleventy --serve --port=8081",
+    "dev:local": "DOCS_EMBED_SOURCE=local eleventy --serve --port=8081",
     "build": "ELEVENTY_PRODUCTION=true eleventy",
     "debug": "DEBUG=* eleventy"
   },

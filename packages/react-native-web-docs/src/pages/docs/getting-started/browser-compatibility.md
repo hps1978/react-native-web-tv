@@ -12,7 +12,7 @@ eleventyNavigation:
 Understanding {{ site.name }} browser compatibility.
 :::
 
-{{ site.name }} is designed and tested for recent mobile and desktop browsers, for touch and mouse and keyboard interactions.
+TV-browser compatibility validation in this fork is still in progress. Because this project builds on React Native Web, the baseline browser compatibility expectations generally follow React Native Web behavior. On top of that baseline, this fork adds LRUD-based spatial navigation support for TV-focused interaction patterns (which also work on PC browsers).
 
 The browsers with known support include:
 
@@ -23,6 +23,7 @@ The browsers with known support include:
 * Opera
 
 If specific exports have a different browser support expectation, it will be documented with that export.
+
 
 ---
 

@@ -13,6 +13,10 @@ eleventyNavigation:
 The Appearance module exposes information about the user's appearance preferences, such as their preferred color scheme (light or dark).
 :::
 
+:::callout
+**TV relevance:** Baseline React Native Web API. Use for theme adaptation on TV UIs the same way as standard web UIs.
+:::
+
 ```js
 import { Appearance } from 'react-native';
 ```

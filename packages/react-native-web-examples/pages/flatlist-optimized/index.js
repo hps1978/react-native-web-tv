@@ -15,6 +15,7 @@ import {
   Button,
   Dimensions
 } from 'react-native';
+import Example from '../../shared/example';
 
 // Fixed item height example data
 const generateListData = (size = 100) => {
@@ -364,115 +365,121 @@ function OptimizedFlatListExample() {
   );
 
   return (
-    <View data-testid="flatlist-container" style={styles.outerContainer}>
-      {/* Fixed Performance Metrics - Always Visible */}
-      <View style={styles.fixedMetrics}>
-        <Text style={styles.headerTitle}>
-          Optimized FlatList with RecyclerListView
-        </Text>
-        <Text style={styles.subheading}>
-          Mode:{' '}
-          {renderMode === 'optimized'
-            ? '🚀 RecyclerListView (Optimized)'
-            : '🐌 Legacy VirtualizedList'}
-        </Text>
-
-        <View style={styles.metricsContainer}>
-          <Text style={styles.metricsTitle}>⚡ Performance Metrics</Text>
-          <View style={styles.metricsGrid}>
-            <View style={styles.metricBox}>
-              <Text style={styles.metricLabel}>Initial Render</Text>
-              <Text style={styles.metricValue}>{renderTime.toFixed(1)}ms</Text>
-              <Text style={styles.metricSubtext}>
-                {renderTime < 100
-                  ? '✓ Fast'
-                  : renderTime < 500
-                  ? '⚠ Moderate'
-                  : '⚠ Slow'}
-              </Text>
-            </View>
-            <View style={styles.metricBox}>
-              <Text style={styles.metricLabel}>DOM Nodes</Text>
-              <Text style={styles.metricValue}>{domNodes}</Text>
-              <Text style={styles.metricSubtext}>
-                {domNodes < 200 ? '✓ Light' : '⚠ Heavy'}
-              </Text>
-            </View>
-            <View style={styles.metricBox}>
-              <Text style={styles.metricLabel}>Scroll FPS</Text>
-              <Text
-                style={[
-                  styles.metricValue,
-                  fps >= 55
-                    ? styles.metricGood
-                    : fps >= 45
-                    ? styles.metricWarning
-                    : styles.metricBad
-                ]}
-              >
-                {fps}
-              </Text>
-              <Text style={styles.metricSubtext}>
-                {fps >= 55 ? '✓ Smooth' : '⚠ Laggy'}
-              </Text>
-            </View>
-            <View style={styles.metricBox}>
-              <Text style={styles.metricLabel}>Item Renders</Text>
-              <Text style={styles.metricValue}>{itemRenderCount}</Text>
-              <Text style={styles.metricSubtext}>
-                {renderMode === 'optimized' ? '✓ Minimal' : '⚠ Many'}
-              </Text>
-            </View>
-          </View>
-          <Text style={styles.metricsHint}>
-            💡{' '}
-            {renderMode === 'optimized'
-              ? 'RecyclerListView only renders visible items (~10-15) regardless of list size'
-              : 'Legacy mode re-renders items frequently - watch the Item Renders counter grow!'}
+    <Example title="FlatList Optimized">
+      <View data-testid="flatlist-container" style={styles.outerContainer}>
+        {/* Fixed Performance Metrics - Always Visible */}
+        <View style={styles.fixedMetrics}>
+          <Text style={styles.headerTitle}>
+            Optimized FlatList with RecyclerListView
           </Text>
+          <Text style={styles.subheading}>
+            Mode:{' '}
+            {renderMode === 'optimized'
+              ? '🚀 RecyclerListView (Optimized)'
+              : '🐌 Legacy VirtualizedList'}
+          </Text>
+
+          <View style={styles.metricsContainer}>
+            <Text style={styles.metricsTitle}>⚡ Performance Metrics</Text>
+            <View style={styles.metricsGrid}>
+              <View style={styles.metricBox}>
+                <Text style={styles.metricLabel}>Initial Render</Text>
+                <Text style={styles.metricValue}>
+                  {renderTime.toFixed(1)}ms
+                </Text>
+                <Text style={styles.metricSubtext}>
+                  {renderTime < 100
+                    ? '✓ Fast'
+                    : renderTime < 500
+                    ? '⚠ Moderate'
+                    : '⚠ Slow'}
+                </Text>
+              </View>
+              <View style={styles.metricBox}>
+                <Text style={styles.metricLabel}>DOM Nodes</Text>
+                <Text style={styles.metricValue}>{domNodes}</Text>
+                <Text style={styles.metricSubtext}>
+                  {domNodes < 200 ? '✓ Light' : '⚠ Heavy'}
+                </Text>
+              </View>
+              <View style={styles.metricBox}>
+                <Text style={styles.metricLabel}>Scroll FPS</Text>
+                <Text
+                  style={[
+                    styles.metricValue,
+                    fps >= 55
+                      ? styles.metricGood
+                      : fps >= 45
+                      ? styles.metricWarning
+                      : styles.metricBad
+                  ]}
+                >
+                  {fps}
+                </Text>
+                <Text style={styles.metricSubtext}>
+                  {fps >= 55 ? '✓ Smooth' : '⚠ Laggy'}
+                </Text>
+              </View>
+              <View style={styles.metricBox}>
+                <Text style={styles.metricLabel}>Item Renders</Text>
+                <Text style={styles.metricValue}>{itemRenderCount}</Text>
+                <Text style={styles.metricSubtext}>
+                  {renderMode === 'optimized' ? '✓ Minimal' : '⚠ Many'}
+                </Text>
+              </View>
+            </View>
+            <Text style={styles.metricsHint}>
+              💡{' '}
+              {renderMode === 'optimized'
+                ? 'RecyclerListView only renders visible items (~10-15) regardless of list size'
+                : 'Legacy mode re-renders items frequently - watch the Item Renders counter grow!'}
+            </Text>
+          </View>
+
+          {/* Controls - Always Accessible */}
+          <TextInput
+            onChangeText={setFilter}
+            placeholder="Filter items..."
+            style={styles.filterInput}
+            value={filter}
+          />
+
+          <View style={styles.buttonRow}>
+            <Button
+              onPress={() =>
+                setRenderMode((m) =>
+                  m === 'optimized' ? 'legacy' : 'optimized'
+                )
+              }
+              title={
+                renderMode === 'optimized'
+                  ? 'Switch to Legacy'
+                  : 'Switch to Optimized'
+              }
+            />
+            <Button onPress={handleRefresh} title="Refresh (500)" />
+            <Button onPress={handleStressTest} title="Stress Test (2000)" />
+            <Button
+              onPress={() => setMetricsEnabled((enabled) => !enabled)}
+              title={metricsEnabled ? 'Disable Metrics' : 'Enable Metrics'}
+            />
+          </View>
         </View>
 
-        {/* Controls - Always Accessible */}
-        <TextInput
-          onChangeText={setFilter}
-          placeholder="Filter items..."
-          style={styles.filterInput}
-          value={filter}
-        />
-
-        <View style={styles.buttonRow}>
-          <Button
-            onPress={() =>
-              setRenderMode((m) => (m === 'optimized' ? 'legacy' : 'optimized'))
-            }
-            title={
-              renderMode === 'optimized'
-                ? 'Switch to Legacy'
-                : 'Switch to Optimized'
-            }
-          />
-          <Button onPress={handleRefresh} title="Refresh (500)" />
-          <Button onPress={handleStressTest} title="Stress Test (2000)" />
-          <Button
-            onPress={() => setMetricsEnabled((enabled) => !enabled)}
-            title={metricsEnabled ? 'Disable Metrics' : 'Enable Metrics'}
+        {/* Scrollable List Container */}
+        <View style={styles.container}>
+          <FlatListMemo
+            ListEmptyComponent={ListEmptyComponent}
+            ListHeaderComponent={ListHeaderComponent}
+            filteredData={memoizedFilteredData}
+            layoutProvider={layoutProvider}
+            renderItem={renderItem}
+            renderMode={renderMode}
+            rowHasChanged={rowHasChanged}
           />
         </View>
       </View>
-
-      {/* Scrollable List Container */}
-      <View style={styles.container}>
-        <FlatListMemo
-          ListEmptyComponent={ListEmptyComponent}
-          ListHeaderComponent={ListHeaderComponent}
-          filteredData={memoizedFilteredData}
-          layoutProvider={layoutProvider}
-          renderItem={renderItem}
-          renderMode={renderMode}
-          rowHasChanged={rowHasChanged}
-        />
-      </View>
-    </View>
+    </Example>
   );
 }
 
@@ -480,7 +487,6 @@ const styles = StyleSheet.create({
   outerContainer: {
     flex: 1,
     width: '100%',
-    height: '100vh',
     backgroundColor: '#f5f5f5',
     flexDirection: 'column'
   },

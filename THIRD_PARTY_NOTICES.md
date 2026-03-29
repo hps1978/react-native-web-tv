@@ -10,6 +10,9 @@ This repository is primarily licensed under the MIT license. Portions of the cod
 
 All such files retain their original copyright notices and are redistributed under the MIT license as described in the LICENSE file.
 
+Some TV example pages in `packages/react-native-web-examples/pages/` are adapted from React Native tvOS (`react-native-tvos`) examples.
+Those files retain original per-file copyright notices and include a modifications notice where applicable.
+
 
 The TV spatial navigation functionality in this fork depends on third-party code distributed under the Apache License 2.0.
 

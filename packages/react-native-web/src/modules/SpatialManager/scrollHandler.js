@@ -12,6 +12,7 @@ import {
   scheduleAnimationFrame,
   cancelScheduledFrame,
   findScrollableAncestor,
+  isNativeScrollerType,
   isElementInWindowViewport,
   getElementVisibilityRatio,
   inferScrollDirection,
@@ -135,6 +136,60 @@ class ScrollHandler {
     this._isConfigured = true;
   }
 
+  _scrollToOffset(
+    scrollable: any,
+    isNativeScroller: boolean,
+    isVertical: boolean,
+    offset: number,
+    animated: boolean
+  ): void {
+    if (!isNativeScroller && typeof scrollable?.scrollTo === 'function') {
+      if (isVertical) {
+        scrollable.scrollTo({
+          y: offset,
+          animated
+        });
+      } else {
+        scrollable.scrollTo({
+          x: offset,
+          animated
+        });
+      }
+      return;
+    }
+
+    if (typeof scrollable?.scroll === 'function') {
+      const behavior = animated ? 'smooth' : 'auto';
+      if (isVertical) {
+        scrollable.scroll({ top: offset, behavior });
+      } else {
+        scrollable.scroll({ left: offset, behavior });
+      }
+      return;
+    }
+
+    if (typeof scrollable?.scrollTo === 'function') {
+      if (isVertical) {
+        scrollable.scrollTo({
+          top: offset,
+          behavior: animated ? 'smooth' : 'auto'
+        });
+      } else {
+        scrollable.scrollTo({
+          left: offset,
+          behavior: animated ? 'smooth' : 'auto'
+        });
+      }
+      return;
+    }
+
+    if (isVertical) {
+      scrollable.scrollTop = offset;
+    } else {
+      scrollable.scrollLeft = offset;
+    }
+  }
+
   /**
    * animateScrollTo
    * Smoothly animates scroll position from current to next offset using easing.
@@ -147,6 +202,7 @@ class ScrollHandler {
    */
   animateScrollTo(
     scrollable: any,
+    isNativeScroller: boolean,
     isVertical: boolean,
     nextOffset: number,
     durationMs: number
@@ -172,23 +228,13 @@ class ScrollHandler {
       const easedT = easingFunction(t);
       const value = startOffset + delta * easedT;
 
-      if (typeof scrollable.scrollTo === 'function') {
-        if (isVertical) {
-          scrollable.scrollTo({
-            y: value,
-            animated: false
-          });
-        } else {
-          scrollable.scrollTo({
-            x: value,
-            animated: false
-          });
-        }
-      } else if (isVertical) {
-        scrollable.scrollTop = value;
-      } else {
-        scrollable.scrollLeft = value;
-      }
+      this._scrollToOffset(
+        scrollable,
+        isNativeScroller,
+        isVertical,
+        value,
+        false
+      );
 
       if (t < 1) {
         this._scrollState.scrollAnimationFrame = scheduleAnimationFrame(() =>
@@ -217,6 +263,7 @@ class ScrollHandler {
    */
   performScroll(
     scrollable: any,
+    isNativeScroller: boolean,
     isVertical: boolean,
     nextOffset: number,
     liveNextOffset: number,
@@ -227,27 +274,23 @@ class ScrollHandler {
       : this._scrollConfig.scrollAnimationDurationMsHorizontal;
 
     if (animate && durationMs > 0) {
-      this.animateScrollTo(scrollable, isVertical, liveNextOffset, durationMs);
+      this.animateScrollTo(
+        scrollable,
+        isNativeScroller,
+        isVertical,
+        liveNextOffset,
+        durationMs
+      );
       return;
     }
 
-    if (typeof scrollable.scrollTo === 'function') {
-      if (isVertical) {
-        scrollable.scrollTo({
-          y: nextOffset,
-          animated: this._scrollConfig.smoothScrollEnabled !== false
-        });
-      } else {
-        scrollable.scrollTo({
-          x: nextOffset,
-          animated: this._scrollConfig.smoothScrollEnabled !== false
-        });
-      }
-    } else if (isVertical) {
-      scrollable.scrollTop = nextOffset;
-    } else {
-      scrollable.scrollLeft = nextOffset;
-    }
+    this._scrollToOffset(
+      scrollable,
+      isNativeScroller,
+      isVertical,
+      nextOffset,
+      this._scrollConfig.smoothScrollEnabled !== false
+    );
   }
 
   /**
@@ -264,6 +307,7 @@ class ScrollHandler {
   scrollAxis(
     scrollable: any,
     isWindowScroll: boolean,
+    isNativeScroller: boolean,
     isVertical: boolean,
     scrollDelta: number,
     animate: boolean = false
@@ -291,6 +335,7 @@ class ScrollHandler {
 
     this.performScroll(
       scrollable,
+      isNativeScroller,
       isVertical,
       nextOffset,
       liveNextOffset,
@@ -368,14 +413,28 @@ class ScrollHandler {
       options.scrollDurationMs > 0
         ? options.scrollDurationMs
         : 0;
+    const isNativeScroller = isNativeScrollerType(scrollable);
 
     if (durationMs > 0) {
-      this.animateScrollTo(scrollable, !horizontal, targetOffset, durationMs);
+      this.animateScrollTo(
+        scrollable,
+        isNativeScroller,
+        !horizontal,
+        targetOffset,
+        durationMs
+      );
       return true;
     }
 
     const delta = targetOffset - currentOffset;
-    this.scrollAxis(scrollable, false, !horizontal, delta, false);
+    this.scrollAxis(
+      scrollable,
+      false,
+      isNativeScroller,
+      !horizontal,
+      delta,
+      false
+    );
     return true;
   }
 
@@ -550,6 +609,7 @@ class ScrollHandler {
       this.scrollAxis(
         scrollInfo.scrollable,
         scrollInfo.isWindowScroll,
+        scrollInfo.isNativeScroller,
         axis === 'vertical',
         delta,
         animate
@@ -661,6 +721,7 @@ class ScrollHandler {
       this.scrollAxis(
         scrollInfo.scrollable,
         scrollInfo.isWindowScroll,
+        scrollInfo.isNativeScroller,
         axis === 'vertical',
         deltaInfo.scrollDelta,
         animate
@@ -834,7 +895,7 @@ class ScrollHandler {
       return null;
     }
 
-    const { scrollable, isWindowScroll } = scrollInfo;
+    const { scrollable, isWindowScroll, isNativeScroller } = scrollInfo;
     const currentOffset = isVertical
       ? scrollable.scrollTop
       : scrollable.scrollLeft;
@@ -850,7 +911,14 @@ class ScrollHandler {
       return null;
     }
 
-    this.scrollAxis(scrollable, isWindowScroll, isVertical, delta, true);
+    this.scrollAxis(
+      scrollable,
+      isWindowScroll,
+      isNativeScroller,
+      isVertical,
+      delta,
+      true
+    );
     return null;
   }
 }

@@ -28,6 +28,7 @@ import {
   TVFocusGuideView,
   type TVRemoteEvent
 } from 'react-native';
+import Example from '../../shared/example';
 
 const focusHandler = (event: $FlowFixMe, props: any) => {
   if (props.noBubbledEvents) {
@@ -325,243 +326,254 @@ export const TVEventHandlerView: () => React.Node = () => {
 
   if (!Platform.isTV) {
     return (
-      <View>
-        <Text>This example is intended to be run on TV.</Text>
-      </View>
+      <Example title="TV Event Handler">
+        <View>
+          <Text>This example is intended to be run on TV.</Text>
+        </View>
+      </Example>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <ScrollView>
-        <View>
-          <PressableButton log={updatePressableLog} title="Pressable" />
-          <PressableNonfunctionalButton
-            log={updatePressableLog}
-            title="Pressable nonfunctional form"
-          />
-          <PressableButton
-            accessible={false}
-            log={updatePressableLog}
-            noBubbledEvents
-            title="Pressable accessible={false}"
-          />
-          <PressableButton
-            focusable={false}
-            log={updatePressableLog}
-            noBubbledEvents
-            title="Pressable focusable={false}"
-          />
-          <PressableButton
-            disabled={true}
-            log={updatePressableLog}
-            noBubbledEvents
-            title="Pressable disabled={true}"
-          />
-          <PressableButton
-            disabled={true}
-            focusable={false}
-            log={updatePressableLog}
-            noBubbledEvents
-            title="Pressable disabled={true} focusable={false}"
-          />
-          <PressableButton
-            disabled={true}
-            focusable={true}
-            log={updatePressableLog}
-            noBubbledEvents
-            title="Pressable disabled={true} focusable={true}"
-          />
-          <PressableButton
-            log={updatePressableLog}
-            title="Pressable tvOS expand"
-            tvParallaxProperties={{
-              enabled: true,
-              magnification: 1.05,
-              pressMagnification: 1.1
-            }}
-          />
-          <TouchableOpacityButton
-            log={updatePressableLog}
-            title="TouchableOpacity"
-          />
-          <TouchableOpacityButton
-            focusable={false}
-            log={updatePressableLog}
-            title="TouchableOpacity focusable={false}"
-          />
-          <TouchableOpacityButton
-            disabled={true}
-            log={updatePressableLog}
-            title="TouchableOpacity disabled={true}"
-          />
-          <TouchableOpacityButton
-            disabled={true}
-            focusable={false}
-            log={updatePressableLog}
-            title="TouchableOpacity disabled={true} focusable={false}"
-          />
-          <TouchableHighlightButton
-            log={updatePressableLog}
-            title="TouchableHighlight"
-          />
-          <TouchableHighlightButton
-            focusable={false}
-            log={updatePressableLog}
-            title="TouchableHighlight focusable={false}"
-          />
-          <TouchableHighlightButton
-            disabled={true}
-            log={updatePressableLog}
-            title="TouchableHighlight disabled={true}"
-          />
-          <TouchableHighlightButton
-            disabled={true}
-            focusable={false}
-            log={updatePressableLog}
-            title="TouchableHighlight disabled={true} focusable={false}"
-          />
-          {Platform.OS === 'android' ? (
-            <TouchableNativeFeedbackButton
+    <Example title="TV Event Handler">
+      <View style={styles.container}>
+        <ScrollView>
+          <View>
+            <PressableButton log={updatePressableLog} title="Pressable" />
+            <PressableNonfunctionalButton
               log={updatePressableLog}
-              title="TouchableNativeFeedback"
+              title="Pressable nonfunctional form"
             />
-          ) : null}
-        </View>
-        <TVFocusGuideView
-          onBlur={(event: any) => {
-            updatePressableLog(
-              `Container received bubbled blur event from ${event.name} at ${event.nativeEvent.target}`
-            );
-            setIsContainerFocused(false);
-          }}
-          onBlurCapture={(event: any) => {
-            updatePressableLog(
-              `Container captured blur event for ${event.nativeEvent.target}`
-            );
-          }}
-          onFocus={(event: any) => {
-            updatePressableLog(
-              `Container received bubbled focus event from ${event.name} at ${event.nativeEvent?.target}`
-            );
-            setIsContainerFocused(true);
-          }}
-          onFocusCapture={(event: any) => {
-            updatePressableLog(
-              `Container captured focus event for ${event.nativeEvent.target}`
-            );
-          }}
-          style={[
-            styles.containerView,
-            isContainerFocused ? { backgroundColor: '#cccccc' } : {}
-          ]}
-        >
-          <Text style={{ fontSize: 12 * scale }}>
-            Container receives bubbled events
-          </Text>
-          <PressableButton
-            log={updatePressableLog}
-            title="Contained button 1"
-          />
-          <PressableButton
-            log={updatePressableLog}
-            noBubbledEvents
-            title="Contained button 2"
-          />
-        </TVFocusGuideView>
-        <View
-          onBlur={(event: $FlowFixMe) => {
-            updatePressableLog(`Blur bubbled from ${event.nativeEvent.target}`);
-          }}
-          onFocus={(event: $FlowFixMe) => {
-            updatePressableLog(
-              `Focus bubbled from ${event.nativeEvent.target}`
-            );
-          }}
-          style={styles.containerView}
-        >
-          <Text style={{ fontSize: 12 * scale }}>
-            TextInput wrapped with TouchableOpacity
-          </Text>
-          <TouchableOpacity
-            onPress={() => textInputRef.current?.focus()}
+            <PressableButton
+              accessible={false}
+              log={updatePressableLog}
+              noBubbledEvents
+              title="Pressable accessible={false}"
+            />
+            <PressableButton
+              focusable={false}
+              log={updatePressableLog}
+              noBubbledEvents
+              title="Pressable focusable={false}"
+            />
+            <PressableButton
+              disabled={true}
+              log={updatePressableLog}
+              noBubbledEvents
+              title="Pressable disabled={true}"
+            />
+            <PressableButton
+              disabled={true}
+              focusable={false}
+              log={updatePressableLog}
+              noBubbledEvents
+              title="Pressable disabled={true} focusable={false}"
+            />
+            <PressableButton
+              disabled={true}
+              focusable={true}
+              log={updatePressableLog}
+              noBubbledEvents
+              title="Pressable disabled={true} focusable={true}"
+            />
+            <PressableButton
+              log={updatePressableLog}
+              title="Pressable tvOS expand"
+              tvParallaxProperties={{
+                enabled: true,
+                magnification: 1.05,
+                pressMagnification: 1.1
+              }}
+            />
+            <TouchableOpacityButton
+              log={updatePressableLog}
+              title="TouchableOpacity"
+            />
+            <TouchableOpacityButton
+              focusable={false}
+              log={updatePressableLog}
+              title="TouchableOpacity focusable={false}"
+            />
+            <TouchableOpacityButton
+              disabled={true}
+              log={updatePressableLog}
+              title="TouchableOpacity disabled={true}"
+            />
+            <TouchableOpacityButton
+              disabled={true}
+              focusable={false}
+              log={updatePressableLog}
+              title="TouchableOpacity disabled={true} focusable={false}"
+            />
+            <TouchableHighlightButton
+              log={updatePressableLog}
+              title="TouchableHighlight"
+            />
+            <TouchableHighlightButton
+              focusable={false}
+              log={updatePressableLog}
+              title="TouchableHighlight focusable={false}"
+            />
+            <TouchableHighlightButton
+              disabled={true}
+              log={updatePressableLog}
+              title="TouchableHighlight disabled={true}"
+            />
+            <TouchableHighlightButton
+              disabled={true}
+              focusable={false}
+              log={updatePressableLog}
+              title="TouchableHighlight disabled={true} focusable={false}"
+            />
+            {Platform.OS === 'android' ? (
+              <TouchableNativeFeedbackButton
+                log={updatePressableLog}
+                title="TouchableNativeFeedback"
+              />
+            ) : null}
+          </View>
+          <TVFocusGuideView
+            onBlur={(event: any) => {
+              updatePressableLog(
+                `Container received bubbled blur event from ${event.name} at ${event.nativeEvent.target}`
+              );
+              setIsContainerFocused(false);
+            }}
+            onBlurCapture={(event: any) => {
+              updatePressableLog(
+                `Container captured blur event for ${event.nativeEvent.target}`
+              );
+            }}
+            onFocus={(event: any) => {
+              updatePressableLog(
+                `Container received bubbled focus event from ${event.name} at ${event.nativeEvent?.target}`
+              );
+              setIsContainerFocused(true);
+            }}
+            onFocusCapture={(event: any) => {
+              updatePressableLog(
+                `Container captured focus event for ${event.nativeEvent.target}`
+              );
+            }}
             style={[
-              styles.pressable,
-              {
-                backgroundColor: '#cccccc',
-                height: 50 * scale
-              }
+              styles.containerView,
+              isContainerFocused ? { backgroundColor: '#cccccc' } : {}
             ]}
           >
-            <View>
-              <TextInput
-                onBlur={(event: $FlowFixMe) =>
-                  updatePressableLog(
-                    `TextInput ${event.nativeEvent.target} is blurred`
-                  )
-                }
-                onChange={(value: any) => {
-                  setTextInputValue(value.nativeEvent.text);
-                }}
-                onFocus={(event: $FlowFixMe) =>
-                  updatePressableLog(
-                    `TextInput ${event.nativeEvent.target} is focused`
-                  )
-                }
-                onSubmitEditing={(value: any) => {
-                  setTextInputValue(value.nativeEvent.text);
-                  console.log(value.nativeEvent.text);
-                }}
-                placeholder="Enter a value"
-                placeholderTextColor="#0000ff"
-                ref={textInputRef}
-                style={[
-                  styles.pressableText,
-                  { color: 'red', height: 50 * scale }
-                ]}
-                value={textInputValue}
-              />
-            </View>
-          </TouchableOpacity>
-          <Text style={{ fontSize: 12 * scale }}>Unwrapped TextInput</Text>
-          <TextInput
-            onBlur={(event: $FlowFixMe) =>
+            <Text style={{ fontSize: 12 * scale }}>
+              Container receives bubbled events
+            </Text>
+            <PressableButton
+              log={updatePressableLog}
+              title="Contained button 1"
+            />
+            <PressableButton
+              log={updatePressableLog}
+              noBubbledEvents
+              title="Contained button 2"
+            />
+          </TVFocusGuideView>
+          <View
+            onBlur={(event: $FlowFixMe) => {
               updatePressableLog(
-                `TextInput ${event.nativeEvent.target} is blurred`
-              )
-            }
-            onChange={(value: any) => {
-              setTextInputValue(value.nativeEvent.text);
+                `Blur bubbled from ${event.nativeEvent.target}`
+              );
             }}
-            onFocus={(event: $FlowFixMe) =>
+            onFocus={(event: $FlowFixMe) => {
               updatePressableLog(
-                `TextInput ${event.nativeEvent.target} is focused`
-              )
-            }
-            onSubmitEditing={(value: any) => {
-              setTextInputValue(value.nativeEvent.text);
-              console.log(value.nativeEvent.text);
+                `Focus bubbled from ${event.nativeEvent.target}`
+              );
             }}
-            placeholder="Enter a value"
-            placeholderTextColor="#0000ff"
-            ref={textInputRef}
-            style={[styles.pressableText, { color: 'red', height: 50 * scale }]}
-            value={textInputValue}
-          />
-        </View>
-      </ScrollView>
+            style={styles.containerView}
+          >
+            <Text style={{ fontSize: 12 * scale }}>
+              TextInput wrapped with TouchableOpacity
+            </Text>
+            <TouchableOpacity
+              onPress={() => textInputRef.current?.focus()}
+              style={[
+                styles.pressable,
+                {
+                  backgroundColor: '#cccccc',
+                  height: 50 * scale
+                }
+              ]}
+            >
+              <View>
+                <TextInput
+                  onBlur={(event: $FlowFixMe) =>
+                    updatePressableLog(
+                      `TextInput ${event.nativeEvent.target} is blurred`
+                    )
+                  }
+                  onChange={(value: any) => {
+                    setTextInputValue(value.nativeEvent.text);
+                  }}
+                  onFocus={(event: $FlowFixMe) =>
+                    updatePressableLog(
+                      `TextInput ${event.nativeEvent.target} is focused`
+                    )
+                  }
+                  onSubmitEditing={(value: any) => {
+                    setTextInputValue(value.nativeEvent.text);
+                    console.log(value.nativeEvent.text);
+                  }}
+                  placeholder="Enter a value"
+                  placeholderTextColor="#0000ff"
+                  ref={textInputRef}
+                  style={[
+                    styles.pressableText,
+                    { color: 'red', height: 50 * scale }
+                  ]}
+                  value={textInputValue}
+                />
+              </View>
+            </TouchableOpacity>
+            <Text style={{ fontSize: 12 * scale }}>Unwrapped TextInput</Text>
+            <TextInput
+              onBlur={(event: $FlowFixMe) =>
+                updatePressableLog(
+                  `TextInput ${event.nativeEvent.target} is blurred`
+                )
+              }
+              onChange={(value: any) => {
+                setTextInputValue(value.nativeEvent.text);
+              }}
+              onFocus={(event: $FlowFixMe) =>
+                updatePressableLog(
+                  `TextInput ${event.nativeEvent.target} is focused`
+                )
+              }
+              onSubmitEditing={(value: any) => {
+                setTextInputValue(value.nativeEvent.text);
+                console.log(value.nativeEvent.text);
+              }}
+              placeholder="Enter a value"
+              placeholderTextColor="#0000ff"
+              ref={textInputRef}
+              style={[
+                styles.pressableText,
+                { color: 'red', height: 50 * scale }
+              ]}
+              value={textInputValue}
+            />
+          </View>
+        </ScrollView>
 
-      <View style={styles.logContainer}>
-        <View style={{ width: 400 * scale }}>
-          <Text style={{ fontSize: 16 * scale }}>Native events</Text>
-          <Text style={styles.logText}>{pressableEventLog.join('\n')}</Text>
-        </View>
-        <View style={{ width: 200 * scale }}>
-          <Text style={{ fontSize: 16 * scale }}>TV event handler events</Text>
-          <Text style={styles.logText}>{remoteEventLog.join('\n')}</Text>
+        <View style={styles.logContainer}>
+          <View style={{ width: 400 * scale }}>
+            <Text style={{ fontSize: 16 * scale }}>Native events</Text>
+            <Text style={styles.logText}>{pressableEventLog.join('\n')}</Text>
+          </View>
+          <View style={{ width: 200 * scale }}>
+            <Text style={{ fontSize: 16 * scale }}>
+              TV event handler events
+            </Text>
+            <Text style={styles.logText}>{remoteEventLog.join('\n')}</Text>
+          </View>
         </View>
       </View>
-    </View>
+    </Example>
   );
 };
 

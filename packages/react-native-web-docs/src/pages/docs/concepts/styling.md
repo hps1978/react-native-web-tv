@@ -11,10 +11,10 @@ eleventyNavigation:
 {% import "fragments/macros.html" as macro with context %}
 
 :::lead
-{{ site.name }} relies on authoring styles in JavaScript and produces optimized CSS.
+React Native Web relies on authoring styles in JavaScript and produces optimized CSS.
 :::
 
-Style declarations are authored in JavaScript and applied to elements using the `style` prop. {{ site.name }} includes a very small CSS reset that only removes unwanted User Agent styles beyond the reach of React components. All other styles are scoped to components and implemented as "utility" CSS that deduplicates styles and provides reliable rendering.
+Style declarations are authored in JavaScript and applied to elements using the `style` prop. React Native Web includes a very small CSS reset that only removes unwanted User Agent styles beyond the reach of React components. All other styles are scoped to components and implemented as "utility" CSS that deduplicates styles and provides reliable rendering.
 
 ```jsx
 const style = { flex: 1, opacity: 0 };
@@ -63,7 +63,7 @@ You have greater control over how styles are composed when compared to using cla
 
 ## Styles API
 
-{{ site.name }} supports all *long-form* CSS properties. There is no direct support for `@`-rules, selectors, pseudo-selectors, and pseudo-elements, equivalents of which are demonstrated in the [styling patterns](#styling-patterns) section below.
+React Native Web supports all *long-form* CSS properties. There is no direct support for `@`-rules, selectors, pseudo-selectors, and pseudo-elements, equivalents of which are demonstrated in the [styling patterns](#styling-patterns) section below.
 
 ### Short-form properties
 
@@ -136,7 +136,7 @@ Equivalent to [padding-inline](https://developer.mozilla.org/en-US/docs/Web/CSS/
 
 ### Non-standard properties
 
-{{ site.name }} includes compatibility with the following non-standard React Native properties and values.
+React Native Web includes compatibility with the following non-standard React Native properties and values.
 
 {% call macro.prop('animationKeyframes', '?Object') %}
 A web-only CSS extension for defining keyframes. The value is an object representing a [CSS keyframes definition](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Animations/Using_CSS_animations). For example: `{ '0%': { opacity: 1 } }`.
@@ -164,7 +164,7 @@ html {
 }
 ```
 
-However, this approach is problematic for component-based systems, as the rendering of a component may be affected by text styles unexpectedly inherited from its ancestors. {{ site.name }} adopts the same inheritance restrictions found in React Native: all text nodes **must** be contained by a `Text` component and cannot be rendered directly within a `View`; and text style inheritance is only available within `Text` subtrees.
+However, this approach is problematic for component-based systems, as the rendering of a component may be affected by text styles unexpectedly inherited from its ancestors. React Native Web adopts the same inheritance restrictions found in React Native: all text nodes **must** be contained by a `Text` component and cannot be rendered directly within a `View`; and text style inheritance is only available within `Text` subtrees.
 
 ```jsx
 // BAD
@@ -230,7 +230,7 @@ Style resolution is deterministic and slightly different from CSS. In the follow
 <div class="marginTop marginBottom margin"></div>
 ```
 
-But in {{ site.name }} the most *precise* style property takes precedence, resulting in margins of `10,0,20,0`.
+But in React Native Web the most *precise* style property takes precedence, resulting in margins of `10,0,20,0`.
 
 ```jsx
 const style = [
@@ -242,7 +242,7 @@ const style = [
 const Box = () => <View style={style} />
 ```
 
-{{ site.name }} transforms styles objects into CSS and inline styles. Any styles defined using `StyleSheet.create` will ultimately be rendered using CSS class names. Each rule is broken down into declarations, properties are expanded to their long-form, and the resulting key-value pairs are mapped to unique "atomic CSS" class names.
+React Native Web transforms styles objects into CSS and inline styles. Any styles defined using `StyleSheet.create` will ultimately be rendered using CSS class names. Each rule is broken down into declarations, properties are expanded to their long-form, and the resulting key-value pairs are mapped to unique "atomic CSS" class names.
 
 Input:
 

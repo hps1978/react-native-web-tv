@@ -24,6 +24,7 @@ import {
   TVFocusGuideView,
   View
 } from 'react-native';
+import Example from '../../shared/example';
 
 // Set it to false to see the behavior without TVFocusGuide.
 const FOCUS_GUIDE_ENABLED = true;
@@ -508,10 +509,12 @@ export default function TVFocusGuideAutoFocusExample() {
     React.useRef<?React.ElementRef<typeof TVFocusGuide>>(null);
 
   return (
-    <View style={[styles.container, { backgroundColor: 'darkgray' }]}>
-      <SideMenu ref={sideMenuRef} />
-      <ContentArea sideMenuRef={sideMenuRef} />
-    </View>
+    <Example title="TV Focus Guide View">
+      <View style={[styles.container, { backgroundColor: 'darkgray' }]}>
+        <SideMenu ref={sideMenuRef} />
+        <ContentArea sideMenuRef={sideMenuRef} />
+      </View>
+    </Example>
   );
 }
 
@@ -541,7 +544,6 @@ const styles = StyleSheet.create({
   slowListTitle: { fontSize: 24 * scale, margin: 16 * scale },
   container: {
     flex: 1,
-    height: '100vh',
     width: '100%',
     flexDirection: 'row'
   },

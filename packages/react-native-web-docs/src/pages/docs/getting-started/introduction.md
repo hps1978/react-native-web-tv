@@ -1,5 +1,5 @@
 ---
-title: Introduction to React Native for Web
+title: Introduction to React Native Web for TV
 date: Last Modified
 permalink: /docs/index.html
 eleventyNavigation:
@@ -11,10 +11,20 @@ eleventyNavigation:
 {% import "fragments/macros.html" as macro with context %}
 
 :::lead
-React Native for Web is a compatibility layer between React DOM and React Native. It can be used in new and existing apps, web-only and multi-platform apps.
+React Native Web for TV extends React Native Web with TV-first focus navigation, remote input handling, and TV-specific APIs for browser-based TV platforms.
 :::
 
-{{ site.name }} uses React DOM to accurately render React Native compatible JavaScript code in a web browser. This brings several powerful abstractions to web developers include a simple [styles in JavaScript API]({{ '/docs/styling' | url }}), built-in [layout localization]({{ '/docs/localization' | url }}), and a [high-level gesture system]({{ '/docs/interactions/#responder-props-api' | url}}).
+This project is a TV-focused fork and builds on top of multiple foundations:
+
+- **React Native Web (RNW)** provides the core web renderer, component model, styling system, accessibility behavior, and React DOM integration.
+- **React Native TV patterns (react-native-tvos / RN TV)** inspire and inform the TV API surface and example parity.
+- **TV specific work in this repo** adds web-targeted TV behavior such as LRUD spatial navigation integration and TV-focused exports.
+
+If you are new to the base technology, please start with the upstream React Native Web documentation:
+
+- [React Native Web docs](https://necolas.github.io/react-native-web/docs/)
+
+This documentation is for the TV-specific behavior and APIs added by this fork.
 
 ## Modern React
 
@@ -28,7 +38,7 @@ React Native for Web is a compatibility layer between React DOM and React Native
 
 {{ site.name }} provides all the core components you'd expect from React Native. You will mostly work with `View`, `Image`, `Text`, `TextInput`, and `ScrollView`. The core components include props for working with interactions, including the advanced gesture [responder system]({{ '/docs/interactions' | url }}). Each component's documentation contains live and editable examples to try out. 
 
-React Native for Web exports many different modules to support a variety of use cases. Your application can use as many or as few of these modules as needed. The babel plugin will help you to only bundle the modules that you are using.
+On top of the RNW baseline, this fork adds TV APIs such as `TVFocusGuideView`, `TVEventHandler`, `TVEventControl`, `TVTextScrollView`, and `useTVEventHandler`, along with TV focus props and spatial navigation behavior for remote-style navigation on the web.
 
 ## Styles
 
@@ -37,3 +47,4 @@ React Native for Web exports many different modules to support a variety of use 
 ## Reliable and tested
 
 {{ site.name }} is thoroughly unit and production tested. Significant changes are first published as canary releases to limit regressions and gather feedback from partners. Pull requests record changes to the compressed file size of each module in the library.
+This fork continues to run the existing React Native Web test coverage and extends it with additional tests for spatial navigation behavior and TV-specific components/APIs.

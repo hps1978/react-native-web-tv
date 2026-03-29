@@ -9,14 +9,24 @@ eleventyNavigation:
 ---
 
 :::lead
-How to integrate React Native for Web with various development tools.
+How to integrate React Native Web for TV with common web development tools.
 :::
 
-Find out about package aliasing, package optimization, using types, and customizing the app's HTML shell.
+This guide covers package aliasing, Babel optimization, types, and app shell requirements for web TV targets.
+
+Use one of the two possible strategies consistently across your toolchain:
+
+- direct package: `react-native-web-tv`
+- npm alias package key: `react-native-web` mapped to `react-native-web-tv`
 
 ---
 
 ## Package aliasing
+
+If your app imports from `react-native`, configure tooling so those imports resolve to the package key you installed.
+
+- If you installed `react-native-web-tv` directly, alias to `react-native-web-tv`.
+- If you installed via npm alias and kept `react-native-web` as the dependency key, alias to `react-native-web`.
 
 ### Bundler
 
@@ -29,6 +39,8 @@ module.exports = {
 
   resolve: {
     alias: {
+      // Choose one based on your installation path:
+      // 'react-native$': 'react-native-web-tv'
       'react-native$': 'react-native-web'
     }
   }
@@ -51,6 +63,8 @@ module.exports = {
 }
 ```
 
+For direct installs, replace `react-native-web` with `react-native-web-tv`.
+
 ### Jest
 
 [Jest](https://facebook.github.io/jest/) can be configured to understand the aliased module.
@@ -63,6 +77,8 @@ module.exports = {
 }
 ```
 
+For direct installs, map `^react-native$` to `react-native-web-tv`.
+
 ### Flow
 
 [Flow](https://flow.org) can be configured to understand the aliased module.
@@ -73,14 +89,18 @@ module.exports = {
 module.name_mapper='^react-native$' -> 'react-native-web'
 ```
 
+For direct installs, map to `react-native-web-tv`.
+
 ### Node.js
 
-Node.js can alias `react-native` to `react-native-web` using [`module-alias`](https://www.npmjs.com/package/module-alias). This is useful if you want to pre-render the app (e.g., server-side rendering or build-time rendering).
+Node.js can alias `react-native` to your selected package key using [`module-alias`](https://www.npmjs.com/package/module-alias). This is useful if you want to pre-render the app (e.g., server-side rendering or build-time rendering).
 
 ```js
 // Install the `module-alias` package as a dependency first
 const moduleAlias = require("module-alias");
 moduleAlias.addAliases({
+  // Choose one based on your installation path:
+  // "react-native": require.resolve("react-native-web-tv"),
   "react-native": require.resolve("react-native-web"),
 });
 moduleAlias();
@@ -94,15 +114,23 @@ The project's Babel plugin (see [Installation]({{ '/docs/installation' | url }})
 
 ```js
 {
-  "plugins": ['react-native-web']
+  "plugins": [
+    ["react-native-web-tv", { "target": "react-native-web" }]
+  ]
 }
 ```
+
+If you installed `react-native-web-tv` directly, set `target` to `react-native-web-tv`.
+
+Optional setting:
+
+- `commonjs: true` rewrites to CommonJS dist paths for older bundlers.
 
 ---
 
 ## Types
 
-Flow can be configured to pull types from React Native for Web's source code.
+Flow can be configured to pull types from the package source fields.
 
 ```yml
 [options]

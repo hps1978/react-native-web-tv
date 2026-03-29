@@ -15,6 +15,7 @@ import {
   Image,
   Pressable
 } from 'react-native';
+import Example from '../../shared/example';
 
 const ROW_COUNT = 10;
 const ITEM_COUNT = 15;
@@ -61,48 +62,50 @@ function RLVFlatListTVScrollExample() {
   const keyExtractor = useCallback((item) => item.id, []);
 
   return (
-    <View style={styles.screen}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>TV FlatList Scroll Test</Text>
-        <Text style={styles.headerSubtitle}>
-          {ROW_COUNT} rows · {ITEM_COUNT} items per row
-        </Text>
-      </View>
+    <Example title="RLV FlatList TV Scroll">
+      <View style={styles.screen}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>TV FlatList Scroll Test</Text>
+          <Text style={styles.headerSubtitle}>
+            {ROW_COUNT} rows · {ITEM_COUNT} items per row
+          </Text>
+        </View>
 
-      <ScrollView
-        contentContainerStyle={styles.verticalContent}
-        showsVerticalScrollIndicator
-        style={styles.verticalScroll}
-      >
-        {rows.map((rowData, rowIndex) => (
-          <View key={`row-${rowIndex}`} style={styles.rowSection}>
-            <Text style={styles.rowTitle}>Row {rowIndex + 1}</Text>
-            <FlatList
-              contentContainerStyle={styles.rowContent}
-              data={rowData}
-              horizontal
-              keyExtractor={keyExtractor}
-              layoutProvider={{
-                getLayoutTypeForIndex: () => 'item',
-                getDimensionForType: () => ({
-                  width: ITEM_SIZE + ITEM_SPACING * 2,
-                  height: ROW_HEIGHT
-                })
-              }}
-              renderItem={renderItemForRow(rowIndex)}
-              style={styles.rowList}
-            />
-          </View>
-        ))}
-      </ScrollView>
-    </View>
+        <ScrollView
+          contentContainerStyle={styles.verticalContent}
+          showsVerticalScrollIndicator
+          style={styles.verticalScroll}
+        >
+          {rows.map((rowData, rowIndex) => (
+            <View key={`row-${rowIndex}`} style={styles.rowSection}>
+              <Text style={styles.rowTitle}>Row {rowIndex + 1}</Text>
+              <FlatList
+                contentContainerStyle={styles.rowContent}
+                data={rowData}
+                horizontal
+                keyExtractor={keyExtractor}
+                layoutProvider={{
+                  getLayoutTypeForIndex: () => 'item',
+                  getDimensionForType: () => ({
+                    width: ITEM_SIZE + ITEM_SPACING * 2,
+                    height: ROW_HEIGHT
+                  })
+                }}
+                renderItem={renderItemForRow(rowIndex)}
+                style={styles.rowList}
+              />
+            </View>
+          ))}
+        </ScrollView>
+      </View>
+    </Example>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
+    flex: 1,
     width: '100%',
-    height: '100vh',
     backgroundColor: '#0f172a'
   },
   header: {
@@ -125,17 +128,16 @@ const styles = StyleSheet.create({
   },
   verticalScroll: {
     flex: 1,
-    height: '100vh'
+    minHeight: 0
   },
   verticalContent: {
-    paddingBottom: 24,
-    height: '100vh'
+    paddingBottom: 24
   },
   rowSection: {
     paddingHorizontal: 24,
     paddingTop: 14,
     paddingBottom: 18,
-    width: '100vw',
+    width: '100%',
     height: ROW_HEIGHT + ROW_TITLE_HEIGHT + 20
   },
   rowTitle: {
@@ -147,7 +149,7 @@ const styles = StyleSheet.create({
   },
   rowList: {
     height: ROW_HEIGHT,
-    width: '100vw'
+    width: '100%'
   },
   rowContent: {
     paddingRight: ITEM_SPACING

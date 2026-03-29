@@ -13,11 +13,11 @@
     "prop-types": "^15.6.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "react-native-web-tv": "0.21.2-tv.6"
+    "react-native-web-tv": "0.21.2-tv.9"
   },
   "devDependencies": {
     "babel-loader": "^8.2.5",
-    "babel-plugin-react-native-web-tv": "0.21.2-tv.6",
+    "babel-plugin-react-native-web-tv": "0.21.2-tv.9",
     "css-loader": "^6.7.1",
     "style-loader": "^3.3.1",
     "url-loader": "^4.1.1",

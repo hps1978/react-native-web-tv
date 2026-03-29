@@ -26,6 +26,7 @@ import {
   TVFocusGuideView,
   View
 } from 'react-native';
+import Example from '../../shared/example';
 
 // ---------------------------------------------------------------------------
 // Data
@@ -165,79 +166,83 @@ export default function TVNestedScrollViewGridExample() {
   const [activeTab, setActiveTab] = useState('all');
 
   return (
-    /**
-     * Outer ScrollView with nativeID="lrud-screen-cities"
-     * → generates id="lrud-screen-cities" in the DOM which LRUD uses as the
-     *   screen boundary for spatial navigation candidate search.
-     *
-     * DOM equivalent:
-     *   <div id="lrud-screen-cities" style="overflow-y:scroll; flex-direction:column; flex:1">
-     */
-    <ScrollView
-      contentContainerStyle={styles.screenContent}
-      nativeID="lrud-screen-cities"
-      style={styles.screenScroll}
+    <Example
+      nativeID="lrud-screen-cities-header"
+      title="TV Nested ScrollView Grid"
     >
-      {/* ------------------------------------------------------------------ */}
-      {/* Tab bar section                                                      */}
-      {/* ------------------------------------------------------------------ */}
       {/**
-       * TVFocusGuideView with trapFocusLeft + trapFocusRight (no autoFocus)
-       * → lrud-container tabindex=-1 data-block-exit="left right"
-       * This is a "non-focusable container" with focusable children that only traps left/right exit.
-       * Focus cannot escape the tab row sideways.
-       */}
-      <TVFocusGuideView
-        style={styles.tabContainer}
-        trapFocusLeft
-        trapFocusRight
-      >
-        <View style={styles.tabRow}>
-          {TABS.map((tab, i) => (
-            <TabButton
-              hasTVPreferredFocus={i === 0}
-              key={tab.id}
-              label={tab.label}
-              onPress={() => setActiveTab(tab.id)}
-              selected={activeTab === tab.id}
-            />
-          ))}
-        </View>
-      </TVFocusGuideView>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* Content area – nested vertical ScrollView                           */}
-      {/* ------------------------------------------------------------------ */}
-      {/**
-       * Inner ScrollView (no lrud-screen id)
-       * → <div style="overflow-y: auto; flex:1">
-       * This is the vertically-scrollable container for the grid.
-       * SpatialManager's scrollToElement will scroll this when navigating
-       * down into off-screen cards.
+       * Outer ScrollView with nativeID="lrud-screen-cities"
+       * → generates id="lrud-screen-cities" in the DOM which LRUD uses as the
+       *   screen boundary for spatial navigation candidate search.
+       *
+       * DOM equivalent:
+       *   <div id="lrud-screen-cities" style="overflow-y:scroll; flex-direction:column; flex:1">
        */}
       <ScrollView
-        contentContainerStyle={styles.contentScrollInner}
-        style={styles.contentScroll}
+        contentContainerStyle={styles.screenContent}
+        nativeID="lrud-screen-cities"
+        style={styles.screenScroll}
       >
+        {/* ------------------------------------------------------------------ */}
+        {/* Tab bar section                                                      */}
+        {/* ------------------------------------------------------------------ */}
         {/**
          * TVFocusGuideView with trapFocusLeft + trapFocusRight (no autoFocus)
          * → lrud-container tabindex=-1 data-block-exit="left right"
-         * Same pattern as tab bar – traps focus inside the grid horizontally.
+         * This is a "non-focusable container" with focusable children that only traps left/right exit.
+         * Focus cannot escape the tab row sideways.
          */}
         <TVFocusGuideView
-          style={styles.gridContainer}
+          style={styles.tabContainer}
           trapFocusLeft
           trapFocusRight
         >
-          {/* Flex-wrap grid matching the real app's wrapping card layout */}
-          <View style={styles.grid}>
-            {CITIES.map((item, index) => (
-              <GridCard index={index} item={item} key={item.id} />
+          <View style={styles.tabRow}>
+            {TABS.map((tab, i) => (
+              <TabButton
+                key={tab.id}
+                label={tab.label}
+                onPress={() => setActiveTab(tab.id)}
+                selected={activeTab === tab.id}
+              />
             ))}
           </View>
         </TVFocusGuideView>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* Content area – nested vertical ScrollView                           */}
+        {/* ------------------------------------------------------------------ */}
+        {/**
+         * Inner ScrollView (no lrud-screen id)
+         * → <div style="overflow-y: auto; flex:1">
+         * This is the vertically-scrollable container for the grid.
+         * SpatialManager's scrollToElement will scroll this when navigating
+         * down into off-screen cards.
+         */}
+        <ScrollView
+          contentContainerStyle={styles.contentScrollInner}
+          style={styles.contentScroll}
+        >
+          {/**
+           * TVFocusGuideView with trapFocusLeft + trapFocusRight (no autoFocus)
+           * → lrud-container tabindex=-1 data-block-exit="left right"
+           * Same pattern as tab bar – traps focus inside the grid horizontally.
+           */}
+          <TVFocusGuideView
+            style={styles.gridContainer}
+            trapFocusLeft
+            trapFocusRight
+          >
+            {/* Flex-wrap grid matching the real app's wrapping card layout */}
+            <View style={styles.grid}>
+              {CITIES.map((item, index) => (
+                <GridCard index={index} item={item} key={item.id} />
+              ))}
+            </View>
+          </TVFocusGuideView>
+        </ScrollView>
       </ScrollView>
-    </ScrollView>
+    </Example>
   );
 }
 
@@ -256,7 +261,7 @@ const styles = StyleSheet.create({
   // --- Screen ---
   screenScroll: {
     flex: 1,
-    width: Dimensions.get('window').width,
+    width: '100%',
     flexDirection: 'column',
     backgroundColor: '#111'
   },

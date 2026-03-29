@@ -26,23 +26,21 @@ The spatial navigation layer is integrated and enabled by default once remote ke
 
 ### Configurability
 
-Spatial navigation and remote key handling can be customized for your app or platform. See the [Configuration](#configuration) section below for details and examples.
+Spatial navigation and remote key handling can be customized for your app or platform using runtime configuration (for example `window.appConfig.keyMap`, `window.appConfig.scrollConfig`, and `window.appConfig.focusConfig`).
 
 For advanced use cases, you can:
 - Remap remote keys for different TV platforms
 - Adjust focus and scroll behavior
 
-See below and the [TV Navigation documentation]({{ '/docs/tv-navigation/' | url }}) for more platform-specific tips, best practices, and migration notes.
+See below for more platform-specific tips, best practices, and migration notes.
 
 ---
-:::
 
-This fork extends React Native for Web with APIs inspired by React Native tvOS, targeting web TV environments such as Samsung and LG browser runtimes.
+This package extends React Native for Web with APIs inspired by React Native tvOS, targeting web TV environments such as Samsung and LG browser runtimes.
 
 ## Scope
 
-- React Native tvOS targets native Apple TV and Android/Google TV runtimes.
-- This fork targets browser-based TV runtimes where navigation is driven by remote key events and spatial focus.
+- This package targets browser-based TV runtimes where navigation is driven by remote key events and spatial focus.
 - The goal is API-level familiarity where possible, with web-specific implementation details.
 
 ---
@@ -63,9 +61,9 @@ This fork extends React Native for Web with APIs inspired by React Native tvOS, 
 
 ---
 
-## Guide: Managing screens and headers with navigation libraries
+## Guide: Integrating into existing React Native apps
 
-If your app already uses a React-based navigation library such as [React Navigation](https://reactnavigation.org/docs/getting-started), continue using it for routing, stack management, and screen lifecycle.
+If you are integrating `react-native-web-tv` into an existing React Native app, continue using your existing navigation library (for example [React Navigation](https://reactnavigation.org/docs/getting-started)) for routing, stack management, and screen lifecycle.
 
 The TV spatial layer in this project is additive. It helps directional focus move predictably across screen bodies and header areas, especially in web TV runtimes.
 
@@ -73,12 +71,12 @@ The TV spatial layer in this project is additive. It helps directional focus mov
 
 ### Screen and header conventions used by spatial navigation
 
-The LRUD integration recognizes screen regions using DOM `id` conventions which can be set using `nativeID` prop:
+Screen/header scoping conventions are implemented in the LRUD engine dependency [`@hps1978/tv-lrud-spatial`](https://www.npmjs.com/package/@hps1978/tv-lrud-spatial) and are supported by this package's integration. Use `nativeID` (mapped to DOM `id` on web) to provide these identifiers:
 
 - Screen root: `nativeID="lrud-screen-<screenName>"`
 - Header region(s) for that screen: `nativeID="lrud-screen-<screenName>-<headerName>"`
 
-When these IDs are present, directional navigation applies screen-aware scoping and stays within current screen / header context.
+When these IDs are present, directional navigation can apply screen-aware scoping and stay within the current screen/header context.
 
 This lets apps model common TV patterns like top tabs, utility actions, and profile/search rows in headers while keeping body focus behavior stable.
 

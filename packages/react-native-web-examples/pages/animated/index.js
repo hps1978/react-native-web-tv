@@ -24,9 +24,10 @@ export default function AnimatedPage() {
         <Animated.View style={[styles.animatedBox, { transform: transform }]} />
         <Pressable
           onPress={animateBox}
-          style={({ pressed }) => [
+          style={({ pressed, focused }) => [
             styles.button,
-            { opacity: pressed ? 0.4 : 1 }
+            { opacity: pressed ? 0.4 : 1 },
+            focused && styles.buttonFocused
           ]}
         >
           <Text style={styles.buttonText}>Animate Box</Text>
@@ -54,6 +55,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'blue',
     borderRadius: 8,
     marginTop: 24
+  },
+  buttonFocused: {
+    borderColor: 'orange',
+    borderWidth: 2
   },
   buttonText: { color: 'white' }
 });

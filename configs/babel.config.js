@@ -38,7 +38,7 @@ const createConfig = ({ modules }) => {
           }
         }
       ],
-      '@babel/preset-react',
+      ['@babel/preset-react', { runtime: 'automatic' }],
       '@babel/preset-flow'
     ],
     plugins: plugins

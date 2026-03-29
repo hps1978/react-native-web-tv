@@ -14,13 +14,13 @@ eleventyNavigation:
 Familiar web accessibility APIs in a platform-agnostic form.
 :::
 
-Accessibility in {{ site.name }} combines several separate web APIs into a cohesive system. Assistive technologies (e.g., VoiceOver, TalkBack screen readers) derive useful information about the structure, purpose, and interactivity of web apps from their [HTML elements][html-accessibility-url], attributes, and [ARIA in HTML][aria-in-html-url].
+Accessibility in React Native Web combines several separate web APIs into a cohesive system. Assistive technologies (e.g., VoiceOver, TalkBack screen readers) derive useful information about the structure, purpose, and interactivity of web apps from their [HTML elements][html-accessibility-url], attributes, and [ARIA in HTML][aria-in-html-url].
 
 ---
 
 ## Accessibility Props API
 
-{{ site.name }} includes APIs for making accessible apps. (Note that for compatibility with existing React Native code, the React Native-specific `accessibility*` props are also supported.)
+React Native Web includes APIs for making accessible apps. (Note that for compatibility with existing React Native code, the React Native-specific `accessibility*` props are also supported.)
 
 {% call macro.prop('aria-activedescendant', '?string') %}
 Equivalent to [aria-activedescendant](https://www.w3.org/TR/wai-aria-1.2/#aria-activedescendant).
@@ -249,7 +249,7 @@ The `tabIndex` prop determines whether a component is user-focusable and appears
 
 ### Accessible HTML
 
-{{ site.name }} components express semantics exclusively via the `aria-*` props.
+React Native Web components express semantics exclusively via the `aria-*` props.
 
 ```jsx
 <View

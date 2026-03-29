@@ -21,7 +21,7 @@ export default class Button extends Component<*> {
         accessibilityLabel={accessibilityLabel}
         accessibilityRole="button"
         disabled={disabled}
-        onPress={onPress}
+        onPressOut={onPress}
         style={[
           styles.button,
           style,

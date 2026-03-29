@@ -7,6 +7,7 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { FlatList, Text, View, StyleSheet, Button, Image } from 'react-native';
+import Example from '../../shared/example';
 
 const HORIZONTAL_ITEM_WIDTH = 180;
 const HORIZONTAL_ITEM_HEIGHT = 120;
@@ -132,52 +133,56 @@ function OptimizedFlatListHorizontalExample() {
   );
 
   return (
-    <View
-      data-testid="flatlist-horizontal-container"
-      style={styles.outerContainer}
-    >
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>
-          Horizontal FlatList (RLV vs Legacy)
-        </Text>
-        <Text style={styles.subheading}>
-          Mode: {renderMode === 'optimized' ? '🚀 RLV' : '🐌 Legacy'}
-        </Text>
-
-        <View style={styles.metricsRow}>
-          <Text style={styles.metricText}>
-            Render: {renderTime.toFixed(1)}ms
+    <Example title="FlatList Optimized Horizontal">
+      <View
+        data-testid="flatlist-horizontal-container"
+        style={styles.outerContainer}
+      >
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>
+            Horizontal FlatList (RLV vs Legacy)
           </Text>
-          <Text style={styles.metricText}>DOM Nodes: {domNodes}</Text>
-          <Text style={styles.metricText}>Items: {listData.length}</Text>
+          <Text style={styles.subheading}>
+            Mode: {renderMode === 'optimized' ? '🚀 RLV' : '🐌 Legacy'}
+          </Text>
+
+          <View style={styles.metricsRow}>
+            <Text style={styles.metricText}>
+              Render: {renderTime.toFixed(1)}ms
+            </Text>
+            <Text style={styles.metricText}>DOM Nodes: {domNodes}</Text>
+            <Text style={styles.metricText}>Items: {listData.length}</Text>
+          </View>
+
+          <View style={styles.buttonRow}>
+            <Button
+              onPress={() =>
+                setRenderMode((m) =>
+                  m === 'optimized' ? 'legacy' : 'optimized'
+                )
+              }
+              title={
+                renderMode === 'optimized'
+                  ? 'Switch to Legacy'
+                  : 'Switch to Optimized'
+              }
+            />
+            <Button onPress={handleRefresh} title="Refresh (20)" />
+            <Button onPress={handleStressTest} title="Stress (80)" />
+          </View>
         </View>
 
-        <View style={styles.buttonRow}>
-          <Button
-            onPress={() =>
-              setRenderMode((m) => (m === 'optimized' ? 'legacy' : 'optimized'))
-            }
-            title={
-              renderMode === 'optimized'
-                ? 'Switch to Legacy'
-                : 'Switch to Optimized'
-            }
+        <View style={styles.horizontalListContainer}>
+          <HorizontalFlatListMemo
+            data={listData}
+            layoutProvider={horizontalLayoutProvider}
+            renderItem={renderHorizontalItem}
+            renderMode={renderMode}
+            rowHasChanged={rowHasChanged}
           />
-          <Button onPress={handleRefresh} title="Refresh (20)" />
-          <Button onPress={handleStressTest} title="Stress (80)" />
         </View>
       </View>
-
-      <View style={styles.horizontalListContainer}>
-        <HorizontalFlatListMemo
-          data={listData}
-          layoutProvider={horizontalLayoutProvider}
-          renderItem={renderHorizontalItem}
-          renderMode={renderMode}
-          rowHasChanged={rowHasChanged}
-        />
-      </View>
-    </View>
+    </Example>
   );
 }
 
@@ -185,7 +190,6 @@ const styles = StyleSheet.create({
   outerContainer: {
     flex: 1,
     width: '100%',
-    height: '100vh',
     backgroundColor: '#f5f5f5'
   },
   header: {
