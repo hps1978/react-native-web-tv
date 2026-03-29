@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "react-native-web-docs",
-  "version": "0.21.2-tv.9",
+  "version": "0.21.2-tv.10",
   "description": "Documentation website for React Native Web for TV",
   "scripts": {
     "dev": "DOCS_EMBED_SOURCE=sandbox eleventy --serve --port=8081",
