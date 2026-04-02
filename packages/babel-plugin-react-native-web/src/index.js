@@ -1,4 +1,452 @@
 const moduleMap = require('./moduleMap');
+const path = require('path');
+const fs = require('fs');
+
+const defaultPreprocessOptions = { shadow: true, textShadow: true };
+
+let staticStyleCompiler = null;
+
+const loadStaticStyleCompiler = () => {
+  if (staticStyleCompiler != null) {
+    return staticStyleCompiler;
+  }
+
+  const preprocessCandidates = [
+    path.resolve(
+      process.cwd(),
+      'packages/react-native-web/dist/cjs/exports/StyleSheet/preprocess.js'
+    ),
+    path.resolve(
+      __dirname,
+      '../../react-native-web/dist/cjs/exports/StyleSheet/preprocess.js'
+    )
+  ];
+  const compilerCandidates = [
+    path.resolve(
+      process.cwd(),
+      'packages/react-native-web/dist/cjs/exports/StyleSheet/compiler/index.js'
+    ),
+    path.resolve(
+      __dirname,
+      '../../react-native-web/dist/cjs/exports/StyleSheet/compiler/index.js'
+    )
+  ];
+
+  const preprocessPath = preprocessCandidates.find((candidate) =>
+    fs.existsSync(candidate)
+  );
+  const compilerPath = compilerCandidates.find((candidate) =>
+    fs.existsSync(candidate)
+  );
+
+  if (preprocessPath == null || compilerPath == null) {
+    throw new Error(
+      'Unable to resolve react-native-web dist compiler artifacts for static style transpilation.'
+    );
+  }
+
+  // Use built CJS artifacts so the Babel plugin can run in Node without Flow transforms.
+  // eslint-disable-next-line import/no-dynamic-require, global-require
+  const { preprocess } = require(preprocessPath);
+  // eslint-disable-next-line import/no-dynamic-require, global-require
+  const { atomic, classic } = require(compilerPath);
+
+  staticStyleCompiler = { preprocess, atomic, classic };
+  return staticStyleCompiler;
+};
+
+const evalStaticNode = (node) => {
+  if (!node) {
+    return undefined;
+  }
+
+  switch (node.type) {
+    case 'StringLiteral':
+    case 'BooleanLiteral':
+    case 'NumericLiteral':
+      return node.value;
+    case 'NullLiteral':
+      return null;
+    case 'Identifier':
+      if (node.name === 'undefined') {
+        return undefined;
+      }
+      return undefined;
+    case 'UnaryExpression': {
+      const arg = evalStaticNode(node.argument);
+      if (arg === undefined) {
+        return undefined;
+      }
+      if (node.operator === '-') return -arg;
+      if (node.operator === '+') return +arg;
+      if (node.operator === '!') return !arg;
+      return undefined;
+    }
+    case 'ArrayExpression': {
+      const values = [];
+      for (const element of node.elements) {
+        if (element == null) {
+          values.push(undefined);
+          continue;
+        }
+        const value = evalStaticNode(element);
+        if (value === undefined) {
+          return undefined;
+        }
+        values.push(value);
+      }
+      return values;
+    }
+    case 'ObjectExpression': {
+      const obj = {};
+      for (const property of node.properties) {
+        if (property.type !== 'ObjectProperty' || property.computed) {
+          return undefined;
+        }
+        let key;
+        if (property.key.type === 'Identifier') {
+          key = property.key.name;
+        } else if (
+          property.key.type === 'StringLiteral' ||
+          property.key.type === 'NumericLiteral'
+        ) {
+          key = String(property.key.value);
+        } else {
+          return undefined;
+        }
+
+        const value = evalStaticNode(property.value);
+        if (value === undefined) {
+          return undefined;
+        }
+        obj[key] = value;
+      }
+      return obj;
+    }
+    default:
+      return undefined;
+  }
+};
+
+const isStyleSheetCreateCall = (t, node) => {
+  return (
+    t.isMemberExpression(node.callee) &&
+    !node.callee.computed &&
+    t.isIdentifier(node.callee.object, { name: 'StyleSheet' }) &&
+    t.isIdentifier(node.callee.property, { name: 'create' })
+  );
+};
+
+const objectToAst = (t, value) => {
+  if (value === null) {
+    return t.nullLiteral();
+  }
+  if (typeof value === 'string') {
+    return t.stringLiteral(value);
+  }
+  if (typeof value === 'number') {
+    return t.numericLiteral(value);
+  }
+  if (typeof value === 'boolean') {
+    return t.booleanLiteral(value);
+  }
+  if (Array.isArray(value)) {
+    return t.arrayExpression(value.map((item) => objectToAst(t, item)));
+  }
+  if (typeof value === 'object') {
+    return t.objectExpression(
+      Object.keys(value).map((key) =>
+        t.objectProperty(t.stringLiteral(key), objectToAst(t, value[key]))
+      )
+    );
+  }
+  return t.identifier('undefined');
+};
+
+const isUppercaseComponentElement = (t, jsxName) => {
+  if (t.isJSXIdentifier(jsxName)) {
+    const { name } = jsxName;
+    return name.length > 0 && name[0] === name[0].toUpperCase();
+  }
+  return true;
+};
+
+const hashString = (input) => {
+  let hash = 2166136261;
+  for (let i = 0; i < input.length; i += 1) {
+    hash ^= input.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(36);
+};
+
+const createInlinePrecompiledId = (styleKey, compiled) => {
+  const serialized = JSON.stringify({
+    styleKey,
+    compiledStyle: compiled.compiledStyle,
+    compiledOrderedRules: compiled.compiledOrderedRules
+  });
+  return `rnwtv_${hashString(serialized)}`;
+};
+
+const compileSingleStaticStyle = (styleObject, styleKey = 'style') => {
+  let compiler;
+  try {
+    compiler = loadStaticStyleCompiler();
+  } catch (error) {
+    return null;
+  }
+
+  let preprocessed = styleObject;
+  let compiledStyle;
+  let compiledOrderedRules;
+
+  if (styleKey.indexOf('$raw') > -1) {
+    [compiledStyle, compiledOrderedRules] = compiler.classic(
+      styleObject,
+      styleKey.split('$raw')[0]
+    );
+  } else {
+    preprocessed = compiler.preprocess(styleObject, defaultPreprocessOptions);
+    [compiledStyle, compiledOrderedRules] = compiler.atomic(preprocessed);
+  }
+
+  return {
+    preprocessed,
+    compiledStyle,
+    compiledOrderedRules
+  };
+};
+
+const createInlinePrecompiledStyleAst = (t, styleObject, styleKey = 'style') => {
+  const compiled = compileSingleStaticStyle(styleObject, styleKey);
+  if (compiled == null) {
+    return null;
+  }
+
+  const previewPayload = {
+    ...compiled,
+    __rnwTvStaticPreviewId: createInlinePrecompiledId(styleKey, compiled)
+  };
+
+  return t.objectExpression([
+    t.objectProperty(
+      t.identifier('__rnwTvStaticPreview'),
+      objectToAst(t, previewPayload)
+    )
+  ]);
+};
+
+const getMemberExpressionPropertyName = (t, memberExpression) => {
+  if (!memberExpression.computed && t.isIdentifier(memberExpression.property)) {
+    return memberExpression.property.name;
+  }
+  if (
+    memberExpression.computed &&
+    t.isStringLiteral(memberExpression.property)
+  ) {
+    return memberExpression.property.value;
+  }
+  return null;
+};
+
+const resolveStaticStyleFromReference = (t, path, expressionNode) => {
+  if (!t.isMemberExpression(expressionNode) || !t.isIdentifier(expressionNode.object)) {
+    return null;
+  }
+
+  const propertyName = getMemberExpressionPropertyName(t, expressionNode);
+  if (propertyName == null) {
+    return null;
+  }
+
+  const binding = path.scope.getBinding(expressionNode.object.name);
+  if (binding == null || !binding.path.isVariableDeclarator()) {
+    return null;
+  }
+
+  const init = binding.path.node.init;
+  if (!t.isObjectExpression(init)) {
+    return null;
+  }
+
+  const matchingProperty = init.properties.find((property) => {
+    if (!t.isObjectProperty(property) || property.computed) {
+      return false;
+    }
+    if (t.isIdentifier(property.key)) {
+      return property.key.name === propertyName;
+    }
+    if (t.isStringLiteral(property.key)) {
+      return property.key.value === propertyName;
+    }
+    return false;
+  });
+
+  if (matchingProperty == null || !t.isObjectProperty(matchingProperty)) {
+    return null;
+  }
+
+  const staticStyleObject = evalStaticNode(matchingProperty.value);
+  if (
+    staticStyleObject == null ||
+    typeof staticStyleObject !== 'object' ||
+    Array.isArray(staticStyleObject)
+  ) {
+    return null;
+  }
+
+  return {
+    styleObject: staticStyleObject,
+    styleKey: propertyName
+  };
+};
+
+const transformStyleExpressionNode = (t, path, node) => {
+  if (node == null) {
+    return node;
+  }
+
+  if (t.isArrayExpression(node)) {
+    return t.arrayExpression(
+      node.elements.map((element) =>
+        element == null ? element : transformStyleExpressionNode(t, path, element)
+      )
+    );
+  }
+
+  if (t.isLogicalExpression(node) && node.operator === '&&') {
+    return t.logicalExpression(
+      '&&',
+      node.left,
+      transformStyleExpressionNode(t, path, node.right)
+    );
+  }
+
+  if (t.isConditionalExpression(node)) {
+    return t.conditionalExpression(
+      node.test,
+      transformStyleExpressionNode(t, path, node.consequent),
+      transformStyleExpressionNode(t, path, node.alternate)
+    );
+  }
+
+  if (t.isObjectExpression(node)) {
+    const staticStyleObject = evalStaticNode(node);
+    if (
+      staticStyleObject != null &&
+      typeof staticStyleObject === 'object' &&
+      !Array.isArray(staticStyleObject)
+    ) {
+      const transformed = createInlinePrecompiledStyleAst(t, staticStyleObject);
+      if (transformed != null) {
+        return transformed;
+      }
+    }
+    return node;
+  }
+
+  const resolvedReference = resolveStaticStyleFromReference(t, path, node);
+  if (resolvedReference != null) {
+    const transformed = createInlinePrecompiledStyleAst(
+      t,
+      resolvedReference.styleObject,
+      resolvedReference.styleKey
+    );
+    if (transformed != null) {
+      return transformed;
+    }
+  }
+
+  return node;
+};
+
+const buildStaticStylePayload = (stylesObject) => {
+  let compiler;
+  try {
+    compiler = loadStaticStyleCompiler();
+  } catch (error) {
+    return null;
+  }
+
+  const precompiled = {};
+  const replacedStyles = {};
+  const styleKeys = Object.keys(stylesObject);
+  for (const styleKey of styleKeys) {
+    const styleValue = stylesObject[styleKey];
+    if (
+      styleValue == null ||
+      typeof styleValue !== 'object' ||
+      Array.isArray(styleValue)
+    ) {
+      return null;
+    }
+
+    let preprocessed = styleValue;
+    let compiledStyle;
+    let compiledOrderedRules;
+
+    if (styleKey.indexOf('$raw') > -1) {
+      [compiledStyle, compiledOrderedRules] = compiler.classic(
+        styleValue,
+        styleKey.split('$raw')[0]
+      );
+    } else {
+      preprocessed = compiler.preprocess(styleValue, defaultPreprocessOptions);
+      [compiledStyle, compiledOrderedRules] = compiler.atomic(preprocessed);
+    }
+
+    precompiled[styleKey] = {
+      preprocessed,
+      compiledStyle,
+      compiledOrderedRules
+    };
+    replacedStyles[styleKey] = compiledStyle;
+  }
+
+  return { precompiled, replacedStyles };
+};
+
+const createStaticStylePreviewArg = (t, stylesNode) => {
+  const stylesObject = evalStaticNode(stylesNode);
+  if (stylesObject == null || typeof stylesObject !== 'object') {
+    return null;
+  }
+
+  const payload = buildStaticStylePayload(stylesObject);
+  if (payload == null) {
+    return null;
+  }
+
+  return t.objectExpression([
+    t.objectProperty(
+      t.identifier('__rnwTvStaticPreview'),
+      objectToAst(t, payload.precompiled)
+    )
+  ]);
+};
+
+const createReplacedStylesAst = (t, stylesNode) => {
+  const stylesObject = evalStaticNode(stylesNode);
+  if (stylesObject == null || typeof stylesObject !== 'object') {
+    return null;
+  }
+
+  const payload = buildStaticStylePayload(stylesObject);
+  if (payload == null) {
+    return null;
+  }
+
+  return {
+    stylesAst: objectToAst(t, payload.replacedStyles),
+    precompiledAst: t.objectExpression([
+      t.objectProperty(
+        t.identifier('__rnwTvStaticPreview'),
+        objectToAst(t, payload.precompiled)
+      )
+    ])
+  };
+};
 
 const isCommonJS = (opts) => opts.commonjs === true;
 
@@ -182,6 +630,61 @@ module.exports = function ({ types: t }) {
 
             path.replaceWith(importIndex);
           }
+        }
+      },
+      CallExpression(path, state) {
+        const { node } = path;
+        if (!isStyleSheetCreateCall(t, node) || node.arguments.length !== 1) {
+          return;
+        }
+
+        if (state.opts.extractStaticStylesReplace === true) {
+          const replaced = createReplacedStylesAst(t, node.arguments[0]);
+          if (replaced != null) {
+            node.arguments = [replaced.stylesAst, replaced.precompiledAst];
+          }
+          return;
+        }
+
+        if (state.opts.extractStaticStylesPreview !== true) {
+          return;
+        }
+
+        const previewArg = createStaticStylePreviewArg(t, node.arguments[0]);
+        if (previewArg != null) {
+          node.arguments.push(previewArg);
+        }
+      },
+      JSXAttribute(path, state) {
+        if (state.opts.transpileStaticStyleProps !== true) {
+          return;
+        }
+
+        if (!t.isJSXIdentifier(path.node.name, { name: 'style' })) {
+          return;
+        }
+
+        const openingElement = path.parentPath && path.parentPath.node;
+        if (
+          openingElement == null ||
+          !isUppercaseComponentElement(t, openingElement.name)
+        ) {
+          return;
+        }
+
+        const { value } = path.node;
+        if (!t.isJSXExpressionContainer(value)) {
+          return;
+        }
+
+        const transformedExpression = transformStyleExpressionNode(
+          t,
+          path,
+          value.expression
+        );
+
+        if (transformedExpression !== value.expression) {
+          path.node.value = t.jsxExpressionContainer(transformedExpression);
         }
       }
     }

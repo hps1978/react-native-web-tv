@@ -16,25 +16,75 @@ import { validate } from './validate';
 import canUseDOM from '../../modules/canUseDom';
 
 const staticStyleMap: WeakMap<Object, Object> = new WeakMap();
+const insertedInlinePrecompiledRules: WeakSet<Object> = new WeakSet();
+const insertedInlinePrecompiledRuleIds: Set<string> = new Set();
 const sheet = createSheet();
 
 const defaultPreprocessOptions = { shadow: true, textShadow: true };
 
-function customStyleq(styles, options: Options = {}) {
-  const { writingDirection, ...preprocessOptions } = options;
-  const isRTL = writingDirection === 'rtl';
+function createStyleqResolver(isRTL, preprocessOptions) {
   return styleq.factory({
     transform(style) {
+      const inlinePrecompiled =
+        style != null ? style.__rnwTvStaticPreview : null;
+      if (
+        inlinePrecompiled != null &&
+        inlinePrecompiled.compiledStyle != null &&
+        Array.isArray(inlinePrecompiled.compiledOrderedRules)
+      ) {
+        const inlinePrecompiledId = inlinePrecompiled.__rnwTvStaticPreviewId;
+        const hasStableInlinePrecompiledId =
+          typeof inlinePrecompiledId === 'string' &&
+          inlinePrecompiledId.length > 0;
+        const hasInsertedInlinePrecompiledRules = hasStableInlinePrecompiledId
+          ? insertedInlinePrecompiledRuleIds.has(inlinePrecompiledId)
+          : insertedInlinePrecompiledRules.has(inlinePrecompiled);
+
+        if (!hasInsertedInlinePrecompiledRules) {
+          insertRules(inlinePrecompiled.compiledOrderedRules);
+          if (hasStableInlinePrecompiledId) {
+            insertedInlinePrecompiledRuleIds.add(inlinePrecompiledId);
+          } else {
+            insertedInlinePrecompiledRules.add(inlinePrecompiled);
+          }
+        }
+        return localizeStyle(inlinePrecompiled.compiledStyle, isRTL);
+      }
+
       const compiledStyle = staticStyleMap.get(style);
       if (compiledStyle != null) {
         return localizeStyle(compiledStyle, isRTL);
       }
-      return preprocess(style, {
-        ...defaultPreprocessOptions,
-        ...preprocessOptions
-      });
+      return preprocess(style, preprocessOptions);
     }
-  })(styles);
+  });
+}
+
+const defaultLtrStyleqResolver = createStyleqResolver(
+  false,
+  defaultPreprocessOptions
+);
+const defaultRtlStyleqResolver = createStyleqResolver(
+  true,
+  defaultPreprocessOptions
+);
+
+function customStyleq(styles, options: Options = {}) {
+  const { writingDirection, ...preprocessOptions } = options;
+  const isRTL = writingDirection === 'rtl';
+  const hasCustomPreprocessOptions =
+    preprocessOptions.shadow != null || preprocessOptions.textShadow != null;
+
+  if (!hasCustomPreprocessOptions) {
+    const resolver = isRTL ? defaultRtlStyleqResolver : defaultLtrStyleqResolver;
+    return resolver(styles);
+  }
+
+  const mergedPreprocessOptions = {
+    ...defaultPreprocessOptions,
+    ...preprocessOptions
+  };
+  return createStyleqResolver(isRTL, mergedPreprocessOptions)(styles);
 }
 
 function insertRules(compiledOrderedRules) {
@@ -61,6 +111,25 @@ function compileAndInsertReset(style, key) {
   return compiledStyle;
 }
 
+function getPrecompiledStyleEntry(precompiledStyles, key) {
+  if (precompiledStyles == null) {
+    return null;
+  }
+  const previewPayload = precompiledStyles.__rnwTvStaticPreview;
+  if (previewPayload == null) {
+    return null;
+  }
+  const entry = previewPayload[key];
+  if (
+    entry != null &&
+    entry.compiledStyle != null &&
+    Array.isArray(entry.compiledOrderedRules)
+  ) {
+    return entry;
+  }
+  return null;
+}
+
 /* ----- API ----- */
 
 const absoluteFillObject = {
@@ -76,9 +145,17 @@ const absoluteFill = create({ x: { ...absoluteFillObject } }).x;
 /**
  * create
  */
-function create<T: Object>(styles: T): $ReadOnly<T> {
+function create<T: Object>(styles: T, precompiledStyles?: any): $ReadOnly<T> {
   Object.keys(styles).forEach((key) => {
     const styleObj = styles[key];
+    const precompiledEntry = getPrecompiledStyleEntry(precompiledStyles, key);
+
+    if (precompiledEntry != null && styleObj != null) {
+      insertRules(precompiledEntry.compiledOrderedRules);
+      staticStyleMap.set(styleObj, precompiledEntry.compiledStyle);
+      return;
+    }
+
     // Only compile at runtime if the style is not already compiled
     if (styleObj != null && styleObj.$$css !== true) {
       let compiledStyles;

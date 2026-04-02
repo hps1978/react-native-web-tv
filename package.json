@@ -20,6 +20,7 @@
     "patches:export": "node ./scripts/tvGroupedPatchExport.js",
     "patches:verify": "node ./scripts/tvPatchQueueVerify.js",
     "patches:replay": "node ./scripts/tvPatchQueueReplay.js",
+    "styles:transpile-preview": "node ./scripts/transpileStaticStylesPreview.js",
     "release:docs": "node ./scripts/releaseDocsToGhPages.js",
     "docs:verify-links": "node ./scripts/verifyDocsLinks.js",
     "docs:verify-links:build": "node ./scripts/verifyDocsLinks.js --build",
