@@ -551,7 +551,7 @@ class SpatialManager {
       typeof document !== 'undefined' &&
       typeof document.removeEventListener === 'function'
     ) {
-      window.removeEventListener('focus', this.handlePageVisibilityChange);
+      window.removeEventListener('focus', this.handlePageVisibilityChange.bind(this));
     }
     stopObserving();
     this._currentFocus = { elem: null, parentContainer: null };

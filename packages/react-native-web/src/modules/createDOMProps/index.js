@@ -42,6 +42,9 @@ const pointerEventsStyles = StyleSheet.create({
   }
 });
 
+// Pre-built default options to avoid creating a new object on every render
+const defaultStyleSheetOptions = { writingDirection: 'ltr' };
+
 const createDOMProps = (elementType, props, options) => {
   if (!props) {
     props = emptyObject;
@@ -891,13 +894,18 @@ const createDOMProps = (elementType, props, options) => {
     );
   }
 
-  const [className, inlineStyle] = StyleSheet(
-    [style, pointerEvents && pointerEventsStyles[pointerEvents]],
-    {
-      writingDirection: 'ltr',
-      ...options
-    }
-  );
+  // Avoid array allocation when pointerEvents is not set (common case)
+  const styleInput =
+    pointerEvents != null
+      ? [style, pointerEventsStyles[pointerEvents]]
+      : style;
+  // Avoid options object allocation when no custom options are needed
+  const styleOptions =
+    options != null
+      ? { writingDirection: 'ltr', ...options }
+      : defaultStyleSheetOptions;
+
+  const [className, inlineStyle] = StyleSheet(styleInput, styleOptions);
   if (className) {
     domProps.className = className;
   }
