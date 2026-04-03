@@ -5,7 +5,10 @@
 const execSync = require('child_process').execSync;
 const minimist = require('minimist');
 
-const PACKAGE_NAME = 'react-native-web-tv';
+const PACKAGE_NAMES = [
+  'react-native-web-tv',
+  'babel-plugin-react-native-web-tv'
+];
 const argv = minimist(process.argv.slice(2));
 
 function printUsage() {
@@ -37,16 +40,18 @@ if (/\s/.test(tag)) {
 }
 
 const otpArg = otp ? ` --otp ${otp}` : '';
-const addTagCommand = `npm dist-tag add ${PACKAGE_NAME}@${version} ${tag}${otpArg}`;
 
-console.log(`Promoting ${PACKAGE_NAME}@${version} to dist-tag "${tag}"...`);
-execSync(addTagCommand, { stdio: 'inherit' });
+PACKAGE_NAMES.forEach((packageName) => {
+  const addTagCommand = `npm dist-tag add ${packageName}@${version} ${tag}${otpArg}`;
+  console.log(`Promoting ${packageName}@${version} to dist-tag "${tag}"...`);
+  execSync(addTagCommand, { stdio: 'inherit' });
 
-const tags = execSync(`npm view ${PACKAGE_NAME} dist-tags --json`, {
-  stdio: ['ignore', 'pipe', 'inherit']
-})
-  .toString()
-  .trim();
+  const tags = execSync(`npm view ${packageName} dist-tags --json`, {
+    stdio: ['ignore', 'pipe', 'inherit']
+  })
+    .toString()
+    .trim();
 
-console.log('Updated dist-tags:');
-console.log(tags);
+  console.log(`Updated dist-tags for ${packageName}:`);
+  console.log(tags);
+});
