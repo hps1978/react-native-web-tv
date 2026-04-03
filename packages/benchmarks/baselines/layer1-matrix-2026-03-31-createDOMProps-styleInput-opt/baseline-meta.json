@@ -1,0 +1,8 @@
+{
+  "baseline": "layer1-matrix-2026-03-31-createDOMProps-styleInput-opt",
+  "savedAt": "2026-03-31T20:13:16.213Z",
+  "sourceFiles": {
+    "json": "dist/benchmark-results.json",
+    "markdown": "dist/benchmark-results.md"
+  }
+}

@@ -12,7 +12,8 @@
     "format:fix": "prettier --write --ignore-path ./configs/.prettierignore \"**/*.js\"",
     "lint": "eslint configs packages scripts --config ./configs/.eslintrc",
     "lint:fix": "npm run lint -- --fix",
-    "prerelease": "npm run test && npm run build && npm run docs:verify-links",
+    "benchmark:verify": "cd packages/benchmarks && npm install && npm run verify",
+    "prerelease": "npm run test && npm run build && npm run benchmark:verify && npm run docs:verify-links",
     "release:publish": "node ./scripts/releaseReactNativeWebTVPackages.js",
     "release:dist-tag": "node ./scripts/promoteNpmDistTag.js",
     "release:promote-latest": "node ./scripts/promoteNpmDistTag.js --tag latest",
@@ -73,7 +74,10 @@
   },
   "workspaces": [
     "packages/react-native-web",
-    "packages/*"
+    "packages/babel-plugin-react-native-web",
+    "packages/dom-event-testing-library",
+    "packages/react-native-web-docs",
+    "packages/react-native-web-examples"
   ],
   "husky": {
     "hooks": {

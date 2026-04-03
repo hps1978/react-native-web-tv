@@ -3,6 +3,12 @@ const BundleAnalyzerPlugin =
 const path = require('path');
 
 const appDirectory = path.resolve(__dirname);
+const enableStaticStylePropTranspile =
+  process.env.BENCH_STATIC_STYLE_PROP_TRANSPILE === 'true';
+const staticStylePropPlugin = require.resolve(
+  'babel-plugin-react-native-web-tv',
+  { paths: [appDirectory] }
+);
 
 module.exports = {
   mode: 'production',
@@ -38,7 +44,18 @@ module.exports = {
           loader: 'babel-loader',
           options: {
             cacheDirectory: false,
-            extends: path.resolve(appDirectory, '../../configs/babel.config')
+            extends: path.resolve(appDirectory, '../../configs/babel.config'),
+            plugins: enableStaticStylePropTranspile
+              ? [
+                  [
+                    staticStylePropPlugin,
+                    {
+                      target: 'react-native-web',
+                      transpileStaticStyleProps: true
+                    }
+                  ]
+                ]
+              : []
           }
         }
       }
