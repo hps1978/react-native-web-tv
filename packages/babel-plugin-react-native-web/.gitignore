@@ -1,0 +1,2 @@
+# Vendor directory: populated during `npm run build`
+vendor/

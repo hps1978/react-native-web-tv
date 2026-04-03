@@ -1,6 +1,4 @@
 const moduleMap = require('./moduleMap');
-const path = require('path');
-const fs = require('fs');
 
 const defaultPreprocessOptions = { shadow: true, textShadow: true };
 
@@ -11,48 +9,28 @@ const loadStaticStyleCompiler = () => {
     return staticStyleCompiler;
   }
 
-  const preprocessCandidates = [
-    path.resolve(
-      process.cwd(),
-      'packages/react-native-web/dist/cjs/exports/StyleSheet/preprocess.js'
-    ),
-    path.resolve(
-      __dirname,
-      '../../react-native-web/dist/cjs/exports/StyleSheet/preprocess.js'
-    )
-  ];
-  const compilerCandidates = [
-    path.resolve(
-      process.cwd(),
-      'packages/react-native-web/dist/cjs/exports/StyleSheet/compiler/index.js'
-    ),
-    path.resolve(
-      __dirname,
-      '../../react-native-web/dist/cjs/exports/StyleSheet/compiler/index.js'
-    )
-  ];
+  // Load vendored and transpiled RNW compiler.
+  // The vendor/ directory is populated during `npm run build` and
+  // contains transpiled (Flow-stripped, CommonJS) copies of RNW source.
+  try {
+    // eslint-disable-next-line global-require
+    const {
+      preprocess
+    } = require('../vendor/rnw-compiler/StyleSheet/preprocess.js');
+    // eslint-disable-next-line global-require
+    const {
+      atomic,
+      classic
+    } = require('../vendor/rnw-compiler/StyleSheet/compiler/index.js');
 
-  const preprocessPath = preprocessCandidates.find((candidate) =>
-    fs.existsSync(candidate)
-  );
-  const compilerPath = compilerCandidates.find((candidate) =>
-    fs.existsSync(candidate)
-  );
-
-  if (preprocessPath == null || compilerPath == null) {
+    staticStyleCompiler = { preprocess, atomic, classic };
+    return staticStyleCompiler;
+  } catch (err) {
     throw new Error(
-      'Unable to resolve react-native-web dist compiler artifacts for static style transpilation.'
+      'Unable to load vendored RNW compiler. Did you run `npm run build` in babel-plugin-react-native-web? ' +
+        `Original error: ${err.message}`
     );
   }
-
-  // Use built CJS artifacts so the Babel plugin can run in Node without Flow transforms.
-  // eslint-disable-next-line import/no-dynamic-require, global-require
-  const { preprocess } = require(preprocessPath);
-  // eslint-disable-next-line import/no-dynamic-require, global-require
-  const { atomic, classic } = require(compilerPath);
-
-  staticStyleCompiler = { preprocess, atomic, classic };
-  return staticStyleCompiler;
 };
 
 const evalStaticNode = (node) => {
@@ -218,7 +196,11 @@ const compileSingleStaticStyle = (styleObject, styleKey = 'style') => {
   };
 };
 
-const createInlinePrecompiledStyleAst = (t, styleObject, styleKey = 'style') => {
+const createInlinePrecompiledStyleAst = (
+  t,
+  styleObject,
+  styleKey = 'style'
+) => {
   const compiled = compileSingleStaticStyle(styleObject, styleKey);
   if (compiled == null) {
     return null;
@@ -251,7 +233,10 @@ const getMemberExpressionPropertyName = (t, memberExpression) => {
 };
 
 const resolveStaticStyleFromReference = (t, path, expressionNode) => {
-  if (!t.isMemberExpression(expressionNode) || !t.isIdentifier(expressionNode.object)) {
+  if (
+    !t.isMemberExpression(expressionNode) ||
+    !t.isIdentifier(expressionNode.object)
+  ) {
     return null;
   }
 
@@ -310,7 +295,9 @@ const transformStyleExpressionNode = (t, path, node) => {
   if (t.isArrayExpression(node)) {
     return t.arrayExpression(
       node.elements.map((element) =>
-        element == null ? element : transformStyleExpressionNode(t, path, element)
+        element == null
+          ? element
+          : transformStyleExpressionNode(t, path, element)
       )
     );
   }
