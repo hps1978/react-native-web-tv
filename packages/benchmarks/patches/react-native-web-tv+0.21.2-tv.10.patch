@@ -1,0 +1,1426 @@
+diff --git a/node_modules/react-native-web-tv/src/exports/StyleSheet/index.js b/node_modules/react-native-web-tv/src/exports/StyleSheet/index.js
+index a1339366..7e5b1b6b 100644
+--- a/node_modules/react-native-web-tv/src/exports/StyleSheet/index.js
++++ b/node_modules/react-native-web-tv/src/exports/StyleSheet/index.js
+@@ -13,6 +13,11 @@ import { localizeStyle } from 'styleq/transform-localize-style';
+ import { preprocess } from './preprocess';
+ import { styleq } from 'styleq';
+ import { validate } from './validate';
++import {
++  profile,
++  profileEnd,
++  profileStart
++} from '../../modules/benchmarkProfiler';
+ import canUseDOM from '../../modules/canUseDom';
+ 
+ const staticStyleMap: WeakMap<Object, Object> = new WeakMap();
+@@ -27,12 +32,18 @@ function customStyleq(styles, options: Options = {}) {
+     transform(style) {
+       const compiledStyle = staticStyleMap.get(style);
+       if (compiledStyle != null) {
+-        return localizeStyle(compiledStyle, isRTL);
++        return profile('StyleSheet.customStyleq.cacheHit', () =>
++          profile('StyleSheet.localizeStyle', () =>
++            localizeStyle(compiledStyle, isRTL)
++          )
++        );
+       }
+-      return preprocess(style, {
+-        ...defaultPreprocessOptions,
+-        ...preprocessOptions
+-      });
++      return profile('StyleSheet.customStyleq.preprocess', () =>
++        preprocess(style, {
++          ...defaultPreprocessOptions,
++          ...preprocessOptions
++        })
++      );
+     }
+   })(styles);
+ }
+@@ -159,12 +170,21 @@ type Options = {
+ };
+ 
+ function StyleSheet(styles: any, options?: Options = {}): StyleProps {
+-  const isRTL = options.writingDirection === 'rtl';
+-  const styleProps: StyleProps = customStyleq(styles, options);
+-  if (Array.isArray(styleProps) && styleProps[1] != null) {
+-    styleProps[1] = inline(styleProps[1], isRTL);
++  const totalProfile = profileStart('StyleSheet.resolve');
++  try {
++    const isRTL = options.writingDirection === 'rtl';
++    const styleProps: StyleProps = profile('StyleSheet.customStyleq', () =>
++      customStyleq(styles, options)
++    );
++    if (Array.isArray(styleProps) && styleProps[1] != null) {
++      styleProps[1] = profile('StyleSheet.inline', () =>
++        inline(styleProps[1], isRTL)
++      );
++    }
++    return styleProps;
++  } finally {
++    profileEnd('StyleSheet.resolve', totalProfile);
+   }
+-  return styleProps;
+ }
+ 
+ StyleSheet.absoluteFill = absoluteFill;
+diff --git a/node_modules/react-native-web-tv/src/exports/View/index.js b/node_modules/react-native-web-tv/src/exports/View/index.js
+index 7e4f0887..92e6c046 100644
+--- a/node_modules/react-native-web-tv/src/exports/View/index.js
++++ b/node_modules/react-native-web-tv/src/exports/View/index.js
+@@ -15,6 +15,7 @@ import type { PlatformMethods } from '../../types';
+ import type { ViewProps } from './types';
+ 
+ import * as React from 'react';
++import { profile, profileEnd, profileStart } from '../../modules/benchmarkProfiler';
+ import createElement from '../createElement';
+ import * as forwardedProps from '../../modules/forwardedProps';
+ import pick from '../../modules/pick';
+@@ -53,6 +54,7 @@ const pickProps = (props) => pick(props, forwardPropsList);
+ 
+ const View: React.AbstractComponent<ViewProps, HTMLElement & PlatformMethods> =
+   React.forwardRef((props, forwardedRef) => {
++    const totalProfile = profileStart('View.render');
+     const {
+       hrefAttrs,
+       onLayout,
+@@ -117,7 +119,7 @@ const View: React.AbstractComponent<ViewProps, HTMLElement & PlatformMethods> =
+     const componentDirection = props.dir || langDirection;
+     const writingDirection = componentDirection || contextDirection;
+ 
+-    const supportedProps = pickProps(rest);
++    const supportedProps = profile('View.pickProps', () => pickProps(rest));
+     supportedProps.dir = componentDirection;
+     supportedProps.style = [
+       styles.view$raw,
+@@ -184,7 +186,12 @@ const View: React.AbstractComponent<ViewProps, HTMLElement & PlatformMethods> =
+ 
+     supportedProps.ref = setRef;
+     supportedProps.isContainer = ((props: any).isContainer: ?boolean) === true;
+-    return createElement(component, supportedProps, { writingDirection });
++
++    try {
++      return createElement(component, supportedProps, { writingDirection });
++    } finally {
++      profileEnd('View.render', totalProfile);
++    }
+   });
+ 
+ View.displayName = 'View';
+diff --git a/node_modules/react-native-web-tv/src/exports/createElement/index.js b/node_modules/react-native-web-tv/src/exports/createElement/index.js
+index e6a7f172..3ae046a7 100644
+--- a/node_modules/react-native-web-tv/src/exports/createElement/index.js
++++ b/node_modules/react-native-web-tv/src/exports/createElement/index.js
+@@ -10,34 +10,46 @@
+ 'use client';
+ 
+ import AccessibilityUtil from '../../modules/AccessibilityUtil';
++import { profile, profileEnd, profileStart } from '../../modules/benchmarkProfiler';
+ import createDOMProps from '../../modules/createDOMProps';
+ import React from 'react';
+ import { LocaleProvider } from '../../modules/useLocale';
+ 
+ const createElement = (component, props, options) => {
++  const totalProfile = profileStart('createElement.total');
+   // Use equivalent platform elements where possible.
+   let accessibilityComponent;
+   if (component && component.constructor === String) {
+-    accessibilityComponent =
+-      AccessibilityUtil.propsToAccessibilityComponent(props);
++    accessibilityComponent = profile(
++      'createElement.propsToAccessibilityComponent',
++      () => AccessibilityUtil.propsToAccessibilityComponent(props)
++    );
+   }
+-  const Component = accessibilityComponent || component;
+-  const domProps = createDOMProps(Component, props, options);
++  try {
++    const Component = accessibilityComponent || component;
++    const domProps = profile('createElement.createDOMProps', () =>
++      createDOMProps(Component, props, options)
++    );
+ 
+-  const element = React.createElement(Component, domProps);
++    const element = profile('createElement.React.createElement', () =>
++      React.createElement(Component, domProps)
++    );
+ 
+-  // Update locale context if element's writing direction prop changes
+-  const elementWithLocaleProvider = domProps.dir ? (
+-    <LocaleProvider
+-      children={element}
+-      direction={domProps.dir}
+-      locale={domProps.lang}
+-    />
+-  ) : (
+-    element
+-  );
++    // Update locale context if element's writing direction prop changes
++    const elementWithLocaleProvider = domProps.dir
++      ? profile('createElement.localeProvider', () => (
++          <LocaleProvider
++            children={element}
++            direction={domProps.dir}
++            locale={domProps.lang}
++          />
++        ))
++      : element;
+ 
+-  return elementWithLocaleProvider;
++    return elementWithLocaleProvider;
++  } finally {
++    profileEnd('createElement.total', totalProfile);
++  }
+ };
+ 
+ export default createElement;
+diff --git a/node_modules/react-native-web-tv/src/modules/createDOMProps/index.js b/node_modules/react-native-web-tv/src/modules/createDOMProps/index.js
+index bf4203d2..116b4d43 100644
+--- a/node_modules/react-native-web-tv/src/modules/createDOMProps/index.js
++++ b/node_modules/react-native-web-tv/src/modules/createDOMProps/index.js
+@@ -8,6 +8,7 @@
+  */
+ 
+ import AccessibilityUtil from '../AccessibilityUtil';
++import { profile, profileEnd, profileStart } from '../benchmarkProfiler';
+ import StyleSheet from '../../exports/StyleSheet';
+ import { warnOnce } from '../warnOnce';
+ import { setupNodeId } from '../../exports/TV/utils';
+@@ -43,11 +44,13 @@ const pointerEventsStyles = StyleSheet.create({
+ });
+ 
+ const createDOMProps = (elementType, props, options) => {
+-  if (!props) {
+-    props = emptyObject;
+-  }
++  const totalProfile = profileStart('createDOMProps.total');
++  try {
++    if (!props) {
++      props = emptyObject;
++    }
+ 
+-  const {
++    const {
+     'aria-activedescendant': ariaActiveDescendant,
+     accessibilityActiveDescendant,
+     'aria-atomic': ariaAtomic,
+@@ -161,19 +164,22 @@ const createDOMProps = (elementType, props, options) => {
+     isContainer, // This may be a container
+     // Rest
+     ...domProps
+-  } = props;
++    } = props;
+ 
+-  /*
++    /*
+   if (accessibilityDisabled != null) {
+     warnOnce('accessibilityDisabled', `accessibilityDisabled is deprecated.`);
+   }
+   */
+-  const disabled = ariaDisabled || accessibilityDisabled;
++    const disabled = ariaDisabled || accessibilityDisabled;
+ 
+-  const role = AccessibilityUtil.propsToAriaRole(props);
++    const role = profile('createDOMProps.propsToAriaRole', () =>
++      AccessibilityUtil.propsToAriaRole(props)
++    );
+ 
+-  // ACCESSIBILITY
+-  /*
++    profile('createDOMProps.accessibilityProps', () => {
++      // ACCESSIBILITY
++      /*
+   if (accessibilityActiveDescendant != null) {
+     warnOnce(
+       'accessibilityActiveDescendant',
+@@ -181,13 +187,13 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaActiveDescendant =
+-    ariaActiveDescendant != null
+-      ? ariaActiveDescendant
+-      : accessibilityActiveDescendant;
+-  if (_ariaActiveDescendant != null) {
+-    domProps['aria-activedescendant'] = _ariaActiveDescendant;
+-  }
++      const _ariaActiveDescendant =
++        ariaActiveDescendant != null
++          ? ariaActiveDescendant
++          : accessibilityActiveDescendant;
++      if (_ariaActiveDescendant != null) {
++        domProps['aria-activedescendant'] = _ariaActiveDescendant;
++      }
+ 
+   /*
+   if (accessibilityAtomic != null) {
+@@ -197,11 +203,11 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaAtomic =
+-    ariaAtomic != null ? ariaActiveDescendant : accessibilityAtomic;
+-  if (_ariaAtomic != null) {
+-    domProps['aria-atomic'] = _ariaAtomic;
+-  }
++      const _ariaAtomic =
++        ariaAtomic != null ? ariaActiveDescendant : accessibilityAtomic;
++      if (_ariaAtomic != null) {
++        domProps['aria-atomic'] = _ariaAtomic;
++      }
+ 
+   /*
+   if (accessibilityAutoComplete != null) {
+@@ -211,11 +217,11 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaAutoComplete =
+-    ariaAutoComplete != null ? ariaAutoComplete : accessibilityAutoComplete;
+-  if (_ariaAutoComplete != null) {
+-    domProps['aria-autocomplete'] = _ariaAutoComplete;
+-  }
++      const _ariaAutoComplete =
++        ariaAutoComplete != null ? ariaAutoComplete : accessibilityAutoComplete;
++      if (_ariaAutoComplete != null) {
++        domProps['aria-autocomplete'] = _ariaAutoComplete;
++      }
+ 
+   /*
+   if (accessibilityBusy != null) {
+@@ -225,10 +231,10 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaBusy = ariaBusy != null ? ariaBusy : accessibilityBusy;
+-  if (_ariaBusy != null) {
+-    domProps['aria-busy'] = _ariaBusy;
+-  }
++      const _ariaBusy = ariaBusy != null ? ariaBusy : accessibilityBusy;
++      if (_ariaBusy != null) {
++        domProps['aria-busy'] = _ariaBusy;
++      }
+ 
+   /*
+   if (accessibilityChecked != null) {
+@@ -238,10 +244,10 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaChecked = ariaChecked != null ? ariaChecked : accessibilityChecked;
+-  if (_ariaChecked != null) {
+-    domProps['aria-checked'] = _ariaChecked;
+-  }
++      const _ariaChecked = ariaChecked != null ? ariaChecked : accessibilityChecked;
++      if (_ariaChecked != null) {
++        domProps['aria-checked'] = _ariaChecked;
++      }
+ 
+   /*
+   if (accessibilityColumnCount != null) {
+@@ -251,11 +257,11 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaColumnCount =
+-    ariaColumnCount != null ? ariaColumnCount : accessibilityColumnCount;
+-  if (_ariaColumnCount != null) {
+-    domProps['aria-colcount'] = _ariaColumnCount;
+-  }
++      const _ariaColumnCount =
++        ariaColumnCount != null ? ariaColumnCount : accessibilityColumnCount;
++      if (_ariaColumnCount != null) {
++        domProps['aria-colcount'] = _ariaColumnCount;
++      }
+ 
+   /*
+   if (accessibilityColumnIndex != null) {
+@@ -265,11 +271,11 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaColumnIndex =
+-    ariaColumnIndex != null ? ariaColumnIndex : accessibilityColumnIndex;
+-  if (_ariaColumnIndex != null) {
+-    domProps['aria-colindex'] = _ariaColumnIndex;
+-  }
++      const _ariaColumnIndex =
++        ariaColumnIndex != null ? ariaColumnIndex : accessibilityColumnIndex;
++      if (_ariaColumnIndex != null) {
++        domProps['aria-colindex'] = _ariaColumnIndex;
++      }
+ 
+   /*
+   if (accessibilityColumnSpan != null) {
+@@ -279,11 +285,11 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaColumnSpan =
+-    ariaColumnSpan != null ? ariaColumnSpan : accessibilityColumnSpan;
+-  if (_ariaColumnSpan != null) {
+-    domProps['aria-colspan'] = _ariaColumnSpan;
+-  }
++      const _ariaColumnSpan =
++        ariaColumnSpan != null ? ariaColumnSpan : accessibilityColumnSpan;
++      if (_ariaColumnSpan != null) {
++        domProps['aria-colspan'] = _ariaColumnSpan;
++      }
+ 
+   /*
+   if (accessibilityControls != null) {
+@@ -293,11 +299,11 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaControls =
+-    ariaControls != null ? ariaControls : accessibilityControls;
+-  if (_ariaControls != null) {
+-    domProps['aria-controls'] = processIDRefList(_ariaControls);
+-  }
++      const _ariaControls =
++        ariaControls != null ? ariaControls : accessibilityControls;
++      if (_ariaControls != null) {
++        domProps['aria-controls'] = processIDRefList(_ariaControls);
++      }
+ 
+   /*
+   if (accessibilityCurrent != null) {
+@@ -307,10 +313,10 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaCurrent = ariaCurrent != null ? ariaCurrent : accessibilityCurrent;
+-  if (_ariaCurrent != null) {
+-    domProps['aria-current'] = _ariaCurrent;
+-  }
++      const _ariaCurrent = ariaCurrent != null ? ariaCurrent : accessibilityCurrent;
++      if (_ariaCurrent != null) {
++        domProps['aria-current'] = _ariaCurrent;
++      }
+ 
+   /*
+   if (accessibilityDescribedBy != null) {
+@@ -320,11 +326,11 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaDescribedBy =
+-    ariaDescribedBy != null ? ariaDescribedBy : accessibilityDescribedBy;
+-  if (_ariaDescribedBy != null) {
+-    domProps['aria-describedby'] = processIDRefList(_ariaDescribedBy);
+-  }
++      const _ariaDescribedBy =
++        ariaDescribedBy != null ? ariaDescribedBy : accessibilityDescribedBy;
++      if (_ariaDescribedBy != null) {
++        domProps['aria-describedby'] = processIDRefList(_ariaDescribedBy);
++      }
+ 
+   /*
+   if (accessibilityDetails != null) {
+@@ -334,24 +340,23 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaDetails = ariaDetails != null ? ariaDetails : accessibilityDetails;
+-  if (_ariaDetails != null) {
+-    domProps['aria-details'] = _ariaDetails;
+-  }
++      const _ariaDetails = ariaDetails != null ? ariaDetails : accessibilityDetails;
++      if (_ariaDetails != null) {
++        domProps['aria-details'] = _ariaDetails;
++      }
+ 
+-  if (disabled === true) {
+-    domProps['aria-disabled'] = true;
+-    // Enhance with native semantics
+-    if (
+-      elementType === 'button' ||
+-      elementType === 'form' ||
+-      elementType === 'input' ||
+-      elementType === 'select' ||
+-      elementType === 'textarea'
+-    ) {
+-      domProps.disabled = true;
+-    }
+-  }
++      if (disabled === true) {
++        domProps['aria-disabled'] = true;
++        if (
++          elementType === 'button' ||
++          elementType === 'form' ||
++          elementType === 'input' ||
++          elementType === 'select' ||
++          elementType === 'textarea'
++        ) {
++          domProps.disabled = true;
++        }
++      }
+ 
+   /*
+   if (accessibilityErrorMessage != null) {
+@@ -361,11 +366,11 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaErrorMessage =
+-    ariaErrorMessage != null ? ariaErrorMessage : accessibilityErrorMessage;
+-  if (_ariaErrorMessage != null) {
+-    domProps['aria-errormessage'] = _ariaErrorMessage;
+-  }
++      const _ariaErrorMessage =
++        ariaErrorMessage != null ? ariaErrorMessage : accessibilityErrorMessage;
++      if (_ariaErrorMessage != null) {
++        domProps['aria-errormessage'] = _ariaErrorMessage;
++      }
+ 
+   /*
+   if (accessibilityExpanded != null) {
+@@ -375,11 +380,11 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaExpanded =
+-    ariaExpanded != null ? ariaExpanded : accessibilityExpanded;
+-  if (_ariaExpanded != null) {
+-    domProps['aria-expanded'] = _ariaExpanded;
+-  }
++      const _ariaExpanded =
++        ariaExpanded != null ? ariaExpanded : accessibilityExpanded;
++      if (_ariaExpanded != null) {
++        domProps['aria-expanded'] = _ariaExpanded;
++      }
+ 
+   /*
+   if (accessibilityFlowTo != null) {
+@@ -389,10 +394,10 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaFlowTo = ariaFlowTo != null ? ariaFlowTo : accessibilityFlowTo;
+-  if (_ariaFlowTo != null) {
+-    domProps['aria-flowto'] = processIDRefList(_ariaFlowTo);
+-  }
++      const _ariaFlowTo = ariaFlowTo != null ? ariaFlowTo : accessibilityFlowTo;
++      if (_ariaFlowTo != null) {
++        domProps['aria-flowto'] = processIDRefList(_ariaFlowTo);
++      }
+ 
+   /*
+   if (accessibilityHasPopup != null) {
+@@ -402,11 +407,11 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaHasPopup =
+-    ariaHasPopup != null ? ariaHasPopup : accessibilityHasPopup;
+-  if (_ariaHasPopup != null) {
+-    domProps['aria-haspopup'] = _ariaHasPopup;
+-  }
++      const _ariaHasPopup =
++        ariaHasPopup != null ? ariaHasPopup : accessibilityHasPopup;
++      if (_ariaHasPopup != null) {
++        domProps['aria-haspopup'] = _ariaHasPopup;
++      }
+ 
+   /*
+   if (accessibilityHidden != null) {
+@@ -416,10 +421,10 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaHidden = ariaHidden != null ? ariaHidden : accessibilityHidden;
+-  if (_ariaHidden === true) {
+-    domProps['aria-hidden'] = _ariaHidden;
+-  }
++      const _ariaHidden = ariaHidden != null ? ariaHidden : accessibilityHidden;
++      if (_ariaHidden === true) {
++        domProps['aria-hidden'] = _ariaHidden;
++      }
+ 
+   /*
+   if (accessibilityInvalid != null) {
+@@ -429,10 +434,10 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaInvalid = ariaInvalid != null ? ariaInvalid : accessibilityInvalid;
+-  if (_ariaInvalid != null) {
+-    domProps['aria-invalid'] = _ariaInvalid;
+-  }
++      const _ariaInvalid = ariaInvalid != null ? ariaInvalid : accessibilityInvalid;
++      if (_ariaInvalid != null) {
++        domProps['aria-invalid'] = _ariaInvalid;
++      }
+ 
+   /*
+   if (accessibilityKeyShortcuts != null) {
+@@ -442,11 +447,11 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaKeyShortcuts =
+-    ariaKeyShortcuts != null ? ariaKeyShortcuts : accessibilityKeyShortcuts;
+-  if (_ariaKeyShortcuts != null) {
+-    domProps['aria-keyshortcuts'] = processIDRefList(_ariaKeyShortcuts);
+-  }
++      const _ariaKeyShortcuts =
++        ariaKeyShortcuts != null ? ariaKeyShortcuts : accessibilityKeyShortcuts;
++      if (_ariaKeyShortcuts != null) {
++        domProps['aria-keyshortcuts'] = processIDRefList(_ariaKeyShortcuts);
++      }
+ 
+   /*
+   if (accessibilityLabel != null) {
+@@ -456,10 +461,10 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaLabel = ariaLabel != null ? ariaLabel : accessibilityLabel;
+-  if (_ariaLabel != null) {
+-    domProps['aria-label'] = _ariaLabel;
+-  }
++      const _ariaLabel = ariaLabel != null ? ariaLabel : accessibilityLabel;
++      if (_ariaLabel != null) {
++        domProps['aria-label'] = _ariaLabel;
++      }
+ 
+   /*
+   if (accessibilityLabelledBy != null) {
+@@ -469,11 +474,11 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaLabelledBy =
+-    ariaLabelledBy != null ? ariaLabelledBy : accessibilityLabelledBy;
+-  if (_ariaLabelledBy != null) {
+-    domProps['aria-labelledby'] = processIDRefList(_ariaLabelledBy);
+-  }
++      const _ariaLabelledBy =
++        ariaLabelledBy != null ? ariaLabelledBy : accessibilityLabelledBy;
++      if (_ariaLabelledBy != null) {
++        domProps['aria-labelledby'] = processIDRefList(_ariaLabelledBy);
++      }
+ 
+   /*
+   if (accessibilityLevel != null) {
+@@ -483,10 +488,10 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaLevel = ariaLevel != null ? ariaLevel : accessibilityLevel;
+-  if (_ariaLevel != null) {
+-    domProps['aria-level'] = _ariaLevel;
+-  }
++      const _ariaLevel = ariaLevel != null ? ariaLevel : accessibilityLevel;
++      if (_ariaLevel != null) {
++        domProps['aria-level'] = _ariaLevel;
++      }
+ 
+   /*
+   if (accessibilityLiveRegion != null) {
+@@ -496,10 +501,10 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaLive = ariaLive != null ? ariaLive : accessibilityLiveRegion;
+-  if (_ariaLive != null) {
+-    domProps['aria-live'] = _ariaLive === 'none' ? 'off' : _ariaLive;
+-  }
++      const _ariaLive = ariaLive != null ? ariaLive : accessibilityLiveRegion;
++      if (_ariaLive != null) {
++        domProps['aria-live'] = _ariaLive === 'none' ? 'off' : _ariaLive;
++      }
+ 
+   /*
+   if (accessibilityModal != null) {
+@@ -509,10 +514,10 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaModal = ariaModal != null ? ariaModal : accessibilityModal;
+-  if (_ariaModal != null) {
+-    domProps['aria-modal'] = _ariaModal;
+-  }
++      const _ariaModal = ariaModal != null ? ariaModal : accessibilityModal;
++      if (_ariaModal != null) {
++        domProps['aria-modal'] = _ariaModal;
++      }
+ 
+   /*
+   if (accessibilityMultiline != null) {
+@@ -522,11 +527,11 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaMultiline =
+-    ariaMultiline != null ? ariaMultiline : accessibilityMultiline;
+-  if (_ariaMultiline != null) {
+-    domProps['aria-multiline'] = _ariaMultiline;
+-  }
++      const _ariaMultiline =
++        ariaMultiline != null ? ariaMultiline : accessibilityMultiline;
++      if (_ariaMultiline != null) {
++        domProps['aria-multiline'] = _ariaMultiline;
++      }
+ 
+   /*
+   if (accessibilityMultiSelectable != null) {
+@@ -536,13 +541,13 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaMultiSelectable =
+-    ariaMultiSelectable != null
+-      ? ariaMultiSelectable
+-      : accessibilityMultiSelectable;
+-  if (_ariaMultiSelectable != null) {
+-    domProps['aria-multiselectable'] = _ariaMultiSelectable;
+-  }
++      const _ariaMultiSelectable =
++        ariaMultiSelectable != null
++          ? ariaMultiSelectable
++          : accessibilityMultiSelectable;
++      if (_ariaMultiSelectable != null) {
++        domProps['aria-multiselectable'] = _ariaMultiSelectable;
++      }
+ 
+   /*
+   if (accessibilityOrientation != null) {
+@@ -552,11 +557,11 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaOrientation =
+-    ariaOrientation != null ? ariaOrientation : accessibilityOrientation;
+-  if (_ariaOrientation != null) {
+-    domProps['aria-orientation'] = _ariaOrientation;
+-  }
++      const _ariaOrientation =
++        ariaOrientation != null ? ariaOrientation : accessibilityOrientation;
++      if (_ariaOrientation != null) {
++        domProps['aria-orientation'] = _ariaOrientation;
++      }
+ 
+   /*
+   if (accessibilityOwns != null) {
+@@ -566,10 +571,10 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaOwns = ariaOwns != null ? ariaOwns : accessibilityOwns;
+-  if (_ariaOwns != null) {
+-    domProps['aria-owns'] = processIDRefList(_ariaOwns);
+-  }
++      const _ariaOwns = ariaOwns != null ? ariaOwns : accessibilityOwns;
++      if (_ariaOwns != null) {
++        domProps['aria-owns'] = processIDRefList(_ariaOwns);
++      }
+ 
+   /*
+   if (accessibilityPlaceholder != null) {
+@@ -579,11 +584,11 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaPlaceholder =
+-    ariaPlaceholder != null ? ariaPlaceholder : accessibilityPlaceholder;
+-  if (_ariaPlaceholder != null) {
+-    domProps['aria-placeholder'] = _ariaPlaceholder;
+-  }
++      const _ariaPlaceholder =
++        ariaPlaceholder != null ? ariaPlaceholder : accessibilityPlaceholder;
++      if (_ariaPlaceholder != null) {
++        domProps['aria-placeholder'] = _ariaPlaceholder;
++      }
+ 
+   /*
+   if (accessibilityPosInSet != null) {
+@@ -593,11 +598,11 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaPosInSet =
+-    ariaPosInSet != null ? ariaPosInSet : accessibilityPosInSet;
+-  if (_ariaPosInSet != null) {
+-    domProps['aria-posinset'] = _ariaPosInSet;
+-  }
++      const _ariaPosInSet =
++        ariaPosInSet != null ? ariaPosInSet : accessibilityPosInSet;
++      if (_ariaPosInSet != null) {
++        domProps['aria-posinset'] = _ariaPosInSet;
++      }
+ 
+   /*
+   if (accessibilityPressed != null) {
+@@ -607,10 +612,10 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaPressed = ariaPressed != null ? ariaPressed : accessibilityPressed;
+-  if (_ariaPressed != null) {
+-    domProps['aria-pressed'] = _ariaPressed;
+-  }
++      const _ariaPressed = ariaPressed != null ? ariaPressed : accessibilityPressed;
++      if (_ariaPressed != null) {
++        domProps['aria-pressed'] = _ariaPressed;
++      }
+ 
+   /*
+   if (accessibilityReadOnly != null) {
+@@ -620,19 +625,18 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaReadOnly =
+-    ariaReadOnly != null ? ariaReadOnly : accessibilityReadOnly;
+-  if (_ariaReadOnly != null) {
+-    domProps['aria-readonly'] = _ariaReadOnly;
+-    // Enhance with native semantics
+-    if (
+-      elementType === 'input' ||
+-      elementType === 'select' ||
+-      elementType === 'textarea'
+-    ) {
+-      domProps.readOnly = true;
+-    }
+-  }
++      const _ariaReadOnly =
++        ariaReadOnly != null ? ariaReadOnly : accessibilityReadOnly;
++      if (_ariaReadOnly != null) {
++        domProps['aria-readonly'] = _ariaReadOnly;
++        if (
++          elementType === 'input' ||
++          elementType === 'select' ||
++          elementType === 'textarea'
++        ) {
++          domProps.readOnly = true;
++        }
++      }
+ 
+   /*
+   if (accessibilityRequired != null) {
+@@ -642,29 +646,27 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaRequired =
+-    ariaRequired != null ? ariaRequired : accessibilityRequired;
+-  if (_ariaRequired != null) {
+-    domProps['aria-required'] = _ariaRequired;
+-    // Enhance with native semantics
+-    if (
+-      elementType === 'input' ||
+-      elementType === 'select' ||
+-      elementType === 'textarea'
+-    ) {
+-      domProps.required = accessibilityRequired;
+-    }
+-  }
++      const _ariaRequired =
++        ariaRequired != null ? ariaRequired : accessibilityRequired;
++      if (_ariaRequired != null) {
++        domProps['aria-required'] = _ariaRequired;
++        if (
++          elementType === 'input' ||
++          elementType === 'select' ||
++          elementType === 'textarea'
++        ) {
++          domProps.required = accessibilityRequired;
++        }
++      }
+ 
+   /*
+   if (accessibilityRole != null) {
+     warnOnce('accessibilityRole', `accessibilityRole is deprecated. Use role.`);
+   }
+   */
+-  if (role != null) {
+-    // 'presentation' synonym has wider browser support
+-    domProps['role'] = role === 'none' ? 'presentation' : role;
+-  }
++      if (role != null) {
++        domProps['role'] = role === 'none' ? 'presentation' : role;
++      }
+ 
+   /*
+   if (accessibilityRoleDescription != null) {
+@@ -674,13 +676,13 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaRoleDescription =
+-    ariaRoleDescription != null
+-      ? ariaRoleDescription
+-      : accessibilityRoleDescription;
+-  if (_ariaRoleDescription != null) {
+-    domProps['aria-roledescription'] = _ariaRoleDescription;
+-  }
++      const _ariaRoleDescription =
++        ariaRoleDescription != null
++          ? ariaRoleDescription
++          : accessibilityRoleDescription;
++      if (_ariaRoleDescription != null) {
++        domProps['aria-roledescription'] = _ariaRoleDescription;
++      }
+ 
+   /*
+   if (accessibilityRowCount != null) {
+@@ -690,11 +692,11 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaRowCount =
+-    ariaRowCount != null ? ariaRowCount : accessibilityRowCount;
+-  if (_ariaRowCount != null) {
+-    domProps['aria-rowcount'] = _ariaRowCount;
+-  }
++      const _ariaRowCount =
++        ariaRowCount != null ? ariaRowCount : accessibilityRowCount;
++      if (_ariaRowCount != null) {
++        domProps['aria-rowcount'] = _ariaRowCount;
++      }
+ 
+   /*
+   if (accessibilityRowIndex != null) {
+@@ -704,11 +706,11 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaRowIndex =
+-    ariaRowIndex != null ? ariaRowIndex : accessibilityRowIndex;
+-  if (_ariaRowIndex != null) {
+-    domProps['aria-rowindex'] = _ariaRowIndex;
+-  }
++      const _ariaRowIndex =
++        ariaRowIndex != null ? ariaRowIndex : accessibilityRowIndex;
++      if (_ariaRowIndex != null) {
++        domProps['aria-rowindex'] = _ariaRowIndex;
++      }
+ 
+   /*
+   if (accessibilityRowSpan != null) {
+@@ -718,10 +720,10 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaRowSpan = ariaRowSpan != null ? ariaRowSpan : accessibilityRowSpan;
+-  if (_ariaRowSpan != null) {
+-    domProps['aria-rowspan'] = _ariaRowSpan;
+-  }
++      const _ariaRowSpan = ariaRowSpan != null ? ariaRowSpan : accessibilityRowSpan;
++      if (_ariaRowSpan != null) {
++        domProps['aria-rowspan'] = _ariaRowSpan;
++      }
+ 
+   /*
+   if (accessibilitySelected != null) {
+@@ -731,11 +733,11 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaSelected =
+-    ariaSelected != null ? ariaSelected : accessibilitySelected;
+-  if (_ariaSelected != null) {
+-    domProps['aria-selected'] = _ariaSelected;
+-  }
++      const _ariaSelected =
++        ariaSelected != null ? ariaSelected : accessibilitySelected;
++      if (_ariaSelected != null) {
++        domProps['aria-selected'] = _ariaSelected;
++      }
+ 
+   /*
+   if (accessibilitySetSize != null) {
+@@ -745,10 +747,10 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaSetSize = ariaSetSize != null ? ariaSetSize : accessibilitySetSize;
+-  if (_ariaSetSize != null) {
+-    domProps['aria-setsize'] = _ariaSetSize;
+-  }
++      const _ariaSetSize = ariaSetSize != null ? ariaSetSize : accessibilitySetSize;
++      if (_ariaSetSize != null) {
++        domProps['aria-setsize'] = _ariaSetSize;
++      }
+ 
+   /*
+   if (accessibilitySort != null) {
+@@ -758,10 +760,10 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaSort = ariaSort != null ? ariaSort : accessibilitySort;
+-  if (_ariaSort != null) {
+-    domProps['aria-sort'] = _ariaSort;
+-  }
++      const _ariaSort = ariaSort != null ? ariaSort : accessibilitySort;
++      if (_ariaSort != null) {
++        domProps['aria-sort'] = _ariaSort;
++      }
+ 
+   /*
+   if (accessibilityValueMax != null) {
+@@ -771,11 +773,11 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaValueMax =
+-    ariaValueMax != null ? ariaValueMax : accessibilityValueMax;
+-  if (_ariaValueMax != null) {
+-    domProps['aria-valuemax'] = _ariaValueMax;
+-  }
++      const _ariaValueMax =
++        ariaValueMax != null ? ariaValueMax : accessibilityValueMax;
++      if (_ariaValueMax != null) {
++        domProps['aria-valuemax'] = _ariaValueMax;
++      }
+ 
+   /*
+   if (accessibilityValueMin != null) {
+@@ -785,11 +787,11 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaValueMin =
+-    ariaValueMin != null ? ariaValueMin : accessibilityValueMin;
+-  if (_ariaValueMin != null) {
+-    domProps['aria-valuemin'] = _ariaValueMin;
+-  }
++      const _ariaValueMin =
++        ariaValueMin != null ? ariaValueMin : accessibilityValueMin;
++      if (_ariaValueMin != null) {
++        domProps['aria-valuemin'] = _ariaValueMin;
++      }
+ 
+   /*
+   if (accessibilityValueNow != null) {
+@@ -799,11 +801,11 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaValueNow =
+-    ariaValueNow != null ? ariaValueNow : accessibilityValueNow;
+-  if (_ariaValueNow != null) {
+-    domProps['aria-valuenow'] = _ariaValueNow;
+-  }
++      const _ariaValueNow =
++        ariaValueNow != null ? ariaValueNow : accessibilityValueNow;
++      if (_ariaValueNow != null) {
++        domProps['aria-valuenow'] = _ariaValueNow;
++      }
+ 
+   /*
+   if (accessibilityValueText != null) {
+@@ -813,167 +815,158 @@ const createDOMProps = (elementType, props, options) => {
+     );
+   }
+   */
+-  const _ariaValueText =
+-    ariaValueText != null ? ariaValueText : accessibilityValueText;
+-  if (_ariaValueText != null) {
+-    domProps['aria-valuetext'] = _ariaValueText;
+-  }
+-
+-  // "dataSet" replaced with "data-*"
+-  if (dataSet != null) {
+-    for (const dataProp in dataSet) {
+-      if (hasOwnProperty.call(dataSet, dataProp)) {
+-        const dataName = hyphenateString(dataProp);
+-        const dataValue = dataSet[dataProp];
+-        if (dataValue != null) {
+-          domProps[`data-${dataName}`] = dataValue;
++      const _ariaValueText =
++        ariaValueText != null ? ariaValueText : accessibilityValueText;
++      if (_ariaValueText != null) {
++        domProps['aria-valuetext'] = _ariaValueText;
++      }
++    });
++
++    profile('createDOMProps.dataSetProps', () => {
++      if (dataSet != null) {
++        for (const dataProp in dataSet) {
++          if (hasOwnProperty.call(dataSet, dataProp)) {
++            const dataName = hyphenateString(dataProp);
++            const dataValue = dataSet[dataProp];
++            if (dataValue != null) {
++              domProps[`data-${dataName}`] = dataValue;
++            }
++          }
+         }
+       }
+-    }
+-  }
+-
+-  // FOCUS
+-  if (
+-    tabIndex === 0 ||
+-    tabIndex === '0' ||
+-    tabIndex === -1 ||
+-    tabIndex === '-1'
+-  ) {
+-    domProps.tabIndex = tabIndex;
+-  } else {
+-    /*
++    });
++
++    profile('createDOMProps.focusProps', () => {
++      if (
++        tabIndex === 0 ||
++        tabIndex === '0' ||
++        tabIndex === -1 ||
++        tabIndex === '-1'
++      ) {
++        domProps.tabIndex = tabIndex;
++      } else {
++        /*
+     if (focusable != null) {
+       warnOnce('focusable', `focusable is deprecated.`);
+     }
+     */
+ 
+-    // "focusable" indicates that an element may be a keyboard tab-stop.
+-    if (focusable === false) {
+-      domProps.tabIndex = '-1';
+-    }
++        if (focusable === false) {
++          domProps.tabIndex = '-1';
++        }
+ 
+-    if (
+-      // These native elements are keyboard focusable by default
+-      elementType === 'a' ||
+-      elementType === 'button' ||
+-      elementType === 'input' ||
+-      elementType === 'select' ||
+-      elementType === 'textarea'
+-    ) {
+-      if (focusable === false || accessibilityDisabled === true) {
+-        domProps.tabIndex = '-1';
+-      }
+-    } else if (
+-      // These roles are made keyboard focusable by default
+-      role === 'button' ||
+-      role === 'checkbox' ||
+-      role === 'link' ||
+-      role === 'radio' ||
+-      role === 'textbox' ||
+-      role === 'switch'
+-    ) {
+-      if (focusable !== false) {
+-        domProps.tabIndex = '0';
+-      }
+-    } else {
+-      // Everything else must explicitly set the prop
+-      if (focusable === true) {
+-        domProps.tabIndex = '0';
++        if (
++          elementType === 'a' ||
++          elementType === 'button' ||
++          elementType === 'input' ||
++          elementType === 'select' ||
++          elementType === 'textarea'
++        ) {
++          if (focusable === false || accessibilityDisabled === true) {
++            domProps.tabIndex = '-1';
++          }
++        } else if (
++          role === 'button' ||
++          role === 'checkbox' ||
++          role === 'link' ||
++          role === 'radio' ||
++          role === 'textbox' ||
++          role === 'switch'
++        ) {
++          if (focusable !== false) {
++            domProps.tabIndex = '0';
++          }
++        } else if (focusable === true) {
++          domProps.tabIndex = '0';
++        }
++      }
++    });
++
++    profile('createDOMProps.styleProps', () => {
++      if (pointerEvents != null) {
++        warnOnce(
++          'pointerEvents',
++          `props.pointerEvents is deprecated. Use style.pointerEvents`
++        );
+       }
+-    }
+-  }
+-
+-  // Resolve styles
+-  if (pointerEvents != null) {
+-    warnOnce(
+-      'pointerEvents',
+-      `props.pointerEvents is deprecated. Use style.pointerEvents`
+-    );
+-  }
+-
+-  const [className, inlineStyle] = StyleSheet(
+-    [style, pointerEvents && pointerEventsStyles[pointerEvents]],
+-    {
+-      writingDirection: 'ltr',
+-      ...options
+-    }
+-  );
+-  if (className) {
+-    domProps.className = className;
+-  }
+-  if (inlineStyle) {
+-    domProps.style = inlineStyle;
+-  }
+-
+-  if (isContainer) {
+-    // TV View
+-    // setup attributes and classes for tv focusable elements
+-    // based on @bbc/@bbc/tv-lrud-spatial library requirements
+ 
+-    // 1. Mark it as a container for LRUD navigation by adding "lrud-container" class
+-    if (domProps.className) {
+-      domProps.className += ' lrud-container';
+-    } else {
+-      domProps.className = 'lrud-container';
+-    }
++      const [className, inlineStyle] = profile('createDOMProps.StyleSheet', () =>
++        StyleSheet(
++          [style, pointerEvents && pointerEventsStyles[pointerEvents]],
++          {
++            writingDirection: 'ltr',
++            ...options
++          }
++        )
++      );
++      if (className) {
++        domProps.className = className;
++      }
++      if (inlineStyle) {
++        domProps.style = inlineStyle;
++      }
++    });
++
++    profile('createDOMProps.tvProps', () => {
++      if (isContainer) {
++        if (domProps.className) {
++          domProps.className += ' lrud-container';
++        } else {
++          domProps.className = 'lrud-container';
++        }
+ 
+-    // 2. Consider this container as a TV Focusable container for LRUD navigation only if:
+-    // destinations are defined OR 3. autoFocus is defined
+-    if (autoFocus === true || destinations?.length > 0) {
+-      // focusable container should be in the tab order
+-      domProps.tabIndex = '0';
+-
+-      // setup autoFocus: default is true
+-      domProps['data-autofocus'] = autoFocus === false ? 'false' : 'true';
+-      // setup destinations: get ids of destination elements
+-      if (destinations && destinations.length > 0) {
+-        const destinationString = destinations
+-          .map((dest) => (dest && dest.id ? dest.id : setupNodeId(dest)))
+-          .filter((id) => id != null)
+-          .join(' ');
+-        domProps['data-destinations'] = destinationString;
+-      }
+-    } else {
+-      // non focusable container should be out of the tab order,
+-      // but it's chrildren could still be focusable based on their own props
+-      domProps.tabIndex = tabIndex === -999 ? '-999' : '-1'; // -999 identifies a FlatList container
+-    }
++        if (autoFocus === true || destinations?.length > 0) {
++          domProps.tabIndex = '0';
++          domProps['data-autofocus'] = autoFocus === false ? 'false' : 'true';
++          if (destinations && destinations.length > 0) {
++            const destinationString = destinations
++              .map((dest) => (dest && dest.id ? dest.id : setupNodeId(dest)))
++              .filter((id) => id != null)
++              .join(' ');
++            domProps['data-destinations'] = destinationString;
++          }
++        } else {
++          domProps.tabIndex = tabIndex === -999 ? '-999' : '-1';
++        }
+ 
+-    // 3. setup data-block-exit attributes for trapFocus* props
+-    const trapFocusString = `${trapFocusUp ? 'up' : ''}${
+-      trapFocusDown ? ' down' : ''
+-    }${trapFocusLeft ? ' left' : ''}${trapFocusRight ? ' right' : ''}`;
+-    if (trapFocusString.trim().length > 0) {
+-      domProps['data-block-exit'] = trapFocusString;
+-    }
++        const trapFocusString = `${trapFocusUp ? 'up' : ''}${
++          trapFocusDown ? ' down' : ''
++        }${trapFocusLeft ? ' left' : ''}${trapFocusRight ? ' right' : ''}`;
++        if (trapFocusString.trim().length > 0) {
++          domProps['data-block-exit'] = trapFocusString;
++        }
+ 
+-    // 4. setup lrud-ignore class if tvFocusable is false
+-    if (tvFocusable === false) {
+-      // this also means focusable is false
+-      domProps.className += ' lrud-ignore';
+-    }
+-  }
++        if (tvFocusable === false) {
++          domProps.className += ' lrud-ignore';
++        }
++      }
++    });
+ 
+-  // OTHER
+-  // Native element ID
+-  /*
++    profile('createDOMProps.otherProps', () => {
++      // OTHER
++      // Native element ID
++      /*
+   if (nativeID != null) {
+     warnOnce('nativeID', `nativeID is deprecated. Use id.`);
+   }
+   */
+-  const _id = id != null ? id : nativeID;
+-  if (_id != null) {
+-    domProps.id = _id;
+-  }
+-  // Automated test IDs
+-  if (testID != null) {
+-    domProps['data-testid'] = testID;
+-  }
++      const _id = id != null ? id : nativeID;
++      if (_id != null) {
++        domProps.id = _id;
++      }
++      if (testID != null) {
++        domProps['data-testid'] = testID;
++      }
++
++      if (domProps.type == null && elementType === 'button') {
++        domProps.type = 'button';
++      }
++    });
+ 
+-  if (domProps.type == null && elementType === 'button') {
+-    domProps.type = 'button';
++    return domProps;
++  } finally {
++    profileEnd('createDOMProps.total', totalProfile);
+   }
+-  return domProps;
+ };
+ 
+ export default createDOMProps;
+diff --git a/node_modules/react-native-web-tv/src/modules/benchmarkProfiler/index.js b/node_modules/react-native-web-tv/src/modules/benchmarkProfiler/index.js
+new file mode 100644
+index 00000000..0e2242dd
+--- /dev/null
++++ b/node_modules/react-native-web-tv/src/modules/benchmarkProfiler/index.js
+@@ -0,0 +1,104 @@
++/**
++ * Copyright (c) Nicolas Gallagher.
++ *
++ * This source code is licensed under the MIT license found in the
++ * LICENSE file in the root directory of this source tree.
++ *
++ * @noflow
++ */
++
++const GLOBAL_ENABLE_KEY = '__RNW_BENCHMARK_PROFILING__';
++const GLOBAL_API_KEY = '__RNW_BENCHMARK_PROFILE__';
++
++const profileMap = new Map();
++
++function canUseWindow() {
++  return typeof window !== 'undefined';
++}
++
++function isEnabled() {
++  return canUseWindow() && window[GLOBAL_ENABLE_KEY] === true;
++}
++
++function now() {
++  if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
++    return performance.now();
++  }
++  return Date.now();
++}
++
++function record(label, duration) {
++  const existing = profileMap.get(label);
++  if (existing != null) {
++    existing.calls += 1;
++    existing.totalTime += duration;
++    existing.maxTime = Math.max(existing.maxTime, duration);
++    return;
++  }
++
++  profileMap.set(label, {
++    calls: 1,
++    totalTime: duration,
++    maxTime: duration
++  });
++}
++
++function snapshot() {
++  return Array.from(profileMap.entries())
++    .map(([label, entry]) => ({
++      avgTime: entry.calls > 0 ? entry.totalTime / entry.calls : 0,
++      calls: entry.calls,
++      label,
++      maxTime: entry.maxTime,
++      totalTime: entry.totalTime
++    }))
++    .sort((a, b) => b.totalTime - a.totalTime);
++}
++
++function reset() {
++  profileMap.clear();
++}
++
++function snapshotAndReset() {
++  const result = snapshot();
++  reset();
++  return result;
++}
++
++function ensureGlobalApi() {
++  if (!canUseWindow() || window[GLOBAL_API_KEY] != null) {
++    return;
++  }
++
++  window[GLOBAL_API_KEY] = {
++    reset,
++    snapshot,
++    snapshotAndReset
++  };
++}
++
++export function profileStart(label) {
++  if (!isEnabled()) {
++    return null;
++  }
++
++  ensureGlobalApi();
++  return now();
++}
++
++export function profileEnd(label, startTime) {
++  if (startTime == null || !isEnabled()) {
++    return;
++  }
++
++  record(label, now() - startTime);
++}
++
++export function profile(label, callback) {
++  const startTime = profileStart(label);
++  try {
++    return callback();
++  } finally {
++    profileEnd(label, startTime);
++  }
++}
