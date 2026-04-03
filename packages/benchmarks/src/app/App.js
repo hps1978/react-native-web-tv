@@ -22,6 +22,22 @@ export default class App extends Component {
       status: 'idle',
       results: []
     };
+
+    this._automationMode = false;
+    this._automationQueue = [];
+    this._automationIndex = 0;
+    this._automationResults = [];
+  }
+
+  componentDidMount() {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const config = window.__BENCHMARK_AUTOMATION__;
+    if (config && config.enabled === true) {
+      this._startAutomation(config);
+    }
   }
 
   render() {
@@ -177,12 +193,104 @@ export default class App extends Component {
     this.setState(
       () => ({ status: 'running' }),
       () => {
+        if (window.__RNW_BENCHMARK_PROFILE__) {
+          window.__RNW_BENCHMARK_PROFILE__.reset();
+        }
         if (this._shouldHideBenchmark && this._benchWrapperRef) {
           this._benchWrapperRef.style.opacity = 0;
         }
         this._benchmarkRef.start();
         this._scrollToEnd();
       }
+    );
+  };
+
+  _startAutomation = (config) => {
+    const { tests } = this.props;
+    const benchmarkNames =
+      Array.isArray(config.benchmarkNames) && config.benchmarkNames.length > 0
+        ? config.benchmarkNames.filter((name) => tests[name])
+        : Object.keys(tests);
+    const repeat =
+      typeof config.repeat === 'number' && config.repeat > 0
+        ? Math.floor(config.repeat)
+        : 1;
+    const requestedLibrary = config.libraryName || 'react-native-web';
+    const firstBenchmarkName = benchmarkNames[0];
+
+    if (!firstBenchmarkName) {
+      return;
+    }
+
+    this._automationMode = true;
+    this._shouldHideBenchmark = true;
+    this._automationResults = [];
+    this._automationIndex = 0;
+    this._automationQueue = [];
+
+    benchmarkNames.forEach((benchmarkName) => {
+      if (!tests[benchmarkName]) {
+        return;
+      }
+
+      const libraryName = tests[benchmarkName][requestedLibrary]
+        ? requestedLibrary
+        : Object.keys(tests[benchmarkName])[0];
+
+      for (let run = 1; run <= repeat; run += 1) {
+        this._automationQueue.push({ benchmarkName, libraryName, run });
+      }
+    });
+
+    if (this._automationQueue.length === 0) {
+      return;
+    }
+
+    this.setState(
+      () => ({
+        currentBenchmarkName: firstBenchmarkName,
+        currentLibraryName: requestedLibrary,
+        results: []
+      }),
+      this._runNextAutomationItem
+    );
+  };
+
+  _runNextAutomationItem = () => {
+    if (!this._automationMode) {
+      return;
+    }
+
+    const next = this._automationQueue[this._automationIndex];
+    if (!next) {
+      this._finalizeAutomation();
+      return;
+    }
+
+    this.setState(
+      () => ({
+        currentBenchmarkName: next.benchmarkName,
+        currentLibraryName: next.libraryName,
+        status: 'idle'
+      }),
+      () => {
+        window.requestAnimationFrame(() => {
+          this._handleStart();
+        });
+      }
+    );
+  };
+
+  _finalizeAutomation = () => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.__BENCHMARK_RESULTS__ = this._automationResults.slice();
+    window.dispatchEvent(
+      new CustomEvent('benchmark:complete', {
+        detail: window.__BENCHMARK_RESULTS__
+      })
     );
   };
 
@@ -197,20 +305,40 @@ export default class App extends Component {
   _createHandleComplete =
     ({ benchmarkName, libraryName, sampleCount }) =>
     (results) => {
+      const benchmarkMetadata =
+        this.props.tests[benchmarkName][libraryName].benchmarkMetadata;
+      const benchmarkProfile = window.__RNW_BENCHMARK_PROFILE__
+        ? window.__RNW_BENCHMARK_PROFILE__.snapshotAndReset()
+        : [];
+      const nextResult = {
+        ...results,
+        benchmarkName,
+        benchmarkMetadata,
+        benchmarkProfile,
+        libraryName,
+        libraryVersion: this.props.tests[benchmarkName][libraryName].version,
+        run:
+          this._automationMode && this._automationQueue[this._automationIndex]
+            ? this._automationQueue[this._automationIndex].run
+            : 1
+      };
+
       this.setState(
         (state) => ({
-          results: state.results.concat([
-            {
-              ...results,
-              benchmarkName,
-              libraryName,
-              libraryVersion:
-                this.props.tests[benchmarkName][libraryName].version
-            }
-          ]),
+          results: state.results.concat([nextResult]),
           status: 'complete'
         }),
-        this._scrollToEnd
+        () => {
+          this._scrollToEnd();
+
+          if (!this._automationMode) {
+            return;
+          }
+
+          this._automationResults.push(nextResult);
+          this._automationIndex += 1;
+          this._runNextAutomationItem();
+        }
       );
       // console.log(results);
       // console.log(results.samples.map(sample => sample.elapsed.toFixed(1)).join('\n'));

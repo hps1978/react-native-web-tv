@@ -1,0 +1,5864 @@
+{
+  "generatedAt": "2026-03-30T21:09:51.286Z",
+  "environment": {
+    "browser": "chromium",
+    "mode": "headless"
+  },
+  "config": {
+    "enabled": true,
+    "libraryName": "react-native-web",
+    "profile": true,
+    "repeat": 1,
+    "benchmarkNames": [
+      "Update host styles",
+      "Update host DOM props",
+      "Update host accessibility props",
+      "Update host props",
+      "Update view styles",
+      "Update view props"
+    ]
+  },
+  "results": [
+    {
+      "startTime": 133.20000004768372,
+      "endTime": 1097.7999999523163,
+      "runTime": 964.5999999046326,
+      "sampleCount": 100,
+      "samples": [
+        {
+          "start": 133.20000004768372,
+          "end": 146.40000009536743,
+          "scriptingStart": 133.20000004768372,
+          "scriptingEnd": 144.20000004768372,
+          "layoutStart": 144.20000004768372,
+          "layoutEnd": 146.40000009536743
+        },
+        {
+          "start": 148.90000009536743,
+          "end": 158.20000004768372,
+          "scriptingStart": 148.90000009536743,
+          "scriptingEnd": 158,
+          "layoutStart": 158,
+          "layoutEnd": 158.20000004768372
+        },
+        {
+          "start": 164.29999995231628,
+          "end": 173.70000004768372,
+          "scriptingStart": 164.29999995231628,
+          "scriptingEnd": 173.20000004768372,
+          "layoutStart": 173.20000004768372,
+          "layoutEnd": 173.70000004768372
+        },
+        {
+          "start": 175,
+          "end": 184.10000014305115,
+          "scriptingStart": 175,
+          "scriptingEnd": 183.60000014305115,
+          "layoutStart": 183.60000014305115,
+          "layoutEnd": 184.10000014305115
+        },
+        {
+          "start": 186.29999995231628,
+          "end": 195.60000014305115,
+          "scriptingStart": 186.29999995231628,
+          "scriptingEnd": 195,
+          "layoutStart": 195,
+          "layoutEnd": 195.60000014305115
+        },
+        {
+          "start": 196.29999995231628,
+          "end": 205.20000004768372,
+          "scriptingStart": 196.29999995231628,
+          "scriptingEnd": 204.70000004768372,
+          "layoutStart": 204.70000004768372,
+          "layoutEnd": 205.20000004768372
+        },
+        {
+          "start": 205.79999995231628,
+          "end": 215.10000014305115,
+          "scriptingStart": 205.79999995231628,
+          "scriptingEnd": 214.5,
+          "layoutStart": 214.5,
+          "layoutEnd": 215.10000014305115
+        },
+        {
+          "start": 215.70000004768372,
+          "end": 224.79999995231628,
+          "scriptingStart": 215.70000004768372,
+          "scriptingEnd": 224.10000014305115,
+          "layoutStart": 224.20000004768372,
+          "layoutEnd": 224.79999995231628
+        },
+        {
+          "start": 225.5,
+          "end": 234.79999995231628,
+          "scriptingStart": 225.5,
+          "scriptingEnd": 234.20000004768372,
+          "layoutStart": 234.20000004768372,
+          "layoutEnd": 234.79999995231628
+        },
+        {
+          "start": 235.5,
+          "end": 243.90000009536743,
+          "scriptingStart": 235.5,
+          "scriptingEnd": 243.40000009536743,
+          "layoutStart": 243.40000009536743,
+          "layoutEnd": 243.90000009536743
+        },
+        {
+          "start": 244.5,
+          "end": 253.70000004768372,
+          "scriptingStart": 244.5,
+          "scriptingEnd": 253.29999995231628,
+          "layoutStart": 253.29999995231628,
+          "layoutEnd": 253.70000004768372
+        },
+        {
+          "start": 254.5,
+          "end": 263.2999999523163,
+          "scriptingStart": 254.5,
+          "scriptingEnd": 262.7000000476837,
+          "layoutStart": 262.7000000476837,
+          "layoutEnd": 263.2999999523163
+        },
+        {
+          "start": 264,
+          "end": 273.2000000476837,
+          "scriptingStart": 264,
+          "scriptingEnd": 272.60000014305115,
+          "layoutStart": 272.60000014305115,
+          "layoutEnd": 273.2000000476837
+        },
+        {
+          "start": 273.7999999523163,
+          "end": 282.2000000476837,
+          "scriptingStart": 273.7999999523163,
+          "scriptingEnd": 281.7000000476837,
+          "layoutStart": 281.7000000476837,
+          "layoutEnd": 282.2000000476837
+        },
+        {
+          "start": 282.90000009536743,
+          "end": 291.5,
+          "scriptingStart": 282.90000009536743,
+          "scriptingEnd": 290.90000009536743,
+          "layoutStart": 290.90000009536743,
+          "layoutEnd": 291.5
+        },
+        {
+          "start": 292.10000014305115,
+          "end": 301.2000000476837,
+          "scriptingStart": 292.10000014305115,
+          "scriptingEnd": 300.5,
+          "layoutStart": 300.5,
+          "layoutEnd": 301.2000000476837
+        },
+        {
+          "start": 301.7999999523163,
+          "end": 310.60000014305115,
+          "scriptingStart": 301.7999999523163,
+          "scriptingEnd": 310,
+          "layoutStart": 310,
+          "layoutEnd": 310.60000014305115
+        },
+        {
+          "start": 311.2000000476837,
+          "end": 320.90000009536743,
+          "scriptingStart": 311.2000000476837,
+          "scriptingEnd": 320.2000000476837,
+          "layoutStart": 320.2000000476837,
+          "layoutEnd": 320.90000009536743
+        },
+        {
+          "start": 321.60000014305115,
+          "end": 330.2999999523163,
+          "scriptingStart": 321.60000014305115,
+          "scriptingEnd": 329.7999999523163,
+          "layoutStart": 329.7999999523163,
+          "layoutEnd": 330.2999999523163
+        },
+        {
+          "start": 330.90000009536743,
+          "end": 339.90000009536743,
+          "scriptingStart": 330.90000009536743,
+          "scriptingEnd": 339.2999999523163,
+          "layoutStart": 339.2999999523163,
+          "layoutEnd": 339.90000009536743
+        },
+        {
+          "start": 340.60000014305115,
+          "end": 349.2999999523163,
+          "scriptingStart": 340.60000014305115,
+          "scriptingEnd": 348.7000000476837,
+          "layoutStart": 348.7000000476837,
+          "layoutEnd": 349.2999999523163
+        },
+        {
+          "start": 349.90000009536743,
+          "end": 358.90000009536743,
+          "scriptingStart": 349.90000009536743,
+          "scriptingEnd": 358.2999999523163,
+          "layoutStart": 358.2999999523163,
+          "layoutEnd": 358.90000009536743
+        },
+        {
+          "start": 359.60000014305115,
+          "end": 368.60000014305115,
+          "scriptingStart": 359.60000014305115,
+          "scriptingEnd": 368,
+          "layoutStart": 368,
+          "layoutEnd": 368.60000014305115
+        },
+        {
+          "start": 369.2999999523163,
+          "end": 378.2999999523163,
+          "scriptingStart": 369.2999999523163,
+          "scriptingEnd": 377.7999999523163,
+          "layoutStart": 377.7999999523163,
+          "layoutEnd": 378.2999999523163
+        },
+        {
+          "start": 379,
+          "end": 387.7999999523163,
+          "scriptingStart": 379,
+          "scriptingEnd": 387.2999999523163,
+          "layoutStart": 387.2999999523163,
+          "layoutEnd": 387.7999999523163
+        },
+        {
+          "start": 388.40000009536743,
+          "end": 397.90000009536743,
+          "scriptingStart": 388.40000009536743,
+          "scriptingEnd": 397.2999999523163,
+          "layoutStart": 397.2999999523163,
+          "layoutEnd": 397.90000009536743
+        },
+        {
+          "start": 398.5,
+          "end": 407.10000014305115,
+          "scriptingStart": 398.5,
+          "scriptingEnd": 406.40000009536743,
+          "layoutStart": 406.40000009536743,
+          "layoutEnd": 407.10000014305115
+        },
+        {
+          "start": 407.7999999523163,
+          "end": 417.10000014305115,
+          "scriptingStart": 407.7999999523163,
+          "scriptingEnd": 416.5,
+          "layoutStart": 416.5,
+          "layoutEnd": 417.10000014305115
+        },
+        {
+          "start": 417.7999999523163,
+          "end": 426.7999999523163,
+          "scriptingStart": 417.7999999523163,
+          "scriptingEnd": 426.2999999523163,
+          "layoutStart": 426.2999999523163,
+          "layoutEnd": 426.7999999523163
+        },
+        {
+          "start": 427.5,
+          "end": 436.60000014305115,
+          "scriptingStart": 427.5,
+          "scriptingEnd": 436,
+          "layoutStart": 436,
+          "layoutEnd": 436.60000014305115
+        },
+        {
+          "start": 437.2000000476837,
+          "end": 446.10000014305115,
+          "scriptingStart": 437.2000000476837,
+          "scriptingEnd": 445.60000014305115,
+          "layoutStart": 445.60000014305115,
+          "layoutEnd": 446.10000014305115
+        },
+        {
+          "start": 446.7000000476837,
+          "end": 455.2000000476837,
+          "scriptingStart": 446.7000000476837,
+          "scriptingEnd": 454.60000014305115,
+          "layoutStart": 454.60000014305115,
+          "layoutEnd": 455.2000000476837
+        },
+        {
+          "start": 455.7999999523163,
+          "end": 464.2999999523163,
+          "scriptingStart": 455.7999999523163,
+          "scriptingEnd": 463.7000000476837,
+          "layoutStart": 463.7000000476837,
+          "layoutEnd": 464.2999999523163
+        },
+        {
+          "start": 465,
+          "end": 473.40000009536743,
+          "scriptingStart": 465,
+          "scriptingEnd": 472.90000009536743,
+          "layoutStart": 472.90000009536743,
+          "layoutEnd": 473.40000009536743
+        },
+        {
+          "start": 474,
+          "end": 482.5,
+          "scriptingStart": 474,
+          "scriptingEnd": 481.90000009536743,
+          "layoutStart": 481.90000009536743,
+          "layoutEnd": 482.5
+        },
+        {
+          "start": 483,
+          "end": 492.10000014305115,
+          "scriptingStart": 483,
+          "scriptingEnd": 491.5,
+          "layoutStart": 491.5,
+          "layoutEnd": 492.10000014305115
+        },
+        {
+          "start": 492.7000000476837,
+          "end": 501,
+          "scriptingStart": 492.7000000476837,
+          "scriptingEnd": 500.5,
+          "layoutStart": 500.5,
+          "layoutEnd": 501
+        },
+        {
+          "start": 501.60000014305115,
+          "end": 510.10000014305115,
+          "scriptingStart": 501.60000014305115,
+          "scriptingEnd": 509.5,
+          "layoutStart": 509.5,
+          "layoutEnd": 510.10000014305115
+        },
+        {
+          "start": 510.7000000476837,
+          "end": 519,
+          "scriptingStart": 510.7000000476837,
+          "scriptingEnd": 518.5,
+          "layoutStart": 518.5,
+          "layoutEnd": 519
+        },
+        {
+          "start": 519.6000001430511,
+          "end": 528.6000001430511,
+          "scriptingStart": 519.6000001430511,
+          "scriptingEnd": 528,
+          "layoutStart": 528,
+          "layoutEnd": 528.6000001430511
+        },
+        {
+          "start": 529.1000001430511,
+          "end": 538,
+          "scriptingStart": 529.1000001430511,
+          "scriptingEnd": 537.4000000953674,
+          "layoutStart": 537.4000000953674,
+          "layoutEnd": 538
+        },
+        {
+          "start": 538.7000000476837,
+          "end": 547.5,
+          "scriptingStart": 538.7000000476837,
+          "scriptingEnd": 547,
+          "layoutStart": 547,
+          "layoutEnd": 547.5
+        },
+        {
+          "start": 548.1000001430511,
+          "end": 556.6000001430511,
+          "scriptingStart": 548.1000001430511,
+          "scriptingEnd": 556.2000000476837,
+          "layoutStart": 556.2000000476837,
+          "layoutEnd": 556.6000001430511
+        },
+        {
+          "start": 557.2999999523163,
+          "end": 566.2000000476837,
+          "scriptingStart": 557.2999999523163,
+          "scriptingEnd": 565.6000001430511,
+          "layoutStart": 565.6000001430511,
+          "layoutEnd": 566.2000000476837
+        },
+        {
+          "start": 566.7999999523163,
+          "end": 576.1000001430511,
+          "scriptingStart": 566.7999999523163,
+          "scriptingEnd": 575.5,
+          "layoutStart": 575.5,
+          "layoutEnd": 576.1000001430511
+        },
+        {
+          "start": 576.7000000476837,
+          "end": 585.6000001430511,
+          "scriptingStart": 576.7000000476837,
+          "scriptingEnd": 584.9000000953674,
+          "layoutStart": 585,
+          "layoutEnd": 585.6000001430511
+        },
+        {
+          "start": 586.2999999523163,
+          "end": 594.7999999523163,
+          "scriptingStart": 586.2999999523163,
+          "scriptingEnd": 594.2000000476837,
+          "layoutStart": 594.2000000476837,
+          "layoutEnd": 594.7999999523163
+        },
+        {
+          "start": 595.4000000953674,
+          "end": 603.7999999523163,
+          "scriptingStart": 595.4000000953674,
+          "scriptingEnd": 603.2000000476837,
+          "layoutStart": 603.2000000476837,
+          "layoutEnd": 603.7999999523163
+        },
+        {
+          "start": 604.4000000953674,
+          "end": 612.9000000953674,
+          "scriptingStart": 604.4000000953674,
+          "scriptingEnd": 612.2999999523163,
+          "layoutStart": 612.2999999523163,
+          "layoutEnd": 612.9000000953674
+        },
+        {
+          "start": 613.5,
+          "end": 622.7000000476837,
+          "scriptingStart": 613.5,
+          "scriptingEnd": 622,
+          "layoutStart": 622,
+          "layoutEnd": 622.7000000476837
+        },
+        {
+          "start": 623.2999999523163,
+          "end": 631.5,
+          "scriptingStart": 623.2999999523163,
+          "scriptingEnd": 631,
+          "layoutStart": 631,
+          "layoutEnd": 631.5
+        },
+        {
+          "start": 632.1000001430511,
+          "end": 640.4000000953674,
+          "scriptingStart": 632.1000001430511,
+          "scriptingEnd": 639.7999999523163,
+          "layoutStart": 639.7999999523163,
+          "layoutEnd": 640.4000000953674
+        },
+        {
+          "start": 640.7999999523163,
+          "end": 649.1000001430511,
+          "scriptingStart": 640.7999999523163,
+          "scriptingEnd": 648.5,
+          "layoutStart": 648.5,
+          "layoutEnd": 649.1000001430511
+        },
+        {
+          "start": 649.6000001430511,
+          "end": 658.2000000476837,
+          "scriptingStart": 649.6000001430511,
+          "scriptingEnd": 657.6000001430511,
+          "layoutStart": 657.6000001430511,
+          "layoutEnd": 658.2000000476837
+        },
+        {
+          "start": 658.7000000476837,
+          "end": 667.5,
+          "scriptingStart": 658.7000000476837,
+          "scriptingEnd": 666.9000000953674,
+          "layoutStart": 666.9000000953674,
+          "layoutEnd": 667.5
+        },
+        {
+          "start": 668.2000000476837,
+          "end": 676.7000000476837,
+          "scriptingStart": 668.2000000476837,
+          "scriptingEnd": 676.2000000476837,
+          "layoutStart": 676.2000000476837,
+          "layoutEnd": 676.7000000476837
+        },
+        {
+          "start": 677.2999999523163,
+          "end": 685.4000000953674,
+          "scriptingStart": 677.2999999523163,
+          "scriptingEnd": 684.9000000953674,
+          "layoutStart": 684.9000000953674,
+          "layoutEnd": 685.4000000953674
+        },
+        {
+          "start": 686,
+          "end": 694.5,
+          "scriptingStart": 686,
+          "scriptingEnd": 694,
+          "layoutStart": 694,
+          "layoutEnd": 694.5
+        },
+        {
+          "start": 695,
+          "end": 704.2999999523163,
+          "scriptingStart": 695,
+          "scriptingEnd": 703.7999999523163,
+          "layoutStart": 703.7999999523163,
+          "layoutEnd": 704.2999999523163
+        },
+        {
+          "start": 705,
+          "end": 714.2999999523163,
+          "scriptingStart": 705,
+          "scriptingEnd": 713.7000000476837,
+          "layoutStart": 713.7000000476837,
+          "layoutEnd": 714.2999999523163
+        },
+        {
+          "start": 715.1000001430511,
+          "end": 723.7999999523163,
+          "scriptingStart": 715.1000001430511,
+          "scriptingEnd": 723.1000001430511,
+          "layoutStart": 723.1000001430511,
+          "layoutEnd": 723.7999999523163
+        },
+        {
+          "start": 724.4000000953674,
+          "end": 732.6000001430511,
+          "scriptingStart": 724.4000000953674,
+          "scriptingEnd": 732.1000001430511,
+          "layoutStart": 732.1000001430511,
+          "layoutEnd": 732.6000001430511
+        },
+        {
+          "start": 733.2000000476837,
+          "end": 741.2999999523163,
+          "scriptingStart": 733.2000000476837,
+          "scriptingEnd": 740.7000000476837,
+          "layoutStart": 740.7000000476837,
+          "layoutEnd": 741.2999999523163
+        },
+        {
+          "start": 741.7999999523163,
+          "end": 750.6000001430511,
+          "scriptingStart": 741.7999999523163,
+          "scriptingEnd": 750.1000001430511,
+          "layoutStart": 750.1000001430511,
+          "layoutEnd": 750.6000001430511
+        },
+        {
+          "start": 751.2000000476837,
+          "end": 759.5,
+          "scriptingStart": 751.2000000476837,
+          "scriptingEnd": 759,
+          "layoutStart": 759,
+          "layoutEnd": 759.5
+        },
+        {
+          "start": 760.1000001430511,
+          "end": 768.2999999523163,
+          "scriptingStart": 760.1000001430511,
+          "scriptingEnd": 767.7999999523163,
+          "layoutStart": 767.7999999523163,
+          "layoutEnd": 768.2999999523163
+        },
+        {
+          "start": 768.7999999523163,
+          "end": 776.9000000953674,
+          "scriptingStart": 768.7999999523163,
+          "scriptingEnd": 776.4000000953674,
+          "layoutStart": 776.4000000953674,
+          "layoutEnd": 776.9000000953674
+        },
+        {
+          "start": 777.4000000953674,
+          "end": 786.1000001430511,
+          "scriptingStart": 777.4000000953674,
+          "scriptingEnd": 785.6000001430511,
+          "layoutStart": 785.6000001430511,
+          "layoutEnd": 786.1000001430511
+        },
+        {
+          "start": 786.6000001430511,
+          "end": 795.4000000953674,
+          "scriptingStart": 786.6000001430511,
+          "scriptingEnd": 794.7999999523163,
+          "layoutStart": 794.7999999523163,
+          "layoutEnd": 795.4000000953674
+        },
+        {
+          "start": 796.1000001430511,
+          "end": 805.1000001430511,
+          "scriptingStart": 796.1000001430511,
+          "scriptingEnd": 804.5,
+          "layoutStart": 804.5,
+          "layoutEnd": 805.1000001430511
+        },
+        {
+          "start": 805.7000000476837,
+          "end": 814,
+          "scriptingStart": 805.7000000476837,
+          "scriptingEnd": 813.2999999523163,
+          "layoutStart": 813.2999999523163,
+          "layoutEnd": 814
+        },
+        {
+          "start": 814.7000000476837,
+          "end": 823.6000001430511,
+          "scriptingStart": 814.7000000476837,
+          "scriptingEnd": 823.1000001430511,
+          "layoutStart": 823.1000001430511,
+          "layoutEnd": 823.6000001430511
+        },
+        {
+          "start": 824.2999999523163,
+          "end": 833.4000000953674,
+          "scriptingStart": 824.2999999523163,
+          "scriptingEnd": 832.7999999523163,
+          "layoutStart": 832.7999999523163,
+          "layoutEnd": 833.4000000953674
+        },
+        {
+          "start": 834,
+          "end": 842.2000000476837,
+          "scriptingStart": 834,
+          "scriptingEnd": 841.7000000476837,
+          "layoutStart": 841.7000000476837,
+          "layoutEnd": 842.2000000476837
+        },
+        {
+          "start": 842.7999999523163,
+          "end": 851.1000001430511,
+          "scriptingStart": 842.7999999523163,
+          "scriptingEnd": 850.5,
+          "layoutStart": 850.5,
+          "layoutEnd": 851.1000001430511
+        },
+        {
+          "start": 855.1000001430511,
+          "end": 867,
+          "scriptingStart": 855.1000001430511,
+          "scriptingEnd": 866.2999999523163,
+          "layoutStart": 866.2999999523163,
+          "layoutEnd": 867
+        },
+        {
+          "start": 867.7000000476837,
+          "end": 876.2000000476837,
+          "scriptingStart": 867.7000000476837,
+          "scriptingEnd": 875.7000000476837,
+          "layoutStart": 875.7000000476837,
+          "layoutEnd": 876.2000000476837
+        },
+        {
+          "start": 876.9000000953674,
+          "end": 885.7999999523163,
+          "scriptingStart": 876.9000000953674,
+          "scriptingEnd": 885.2000000476837,
+          "layoutStart": 885.2000000476837,
+          "layoutEnd": 885.7999999523163
+        },
+        {
+          "start": 886.6000001430511,
+          "end": 894.9000000953674,
+          "scriptingStart": 886.6000001430511,
+          "scriptingEnd": 894.4000000953674,
+          "layoutStart": 894.4000000953674,
+          "layoutEnd": 894.9000000953674
+        },
+        {
+          "start": 895.5,
+          "end": 905.1000001430511,
+          "scriptingStart": 895.5,
+          "scriptingEnd": 904.5,
+          "layoutStart": 904.5,
+          "layoutEnd": 905.1000001430511
+        },
+        {
+          "start": 905.7999999523163,
+          "end": 914.9000000953674,
+          "scriptingStart": 905.7999999523163,
+          "scriptingEnd": 914.2999999523163,
+          "layoutStart": 914.2999999523163,
+          "layoutEnd": 914.9000000953674
+        },
+        {
+          "start": 915.6000001430511,
+          "end": 924.9000000953674,
+          "scriptingStart": 915.6000001430511,
+          "scriptingEnd": 924.2999999523163,
+          "layoutStart": 924.2999999523163,
+          "layoutEnd": 924.9000000953674
+        },
+        {
+          "start": 925.6000001430511,
+          "end": 934.5,
+          "scriptingStart": 925.6000001430511,
+          "scriptingEnd": 934,
+          "layoutStart": 934,
+          "layoutEnd": 934.5
+        },
+        {
+          "start": 935.2999999523163,
+          "end": 944.1000001430511,
+          "scriptingStart": 935.2999999523163,
+          "scriptingEnd": 943.5,
+          "layoutStart": 943.5,
+          "layoutEnd": 944.1000001430511
+        },
+        {
+          "start": 944.7000000476837,
+          "end": 953.6000001430511,
+          "scriptingStart": 944.7000000476837,
+          "scriptingEnd": 953,
+          "layoutStart": 953,
+          "layoutEnd": 953.6000001430511
+        },
+        {
+          "start": 954.2999999523163,
+          "end": 963.1000001430511,
+          "scriptingStart": 954.2999999523163,
+          "scriptingEnd": 962.5,
+          "layoutStart": 962.5,
+          "layoutEnd": 963.1000001430511
+        },
+        {
+          "start": 967.7999999523163,
+          "end": 976.7999999523163,
+          "scriptingStart": 967.7999999523163,
+          "scriptingEnd": 976.2999999523163,
+          "layoutStart": 976.2999999523163,
+          "layoutEnd": 976.7999999523163
+        },
+        {
+          "start": 977.6000001430511,
+          "end": 985.7999999523163,
+          "scriptingStart": 977.6000001430511,
+          "scriptingEnd": 985.2000000476837,
+          "layoutStart": 985.2000000476837,
+          "layoutEnd": 985.7999999523163
+        },
+        {
+          "start": 986.2999999523163,
+          "end": 994.4000000953674,
+          "scriptingStart": 986.2999999523163,
+          "scriptingEnd": 993.9000000953674,
+          "layoutStart": 993.9000000953674,
+          "layoutEnd": 994.4000000953674
+        },
+        {
+          "start": 994.9000000953674,
+          "end": 1004,
+          "scriptingStart": 994.9000000953674,
+          "scriptingEnd": 1003.4000000953674,
+          "layoutStart": 1003.4000000953674,
+          "layoutEnd": 1004
+        },
+        {
+          "start": 1004.6000001430511,
+          "end": 1013.6000001430511,
+          "scriptingStart": 1004.6000001430511,
+          "scriptingEnd": 1013.1000001430511,
+          "layoutStart": 1013.1000001430511,
+          "layoutEnd": 1013.6000001430511
+        },
+        {
+          "start": 1014.4000000953674,
+          "end": 1022.7999999523163,
+          "scriptingStart": 1014.4000000953674,
+          "scriptingEnd": 1022.4000000953674,
+          "layoutStart": 1022.4000000953674,
+          "layoutEnd": 1022.7999999523163
+        },
+        {
+          "start": 1023.5,
+          "end": 1032.2000000476837,
+          "scriptingStart": 1023.5,
+          "scriptingEnd": 1031.7000000476837,
+          "layoutStart": 1031.7000000476837,
+          "layoutEnd": 1032.2000000476837
+        },
+        {
+          "start": 1032.7999999523163,
+          "end": 1041.7000000476837,
+          "scriptingStart": 1032.7999999523163,
+          "scriptingEnd": 1041.1000001430511,
+          "layoutStart": 1041.1000001430511,
+          "layoutEnd": 1041.7000000476837
+        },
+        {
+          "start": 1042.2000000476837,
+          "end": 1050.4000000953674,
+          "scriptingStart": 1042.2000000476837,
+          "scriptingEnd": 1049.7999999523163,
+          "layoutStart": 1049.7999999523163,
+          "layoutEnd": 1050.4000000953674
+        },
+        {
+          "start": 1051.1000001430511,
+          "end": 1060.7999999523163,
+          "scriptingStart": 1051.1000001430511,
+          "scriptingEnd": 1060.1000001430511,
+          "layoutStart": 1060.1000001430511,
+          "layoutEnd": 1060.7999999523163
+        },
+        {
+          "start": 1061.6000001430511,
+          "end": 1070.2000000476837,
+          "scriptingStart": 1061.6000001430511,
+          "scriptingEnd": 1069.6000001430511,
+          "layoutStart": 1069.6000001430511,
+          "layoutEnd": 1070.2000000476837
+        },
+        {
+          "start": 1070.7999999523163,
+          "end": 1078.7999999523163,
+          "scriptingStart": 1070.7999999523163,
+          "scriptingEnd": 1078.4000000953674,
+          "layoutStart": 1078.4000000953674,
+          "layoutEnd": 1078.7999999523163
+        },
+        {
+          "start": 1079.4000000953674,
+          "end": 1088.4000000953674,
+          "scriptingStart": 1079.4000000953674,
+          "scriptingEnd": 1087.7999999523163,
+          "layoutStart": 1087.7999999523163,
+          "layoutEnd": 1088.4000000953674
+        },
+        {
+          "start": 1089,
+          "end": 1097.7999999523163,
+          "scriptingStart": 1089,
+          "scriptingEnd": 1097.2000000476837,
+          "layoutStart": 1097.2000000476837,
+          "layoutEnd": 1097.7999999523163
+        }
+      ],
+      "max": 13.200000047683716,
+      "min": 8,
+      "median": 8.800000190734863,
+      "mean": 8.850000014305115,
+      "stdDev": 0.6667083338193672,
+      "meanLayout": 0.5780000185966492,
+      "meanScripting": 8.269999997615814,
+      "benchmarkName": "Update host styles",
+      "benchmarkMetadata": {
+        "description": "Update many direct host nodes with style changes only, without prop churn.",
+        "intent": "update-style",
+        "layer": "Layer 1",
+        "nodeCount": 360,
+        "primitive": "createElement",
+        "changedPropCountPerNode": 0,
+        "changedStyleCountPerNode": 5
+      },
+      "benchmarkProfile": [
+        {
+          "avgTime": 0.01699994455699966,
+          "calls": 36006,
+          "label": "createElement.total",
+          "maxTime": 2.700000047683716,
+          "totalTime": 612.1000037193298
+        },
+        {
+          "avgTime": 0.01522524029203556,
+          "calls": 36006,
+          "label": "createElement.createDOMProps",
+          "maxTime": 2.700000047683716,
+          "totalTime": 548.2000019550323
+        },
+        {
+          "avgTime": 0.014683663921211055,
+          "calls": 36006,
+          "label": "createDOMProps.total",
+          "maxTime": 2.700000047683716,
+          "totalTime": 528.7000031471252
+        },
+        {
+          "avgTime": 0.010264956003585431,
+          "calls": 36006,
+          "label": "createDOMProps.styleProps",
+          "maxTime": 2.700000047683716,
+          "totalTime": 369.60000586509705
+        },
+        {
+          "avgTime": 0.00974004349297751,
+          "calls": 36006,
+          "label": "createDOMProps.StyleSheet",
+          "maxTime": 2.700000047683716,
+          "totalTime": 350.7000060081482
+        },
+        {
+          "avgTime": 0.009167916667611707,
+          "calls": 36006,
+          "label": "StyleSheet.resolve",
+          "maxTime": 2.700000047683716,
+          "totalTime": 330.1000075340271
+        },
+        {
+          "avgTime": 0.005340776575649274,
+          "calls": 36006,
+          "label": "StyleSheet.customStyleq",
+          "maxTime": 0.5,
+          "totalTime": 192.30000138282776
+        },
+        {
+          "avgTime": 0.002986111296547784,
+          "calls": 36000,
+          "label": "StyleSheet.inline",
+          "maxTime": 2.700000047683716,
+          "totalTime": 107.50000667572021
+        },
+        {
+          "avgTime": 0.0005992753557536913,
+          "calls": 138000,
+          "label": "StyleSheet.customStyleq.preprocess",
+          "maxTime": 0.5,
+          "totalTime": 82.6999990940094
+        },
+        {
+          "avgTime": 0.0008440928146042427,
+          "calls": 36015,
+          "label": "StyleSheet.customStyleq.cacheHit",
+          "maxTime": 0.40000009536743164,
+          "totalTime": 30.4000027179718
+        },
+        {
+          "avgTime": 0.00033319450891069216,
+          "calls": 36015,
+          "label": "StyleSheet.localizeStyle",
+          "maxTime": 0.39999985694885254,
+          "totalTime": 12.000000238418579
+        },
+        {
+          "avgTime": 0.0003027273060076569,
+          "calls": 36006,
+          "label": "createDOMProps.tvProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 10.899999380111694
+        },
+        {
+          "avgTime": 0.00029717268152103975,
+          "calls": 36006,
+          "label": "createDOMProps.dataSetProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 10.699999570846558
+        },
+        {
+          "avgTime": 0.0002860634391694402,
+          "calls": 36006,
+          "label": "createElement.React.createElement",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 10.300000190734863
+        },
+        {
+          "avgTime": 0.0002721768051149156,
+          "calls": 36006,
+          "label": "createDOMProps.accessibilityProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 9.799998044967651
+        },
+        {
+          "avgTime": 0.00025829029024981566,
+          "calls": 36006,
+          "label": "createDOMProps.propsToAriaRole",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 9.300000190734863
+        },
+        {
+          "avgTime": 0.0002527356723848332,
+          "calls": 36006,
+          "label": "createElement.propsToAccessibilityComponent",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 9.100000619888306
+        },
+        {
+          "avgTime": 0.00023607176581680832,
+          "calls": 36006,
+          "label": "createDOMProps.focusProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 8.5
+        },
+        {
+          "avgTime": 0.00021663056024874422,
+          "calls": 36006,
+          "label": "createDOMProps.otherProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 7.799999952316284
+        },
+        {
+          "avgTime": 0.0333333412806193,
+          "calls": 6,
+          "label": "View.render",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 0.20000004768371582
+        },
+        {
+          "avgTime": 0,
+          "calls": 6,
+          "label": "View.pickProps",
+          "maxTime": 0,
+          "totalTime": 0
+        }
+      ],
+      "libraryName": "react-native-web",
+      "libraryVersion": "",
+      "run": 1
+    },
+    {
+      "startTime": 1130,
+      "endTime": 1961.1000001430511,
+      "runTime": 831.1000001430511,
+      "sampleCount": 100,
+      "samples": [
+        {
+          "start": 1130,
+          "end": 1141.1000001430511,
+          "scriptingStart": 1130,
+          "scriptingEnd": 1139.2000000476837,
+          "layoutStart": 1139.2000000476837,
+          "layoutEnd": 1141.1000001430511
+        },
+        {
+          "start": 1141.7999999523163,
+          "end": 1149.5,
+          "scriptingStart": 1141.7999999523163,
+          "scriptingEnd": 1149.5,
+          "layoutStart": 1149.5,
+          "layoutEnd": 1149.5
+        },
+        {
+          "start": 1149.7000000476837,
+          "end": 1157.7999999523163,
+          "scriptingStart": 1149.7000000476837,
+          "scriptingEnd": 1157.5,
+          "layoutStart": 1157.5,
+          "layoutEnd": 1157.7999999523163
+        },
+        {
+          "start": 1158,
+          "end": 1167,
+          "scriptingStart": 1158,
+          "scriptingEnd": 1166.2000000476837,
+          "layoutStart": 1166.2000000476837,
+          "layoutEnd": 1167
+        },
+        {
+          "start": 1167.5,
+          "end": 1175,
+          "scriptingStart": 1167.5,
+          "scriptingEnd": 1174.7999999523163,
+          "layoutStart": 1174.7999999523163,
+          "layoutEnd": 1175
+        },
+        {
+          "start": 1175.2000000476837,
+          "end": 1183.2000000476837,
+          "scriptingStart": 1175.2000000476837,
+          "scriptingEnd": 1182.4000000953674,
+          "layoutStart": 1182.4000000953674,
+          "layoutEnd": 1183.2000000476837
+        },
+        {
+          "start": 1183.6000001430511,
+          "end": 1191.2000000476837,
+          "scriptingStart": 1183.6000001430511,
+          "scriptingEnd": 1191.1000001430511,
+          "layoutStart": 1191.1000001430511,
+          "layoutEnd": 1191.2000000476837
+        },
+        {
+          "start": 1191.5,
+          "end": 1200.6000001430511,
+          "scriptingStart": 1191.5,
+          "scriptingEnd": 1199.7000000476837,
+          "layoutStart": 1199.7000000476837,
+          "layoutEnd": 1200.6000001430511
+        },
+        {
+          "start": 1201.1000001430511,
+          "end": 1209.7000000476837,
+          "scriptingStart": 1201.1000001430511,
+          "scriptingEnd": 1209.5,
+          "layoutStart": 1209.5,
+          "layoutEnd": 1209.7000000476837
+        },
+        {
+          "start": 1209.9000000953674,
+          "end": 1218.4000000953674,
+          "scriptingStart": 1209.9000000953674,
+          "scriptingEnd": 1217.6000001430511,
+          "layoutStart": 1217.6000001430511,
+          "layoutEnd": 1218.4000000953674
+        },
+        {
+          "start": 1218.9000000953674,
+          "end": 1226.4000000953674,
+          "scriptingStart": 1218.9000000953674,
+          "scriptingEnd": 1226.2000000476837,
+          "layoutStart": 1226.2000000476837,
+          "layoutEnd": 1226.4000000953674
+        },
+        {
+          "start": 1226.6000001430511,
+          "end": 1235,
+          "scriptingStart": 1226.6000001430511,
+          "scriptingEnd": 1234.1000001430511,
+          "layoutStart": 1234.1000001430511,
+          "layoutEnd": 1235
+        },
+        {
+          "start": 1235.4000000953674,
+          "end": 1244.2000000476837,
+          "scriptingStart": 1235.4000000953674,
+          "scriptingEnd": 1243.9000000953674,
+          "layoutStart": 1243.9000000953674,
+          "layoutEnd": 1244.2000000476837
+        },
+        {
+          "start": 1244.2000000476837,
+          "end": 1252.4000000953674,
+          "scriptingStart": 1244.2000000476837,
+          "scriptingEnd": 1251.5,
+          "layoutStart": 1251.5,
+          "layoutEnd": 1252.4000000953674
+        },
+        {
+          "start": 1252.7000000476837,
+          "end": 1260.4000000953674,
+          "scriptingStart": 1252.7000000476837,
+          "scriptingEnd": 1260.2999999523163,
+          "layoutStart": 1260.2999999523163,
+          "layoutEnd": 1260.4000000953674
+        },
+        {
+          "start": 1260.6000001430511,
+          "end": 1268.7999999523163,
+          "scriptingStart": 1260.6000001430511,
+          "scriptingEnd": 1267.9000000953674,
+          "layoutStart": 1267.9000000953674,
+          "layoutEnd": 1268.7999999523163
+        },
+        {
+          "start": 1269.2000000476837,
+          "end": 1276.6000001430511,
+          "scriptingStart": 1269.2000000476837,
+          "scriptingEnd": 1276.4000000953674,
+          "layoutStart": 1276.4000000953674,
+          "layoutEnd": 1276.6000001430511
+        },
+        {
+          "start": 1276.7000000476837,
+          "end": 1285.1000001430511,
+          "scriptingStart": 1276.7000000476837,
+          "scriptingEnd": 1284.2999999523163,
+          "layoutStart": 1284.2999999523163,
+          "layoutEnd": 1285.1000001430511
+        },
+        {
+          "start": 1285.5,
+          "end": 1293.2999999523163,
+          "scriptingStart": 1285.5,
+          "scriptingEnd": 1293.1000001430511,
+          "layoutStart": 1293.1000001430511,
+          "layoutEnd": 1293.2999999523163
+        },
+        {
+          "start": 1293.4000000953674,
+          "end": 1302.2999999523163,
+          "scriptingStart": 1293.4000000953674,
+          "scriptingEnd": 1301.5,
+          "layoutStart": 1301.5,
+          "layoutEnd": 1302.2999999523163
+        },
+        {
+          "start": 1302.7000000476837,
+          "end": 1311.1000001430511,
+          "scriptingStart": 1302.7000000476837,
+          "scriptingEnd": 1311,
+          "layoutStart": 1311,
+          "layoutEnd": 1311.1000001430511
+        },
+        {
+          "start": 1311.4000000953674,
+          "end": 1320.5,
+          "scriptingStart": 1311.4000000953674,
+          "scriptingEnd": 1319.7000000476837,
+          "layoutStart": 1319.7000000476837,
+          "layoutEnd": 1320.5
+        },
+        {
+          "start": 1321,
+          "end": 1329.2000000476837,
+          "scriptingStart": 1321,
+          "scriptingEnd": 1329,
+          "layoutStart": 1329,
+          "layoutEnd": 1329.2000000476837
+        },
+        {
+          "start": 1329.2999999523163,
+          "end": 1338.2999999523163,
+          "scriptingStart": 1329.2999999523163,
+          "scriptingEnd": 1337.4000000953674,
+          "layoutStart": 1337.4000000953674,
+          "layoutEnd": 1338.2999999523163
+        },
+        {
+          "start": 1338.7000000476837,
+          "end": 1346.9000000953674,
+          "scriptingStart": 1338.7000000476837,
+          "scriptingEnd": 1346.7000000476837,
+          "layoutStart": 1346.7000000476837,
+          "layoutEnd": 1346.9000000953674
+        },
+        {
+          "start": 1347,
+          "end": 1355.7000000476837,
+          "scriptingStart": 1347,
+          "scriptingEnd": 1354.9000000953674,
+          "layoutStart": 1354.9000000953674,
+          "layoutEnd": 1355.7000000476837
+        },
+        {
+          "start": 1356,
+          "end": 1363.6000001430511,
+          "scriptingStart": 1356,
+          "scriptingEnd": 1363.2999999523163,
+          "layoutStart": 1363.2999999523163,
+          "layoutEnd": 1363.6000001430511
+        },
+        {
+          "start": 1363.6000001430511,
+          "end": 1371.6000001430511,
+          "scriptingStart": 1363.6000001430511,
+          "scriptingEnd": 1370.7999999523163,
+          "layoutStart": 1370.7999999523163,
+          "layoutEnd": 1371.6000001430511
+        },
+        {
+          "start": 1372.1000001430511,
+          "end": 1379.9000000953674,
+          "scriptingStart": 1372.1000001430511,
+          "scriptingEnd": 1379.7000000476837,
+          "layoutStart": 1379.7000000476837,
+          "layoutEnd": 1379.9000000953674
+        },
+        {
+          "start": 1380.1000001430511,
+          "end": 1389.1000001430511,
+          "scriptingStart": 1380.1000001430511,
+          "scriptingEnd": 1388.2000000476837,
+          "layoutStart": 1388.2000000476837,
+          "layoutEnd": 1389.1000001430511
+        },
+        {
+          "start": 1389.4000000953674,
+          "end": 1398.2000000476837,
+          "scriptingStart": 1389.4000000953674,
+          "scriptingEnd": 1398,
+          "layoutStart": 1398,
+          "layoutEnd": 1398.2000000476837
+        },
+        {
+          "start": 1398.2999999523163,
+          "end": 1407.2000000476837,
+          "scriptingStart": 1398.2999999523163,
+          "scriptingEnd": 1406.2999999523163,
+          "layoutStart": 1406.2999999523163,
+          "layoutEnd": 1407.2000000476837
+        },
+        {
+          "start": 1407.7000000476837,
+          "end": 1415.1000001430511,
+          "scriptingStart": 1407.7000000476837,
+          "scriptingEnd": 1414.9000000953674,
+          "layoutStart": 1414.9000000953674,
+          "layoutEnd": 1415.1000001430511
+        },
+        {
+          "start": 1415.2000000476837,
+          "end": 1423,
+          "scriptingStart": 1415.2000000476837,
+          "scriptingEnd": 1422.2000000476837,
+          "layoutStart": 1422.2000000476837,
+          "layoutEnd": 1423
+        },
+        {
+          "start": 1423.2999999523163,
+          "end": 1431,
+          "scriptingStart": 1423.2999999523163,
+          "scriptingEnd": 1430.7999999523163,
+          "layoutStart": 1430.7999999523163,
+          "layoutEnd": 1431
+        },
+        {
+          "start": 1431.1000001430511,
+          "end": 1438.9000000953674,
+          "scriptingStart": 1431.1000001430511,
+          "scriptingEnd": 1438.2000000476837,
+          "layoutStart": 1438.2000000476837,
+          "layoutEnd": 1438.9000000953674
+        },
+        {
+          "start": 1439.2999999523163,
+          "end": 1446.5,
+          "scriptingStart": 1439.2999999523163,
+          "scriptingEnd": 1446.2999999523163,
+          "layoutStart": 1446.2999999523163,
+          "layoutEnd": 1446.5
+        },
+        {
+          "start": 1446.5,
+          "end": 1454.7000000476837,
+          "scriptingStart": 1446.5,
+          "scriptingEnd": 1453.7999999523163,
+          "layoutStart": 1453.7999999523163,
+          "layoutEnd": 1454.7000000476837
+        },
+        {
+          "start": 1455.1000001430511,
+          "end": 1462.5,
+          "scriptingStart": 1455.1000001430511,
+          "scriptingEnd": 1462.2999999523163,
+          "layoutStart": 1462.2999999523163,
+          "layoutEnd": 1462.5
+        },
+        {
+          "start": 1462.6000001430511,
+          "end": 1470.4000000953674,
+          "scriptingStart": 1462.6000001430511,
+          "scriptingEnd": 1469.6000001430511,
+          "layoutStart": 1469.6000001430511,
+          "layoutEnd": 1470.4000000953674
+        },
+        {
+          "start": 1470.7999999523163,
+          "end": 1478,
+          "scriptingStart": 1470.7999999523163,
+          "scriptingEnd": 1477.7999999523163,
+          "layoutStart": 1477.7999999523163,
+          "layoutEnd": 1478
+        },
+        {
+          "start": 1478,
+          "end": 1486.2000000476837,
+          "scriptingStart": 1478,
+          "scriptingEnd": 1485.4000000953674,
+          "layoutStart": 1485.4000000953674,
+          "layoutEnd": 1486.2000000476837
+        },
+        {
+          "start": 1486.6000001430511,
+          "end": 1494.4000000953674,
+          "scriptingStart": 1486.6000001430511,
+          "scriptingEnd": 1494.1000001430511,
+          "layoutStart": 1494.1000001430511,
+          "layoutEnd": 1494.4000000953674
+        },
+        {
+          "start": 1494.4000000953674,
+          "end": 1503.1000001430511,
+          "scriptingStart": 1494.4000000953674,
+          "scriptingEnd": 1502.2000000476837,
+          "layoutStart": 1502.2000000476837,
+          "layoutEnd": 1503.1000001430511
+        },
+        {
+          "start": 1503.5,
+          "end": 1511.6000001430511,
+          "scriptingStart": 1503.5,
+          "scriptingEnd": 1511.2999999523163,
+          "layoutStart": 1511.2999999523163,
+          "layoutEnd": 1511.6000001430511
+        },
+        {
+          "start": 1511.7000000476837,
+          "end": 1521.1000001430511,
+          "scriptingStart": 1511.7000000476837,
+          "scriptingEnd": 1520.2999999523163,
+          "layoutStart": 1520.2999999523163,
+          "layoutEnd": 1521.1000001430511
+        },
+        {
+          "start": 1521.7000000476837,
+          "end": 1529.2000000476837,
+          "scriptingStart": 1521.7000000476837,
+          "scriptingEnd": 1529,
+          "layoutStart": 1529,
+          "layoutEnd": 1529.2000000476837
+        },
+        {
+          "start": 1529.2999999523163,
+          "end": 1537.2999999523163,
+          "scriptingStart": 1529.2999999523163,
+          "scriptingEnd": 1536.5,
+          "layoutStart": 1536.5,
+          "layoutEnd": 1537.2999999523163
+        },
+        {
+          "start": 1537.7000000476837,
+          "end": 1544.9000000953674,
+          "scriptingStart": 1537.7000000476837,
+          "scriptingEnd": 1544.7000000476837,
+          "layoutStart": 1544.7000000476837,
+          "layoutEnd": 1544.9000000953674
+        },
+        {
+          "start": 1544.9000000953674,
+          "end": 1552.6000001430511,
+          "scriptingStart": 1544.9000000953674,
+          "scriptingEnd": 1551.9000000953674,
+          "layoutStart": 1551.9000000953674,
+          "layoutEnd": 1552.6000001430511
+        },
+        {
+          "start": 1553,
+          "end": 1560.2000000476837,
+          "scriptingStart": 1553,
+          "scriptingEnd": 1560.1000001430511,
+          "layoutStart": 1560.1000001430511,
+          "layoutEnd": 1560.2000000476837
+        },
+        {
+          "start": 1560.2999999523163,
+          "end": 1568,
+          "scriptingStart": 1560.2999999523163,
+          "scriptingEnd": 1567.2000000476837,
+          "layoutStart": 1567.2000000476837,
+          "layoutEnd": 1568
+        },
+        {
+          "start": 1568.2999999523163,
+          "end": 1575.5,
+          "scriptingStart": 1568.2999999523163,
+          "scriptingEnd": 1575.2999999523163,
+          "layoutStart": 1575.2999999523163,
+          "layoutEnd": 1575.5
+        },
+        {
+          "start": 1575.6000001430511,
+          "end": 1583.4000000953674,
+          "scriptingStart": 1575.6000001430511,
+          "scriptingEnd": 1582.7000000476837,
+          "layoutStart": 1582.7000000476837,
+          "layoutEnd": 1583.4000000953674
+        },
+        {
+          "start": 1583.7999999523163,
+          "end": 1590.7999999523163,
+          "scriptingStart": 1583.7999999523163,
+          "scriptingEnd": 1590.7000000476837,
+          "layoutStart": 1590.7000000476837,
+          "layoutEnd": 1590.7999999523163
+        },
+        {
+          "start": 1590.9000000953674,
+          "end": 1598.7000000476837,
+          "scriptingStart": 1590.9000000953674,
+          "scriptingEnd": 1597.9000000953674,
+          "layoutStart": 1597.9000000953674,
+          "layoutEnd": 1598.7000000476837
+        },
+        {
+          "start": 1599.1000001430511,
+          "end": 1606.2000000476837,
+          "scriptingStart": 1599.1000001430511,
+          "scriptingEnd": 1606,
+          "layoutStart": 1606,
+          "layoutEnd": 1606.2000000476837
+        },
+        {
+          "start": 1606.2000000476837,
+          "end": 1615,
+          "scriptingStart": 1606.2000000476837,
+          "scriptingEnd": 1614.1000001430511,
+          "layoutStart": 1614.1000001430511,
+          "layoutEnd": 1615
+        },
+        {
+          "start": 1615.4000000953674,
+          "end": 1622.5,
+          "scriptingStart": 1615.4000000953674,
+          "scriptingEnd": 1622.2999999523163,
+          "layoutStart": 1622.2999999523163,
+          "layoutEnd": 1622.5
+        },
+        {
+          "start": 1622.5,
+          "end": 1630.2999999523163,
+          "scriptingStart": 1622.5,
+          "scriptingEnd": 1629.5,
+          "layoutStart": 1629.5,
+          "layoutEnd": 1630.2999999523163
+        },
+        {
+          "start": 1630.7000000476837,
+          "end": 1637.7999999523163,
+          "scriptingStart": 1630.7000000476837,
+          "scriptingEnd": 1637.6000001430511,
+          "layoutStart": 1637.6000001430511,
+          "layoutEnd": 1637.7999999523163
+        },
+        {
+          "start": 1637.9000000953674,
+          "end": 1645.6000001430511,
+          "scriptingStart": 1637.9000000953674,
+          "scriptingEnd": 1644.7999999523163,
+          "layoutStart": 1644.7999999523163,
+          "layoutEnd": 1645.6000001430511
+        },
+        {
+          "start": 1645.9000000953674,
+          "end": 1652.9000000953674,
+          "scriptingStart": 1645.9000000953674,
+          "scriptingEnd": 1652.7999999523163,
+          "layoutStart": 1652.7999999523163,
+          "layoutEnd": 1652.9000000953674
+        },
+        {
+          "start": 1653.1000001430511,
+          "end": 1661.2999999523163,
+          "scriptingStart": 1653.1000001430511,
+          "scriptingEnd": 1660.4000000953674,
+          "layoutStart": 1660.4000000953674,
+          "layoutEnd": 1661.2999999523163
+        },
+        {
+          "start": 1661.6000001430511,
+          "end": 1668.7999999523163,
+          "scriptingStart": 1661.6000001430511,
+          "scriptingEnd": 1668.6000001430511,
+          "layoutStart": 1668.6000001430511,
+          "layoutEnd": 1668.7999999523163
+        },
+        {
+          "start": 1669.7000000476837,
+          "end": 1677.6000001430511,
+          "scriptingStart": 1669.7000000476837,
+          "scriptingEnd": 1676.7000000476837,
+          "layoutStart": 1676.7000000476837,
+          "layoutEnd": 1677.6000001430511
+        },
+        {
+          "start": 1678.4000000953674,
+          "end": 1685.4000000953674,
+          "scriptingStart": 1678.4000000953674,
+          "scriptingEnd": 1685.2999999523163,
+          "layoutStart": 1685.2999999523163,
+          "layoutEnd": 1685.4000000953674
+        },
+        {
+          "start": 1686.4000000953674,
+          "end": 1695.4000000953674,
+          "scriptingStart": 1686.4000000953674,
+          "scriptingEnd": 1694.5,
+          "layoutStart": 1694.5,
+          "layoutEnd": 1695.4000000953674
+        },
+        {
+          "start": 1695.7999999523163,
+          "end": 1704.1000001430511,
+          "scriptingStart": 1695.7999999523163,
+          "scriptingEnd": 1703.9000000953674,
+          "layoutStart": 1703.9000000953674,
+          "layoutEnd": 1704.1000001430511
+        },
+        {
+          "start": 1704.2000000476837,
+          "end": 1712.7999999523163,
+          "scriptingStart": 1704.2000000476837,
+          "scriptingEnd": 1712,
+          "layoutStart": 1712,
+          "layoutEnd": 1712.7999999523163
+        },
+        {
+          "start": 1713.2000000476837,
+          "end": 1720.9000000953674,
+          "scriptingStart": 1713.2000000476837,
+          "scriptingEnd": 1720.7000000476837,
+          "layoutStart": 1720.7000000476837,
+          "layoutEnd": 1720.9000000953674
+        },
+        {
+          "start": 1721,
+          "end": 1729.5,
+          "scriptingStart": 1721,
+          "scriptingEnd": 1728.7000000476837,
+          "layoutStart": 1728.7000000476837,
+          "layoutEnd": 1729.5
+        },
+        {
+          "start": 1729.9000000953674,
+          "end": 1736.9000000953674,
+          "scriptingStart": 1729.9000000953674,
+          "scriptingEnd": 1736.7999999523163,
+          "layoutStart": 1736.7999999523163,
+          "layoutEnd": 1736.9000000953674
+        },
+        {
+          "start": 1737,
+          "end": 1744.7000000476837,
+          "scriptingStart": 1737,
+          "scriptingEnd": 1743.9000000953674,
+          "layoutStart": 1743.9000000953674,
+          "layoutEnd": 1744.7000000476837
+        },
+        {
+          "start": 1745,
+          "end": 1752.1000001430511,
+          "scriptingStart": 1745,
+          "scriptingEnd": 1752,
+          "layoutStart": 1752,
+          "layoutEnd": 1752.1000001430511
+        },
+        {
+          "start": 1753,
+          "end": 1761,
+          "scriptingStart": 1753,
+          "scriptingEnd": 1760.1000001430511,
+          "layoutStart": 1760.1000001430511,
+          "layoutEnd": 1761
+        },
+        {
+          "start": 1762.7999999523163,
+          "end": 1771.2999999523163,
+          "scriptingStart": 1762.7999999523163,
+          "scriptingEnd": 1771.1000001430511,
+          "layoutStart": 1771.1000001430511,
+          "layoutEnd": 1771.2999999523163
+        },
+        {
+          "start": 1771.4000000953674,
+          "end": 1779.9000000953674,
+          "scriptingStart": 1771.4000000953674,
+          "scriptingEnd": 1779.2000000476837,
+          "layoutStart": 1779.2000000476837,
+          "layoutEnd": 1779.9000000953674
+        },
+        {
+          "start": 1780.2999999523163,
+          "end": 1787.4000000953674,
+          "scriptingStart": 1780.2999999523163,
+          "scriptingEnd": 1787.2000000476837,
+          "layoutStart": 1787.2000000476837,
+          "layoutEnd": 1787.4000000953674
+        },
+        {
+          "start": 1787.5,
+          "end": 1795.7999999523163,
+          "scriptingStart": 1787.5,
+          "scriptingEnd": 1794.9000000953674,
+          "layoutStart": 1794.9000000953674,
+          "layoutEnd": 1795.7999999523163
+        },
+        {
+          "start": 1796.2000000476837,
+          "end": 1803.7000000476837,
+          "scriptingStart": 1796.2000000476837,
+          "scriptingEnd": 1803.5,
+          "layoutStart": 1803.5,
+          "layoutEnd": 1803.7000000476837
+        },
+        {
+          "start": 1803.9000000953674,
+          "end": 1812,
+          "scriptingStart": 1803.9000000953674,
+          "scriptingEnd": 1811.1000001430511,
+          "layoutStart": 1811.1000001430511,
+          "layoutEnd": 1812
+        },
+        {
+          "start": 1812.2999999523163,
+          "end": 1819.5,
+          "scriptingStart": 1812.2999999523163,
+          "scriptingEnd": 1819.2999999523163,
+          "layoutStart": 1819.2999999523163,
+          "layoutEnd": 1819.5
+        },
+        {
+          "start": 1819.6000001430511,
+          "end": 1827.4000000953674,
+          "scriptingStart": 1819.6000001430511,
+          "scriptingEnd": 1826.6000001430511,
+          "layoutStart": 1826.6000001430511,
+          "layoutEnd": 1827.4000000953674
+        },
+        {
+          "start": 1828.4000000953674,
+          "end": 1835.7999999523163,
+          "scriptingStart": 1828.4000000953674,
+          "scriptingEnd": 1835.6000001430511,
+          "layoutStart": 1835.6000001430511,
+          "layoutEnd": 1835.7999999523163
+        },
+        {
+          "start": 1837.2999999523163,
+          "end": 1845.1000001430511,
+          "scriptingStart": 1837.2999999523163,
+          "scriptingEnd": 1844.2000000476837,
+          "layoutStart": 1844.2000000476837,
+          "layoutEnd": 1845.1000001430511
+        },
+        {
+          "start": 1845.4000000953674,
+          "end": 1852.5,
+          "scriptingStart": 1845.4000000953674,
+          "scriptingEnd": 1852.2999999523163,
+          "layoutStart": 1852.2999999523163,
+          "layoutEnd": 1852.5
+        },
+        {
+          "start": 1853,
+          "end": 1861,
+          "scriptingStart": 1853,
+          "scriptingEnd": 1860.1000001430511,
+          "layoutStart": 1860.1000001430511,
+          "layoutEnd": 1861
+        },
+        {
+          "start": 1861.6000001430511,
+          "end": 1868.7000000476837,
+          "scriptingStart": 1861.6000001430511,
+          "scriptingEnd": 1868.6000001430511,
+          "layoutStart": 1868.6000001430511,
+          "layoutEnd": 1868.7000000476837
+        },
+        {
+          "start": 1870.7999999523163,
+          "end": 1878.6000001430511,
+          "scriptingStart": 1870.7999999523163,
+          "scriptingEnd": 1877.7999999523163,
+          "layoutStart": 1877.7999999523163,
+          "layoutEnd": 1878.6000001430511
+        },
+        {
+          "start": 1879,
+          "end": 1886,
+          "scriptingStart": 1879,
+          "scriptingEnd": 1885.7999999523163,
+          "layoutStart": 1885.7999999523163,
+          "layoutEnd": 1886
+        },
+        {
+          "start": 1887.4000000953674,
+          "end": 1895.1000001430511,
+          "scriptingStart": 1887.4000000953674,
+          "scriptingEnd": 1894.4000000953674,
+          "layoutStart": 1894.4000000953674,
+          "layoutEnd": 1895.1000001430511
+        },
+        {
+          "start": 1895.5,
+          "end": 1902.6000001430511,
+          "scriptingStart": 1895.5,
+          "scriptingEnd": 1902.4000000953674,
+          "layoutStart": 1902.4000000953674,
+          "layoutEnd": 1902.6000001430511
+        },
+        {
+          "start": 1903.2000000476837,
+          "end": 1911.2999999523163,
+          "scriptingStart": 1903.2000000476837,
+          "scriptingEnd": 1910.5,
+          "layoutStart": 1910.5,
+          "layoutEnd": 1911.2999999523163
+        },
+        {
+          "start": 1911.6000001430511,
+          "end": 1920,
+          "scriptingStart": 1911.6000001430511,
+          "scriptingEnd": 1919.7000000476837,
+          "layoutStart": 1919.7000000476837,
+          "layoutEnd": 1920
+        },
+        {
+          "start": 1920,
+          "end": 1928.6000001430511,
+          "scriptingStart": 1920,
+          "scriptingEnd": 1927.7999999523163,
+          "layoutStart": 1927.7999999523163,
+          "layoutEnd": 1928.6000001430511
+        },
+        {
+          "start": 1929.1000001430511,
+          "end": 1936.2000000476837,
+          "scriptingStart": 1929.1000001430511,
+          "scriptingEnd": 1936,
+          "layoutStart": 1936,
+          "layoutEnd": 1936.2000000476837
+        },
+        {
+          "start": 1936.4000000953674,
+          "end": 1944.1000001430511,
+          "scriptingStart": 1936.4000000953674,
+          "scriptingEnd": 1943.4000000953674,
+          "layoutStart": 1943.4000000953674,
+          "layoutEnd": 1944.1000001430511
+        },
+        {
+          "start": 1945,
+          "end": 1952.1000001430511,
+          "scriptingStart": 1945,
+          "scriptingEnd": 1951.9000000953674,
+          "layoutStart": 1951.9000000953674,
+          "layoutEnd": 1952.1000001430511
+        },
+        {
+          "start": 1953,
+          "end": 1961.1000001430511,
+          "scriptingStart": 1953,
+          "scriptingEnd": 1960.2000000476837,
+          "layoutStart": 1960.2000000476837,
+          "layoutEnd": 1961.1000001430511
+        }
+      ],
+      "max": 11.100000143051147,
+      "min": 7,
+      "median": 7.799999952316284,
+      "mean": 7.939000005722046,
+      "stdDev": 0.6862791028381587,
+      "meanLayout": 0.5180000138282775,
+      "meanScripting": 7.420999991893768,
+      "benchmarkName": "Update host DOM props",
+      "benchmarkMetadata": {
+        "description": "Update many direct host nodes with DOM-like prop changes only, without style churn.",
+        "intent": "update-dom-props",
+        "layer": "Layer 1",
+        "nodeCount": 360,
+        "primitive": "createElement",
+        "changedPropCountPerNode": 5,
+        "changedStyleCountPerNode": 0
+      },
+      "benchmarkProfile": [
+        {
+          "avgTime": 0.014749999980131785,
+          "calls": 36000,
+          "label": "createElement.total",
+          "maxTime": 0.8000001907348633,
+          "totalTime": 530.9999992847443
+        },
+        {
+          "avgTime": 0.012480555640326605,
+          "calls": 36000,
+          "label": "createElement.createDOMProps",
+          "maxTime": 0.6999998092651367,
+          "totalTime": 449.3000030517578
+        },
+        {
+          "avgTime": 0.01191944451464547,
+          "calls": 36000,
+          "label": "createDOMProps.total",
+          "maxTime": 0.6999998092651367,
+          "totalTime": 429.10000252723694
+        },
+        {
+          "avgTime": 0.006941666722297669,
+          "calls": 36000,
+          "label": "createDOMProps.styleProps",
+          "maxTime": 0.6999998092651367,
+          "totalTime": 249.90000200271606
+        },
+        {
+          "avgTime": 0.00638888896173901,
+          "calls": 36000,
+          "label": "createDOMProps.StyleSheet",
+          "maxTime": 0.6999998092651367,
+          "totalTime": 230.00000262260437
+        },
+        {
+          "avgTime": 0.005783333414130741,
+          "calls": 36000,
+          "label": "StyleSheet.resolve",
+          "maxTime": 0.6999998092651367,
+          "totalTime": 208.20000290870667
+        },
+        {
+          "avgTime": 0.002630555768807729,
+          "calls": 36000,
+          "label": "StyleSheet.customStyleq",
+          "maxTime": 0.5,
+          "totalTime": 94.70000767707825
+        },
+        {
+          "avgTime": 0.00238055553038915,
+          "calls": 36000,
+          "label": "StyleSheet.inline",
+          "maxTime": 0.6999998092651367,
+          "totalTime": 85.6999990940094
+        },
+        {
+          "avgTime": 0.0007555556495984396,
+          "calls": 36000,
+          "label": "StyleSheet.customStyleq.preprocess",
+          "maxTime": 0.5,
+          "totalTime": 27.200003385543823
+        },
+        {
+          "avgTime": 0.0007555555701255799,
+          "calls": 36000,
+          "label": "StyleSheet.customStyleq.cacheHit",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 27.200000524520874
+        },
+        {
+          "avgTime": 0.0003833333518770006,
+          "calls": 36000,
+          "label": "createElement.React.createElement",
+          "maxTime": 0.8000001907348633,
+          "totalTime": 13.800000667572021
+        },
+        {
+          "avgTime": 0.0003027777671813965,
+          "calls": 36000,
+          "label": "createDOMProps.propsToAriaRole",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 10.899999618530273
+        },
+        {
+          "avgTime": 0.0003000000516573588,
+          "calls": 36000,
+          "label": "createDOMProps.focusProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 10.800001859664917
+        },
+        {
+          "avgTime": 0.00030000001192092895,
+          "calls": 36000,
+          "label": "createDOMProps.accessibilityProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 10.800000429153442
+        },
+        {
+          "avgTime": 0.0002805555462837219,
+          "calls": 36000,
+          "label": "StyleSheet.localizeStyle",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 10.09999966621399
+        },
+        {
+          "avgTime": 0.0002805554734336005,
+          "calls": 36000,
+          "label": "createDOMProps.otherProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 10.09999704360962
+        },
+        {
+          "avgTime": 0.00027499994966718886,
+          "calls": 36000,
+          "label": "createElement.propsToAccessibilityComponent",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 9.899998188018799
+        },
+        {
+          "avgTime": 0.0002555555436346266,
+          "calls": 36000,
+          "label": "createElement.localeProvider",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 9.199999570846558
+        },
+        {
+          "avgTime": 0.0002499999933772617,
+          "calls": 36000,
+          "label": "createDOMProps.tvProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 8.999999761581421
+        },
+        {
+          "avgTime": 0.00023333330949147543,
+          "calls": 36000,
+          "label": "createDOMProps.dataSetProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 8.399999141693115
+        }
+      ],
+      "libraryName": "react-native-web",
+      "libraryVersion": "",
+      "run": 1
+    },
+    {
+      "startTime": 1984.4000000953674,
+      "endTime": 2810,
+      "runTime": 825.5999999046326,
+      "sampleCount": 100,
+      "samples": [
+        {
+          "start": 1984.4000000953674,
+          "end": 1993.7999999523163,
+          "scriptingStart": 1984.4000000953674,
+          "scriptingEnd": 1992.7999999523163,
+          "layoutStart": 1992.7999999523163,
+          "layoutEnd": 1993.7999999523163
+        },
+        {
+          "start": 1994.2999999523163,
+          "end": 2001.9000000953674,
+          "scriptingStart": 1994.2999999523163,
+          "scriptingEnd": 2001.9000000953674,
+          "layoutStart": 2001.9000000953674,
+          "layoutEnd": 2001.9000000953674
+        },
+        {
+          "start": 2002,
+          "end": 2008.2999999523163,
+          "scriptingStart": 2002,
+          "scriptingEnd": 2008.2999999523163,
+          "layoutStart": 2008.2999999523163,
+          "layoutEnd": 2008.2999999523163
+        },
+        {
+          "start": 2008.5,
+          "end": 2015.9000000953674,
+          "scriptingStart": 2008.5,
+          "scriptingEnd": 2015.9000000953674,
+          "layoutStart": 2015.9000000953674,
+          "layoutEnd": 2015.9000000953674
+        },
+        {
+          "start": 2016.1000001430511,
+          "end": 2022.7000000476837,
+          "scriptingStart": 2016.1000001430511,
+          "scriptingEnd": 2022.7000000476837,
+          "layoutStart": 2022.7000000476837,
+          "layoutEnd": 2022.7000000476837
+        },
+        {
+          "start": 2022.7999999523163,
+          "end": 2029.2999999523163,
+          "scriptingStart": 2022.7999999523163,
+          "scriptingEnd": 2029.2999999523163,
+          "layoutStart": 2029.2999999523163,
+          "layoutEnd": 2029.2999999523163
+        },
+        {
+          "start": 2029.4000000953674,
+          "end": 2035.7000000476837,
+          "scriptingStart": 2029.4000000953674,
+          "scriptingEnd": 2035.7000000476837,
+          "layoutStart": 2035.7000000476837,
+          "layoutEnd": 2035.7000000476837
+        },
+        {
+          "start": 2036.4000000953674,
+          "end": 2042.9000000953674,
+          "scriptingStart": 2036.4000000953674,
+          "scriptingEnd": 2042.9000000953674,
+          "layoutStart": 2042.9000000953674,
+          "layoutEnd": 2042.9000000953674
+        },
+        {
+          "start": 2044.7000000476837,
+          "end": 2051.100000143051,
+          "scriptingStart": 2044.7000000476837,
+          "scriptingEnd": 2051.100000143051,
+          "layoutStart": 2051.100000143051,
+          "layoutEnd": 2051.100000143051
+        },
+        {
+          "start": 2053,
+          "end": 2059.600000143051,
+          "scriptingStart": 2053,
+          "scriptingEnd": 2059.600000143051,
+          "layoutStart": 2059.600000143051,
+          "layoutEnd": 2059.600000143051
+        },
+        {
+          "start": 2061.4000000953674,
+          "end": 2067.7999999523163,
+          "scriptingStart": 2061.4000000953674,
+          "scriptingEnd": 2067.7999999523163,
+          "layoutStart": 2067.7999999523163,
+          "layoutEnd": 2067.7999999523163
+        },
+        {
+          "start": 2069.7000000476837,
+          "end": 2076.4000000953674,
+          "scriptingStart": 2069.7000000476837,
+          "scriptingEnd": 2076.4000000953674,
+          "layoutStart": 2076.4000000953674,
+          "layoutEnd": 2076.4000000953674
+        },
+        {
+          "start": 2077.9000000953674,
+          "end": 2084.4000000953674,
+          "scriptingStart": 2077.9000000953674,
+          "scriptingEnd": 2084.4000000953674,
+          "layoutStart": 2084.4000000953674,
+          "layoutEnd": 2084.4000000953674
+        },
+        {
+          "start": 2086.2999999523163,
+          "end": 2092.7000000476837,
+          "scriptingStart": 2086.2999999523163,
+          "scriptingEnd": 2092.7000000476837,
+          "layoutStart": 2092.7000000476837,
+          "layoutEnd": 2092.7000000476837
+        },
+        {
+          "start": 2095.600000143051,
+          "end": 2102.4000000953674,
+          "scriptingStart": 2095.600000143051,
+          "scriptingEnd": 2102.4000000953674,
+          "layoutStart": 2102.4000000953674,
+          "layoutEnd": 2102.4000000953674
+        },
+        {
+          "start": 2103.600000143051,
+          "end": 2110.2999999523163,
+          "scriptingStart": 2103.600000143051,
+          "scriptingEnd": 2110.2999999523163,
+          "layoutStart": 2110.2999999523163,
+          "layoutEnd": 2110.2999999523163
+        },
+        {
+          "start": 2111.4000000953674,
+          "end": 2118,
+          "scriptingStart": 2111.4000000953674,
+          "scriptingEnd": 2118,
+          "layoutStart": 2118,
+          "layoutEnd": 2118
+        },
+        {
+          "start": 2120.7000000476837,
+          "end": 2127.2000000476837,
+          "scriptingStart": 2120.7000000476837,
+          "scriptingEnd": 2127.2000000476837,
+          "layoutStart": 2127.2000000476837,
+          "layoutEnd": 2127.2000000476837
+        },
+        {
+          "start": 2128,
+          "end": 2134.4000000953674,
+          "scriptingStart": 2128,
+          "scriptingEnd": 2134.4000000953674,
+          "layoutStart": 2134.4000000953674,
+          "layoutEnd": 2134.4000000953674
+        },
+        {
+          "start": 2136.2999999523163,
+          "end": 2142.7000000476837,
+          "scriptingStart": 2136.2999999523163,
+          "scriptingEnd": 2142.7000000476837,
+          "layoutStart": 2142.7000000476837,
+          "layoutEnd": 2142.7000000476837
+        },
+        {
+          "start": 2144.600000143051,
+          "end": 2151,
+          "scriptingStart": 2144.600000143051,
+          "scriptingEnd": 2151,
+          "layoutStart": 2151,
+          "layoutEnd": 2151
+        },
+        {
+          "start": 2153,
+          "end": 2159.7999999523163,
+          "scriptingStart": 2153,
+          "scriptingEnd": 2159.7999999523163,
+          "layoutStart": 2159.7999999523163,
+          "layoutEnd": 2159.7999999523163
+        },
+        {
+          "start": 2161.4000000953674,
+          "end": 2168,
+          "scriptingStart": 2161.4000000953674,
+          "scriptingEnd": 2168,
+          "layoutStart": 2168,
+          "layoutEnd": 2168
+        },
+        {
+          "start": 2169.7000000476837,
+          "end": 2176.100000143051,
+          "scriptingStart": 2169.7000000476837,
+          "scriptingEnd": 2176.100000143051,
+          "layoutStart": 2176.100000143051,
+          "layoutEnd": 2176.100000143051
+        },
+        {
+          "start": 2178,
+          "end": 2184.4000000953674,
+          "scriptingStart": 2178,
+          "scriptingEnd": 2184.4000000953674,
+          "layoutStart": 2184.4000000953674,
+          "layoutEnd": 2184.4000000953674
+        },
+        {
+          "start": 2186.2999999523163,
+          "end": 2192.7999999523163,
+          "scriptingStart": 2186.2999999523163,
+          "scriptingEnd": 2192.7000000476837,
+          "layoutStart": 2192.7999999523163,
+          "layoutEnd": 2192.7999999523163
+        },
+        {
+          "start": 2194.600000143051,
+          "end": 2201,
+          "scriptingStart": 2194.600000143051,
+          "scriptingEnd": 2201,
+          "layoutStart": 2201,
+          "layoutEnd": 2201
+        },
+        {
+          "start": 2203,
+          "end": 2209.600000143051,
+          "scriptingStart": 2203,
+          "scriptingEnd": 2209.600000143051,
+          "layoutStart": 2209.600000143051,
+          "layoutEnd": 2209.600000143051
+        },
+        {
+          "start": 2211.5,
+          "end": 2218.100000143051,
+          "scriptingStart": 2211.5,
+          "scriptingEnd": 2218.100000143051,
+          "layoutStart": 2218.100000143051,
+          "layoutEnd": 2218.100000143051
+        },
+        {
+          "start": 2219.7000000476837,
+          "end": 2226.2000000476837,
+          "scriptingStart": 2219.7000000476837,
+          "scriptingEnd": 2226.2000000476837,
+          "layoutStart": 2226.2000000476837,
+          "layoutEnd": 2226.2000000476837
+        },
+        {
+          "start": 2229,
+          "end": 2235.5,
+          "scriptingStart": 2229,
+          "scriptingEnd": 2235.5,
+          "layoutStart": 2235.5,
+          "layoutEnd": 2235.5
+        },
+        {
+          "start": 2236.4000000953674,
+          "end": 2242.7999999523163,
+          "scriptingStart": 2236.4000000953674,
+          "scriptingEnd": 2242.7999999523163,
+          "layoutStart": 2242.7999999523163,
+          "layoutEnd": 2242.7999999523163
+        },
+        {
+          "start": 2244.7000000476837,
+          "end": 2251,
+          "scriptingStart": 2244.7000000476837,
+          "scriptingEnd": 2251,
+          "layoutStart": 2251,
+          "layoutEnd": 2251
+        },
+        {
+          "start": 2252.9000000953674,
+          "end": 2259.7000000476837,
+          "scriptingStart": 2252.9000000953674,
+          "scriptingEnd": 2259.7000000476837,
+          "layoutStart": 2259.7000000476837,
+          "layoutEnd": 2259.7000000476837
+        },
+        {
+          "start": 2261.4000000953674,
+          "end": 2267.7999999523163,
+          "scriptingStart": 2261.4000000953674,
+          "scriptingEnd": 2267.7999999523163,
+          "layoutStart": 2267.7999999523163,
+          "layoutEnd": 2267.7999999523163
+        },
+        {
+          "start": 2269.7000000476837,
+          "end": 2276.5,
+          "scriptingStart": 2269.7000000476837,
+          "scriptingEnd": 2276.5,
+          "layoutStart": 2276.5,
+          "layoutEnd": 2276.5
+        },
+        {
+          "start": 2278.100000143051,
+          "end": 2285.7999999523163,
+          "scriptingStart": 2278.100000143051,
+          "scriptingEnd": 2285.7999999523163,
+          "layoutStart": 2285.7999999523163,
+          "layoutEnd": 2285.7999999523163
+        },
+        {
+          "start": 2286.4000000953674,
+          "end": 2292.7000000476837,
+          "scriptingStart": 2286.4000000953674,
+          "scriptingEnd": 2292.7000000476837,
+          "layoutStart": 2292.7000000476837,
+          "layoutEnd": 2292.7000000476837
+        },
+        {
+          "start": 2294.7999999523163,
+          "end": 2302.4000000953674,
+          "scriptingStart": 2294.7999999523163,
+          "scriptingEnd": 2302.4000000953674,
+          "layoutStart": 2302.4000000953674,
+          "layoutEnd": 2302.4000000953674
+        },
+        {
+          "start": 2303.100000143051,
+          "end": 2309.5,
+          "scriptingStart": 2303.100000143051,
+          "scriptingEnd": 2309.5,
+          "layoutStart": 2309.5,
+          "layoutEnd": 2309.5
+        },
+        {
+          "start": 2311.2999999523163,
+          "end": 2318.100000143051,
+          "scriptingStart": 2311.2999999523163,
+          "scriptingEnd": 2318.100000143051,
+          "layoutStart": 2318.100000143051,
+          "layoutEnd": 2318.100000143051
+        },
+        {
+          "start": 2319.7999999523163,
+          "end": 2326.2999999523163,
+          "scriptingStart": 2319.7999999523163,
+          "scriptingEnd": 2326.2999999523163,
+          "layoutStart": 2326.2999999523163,
+          "layoutEnd": 2326.2999999523163
+        },
+        {
+          "start": 2328,
+          "end": 2334.4000000953674,
+          "scriptingStart": 2328,
+          "scriptingEnd": 2334.4000000953674,
+          "layoutStart": 2334.4000000953674,
+          "layoutEnd": 2334.4000000953674
+        },
+        {
+          "start": 2336.4000000953674,
+          "end": 2344.2999999523163,
+          "scriptingStart": 2336.4000000953674,
+          "scriptingEnd": 2344.2999999523163,
+          "layoutStart": 2344.2999999523163,
+          "layoutEnd": 2344.2999999523163
+        },
+        {
+          "start": 2344.7000000476837,
+          "end": 2351.2999999523163,
+          "scriptingStart": 2344.7000000476837,
+          "scriptingEnd": 2351.2999999523163,
+          "layoutStart": 2351.2999999523163,
+          "layoutEnd": 2351.2999999523163
+        },
+        {
+          "start": 2353,
+          "end": 2360,
+          "scriptingStart": 2353,
+          "scriptingEnd": 2360,
+          "layoutStart": 2360,
+          "layoutEnd": 2360
+        },
+        {
+          "start": 2361.5,
+          "end": 2368.4000000953674,
+          "scriptingStart": 2361.5,
+          "scriptingEnd": 2368.4000000953674,
+          "layoutStart": 2368.4000000953674,
+          "layoutEnd": 2368.4000000953674
+        },
+        {
+          "start": 2369.7000000476837,
+          "end": 2376.5,
+          "scriptingStart": 2369.7000000476837,
+          "scriptingEnd": 2376.5,
+          "layoutStart": 2376.5,
+          "layoutEnd": 2376.5
+        },
+        {
+          "start": 2378.100000143051,
+          "end": 2384.9000000953674,
+          "scriptingStart": 2378.100000143051,
+          "scriptingEnd": 2384.9000000953674,
+          "layoutStart": 2384.9000000953674,
+          "layoutEnd": 2384.9000000953674
+        },
+        {
+          "start": 2386.4000000953674,
+          "end": 2392.7999999523163,
+          "scriptingStart": 2386.4000000953674,
+          "scriptingEnd": 2392.7999999523163,
+          "layoutStart": 2392.7999999523163,
+          "layoutEnd": 2392.7999999523163
+        },
+        {
+          "start": 2394.7000000476837,
+          "end": 2401.100000143051,
+          "scriptingStart": 2394.7000000476837,
+          "scriptingEnd": 2401.100000143051,
+          "layoutStart": 2401.100000143051,
+          "layoutEnd": 2401.100000143051
+        },
+        {
+          "start": 2403,
+          "end": 2409.7000000476837,
+          "scriptingStart": 2403,
+          "scriptingEnd": 2409.7000000476837,
+          "layoutStart": 2409.7000000476837,
+          "layoutEnd": 2409.7000000476837
+        },
+        {
+          "start": 2411.4000000953674,
+          "end": 2417.7999999523163,
+          "scriptingStart": 2411.4000000953674,
+          "scriptingEnd": 2417.7999999523163,
+          "layoutStart": 2417.7999999523163,
+          "layoutEnd": 2417.7999999523163
+        },
+        {
+          "start": 2419.7000000476837,
+          "end": 2426,
+          "scriptingStart": 2419.7000000476837,
+          "scriptingEnd": 2426,
+          "layoutStart": 2426,
+          "layoutEnd": 2426
+        },
+        {
+          "start": 2429,
+          "end": 2435.2999999523163,
+          "scriptingStart": 2429,
+          "scriptingEnd": 2435.2999999523163,
+          "layoutStart": 2435.2999999523163,
+          "layoutEnd": 2435.2999999523163
+        },
+        {
+          "start": 2436.2999999523163,
+          "end": 2442.7000000476837,
+          "scriptingStart": 2436.2999999523163,
+          "scriptingEnd": 2442.7000000476837,
+          "layoutStart": 2442.7000000476837,
+          "layoutEnd": 2442.7000000476837
+        },
+        {
+          "start": 2444.600000143051,
+          "end": 2451,
+          "scriptingStart": 2444.600000143051,
+          "scriptingEnd": 2451,
+          "layoutStart": 2451,
+          "layoutEnd": 2451
+        },
+        {
+          "start": 2453,
+          "end": 2459.600000143051,
+          "scriptingStart": 2453,
+          "scriptingEnd": 2459.600000143051,
+          "layoutStart": 2459.600000143051,
+          "layoutEnd": 2459.600000143051
+        },
+        {
+          "start": 2461.2999999523163,
+          "end": 2467.7000000476837,
+          "scriptingStart": 2461.2999999523163,
+          "scriptingEnd": 2467.7000000476837,
+          "layoutStart": 2467.7000000476837,
+          "layoutEnd": 2467.7000000476837
+        },
+        {
+          "start": 2469.7000000476837,
+          "end": 2476.100000143051,
+          "scriptingStart": 2469.7000000476837,
+          "scriptingEnd": 2476.100000143051,
+          "layoutStart": 2476.100000143051,
+          "layoutEnd": 2476.100000143051
+        },
+        {
+          "start": 2478,
+          "end": 2484.600000143051,
+          "scriptingStart": 2478,
+          "scriptingEnd": 2484.600000143051,
+          "layoutStart": 2484.600000143051,
+          "layoutEnd": 2484.600000143051
+        },
+        {
+          "start": 2486.4000000953674,
+          "end": 2492.7999999523163,
+          "scriptingStart": 2486.4000000953674,
+          "scriptingEnd": 2492.7999999523163,
+          "layoutStart": 2492.7999999523163,
+          "layoutEnd": 2492.7999999523163
+        },
+        {
+          "start": 2494.600000143051,
+          "end": 2501,
+          "scriptingStart": 2494.600000143051,
+          "scriptingEnd": 2501,
+          "layoutStart": 2501,
+          "layoutEnd": 2501
+        },
+        {
+          "start": 2503,
+          "end": 2509.600000143051,
+          "scriptingStart": 2503,
+          "scriptingEnd": 2509.600000143051,
+          "layoutStart": 2509.600000143051,
+          "layoutEnd": 2509.600000143051
+        },
+        {
+          "start": 2511.4000000953674,
+          "end": 2517.7999999523163,
+          "scriptingStart": 2511.4000000953674,
+          "scriptingEnd": 2517.7999999523163,
+          "layoutStart": 2517.7999999523163,
+          "layoutEnd": 2517.7999999523163
+        },
+        {
+          "start": 2519.600000143051,
+          "end": 2526.100000143051,
+          "scriptingStart": 2519.600000143051,
+          "scriptingEnd": 2526.100000143051,
+          "layoutStart": 2526.100000143051,
+          "layoutEnd": 2526.100000143051
+        },
+        {
+          "start": 2528,
+          "end": 2534.5,
+          "scriptingStart": 2528,
+          "scriptingEnd": 2534.5,
+          "layoutStart": 2534.5,
+          "layoutEnd": 2534.5
+        },
+        {
+          "start": 2536.2999999523163,
+          "end": 2542.7000000476837,
+          "scriptingStart": 2536.2999999523163,
+          "scriptingEnd": 2542.7000000476837,
+          "layoutStart": 2542.7000000476837,
+          "layoutEnd": 2542.7000000476837
+        },
+        {
+          "start": 2544.600000143051,
+          "end": 2550.9000000953674,
+          "scriptingStart": 2544.600000143051,
+          "scriptingEnd": 2550.9000000953674,
+          "layoutStart": 2550.9000000953674,
+          "layoutEnd": 2550.9000000953674
+        },
+        {
+          "start": 2553,
+          "end": 2559.5,
+          "scriptingStart": 2553,
+          "scriptingEnd": 2559.5,
+          "layoutStart": 2559.5,
+          "layoutEnd": 2559.5
+        },
+        {
+          "start": 2561.4000000953674,
+          "end": 2567.9000000953674,
+          "scriptingStart": 2561.4000000953674,
+          "scriptingEnd": 2567.9000000953674,
+          "layoutStart": 2567.9000000953674,
+          "layoutEnd": 2567.9000000953674
+        },
+        {
+          "start": 2569.600000143051,
+          "end": 2576,
+          "scriptingStart": 2569.600000143051,
+          "scriptingEnd": 2576,
+          "layoutStart": 2576,
+          "layoutEnd": 2576
+        },
+        {
+          "start": 2578,
+          "end": 2584.2999999523163,
+          "scriptingStart": 2578,
+          "scriptingEnd": 2584.2999999523163,
+          "layoutStart": 2584.2999999523163,
+          "layoutEnd": 2584.2999999523163
+        },
+        {
+          "start": 2586.2000000476837,
+          "end": 2592.600000143051,
+          "scriptingStart": 2586.2000000476837,
+          "scriptingEnd": 2592.600000143051,
+          "layoutStart": 2592.600000143051,
+          "layoutEnd": 2592.600000143051
+        },
+        {
+          "start": 2594.7000000476837,
+          "end": 2601.100000143051,
+          "scriptingStart": 2594.7000000476837,
+          "scriptingEnd": 2601.100000143051,
+          "layoutStart": 2601.100000143051,
+          "layoutEnd": 2601.100000143051
+        },
+        {
+          "start": 2603,
+          "end": 2609.600000143051,
+          "scriptingStart": 2603,
+          "scriptingEnd": 2609.600000143051,
+          "layoutStart": 2609.600000143051,
+          "layoutEnd": 2609.600000143051
+        },
+        {
+          "start": 2611.4000000953674,
+          "end": 2617.7000000476837,
+          "scriptingStart": 2611.4000000953674,
+          "scriptingEnd": 2617.7000000476837,
+          "layoutStart": 2617.7000000476837,
+          "layoutEnd": 2617.7000000476837
+        },
+        {
+          "start": 2619.7000000476837,
+          "end": 2626,
+          "scriptingStart": 2619.7000000476837,
+          "scriptingEnd": 2626,
+          "layoutStart": 2626,
+          "layoutEnd": 2626
+        },
+        {
+          "start": 2628,
+          "end": 2634.4000000953674,
+          "scriptingStart": 2628,
+          "scriptingEnd": 2634.4000000953674,
+          "layoutStart": 2634.4000000953674,
+          "layoutEnd": 2634.4000000953674
+        },
+        {
+          "start": 2636.2999999523163,
+          "end": 2642.600000143051,
+          "scriptingStart": 2636.2999999523163,
+          "scriptingEnd": 2642.600000143051,
+          "layoutStart": 2642.600000143051,
+          "layoutEnd": 2642.600000143051
+        },
+        {
+          "start": 2644.7000000476837,
+          "end": 2651,
+          "scriptingStart": 2644.7000000476837,
+          "scriptingEnd": 2651,
+          "layoutStart": 2651,
+          "layoutEnd": 2651
+        },
+        {
+          "start": 2653,
+          "end": 2659.600000143051,
+          "scriptingStart": 2653,
+          "scriptingEnd": 2659.600000143051,
+          "layoutStart": 2659.600000143051,
+          "layoutEnd": 2659.600000143051
+        },
+        {
+          "start": 2661.2999999523163,
+          "end": 2667.600000143051,
+          "scriptingStart": 2661.2999999523163,
+          "scriptingEnd": 2667.600000143051,
+          "layoutStart": 2667.600000143051,
+          "layoutEnd": 2667.600000143051
+        },
+        {
+          "start": 2669.600000143051,
+          "end": 2675.9000000953674,
+          "scriptingStart": 2669.600000143051,
+          "scriptingEnd": 2675.9000000953674,
+          "layoutStart": 2675.9000000953674,
+          "layoutEnd": 2675.9000000953674
+        },
+        {
+          "start": 2678,
+          "end": 2684.4000000953674,
+          "scriptingStart": 2678,
+          "scriptingEnd": 2684.4000000953674,
+          "layoutStart": 2684.4000000953674,
+          "layoutEnd": 2684.4000000953674
+        },
+        {
+          "start": 2686.2999999523163,
+          "end": 2692.600000143051,
+          "scriptingStart": 2686.2999999523163,
+          "scriptingEnd": 2692.600000143051,
+          "layoutStart": 2692.600000143051,
+          "layoutEnd": 2692.600000143051
+        },
+        {
+          "start": 2694.600000143051,
+          "end": 2701,
+          "scriptingStart": 2694.600000143051,
+          "scriptingEnd": 2701,
+          "layoutStart": 2701,
+          "layoutEnd": 2701
+        },
+        {
+          "start": 2702.9000000953674,
+          "end": 2709.2999999523163,
+          "scriptingStart": 2702.9000000953674,
+          "scriptingEnd": 2709.2999999523163,
+          "layoutStart": 2709.2999999523163,
+          "layoutEnd": 2709.2999999523163
+        },
+        {
+          "start": 2711.2999999523163,
+          "end": 2718,
+          "scriptingStart": 2711.2999999523163,
+          "scriptingEnd": 2718,
+          "layoutStart": 2718,
+          "layoutEnd": 2718
+        },
+        {
+          "start": 2719.7000000476837,
+          "end": 2726.2999999523163,
+          "scriptingStart": 2719.7000000476837,
+          "scriptingEnd": 2726.2999999523163,
+          "layoutStart": 2726.2999999523163,
+          "layoutEnd": 2726.2999999523163
+        },
+        {
+          "start": 2727.9000000953674,
+          "end": 2734.5,
+          "scriptingStart": 2727.9000000953674,
+          "scriptingEnd": 2734.5,
+          "layoutStart": 2734.5,
+          "layoutEnd": 2734.5
+        },
+        {
+          "start": 2736.4000000953674,
+          "end": 2743.2000000476837,
+          "scriptingStart": 2736.4000000953674,
+          "scriptingEnd": 2743.100000143051,
+          "layoutStart": 2743.100000143051,
+          "layoutEnd": 2743.2000000476837
+        },
+        {
+          "start": 2744.7000000476837,
+          "end": 2752.4000000953674,
+          "scriptingStart": 2744.7000000476837,
+          "scriptingEnd": 2752.4000000953674,
+          "layoutStart": 2752.4000000953674,
+          "layoutEnd": 2752.4000000953674
+        },
+        {
+          "start": 2753,
+          "end": 2759.7000000476837,
+          "scriptingStart": 2753,
+          "scriptingEnd": 2759.7000000476837,
+          "layoutStart": 2759.7000000476837,
+          "layoutEnd": 2759.7000000476837
+        },
+        {
+          "start": 2761.5,
+          "end": 2768.2999999523163,
+          "scriptingStart": 2761.5,
+          "scriptingEnd": 2768.2999999523163,
+          "layoutStart": 2768.2999999523163,
+          "layoutEnd": 2768.2999999523163
+        },
+        {
+          "start": 2769.7000000476837,
+          "end": 2776.2000000476837,
+          "scriptingStart": 2769.7000000476837,
+          "scriptingEnd": 2776.100000143051,
+          "layoutStart": 2776.100000143051,
+          "layoutEnd": 2776.2000000476837
+        },
+        {
+          "start": 2778,
+          "end": 2784.5,
+          "scriptingStart": 2778,
+          "scriptingEnd": 2784.5,
+          "layoutStart": 2784.5,
+          "layoutEnd": 2784.5
+        },
+        {
+          "start": 2786.2999999523163,
+          "end": 2793,
+          "scriptingStart": 2786.2999999523163,
+          "scriptingEnd": 2793,
+          "layoutStart": 2793,
+          "layoutEnd": 2793
+        },
+        {
+          "start": 2794.7000000476837,
+          "end": 2801.600000143051,
+          "scriptingStart": 2794.7000000476837,
+          "scriptingEnd": 2801.600000143051,
+          "layoutStart": 2801.600000143051,
+          "layoutEnd": 2801.600000143051
+        },
+        {
+          "start": 2803.100000143051,
+          "end": 2810,
+          "scriptingStart": 2803.100000143051,
+          "scriptingEnd": 2810,
+          "layoutStart": 2810,
+          "layoutEnd": 2810
+        }
+      ],
+      "max": 9.399999856948853,
+      "min": 6.299999952316284,
+      "median": 6.5,
+      "mean": 6.606999998092651,
+      "stdDev": 0.42620534310987074,
+      "meanLayout": 0.011999998092651367,
+      "meanScripting": 6.594000000953674,
+      "benchmarkName": "Update host accessibility props",
+      "benchmarkMetadata": {
+        "description": "Update many direct host nodes with accessibility-related prop changes only.",
+        "intent": "update-accessibility-props",
+        "layer": "Layer 1",
+        "nodeCount": 360,
+        "primitive": "createElement",
+        "changedPropCountPerNode": 4,
+        "changedStyleCountPerNode": 0
+      },
+      "benchmarkProfile": [
+        {
+          "avgTime": 0.013452777875794304,
+          "calls": 36000,
+          "label": "createElement.total",
+          "maxTime": 0.7999999523162842,
+          "totalTime": 484.30000352859497
+        },
+        {
+          "avgTime": 0.011830555505222745,
+          "calls": 36000,
+          "label": "createElement.createDOMProps",
+          "maxTime": 0.7999999523162842,
+          "totalTime": 425.8999981880188
+        },
+        {
+          "avgTime": 0.011311111039585537,
+          "calls": 36000,
+          "label": "createDOMProps.total",
+          "maxTime": 0.7999999523162842,
+          "totalTime": 407.19999742507935
+        },
+        {
+          "avgTime": 0.006808333357175191,
+          "calls": 36000,
+          "label": "createDOMProps.styleProps",
+          "maxTime": 0.7999999523162842,
+          "totalTime": 245.10000085830688
+        },
+        {
+          "avgTime": 0.006258333418104384,
+          "calls": 36000,
+          "label": "createDOMProps.StyleSheet",
+          "maxTime": 0.7999999523162842,
+          "totalTime": 225.3000030517578
+        },
+        {
+          "avgTime": 0.005669444455040825,
+          "calls": 36000,
+          "label": "StyleSheet.resolve",
+          "maxTime": 0.7999999523162842,
+          "totalTime": 204.10000038146973
+        },
+        {
+          "avgTime": 0.0026638888981607226,
+          "calls": 36000,
+          "label": "StyleSheet.customStyleq",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 95.90000033378601
+        },
+        {
+          "avgTime": 0.0022555555436346267,
+          "calls": 36000,
+          "label": "StyleSheet.inline",
+          "maxTime": 0.7999999523162842,
+          "totalTime": 81.19999957084656
+        },
+        {
+          "avgTime": 0.0007805555793974135,
+          "calls": 36000,
+          "label": "StyleSheet.customStyleq.preprocess",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 28.100000858306885
+        },
+        {
+          "avgTime": 0.0007027777565850151,
+          "calls": 36000,
+          "label": "StyleSheet.customStyleq.cacheHit",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 25.299999237060547
+        },
+        {
+          "avgTime": 0.0003388889167043898,
+          "calls": 36000,
+          "label": "createElement.React.createElement",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 12.200001001358032
+        },
+        {
+          "avgTime": 0.0002888889776335822,
+          "calls": 36000,
+          "label": "createDOMProps.accessibilityProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 10.40000319480896
+        },
+        {
+          "avgTime": 0.0002833333081669278,
+          "calls": 36000,
+          "label": "createDOMProps.propsToAriaRole",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 10.1999990940094
+        },
+        {
+          "avgTime": 0.0002583333584997389,
+          "calls": 36000,
+          "label": "createElement.propsToAccessibilityComponent",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 9.3000009059906
+        },
+        {
+          "avgTime": 0.00025833330551783246,
+          "calls": 36000,
+          "label": "StyleSheet.localizeStyle",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 9.299998998641968
+        },
+        {
+          "avgTime": 0.00025000003311369154,
+          "calls": 36000,
+          "label": "createDOMProps.tvProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 9.000001192092896
+        },
+        {
+          "avgTime": 0.000247222191757626,
+          "calls": 36000,
+          "label": "createDOMProps.dataSetProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 8.899998903274536
+        },
+        {
+          "avgTime": 0.00024444442987442015,
+          "calls": 36000,
+          "label": "createDOMProps.otherProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 8.799999475479126
+        },
+        {
+          "avgTime": 0.0002444443901379903,
+          "calls": 36000,
+          "label": "createDOMProps.focusProps",
+          "maxTime": 0.20000004768371582,
+          "totalTime": 8.799998044967651
+        }
+      ],
+      "libraryName": "react-native-web",
+      "libraryVersion": "",
+      "run": 1
+    },
+    {
+      "startTime": 2838.600000143051,
+      "endTime": 4040.4000000953674,
+      "runTime": 1201.7999999523163,
+      "sampleCount": 100,
+      "samples": [
+        {
+          "start": 2838.600000143051,
+          "end": 2851.9000000953674,
+          "scriptingStart": 2838.600000143051,
+          "scriptingEnd": 2849.5,
+          "layoutStart": 2849.5,
+          "layoutEnd": 2851.9000000953674
+        },
+        {
+          "start": 2852.7000000476837,
+          "end": 2861.4000000953674,
+          "scriptingStart": 2852.7000000476837,
+          "scriptingEnd": 2861.4000000953674,
+          "layoutStart": 2861.4000000953674,
+          "layoutEnd": 2861.4000000953674
+        },
+        {
+          "start": 2861.5,
+          "end": 2871.7999999523163,
+          "scriptingStart": 2861.5,
+          "scriptingEnd": 2870.600000143051,
+          "layoutStart": 2870.600000143051,
+          "layoutEnd": 2871.7999999523163
+        },
+        {
+          "start": 2872.5,
+          "end": 2884.5,
+          "scriptingStart": 2872.5,
+          "scriptingEnd": 2881.7000000476837,
+          "layoutStart": 2881.7000000476837,
+          "layoutEnd": 2884.5
+        },
+        {
+          "start": 2885.100000143051,
+          "end": 2895.4000000953674,
+          "scriptingStart": 2885.100000143051,
+          "scriptingEnd": 2894.100000143051,
+          "layoutStart": 2894.100000143051,
+          "layoutEnd": 2895.4000000953674
+        },
+        {
+          "start": 2895.9000000953674,
+          "end": 2907.7000000476837,
+          "scriptingStart": 2895.9000000953674,
+          "scriptingEnd": 2905.100000143051,
+          "layoutStart": 2905.100000143051,
+          "layoutEnd": 2907.7000000476837
+        },
+        {
+          "start": 2908.2000000476837,
+          "end": 2918.7000000476837,
+          "scriptingStart": 2908.2000000476837,
+          "scriptingEnd": 2917.600000143051,
+          "layoutStart": 2917.600000143051,
+          "layoutEnd": 2918.7000000476837
+        },
+        {
+          "start": 2919.4000000953674,
+          "end": 2931.2999999523163,
+          "scriptingStart": 2919.4000000953674,
+          "scriptingEnd": 2928.5,
+          "layoutStart": 2928.5,
+          "layoutEnd": 2931.2999999523163
+        },
+        {
+          "start": 2931.9000000953674,
+          "end": 2943.2999999523163,
+          "scriptingStart": 2931.9000000953674,
+          "scriptingEnd": 2942.100000143051,
+          "layoutStart": 2942.100000143051,
+          "layoutEnd": 2943.2999999523163
+        },
+        {
+          "start": 2944,
+          "end": 2955.600000143051,
+          "scriptingStart": 2944,
+          "scriptingEnd": 2953,
+          "layoutStart": 2953,
+          "layoutEnd": 2955.600000143051
+        },
+        {
+          "start": 2956.2000000476837,
+          "end": 2966.7000000476837,
+          "scriptingStart": 2956.2000000476837,
+          "scriptingEnd": 2965.600000143051,
+          "layoutStart": 2965.600000143051,
+          "layoutEnd": 2966.7000000476837
+        },
+        {
+          "start": 2967.2999999523163,
+          "end": 2979.100000143051,
+          "scriptingStart": 2967.2999999523163,
+          "scriptingEnd": 2976.4000000953674,
+          "layoutStart": 2976.4000000953674,
+          "layoutEnd": 2979.100000143051
+        },
+        {
+          "start": 2979.7000000476837,
+          "end": 2990,
+          "scriptingStart": 2979.7000000476837,
+          "scriptingEnd": 2988.7000000476837,
+          "layoutStart": 2988.7000000476837,
+          "layoutEnd": 2990
+        },
+        {
+          "start": 2990.600000143051,
+          "end": 3002,
+          "scriptingStart": 2990.600000143051,
+          "scriptingEnd": 2999.5,
+          "layoutStart": 2999.5,
+          "layoutEnd": 3002
+        },
+        {
+          "start": 3002.5,
+          "end": 3013.2999999523163,
+          "scriptingStart": 3002.5,
+          "scriptingEnd": 3012.100000143051,
+          "layoutStart": 3012.100000143051,
+          "layoutEnd": 3013.2999999523163
+        },
+        {
+          "start": 3013.9000000953674,
+          "end": 3026,
+          "scriptingStart": 3013.9000000953674,
+          "scriptingEnd": 3023.2000000476837,
+          "layoutStart": 3023.2000000476837,
+          "layoutEnd": 3026
+        },
+        {
+          "start": 3026.5,
+          "end": 3038,
+          "scriptingStart": 3026.5,
+          "scriptingEnd": 3036.4000000953674,
+          "layoutStart": 3036.4000000953674,
+          "layoutEnd": 3038
+        },
+        {
+          "start": 3038.600000143051,
+          "end": 3052,
+          "scriptingStart": 3038.600000143051,
+          "scriptingEnd": 3049.100000143051,
+          "layoutStart": 3049.100000143051,
+          "layoutEnd": 3052
+        },
+        {
+          "start": 3052.600000143051,
+          "end": 3063.2000000476837,
+          "scriptingStart": 3052.600000143051,
+          "scriptingEnd": 3062,
+          "layoutStart": 3062,
+          "layoutEnd": 3063.2000000476837
+        },
+        {
+          "start": 3063.9000000953674,
+          "end": 3075.7000000476837,
+          "scriptingStart": 3063.9000000953674,
+          "scriptingEnd": 3073.100000143051,
+          "layoutStart": 3073.100000143051,
+          "layoutEnd": 3075.7000000476837
+        },
+        {
+          "start": 3076.2999999523163,
+          "end": 3086.7000000476837,
+          "scriptingStart": 3076.2999999523163,
+          "scriptingEnd": 3085.2000000476837,
+          "layoutStart": 3085.2000000476837,
+          "layoutEnd": 3086.7000000476837
+        },
+        {
+          "start": 3087.4000000953674,
+          "end": 3100.2999999523163,
+          "scriptingStart": 3087.4000000953674,
+          "scriptingEnd": 3097.2999999523163,
+          "layoutStart": 3097.2999999523163,
+          "layoutEnd": 3100.2999999523163
+        },
+        {
+          "start": 3101,
+          "end": 3112,
+          "scriptingStart": 3101,
+          "scriptingEnd": 3110.7999999523163,
+          "layoutStart": 3110.7999999523163,
+          "layoutEnd": 3112
+        },
+        {
+          "start": 3112.600000143051,
+          "end": 3125.4000000953674,
+          "scriptingStart": 3112.600000143051,
+          "scriptingEnd": 3122.2999999523163,
+          "layoutStart": 3122.2999999523163,
+          "layoutEnd": 3125.4000000953674
+        },
+        {
+          "start": 3126,
+          "end": 3136.5,
+          "scriptingStart": 3126,
+          "scriptingEnd": 3135.2000000476837,
+          "layoutStart": 3135.2000000476837,
+          "layoutEnd": 3136.5
+        },
+        {
+          "start": 3137.100000143051,
+          "end": 3148.7000000476837,
+          "scriptingStart": 3137.100000143051,
+          "scriptingEnd": 3146.100000143051,
+          "layoutStart": 3146.100000143051,
+          "layoutEnd": 3148.7000000476837
+        },
+        {
+          "start": 3149.2000000476837,
+          "end": 3160.2000000476837,
+          "scriptingStart": 3149.2000000476837,
+          "scriptingEnd": 3158.9000000953674,
+          "layoutStart": 3158.9000000953674,
+          "layoutEnd": 3160.2000000476837
+        },
+        {
+          "start": 3160.7999999523163,
+          "end": 3173.9000000953674,
+          "scriptingStart": 3160.7999999523163,
+          "scriptingEnd": 3170.7999999523163,
+          "layoutStart": 3170.7999999523163,
+          "layoutEnd": 3173.9000000953674
+        },
+        {
+          "start": 3174.7000000476837,
+          "end": 3185.2000000476837,
+          "scriptingStart": 3174.7000000476837,
+          "scriptingEnd": 3183.9000000953674,
+          "layoutStart": 3183.9000000953674,
+          "layoutEnd": 3185.2000000476837
+        },
+        {
+          "start": 3185.7999999523163,
+          "end": 3197.4000000953674,
+          "scriptingStart": 3185.7999999523163,
+          "scriptingEnd": 3194.7999999523163,
+          "layoutStart": 3194.7999999523163,
+          "layoutEnd": 3197.4000000953674
+        },
+        {
+          "start": 3197.9000000953674,
+          "end": 3208.100000143051,
+          "scriptingStart": 3197.9000000953674,
+          "scriptingEnd": 3206.7999999523163,
+          "layoutStart": 3206.7999999523163,
+          "layoutEnd": 3208.100000143051
+        },
+        {
+          "start": 3208.7000000476837,
+          "end": 3220.600000143051,
+          "scriptingStart": 3208.7000000476837,
+          "scriptingEnd": 3217.7999999523163,
+          "layoutStart": 3217.7999999523163,
+          "layoutEnd": 3220.600000143051
+        },
+        {
+          "start": 3221.100000143051,
+          "end": 3231.2000000476837,
+          "scriptingStart": 3221.100000143051,
+          "scriptingEnd": 3230,
+          "layoutStart": 3230,
+          "layoutEnd": 3231.2000000476837
+        },
+        {
+          "start": 3231.7999999523163,
+          "end": 3243.2999999523163,
+          "scriptingStart": 3231.7999999523163,
+          "scriptingEnd": 3240.7999999523163,
+          "layoutStart": 3240.7999999523163,
+          "layoutEnd": 3243.2999999523163
+        },
+        {
+          "start": 3243.9000000953674,
+          "end": 3254.2000000476837,
+          "scriptingStart": 3243.9000000953674,
+          "scriptingEnd": 3252.9000000953674,
+          "layoutStart": 3252.9000000953674,
+          "layoutEnd": 3254.2000000476837
+        },
+        {
+          "start": 3254.7999999523163,
+          "end": 3267.5,
+          "scriptingStart": 3254.7999999523163,
+          "scriptingEnd": 3264.7000000476837,
+          "layoutStart": 3264.7000000476837,
+          "layoutEnd": 3267.5
+        },
+        {
+          "start": 3268.2000000476837,
+          "end": 3278.7000000476837,
+          "scriptingStart": 3268.2000000476837,
+          "scriptingEnd": 3277.2999999523163,
+          "layoutStart": 3277.2999999523163,
+          "layoutEnd": 3278.7000000476837
+        },
+        {
+          "start": 3279.2999999523163,
+          "end": 3291.2999999523163,
+          "scriptingStart": 3279.2999999523163,
+          "scriptingEnd": 3288.7000000476837,
+          "layoutStart": 3288.7000000476837,
+          "layoutEnd": 3291.2999999523163
+        },
+        {
+          "start": 3292,
+          "end": 3303.100000143051,
+          "scriptingStart": 3292,
+          "scriptingEnd": 3301.7000000476837,
+          "layoutStart": 3301.7000000476837,
+          "layoutEnd": 3303.100000143051
+        },
+        {
+          "start": 3303.7999999523163,
+          "end": 3316.100000143051,
+          "scriptingStart": 3303.7999999523163,
+          "scriptingEnd": 3313.2999999523163,
+          "layoutStart": 3313.2999999523163,
+          "layoutEnd": 3316.100000143051
+        },
+        {
+          "start": 3316.7999999523163,
+          "end": 3327.2999999523163,
+          "scriptingStart": 3316.7999999523163,
+          "scriptingEnd": 3326,
+          "layoutStart": 3326,
+          "layoutEnd": 3327.2999999523163
+        },
+        {
+          "start": 3327.9000000953674,
+          "end": 3339.600000143051,
+          "scriptingStart": 3327.9000000953674,
+          "scriptingEnd": 3336.9000000953674,
+          "layoutStart": 3336.9000000953674,
+          "layoutEnd": 3339.600000143051
+        },
+        {
+          "start": 3340.2000000476837,
+          "end": 3350.2999999523163,
+          "scriptingStart": 3340.2000000476837,
+          "scriptingEnd": 3349.100000143051,
+          "layoutStart": 3349.100000143051,
+          "layoutEnd": 3350.2999999523163
+        },
+        {
+          "start": 3350.7000000476837,
+          "end": 3363.2000000476837,
+          "scriptingStart": 3350.7000000476837,
+          "scriptingEnd": 3360.2999999523163,
+          "layoutStart": 3360.2999999523163,
+          "layoutEnd": 3363.2000000476837
+        },
+        {
+          "start": 3363.7999999523163,
+          "end": 3375.4000000953674,
+          "scriptingStart": 3363.7999999523163,
+          "scriptingEnd": 3373.9000000953674,
+          "layoutStart": 3373.9000000953674,
+          "layoutEnd": 3375.4000000953674
+        },
+        {
+          "start": 3376.2000000476837,
+          "end": 3388.2000000476837,
+          "scriptingStart": 3376.2000000476837,
+          "scriptingEnd": 3385.600000143051,
+          "layoutStart": 3385.600000143051,
+          "layoutEnd": 3388.2000000476837
+        },
+        {
+          "start": 3388.7999999523163,
+          "end": 3399.100000143051,
+          "scriptingStart": 3388.7999999523163,
+          "scriptingEnd": 3397.9000000953674,
+          "layoutStart": 3397.9000000953674,
+          "layoutEnd": 3399.100000143051
+        },
+        {
+          "start": 3399.7999999523163,
+          "end": 3411.9000000953674,
+          "scriptingStart": 3399.7999999523163,
+          "scriptingEnd": 3408.9000000953674,
+          "layoutStart": 3408.9000000953674,
+          "layoutEnd": 3411.9000000953674
+        },
+        {
+          "start": 3412.5,
+          "end": 3423.4000000953674,
+          "scriptingStart": 3412.5,
+          "scriptingEnd": 3422,
+          "layoutStart": 3422.100000143051,
+          "layoutEnd": 3423.4000000953674
+        },
+        {
+          "start": 3423.9000000953674,
+          "end": 3436.5,
+          "scriptingStart": 3423.9000000953674,
+          "scriptingEnd": 3433.7000000476837,
+          "layoutStart": 3433.7000000476837,
+          "layoutEnd": 3436.5
+        },
+        {
+          "start": 3437.600000143051,
+          "end": 3452.2000000476837,
+          "scriptingStart": 3437.600000143051,
+          "scriptingEnd": 3450.600000143051,
+          "layoutStart": 3450.600000143051,
+          "layoutEnd": 3452.2000000476837
+        },
+        {
+          "start": 3452.9000000953674,
+          "end": 3466.4000000953674,
+          "scriptingStart": 3452.9000000953674,
+          "scriptingEnd": 3463.5,
+          "layoutStart": 3463.5,
+          "layoutEnd": 3466.4000000953674
+        },
+        {
+          "start": 3467.100000143051,
+          "end": 3478.100000143051,
+          "scriptingStart": 3467.100000143051,
+          "scriptingEnd": 3476.7000000476837,
+          "layoutStart": 3476.7000000476837,
+          "layoutEnd": 3478.100000143051
+        },
+        {
+          "start": 3478.7999999523163,
+          "end": 3491,
+          "scriptingStart": 3478.7999999523163,
+          "scriptingEnd": 3488.2000000476837,
+          "layoutStart": 3488.2000000476837,
+          "layoutEnd": 3491
+        },
+        {
+          "start": 3491.7000000476837,
+          "end": 3503,
+          "scriptingStart": 3491.7000000476837,
+          "scriptingEnd": 3501.7000000476837,
+          "layoutStart": 3501.7000000476837,
+          "layoutEnd": 3503
+        },
+        {
+          "start": 3503.7999999523163,
+          "end": 3516,
+          "scriptingStart": 3503.7999999523163,
+          "scriptingEnd": 3513.100000143051,
+          "layoutStart": 3513.100000143051,
+          "layoutEnd": 3516
+        },
+        {
+          "start": 3516.7999999523163,
+          "end": 3527,
+          "scriptingStart": 3516.7999999523163,
+          "scriptingEnd": 3525.7000000476837,
+          "layoutStart": 3525.7000000476837,
+          "layoutEnd": 3527
+        },
+        {
+          "start": 3527.5,
+          "end": 3539,
+          "scriptingStart": 3527.5,
+          "scriptingEnd": 3536.4000000953674,
+          "layoutStart": 3536.4000000953674,
+          "layoutEnd": 3539
+        },
+        {
+          "start": 3539.5,
+          "end": 3549.7999999523163,
+          "scriptingStart": 3539.5,
+          "scriptingEnd": 3548.7000000476837,
+          "layoutStart": 3548.7000000476837,
+          "layoutEnd": 3549.7999999523163
+        },
+        {
+          "start": 3554.2999999523163,
+          "end": 3566.9000000953674,
+          "scriptingStart": 3554.2999999523163,
+          "scriptingEnd": 3564.100000143051,
+          "layoutStart": 3564.100000143051,
+          "layoutEnd": 3566.9000000953674
+        },
+        {
+          "start": 3567.7000000476837,
+          "end": 3579,
+          "scriptingStart": 3567.7000000476837,
+          "scriptingEnd": 3577.5,
+          "layoutStart": 3577.5,
+          "layoutEnd": 3579
+        },
+        {
+          "start": 3579.600000143051,
+          "end": 3591.2999999523163,
+          "scriptingStart": 3579.600000143051,
+          "scriptingEnd": 3588.600000143051,
+          "layoutStart": 3588.600000143051,
+          "layoutEnd": 3591.2999999523163
+        },
+        {
+          "start": 3591.7999999523163,
+          "end": 3601.9000000953674,
+          "scriptingStart": 3591.7999999523163,
+          "scriptingEnd": 3600.7999999523163,
+          "layoutStart": 3600.7999999523163,
+          "layoutEnd": 3601.9000000953674
+        },
+        {
+          "start": 3602.4000000953674,
+          "end": 3614.2999999523163,
+          "scriptingStart": 3602.4000000953674,
+          "scriptingEnd": 3611.600000143051,
+          "layoutStart": 3611.600000143051,
+          "layoutEnd": 3614.2999999523163
+        },
+        {
+          "start": 3614.9000000953674,
+          "end": 3625.600000143051,
+          "scriptingStart": 3614.9000000953674,
+          "scriptingEnd": 3624.2999999523163,
+          "layoutStart": 3624.2999999523163,
+          "layoutEnd": 3625.600000143051
+        },
+        {
+          "start": 3626.100000143051,
+          "end": 3638.7999999523163,
+          "scriptingStart": 3626.100000143051,
+          "scriptingEnd": 3636,
+          "layoutStart": 3636,
+          "layoutEnd": 3638.7999999523163
+        },
+        {
+          "start": 3639.5,
+          "end": 3649.7000000476837,
+          "scriptingStart": 3639.5,
+          "scriptingEnd": 3648.7000000476837,
+          "layoutStart": 3648.7000000476837,
+          "layoutEnd": 3649.7000000476837
+        },
+        {
+          "start": 3650.2000000476837,
+          "end": 3662.2000000476837,
+          "scriptingStart": 3650.2000000476837,
+          "scriptingEnd": 3659.5,
+          "layoutStart": 3659.5,
+          "layoutEnd": 3662.2000000476837
+        },
+        {
+          "start": 3662.7999999523163,
+          "end": 3674,
+          "scriptingStart": 3662.7999999523163,
+          "scriptingEnd": 3672.7000000476837,
+          "layoutStart": 3672.7000000476837,
+          "layoutEnd": 3674
+        },
+        {
+          "start": 3674.600000143051,
+          "end": 3686,
+          "scriptingStart": 3674.600000143051,
+          "scriptingEnd": 3683.5,
+          "layoutStart": 3683.5,
+          "layoutEnd": 3686
+        },
+        {
+          "start": 3686.600000143051,
+          "end": 3696.600000143051,
+          "scriptingStart": 3686.600000143051,
+          "scriptingEnd": 3695.4000000953674,
+          "layoutStart": 3695.4000000953674,
+          "layoutEnd": 3696.600000143051
+        },
+        {
+          "start": 3697.100000143051,
+          "end": 3708.9000000953674,
+          "scriptingStart": 3697.100000143051,
+          "scriptingEnd": 3706,
+          "layoutStart": 3706,
+          "layoutEnd": 3708.9000000953674
+        },
+        {
+          "start": 3709.4000000953674,
+          "end": 3719.5,
+          "scriptingStart": 3709.4000000953674,
+          "scriptingEnd": 3718.2999999523163,
+          "layoutStart": 3718.2999999523163,
+          "layoutEnd": 3719.5
+        },
+        {
+          "start": 3720,
+          "end": 3731.5,
+          "scriptingStart": 3720,
+          "scriptingEnd": 3728.9000000953674,
+          "layoutStart": 3728.9000000953674,
+          "layoutEnd": 3731.5
+        },
+        {
+          "start": 3731.9000000953674,
+          "end": 3741.7999999523163,
+          "scriptingStart": 3731.9000000953674,
+          "scriptingEnd": 3740.7000000476837,
+          "layoutStart": 3740.7000000476837,
+          "layoutEnd": 3741.7999999523163
+        },
+        {
+          "start": 3742.2999999523163,
+          "end": 3754,
+          "scriptingStart": 3742.2999999523163,
+          "scriptingEnd": 3751.2000000476837,
+          "layoutStart": 3751.2000000476837,
+          "layoutEnd": 3754
+        },
+        {
+          "start": 3754.600000143051,
+          "end": 3765.600000143051,
+          "scriptingStart": 3754.600000143051,
+          "scriptingEnd": 3764.100000143051,
+          "layoutStart": 3764.100000143051,
+          "layoutEnd": 3765.600000143051
+        },
+        {
+          "start": 3766.2999999523163,
+          "end": 3779.100000143051,
+          "scriptingStart": 3766.2999999523163,
+          "scriptingEnd": 3776.4000000953674,
+          "layoutStart": 3776.4000000953674,
+          "layoutEnd": 3779.100000143051
+        },
+        {
+          "start": 3779.600000143051,
+          "end": 3789.9000000953674,
+          "scriptingStart": 3779.600000143051,
+          "scriptingEnd": 3788.7000000476837,
+          "layoutStart": 3788.7000000476837,
+          "layoutEnd": 3789.9000000953674
+        },
+        {
+          "start": 3790.5,
+          "end": 3802.5,
+          "scriptingStart": 3790.5,
+          "scriptingEnd": 3799.7999999523163,
+          "layoutStart": 3799.7999999523163,
+          "layoutEnd": 3802.5
+        },
+        {
+          "start": 3803.100000143051,
+          "end": 3813.7000000476837,
+          "scriptingStart": 3803.100000143051,
+          "scriptingEnd": 3812.5,
+          "layoutStart": 3812.5,
+          "layoutEnd": 3813.7000000476837
+        },
+        {
+          "start": 3814.4000000953674,
+          "end": 3826.600000143051,
+          "scriptingStart": 3814.4000000953674,
+          "scriptingEnd": 3823.7999999523163,
+          "layoutStart": 3823.7999999523163,
+          "layoutEnd": 3826.600000143051
+        },
+        {
+          "start": 3827.2000000476837,
+          "end": 3838.4000000953674,
+          "scriptingStart": 3827.2000000476837,
+          "scriptingEnd": 3837.100000143051,
+          "layoutStart": 3837.100000143051,
+          "layoutEnd": 3838.4000000953674
+        },
+        {
+          "start": 3839,
+          "end": 3850.9000000953674,
+          "scriptingStart": 3839,
+          "scriptingEnd": 3848.100000143051,
+          "layoutStart": 3848.100000143051,
+          "layoutEnd": 3850.9000000953674
+        },
+        {
+          "start": 3851.4000000953674,
+          "end": 3862,
+          "scriptingStart": 3851.4000000953674,
+          "scriptingEnd": 3860.600000143051,
+          "layoutStart": 3860.600000143051,
+          "layoutEnd": 3862
+        },
+        {
+          "start": 3862.5,
+          "end": 3874,
+          "scriptingStart": 3862.5,
+          "scriptingEnd": 3871.5,
+          "layoutStart": 3871.5,
+          "layoutEnd": 3874
+        },
+        {
+          "start": 3874.5,
+          "end": 3885.600000143051,
+          "scriptingStart": 3874.5,
+          "scriptingEnd": 3884.5,
+          "layoutStart": 3884.5,
+          "layoutEnd": 3885.600000143051
+        },
+        {
+          "start": 3886.2000000476837,
+          "end": 3897.7000000476837,
+          "scriptingStart": 3886.2000000476837,
+          "scriptingEnd": 3895.100000143051,
+          "layoutStart": 3895.100000143051,
+          "layoutEnd": 3897.7000000476837
+        },
+        {
+          "start": 3898.2999999523163,
+          "end": 3908.7000000476837,
+          "scriptingStart": 3898.2999999523163,
+          "scriptingEnd": 3907.2999999523163,
+          "layoutStart": 3907.2999999523163,
+          "layoutEnd": 3908.7000000476837
+        },
+        {
+          "start": 3909.2999999523163,
+          "end": 3920.7999999523163,
+          "scriptingStart": 3909.2999999523163,
+          "scriptingEnd": 3918.2000000476837,
+          "layoutStart": 3918.2000000476837,
+          "layoutEnd": 3920.7999999523163
+        },
+        {
+          "start": 3921.2999999523163,
+          "end": 3931.2999999523163,
+          "scriptingStart": 3921.2999999523163,
+          "scriptingEnd": 3930.100000143051,
+          "layoutStart": 3930.100000143051,
+          "layoutEnd": 3931.2999999523163
+        },
+        {
+          "start": 3931.7999999523163,
+          "end": 3943.2000000476837,
+          "scriptingStart": 3931.7999999523163,
+          "scriptingEnd": 3940.600000143051,
+          "layoutStart": 3940.600000143051,
+          "layoutEnd": 3943.2000000476837
+        },
+        {
+          "start": 3943.7999999523163,
+          "end": 3954,
+          "scriptingStart": 3943.7999999523163,
+          "scriptingEnd": 3952.7000000476837,
+          "layoutStart": 3952.7000000476837,
+          "layoutEnd": 3954
+        },
+        {
+          "start": 3954.600000143051,
+          "end": 3966.4000000953674,
+          "scriptingStart": 3954.600000143051,
+          "scriptingEnd": 3963.9000000953674,
+          "layoutStart": 3963.9000000953674,
+          "layoutEnd": 3966.4000000953674
+        },
+        {
+          "start": 3967.100000143051,
+          "end": 3977,
+          "scriptingStart": 3967.100000143051,
+          "scriptingEnd": 3975.7999999523163,
+          "layoutStart": 3975.7999999523163,
+          "layoutEnd": 3977
+        },
+        {
+          "start": 3977.4000000953674,
+          "end": 3990.100000143051,
+          "scriptingStart": 3977.4000000953674,
+          "scriptingEnd": 3987.100000143051,
+          "layoutStart": 3987.100000143051,
+          "layoutEnd": 3990.100000143051
+        },
+        {
+          "start": 3990.7000000476837,
+          "end": 4002,
+          "scriptingStart": 3990.7000000476837,
+          "scriptingEnd": 4000.600000143051,
+          "layoutStart": 4000.600000143051,
+          "layoutEnd": 4002
+        },
+        {
+          "start": 4002.7000000476837,
+          "end": 4015.100000143051,
+          "scriptingStart": 4002.7000000476837,
+          "scriptingEnd": 4012.2999999523163,
+          "layoutStart": 4012.2999999523163,
+          "layoutEnd": 4015.100000143051
+        },
+        {
+          "start": 4015.7999999523163,
+          "end": 4026.4000000953674,
+          "scriptingStart": 4015.7999999523163,
+          "scriptingEnd": 4025.2000000476837,
+          "layoutStart": 4025.2000000476837,
+          "layoutEnd": 4026.4000000953674
+        },
+        {
+          "start": 4027,
+          "end": 4040.4000000953674,
+          "scriptingStart": 4027,
+          "scriptingEnd": 4037.100000143051,
+          "layoutStart": 4037.100000143051,
+          "layoutEnd": 4040.4000000953674
+        }
+      ],
+      "max": 14.599999904632568,
+      "min": 8.700000047683716,
+      "median": 11.450000047683716,
+      "mean": 11.382000002861023,
+      "stdDev": 1.0070134082969833,
+      "meanLayout": 1.9989999890327455,
+      "meanScripting": 9.382000012397766,
+      "benchmarkName": "Update host props",
+      "benchmarkMetadata": {
+        "description": "Update many direct host nodes with changing DOM-like props and light style changes.",
+        "intent": "update-props",
+        "layer": "Layer 1",
+        "nodeCount": 360,
+        "primitive": "createElement",
+        "changedPropCountPerNode": 6,
+        "changedStyleCountPerNode": 2
+      },
+      "benchmarkProfile": [
+        {
+          "avgTime": 0.01778055552641551,
+          "calls": 36000,
+          "label": "createElement.total",
+          "maxTime": 0.7999999523162842,
+          "totalTime": 640.0999989509583
+        },
+        {
+          "avgTime": 0.015550000064902836,
+          "calls": 36000,
+          "label": "createElement.createDOMProps",
+          "maxTime": 0.7999999523162842,
+          "totalTime": 559.8000023365021
+        },
+        {
+          "avgTime": 0.014972222261958651,
+          "calls": 36000,
+          "label": "createDOMProps.total",
+          "maxTime": 0.7999999523162842,
+          "totalTime": 539.0000014305115
+        },
+        {
+          "avgTime": 0.009950000054306454,
+          "calls": 36000,
+          "label": "createDOMProps.styleProps",
+          "maxTime": 0.7999999523162842,
+          "totalTime": 358.20000195503235
+        },
+        {
+          "avgTime": 0.009447222292423249,
+          "calls": 36000,
+          "label": "createDOMProps.StyleSheet",
+          "maxTime": 0.7999999523162842,
+          "totalTime": 340.10000252723694
+        },
+        {
+          "avgTime": 0.00884722234805425,
+          "calls": 36000,
+          "label": "StyleSheet.resolve",
+          "maxTime": 0.7999999523162842,
+          "totalTime": 318.500004529953
+        },
+        {
+          "avgTime": 0.005194444437821706,
+          "calls": 36000,
+          "label": "StyleSheet.customStyleq",
+          "maxTime": 0.5,
+          "totalTime": 186.99999976158142
+        },
+        {
+          "avgTime": 0.002833333472410838,
+          "calls": 36000,
+          "label": "StyleSheet.inline",
+          "maxTime": 0.7999999523162842,
+          "totalTime": 102.00000500679016
+        },
+        {
+          "avgTime": 0.000589855078337849,
+          "calls": 138000,
+          "label": "StyleSheet.customStyleq.preprocess",
+          "maxTime": 0.5,
+          "totalTime": 81.40000081062317
+        },
+        {
+          "avgTime": 0.0007500000198682149,
+          "calls": 36000,
+          "label": "StyleSheet.customStyleq.cacheHit",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 27.000000715255737
+        },
+        {
+          "avgTime": 0.00041388884517881604,
+          "calls": 36000,
+          "label": "createElement.React.createElement",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 14.899998426437378
+        },
+        {
+          "avgTime": 0.0003305555714501275,
+          "calls": 36000,
+          "label": "createDOMProps.accessibilityProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 11.90000057220459
+        },
+        {
+          "avgTime": 0.0003166666097111172,
+          "calls": 36000,
+          "label": "createDOMProps.otherProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 11.39999794960022
+        },
+        {
+          "avgTime": 0.0002805555926428901,
+          "calls": 36000,
+          "label": "createDOMProps.dataSetProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 10.100001335144043
+        },
+        {
+          "avgTime": 0.0002805555595291985,
+          "calls": 36000,
+          "label": "createElement.localeProvider",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 10.100000143051147
+        },
+        {
+          "avgTime": 0.00028055553966098364,
+          "calls": 36000,
+          "label": "createDOMProps.propsToAriaRole",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 10.09999942779541
+        },
+        {
+          "avgTime": 0.00026111105415556167,
+          "calls": 36000,
+          "label": "createElement.propsToAccessibilityComponent",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 9.39999794960022
+        },
+        {
+          "avgTime": 0.00025277778837415907,
+          "calls": 36000,
+          "label": "createDOMProps.focusProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 9.100000381469727
+        },
+        {
+          "avgTime": 0.0002444444100062052,
+          "calls": 36000,
+          "label": "StyleSheet.localizeStyle",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 8.799998760223389
+        },
+        {
+          "avgTime": 0.0002277777592341105,
+          "calls": 36000,
+          "label": "createDOMProps.tvProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 8.199999332427979
+        }
+      ],
+      "libraryName": "react-native-web",
+      "libraryVersion": "",
+      "run": 1
+    },
+    {
+      "startTime": 4067.7000000476837,
+      "endTime": 5094.799999952316,
+      "runTime": 1027.0999999046326,
+      "sampleCount": 100,
+      "samples": [
+        {
+          "start": 4067.7000000476837,
+          "end": 4078.4000000953674,
+          "scriptingStart": 4067.7000000476837,
+          "scriptingEnd": 4077.2999999523163,
+          "layoutStart": 4077.2999999523163,
+          "layoutEnd": 4078.4000000953674
+        },
+        {
+          "start": 4079.4000000953674,
+          "end": 4088.7999999523163,
+          "scriptingStart": 4079.4000000953674,
+          "scriptingEnd": 4088.7999999523163,
+          "layoutStart": 4088.7999999523163,
+          "layoutEnd": 4088.7999999523163
+        },
+        {
+          "start": 4089,
+          "end": 4098.5,
+          "scriptingStart": 4089,
+          "scriptingEnd": 4097.799999952316,
+          "layoutStart": 4097.799999952316,
+          "layoutEnd": 4098.5
+        },
+        {
+          "start": 4099.200000047684,
+          "end": 4108.600000143051,
+          "scriptingStart": 4099.200000047684,
+          "scriptingEnd": 4108,
+          "layoutStart": 4108,
+          "layoutEnd": 4108.600000143051
+        },
+        {
+          "start": 4109.400000095367,
+          "end": 4119,
+          "scriptingStart": 4109.400000095367,
+          "scriptingEnd": 4118.299999952316,
+          "layoutStart": 4118.299999952316,
+          "layoutEnd": 4119
+        },
+        {
+          "start": 4119.799999952316,
+          "end": 4129.200000047684,
+          "scriptingStart": 4119.799999952316,
+          "scriptingEnd": 4128.5,
+          "layoutStart": 4128.5,
+          "layoutEnd": 4129.200000047684
+        },
+        {
+          "start": 4129.799999952316,
+          "end": 4139.5,
+          "scriptingStart": 4129.799999952316,
+          "scriptingEnd": 4138.799999952316,
+          "layoutStart": 4138.799999952316,
+          "layoutEnd": 4139.5
+        },
+        {
+          "start": 4140.200000047684,
+          "end": 4150.5,
+          "scriptingStart": 4140.200000047684,
+          "scriptingEnd": 4149.700000047684,
+          "layoutStart": 4149.700000047684,
+          "layoutEnd": 4150.5
+        },
+        {
+          "start": 4151.200000047684,
+          "end": 4161.299999952316,
+          "scriptingStart": 4151.200000047684,
+          "scriptingEnd": 4160.700000047684,
+          "layoutStart": 4160.700000047684,
+          "layoutEnd": 4161.299999952316
+        },
+        {
+          "start": 4162,
+          "end": 4172.299999952316,
+          "scriptingStart": 4162,
+          "scriptingEnd": 4171.600000143051,
+          "layoutStart": 4171.600000143051,
+          "layoutEnd": 4172.299999952316
+        },
+        {
+          "start": 4173.100000143051,
+          "end": 4183.700000047684,
+          "scriptingStart": 4173.100000143051,
+          "scriptingEnd": 4183,
+          "layoutStart": 4183,
+          "layoutEnd": 4183.700000047684
+        },
+        {
+          "start": 4184.5,
+          "end": 4193.5,
+          "scriptingStart": 4184.5,
+          "scriptingEnd": 4192.799999952316,
+          "layoutStart": 4192.799999952316,
+          "layoutEnd": 4193.5
+        },
+        {
+          "start": 4194,
+          "end": 4203.700000047684,
+          "scriptingStart": 4194,
+          "scriptingEnd": 4203.100000143051,
+          "layoutStart": 4203.100000143051,
+          "layoutEnd": 4203.700000047684
+        },
+        {
+          "start": 4204.400000095367,
+          "end": 4214,
+          "scriptingStart": 4204.400000095367,
+          "scriptingEnd": 4213.299999952316,
+          "layoutStart": 4213.299999952316,
+          "layoutEnd": 4214
+        },
+        {
+          "start": 4214.799999952316,
+          "end": 4224.400000095367,
+          "scriptingStart": 4214.799999952316,
+          "scriptingEnd": 4223.700000047684,
+          "layoutStart": 4223.700000047684,
+          "layoutEnd": 4224.400000095367
+        },
+        {
+          "start": 4225.100000143051,
+          "end": 4234.700000047684,
+          "scriptingStart": 4225.100000143051,
+          "scriptingEnd": 4233.900000095367,
+          "layoutStart": 4233.900000095367,
+          "layoutEnd": 4234.700000047684
+        },
+        {
+          "start": 4235.400000095367,
+          "end": 4244.799999952316,
+          "scriptingStart": 4235.400000095367,
+          "scriptingEnd": 4244.100000143051,
+          "layoutStart": 4244.100000143051,
+          "layoutEnd": 4244.799999952316
+        },
+        {
+          "start": 4245.600000143051,
+          "end": 4254.799999952316,
+          "scriptingStart": 4245.600000143051,
+          "scriptingEnd": 4254.100000143051,
+          "layoutStart": 4254.100000143051,
+          "layoutEnd": 4254.799999952316
+        },
+        {
+          "start": 4255.400000095367,
+          "end": 4265,
+          "scriptingStart": 4255.400000095367,
+          "scriptingEnd": 4264.299999952316,
+          "layoutStart": 4264.299999952316,
+          "layoutEnd": 4265
+        },
+        {
+          "start": 4265.600000143051,
+          "end": 4274.799999952316,
+          "scriptingStart": 4265.600000143051,
+          "scriptingEnd": 4274.200000047684,
+          "layoutStart": 4274.200000047684,
+          "layoutEnd": 4274.799999952316
+        },
+        {
+          "start": 4275.5,
+          "end": 4284.900000095367,
+          "scriptingStart": 4275.5,
+          "scriptingEnd": 4284.200000047684,
+          "layoutStart": 4284.200000047684,
+          "layoutEnd": 4284.900000095367
+        },
+        {
+          "start": 4285.5,
+          "end": 4294.900000095367,
+          "scriptingStart": 4285.5,
+          "scriptingEnd": 4294.100000143051,
+          "layoutStart": 4294.100000143051,
+          "layoutEnd": 4294.900000095367
+        },
+        {
+          "start": 4295.5,
+          "end": 4305.100000143051,
+          "scriptingStart": 4295.5,
+          "scriptingEnd": 4304.400000095367,
+          "layoutStart": 4304.400000095367,
+          "layoutEnd": 4305.100000143051
+        },
+        {
+          "start": 4305.900000095367,
+          "end": 4315.799999952316,
+          "scriptingStart": 4305.900000095367,
+          "scriptingEnd": 4315.100000143051,
+          "layoutStart": 4315.100000143051,
+          "layoutEnd": 4315.799999952316
+        },
+        {
+          "start": 4316.600000143051,
+          "end": 4325.900000095367,
+          "scriptingStart": 4316.600000143051,
+          "scriptingEnd": 4325.200000047684,
+          "layoutStart": 4325.200000047684,
+          "layoutEnd": 4325.900000095367
+        },
+        {
+          "start": 4326.5,
+          "end": 4336.400000095367,
+          "scriptingStart": 4326.5,
+          "scriptingEnd": 4335.600000143051,
+          "layoutStart": 4335.600000143051,
+          "layoutEnd": 4336.400000095367
+        },
+        {
+          "start": 4337,
+          "end": 4346.5,
+          "scriptingStart": 4337,
+          "scriptingEnd": 4345.799999952316,
+          "layoutStart": 4345.799999952316,
+          "layoutEnd": 4346.5
+        },
+        {
+          "start": 4347.299999952316,
+          "end": 4357.5,
+          "scriptingStart": 4347.299999952316,
+          "scriptingEnd": 4356.799999952316,
+          "layoutStart": 4356.799999952316,
+          "layoutEnd": 4357.5
+        },
+        {
+          "start": 4358.400000095367,
+          "end": 4367.5,
+          "scriptingStart": 4358.400000095367,
+          "scriptingEnd": 4366.799999952316,
+          "layoutStart": 4366.799999952316,
+          "layoutEnd": 4367.5
+        },
+        {
+          "start": 4368,
+          "end": 4377.200000047684,
+          "scriptingStart": 4368,
+          "scriptingEnd": 4376.5,
+          "layoutStart": 4376.5,
+          "layoutEnd": 4377.200000047684
+        },
+        {
+          "start": 4377.700000047684,
+          "end": 4386.600000143051,
+          "scriptingStart": 4377.700000047684,
+          "scriptingEnd": 4386,
+          "layoutStart": 4386,
+          "layoutEnd": 4386.600000143051
+        },
+        {
+          "start": 4387.200000047684,
+          "end": 4396.200000047684,
+          "scriptingStart": 4387.200000047684,
+          "scriptingEnd": 4395.5,
+          "layoutStart": 4395.5,
+          "layoutEnd": 4396.200000047684
+        },
+        {
+          "start": 4396.799999952316,
+          "end": 4406,
+          "scriptingStart": 4396.799999952316,
+          "scriptingEnd": 4405.400000095367,
+          "layoutStart": 4405.400000095367,
+          "layoutEnd": 4406
+        },
+        {
+          "start": 4406.700000047684,
+          "end": 4416.200000047684,
+          "scriptingStart": 4406.700000047684,
+          "scriptingEnd": 4415.5,
+          "layoutStart": 4415.5,
+          "layoutEnd": 4416.200000047684
+        },
+        {
+          "start": 4416.900000095367,
+          "end": 4426.100000143051,
+          "scriptingStart": 4416.900000095367,
+          "scriptingEnd": 4425.5,
+          "layoutStart": 4425.5,
+          "layoutEnd": 4426.100000143051
+        },
+        {
+          "start": 4426.700000047684,
+          "end": 4435.600000143051,
+          "scriptingStart": 4426.700000047684,
+          "scriptingEnd": 4435,
+          "layoutStart": 4435,
+          "layoutEnd": 4435.600000143051
+        },
+        {
+          "start": 4436.100000143051,
+          "end": 4446,
+          "scriptingStart": 4436.100000143051,
+          "scriptingEnd": 4445.299999952316,
+          "layoutStart": 4445.299999952316,
+          "layoutEnd": 4446
+        },
+        {
+          "start": 4446.700000047684,
+          "end": 4455.900000095367,
+          "scriptingStart": 4446.700000047684,
+          "scriptingEnd": 4455.200000047684,
+          "layoutStart": 4455.200000047684,
+          "layoutEnd": 4455.900000095367
+        },
+        {
+          "start": 4456.5,
+          "end": 4466.200000047684,
+          "scriptingStart": 4456.5,
+          "scriptingEnd": 4465.400000095367,
+          "layoutStart": 4465.400000095367,
+          "layoutEnd": 4466.200000047684
+        },
+        {
+          "start": 4467,
+          "end": 4476.700000047684,
+          "scriptingStart": 4467,
+          "scriptingEnd": 4475.900000095367,
+          "layoutStart": 4475.900000095367,
+          "layoutEnd": 4476.700000047684
+        },
+        {
+          "start": 4477.5,
+          "end": 4487,
+          "scriptingStart": 4477.5,
+          "scriptingEnd": 4486.200000047684,
+          "layoutStart": 4486.200000047684,
+          "layoutEnd": 4487
+        },
+        {
+          "start": 4487.600000143051,
+          "end": 4496.5,
+          "scriptingStart": 4487.600000143051,
+          "scriptingEnd": 4495.900000095367,
+          "layoutStart": 4495.900000095367,
+          "layoutEnd": 4496.5
+        },
+        {
+          "start": 4497.100000143051,
+          "end": 4506.200000047684,
+          "scriptingStart": 4497.100000143051,
+          "scriptingEnd": 4505.5,
+          "layoutStart": 4505.5,
+          "layoutEnd": 4506.200000047684
+        },
+        {
+          "start": 4506.900000095367,
+          "end": 4516.100000143051,
+          "scriptingStart": 4506.900000095367,
+          "scriptingEnd": 4515.400000095367,
+          "layoutStart": 4515.400000095367,
+          "layoutEnd": 4516.100000143051
+        },
+        {
+          "start": 4516.900000095367,
+          "end": 4526.299999952316,
+          "scriptingStart": 4516.900000095367,
+          "scriptingEnd": 4525.600000143051,
+          "layoutStart": 4525.600000143051,
+          "layoutEnd": 4526.299999952316
+        },
+        {
+          "start": 4527,
+          "end": 4537.400000095367,
+          "scriptingStart": 4527,
+          "scriptingEnd": 4536.600000143051,
+          "layoutStart": 4536.600000143051,
+          "layoutEnd": 4537.400000095367
+        },
+        {
+          "start": 4538.200000047684,
+          "end": 4547.100000143051,
+          "scriptingStart": 4538.200000047684,
+          "scriptingEnd": 4546.400000095367,
+          "layoutStart": 4546.400000095367,
+          "layoutEnd": 4547.100000143051
+        },
+        {
+          "start": 4547.900000095367,
+          "end": 4557.600000143051,
+          "scriptingStart": 4547.900000095367,
+          "scriptingEnd": 4556.700000047684,
+          "layoutStart": 4556.700000047684,
+          "layoutEnd": 4557.600000143051
+        },
+        {
+          "start": 4558.5,
+          "end": 4568.700000047684,
+          "scriptingStart": 4558.5,
+          "scriptingEnd": 4567.900000095367,
+          "layoutStart": 4567.900000095367,
+          "layoutEnd": 4568.700000047684
+        },
+        {
+          "start": 4569.5,
+          "end": 4578.5,
+          "scriptingStart": 4569.5,
+          "scriptingEnd": 4577.799999952316,
+          "layoutStart": 4577.799999952316,
+          "layoutEnd": 4578.5
+        },
+        {
+          "start": 4579.200000047684,
+          "end": 4588.100000143051,
+          "scriptingStart": 4579.200000047684,
+          "scriptingEnd": 4587.400000095367,
+          "layoutStart": 4587.400000095367,
+          "layoutEnd": 4588.100000143051
+        },
+        {
+          "start": 4588.600000143051,
+          "end": 4597.799999952316,
+          "scriptingStart": 4588.600000143051,
+          "scriptingEnd": 4597.100000143051,
+          "layoutStart": 4597.100000143051,
+          "layoutEnd": 4597.799999952316
+        },
+        {
+          "start": 4598.5,
+          "end": 4607.5,
+          "scriptingStart": 4598.5,
+          "scriptingEnd": 4606.700000047684,
+          "layoutStart": 4606.700000047684,
+          "layoutEnd": 4607.5
+        },
+        {
+          "start": 4608.400000095367,
+          "end": 4618,
+          "scriptingStart": 4608.400000095367,
+          "scriptingEnd": 4617.200000047684,
+          "layoutStart": 4617.200000047684,
+          "layoutEnd": 4618
+        },
+        {
+          "start": 4618.900000095367,
+          "end": 4629.100000143051,
+          "scriptingStart": 4618.900000095367,
+          "scriptingEnd": 4628.400000095367,
+          "layoutStart": 4628.5,
+          "layoutEnd": 4629.100000143051
+        },
+        {
+          "start": 4629.900000095367,
+          "end": 4638.900000095367,
+          "scriptingStart": 4629.900000095367,
+          "scriptingEnd": 4638.200000047684,
+          "layoutStart": 4638.200000047684,
+          "layoutEnd": 4638.900000095367
+        },
+        {
+          "start": 4639.400000095367,
+          "end": 4648.400000095367,
+          "scriptingStart": 4639.400000095367,
+          "scriptingEnd": 4647.700000047684,
+          "layoutStart": 4647.700000047684,
+          "layoutEnd": 4648.400000095367
+        },
+        {
+          "start": 4649,
+          "end": 4658.200000047684,
+          "scriptingStart": 4649,
+          "scriptingEnd": 4657.400000095367,
+          "layoutStart": 4657.400000095367,
+          "layoutEnd": 4658.200000047684
+        },
+        {
+          "start": 4658.900000095367,
+          "end": 4668.600000143051,
+          "scriptingStart": 4658.900000095367,
+          "scriptingEnd": 4667.799999952316,
+          "layoutStart": 4667.799999952316,
+          "layoutEnd": 4668.600000143051
+        },
+        {
+          "start": 4669.299999952316,
+          "end": 4679.100000143051,
+          "scriptingStart": 4669.299999952316,
+          "scriptingEnd": 4678.400000095367,
+          "layoutStart": 4678.400000095367,
+          "layoutEnd": 4679.100000143051
+        },
+        {
+          "start": 4679.700000047684,
+          "end": 4689.100000143051,
+          "scriptingStart": 4679.700000047684,
+          "scriptingEnd": 4688.400000095367,
+          "layoutStart": 4688.400000095367,
+          "layoutEnd": 4689.100000143051
+        },
+        {
+          "start": 4689.700000047684,
+          "end": 4698.600000143051,
+          "scriptingStart": 4689.700000047684,
+          "scriptingEnd": 4697.900000095367,
+          "layoutStart": 4697.900000095367,
+          "layoutEnd": 4698.600000143051
+        },
+        {
+          "start": 4699.200000047684,
+          "end": 4708.400000095367,
+          "scriptingStart": 4699.200000047684,
+          "scriptingEnd": 4707.600000143051,
+          "layoutStart": 4707.600000143051,
+          "layoutEnd": 4708.400000095367
+        },
+        {
+          "start": 4709.100000143051,
+          "end": 4719.100000143051,
+          "scriptingStart": 4709.100000143051,
+          "scriptingEnd": 4718.299999952316,
+          "layoutStart": 4718.299999952316,
+          "layoutEnd": 4719.100000143051
+        },
+        {
+          "start": 4719.799999952316,
+          "end": 4728.700000047684,
+          "scriptingStart": 4719.799999952316,
+          "scriptingEnd": 4728,
+          "layoutStart": 4728,
+          "layoutEnd": 4728.700000047684
+        },
+        {
+          "start": 4729.299999952316,
+          "end": 4738.400000095367,
+          "scriptingStart": 4729.299999952316,
+          "scriptingEnd": 4737.700000047684,
+          "layoutStart": 4737.700000047684,
+          "layoutEnd": 4738.400000095367
+        },
+        {
+          "start": 4739,
+          "end": 4748.600000143051,
+          "scriptingStart": 4739,
+          "scriptingEnd": 4747.799999952316,
+          "layoutStart": 4747.799999952316,
+          "layoutEnd": 4748.600000143051
+        },
+        {
+          "start": 4749.200000047684,
+          "end": 4759.200000047684,
+          "scriptingStart": 4749.200000047684,
+          "scriptingEnd": 4758.200000047684,
+          "layoutStart": 4758.200000047684,
+          "layoutEnd": 4759.200000047684
+        },
+        {
+          "start": 4760,
+          "end": 4769.400000095367,
+          "scriptingStart": 4760,
+          "scriptingEnd": 4768.700000047684,
+          "layoutStart": 4768.700000047684,
+          "layoutEnd": 4769.400000095367
+        },
+        {
+          "start": 4770.100000143051,
+          "end": 4779.100000143051,
+          "scriptingStart": 4770.100000143051,
+          "scriptingEnd": 4778.5,
+          "layoutStart": 4778.5,
+          "layoutEnd": 4779.100000143051
+        },
+        {
+          "start": 4780.100000143051,
+          "end": 4792.799999952316,
+          "scriptingStart": 4780.100000143051,
+          "scriptingEnd": 4791.900000095367,
+          "layoutStart": 4791.900000095367,
+          "layoutEnd": 4792.799999952316
+        },
+        {
+          "start": 4793.700000047684,
+          "end": 4803.900000095367,
+          "scriptingStart": 4793.700000047684,
+          "scriptingEnd": 4803.100000143051,
+          "layoutStart": 4803.100000143051,
+          "layoutEnd": 4803.900000095367
+        },
+        {
+          "start": 4804.799999952316,
+          "end": 4815.100000143051,
+          "scriptingStart": 4804.799999952316,
+          "scriptingEnd": 4814.299999952316,
+          "layoutStart": 4814.299999952316,
+          "layoutEnd": 4815.100000143051
+        },
+        {
+          "start": 4815.799999952316,
+          "end": 4825.5,
+          "scriptingStart": 4815.799999952316,
+          "scriptingEnd": 4824.799999952316,
+          "layoutStart": 4824.799999952316,
+          "layoutEnd": 4825.5
+        },
+        {
+          "start": 4826.100000143051,
+          "end": 4835.5,
+          "scriptingStart": 4826.100000143051,
+          "scriptingEnd": 4834.700000047684,
+          "layoutStart": 4834.700000047684,
+          "layoutEnd": 4835.5
+        },
+        {
+          "start": 4836.200000047684,
+          "end": 4845.299999952316,
+          "scriptingStart": 4836.200000047684,
+          "scriptingEnd": 4844.600000143051,
+          "layoutStart": 4844.600000143051,
+          "layoutEnd": 4845.299999952316
+        },
+        {
+          "start": 4845.900000095367,
+          "end": 4854.900000095367,
+          "scriptingStart": 4845.900000095367,
+          "scriptingEnd": 4854.299999952316,
+          "layoutStart": 4854.299999952316,
+          "layoutEnd": 4854.900000095367
+        },
+        {
+          "start": 4855.5,
+          "end": 4864.900000095367,
+          "scriptingStart": 4855.5,
+          "scriptingEnd": 4864.299999952316,
+          "layoutStart": 4864.299999952316,
+          "layoutEnd": 4864.900000095367
+        },
+        {
+          "start": 4865.600000143051,
+          "end": 4874.900000095367,
+          "scriptingStart": 4865.600000143051,
+          "scriptingEnd": 4874.299999952316,
+          "layoutStart": 4874.299999952316,
+          "layoutEnd": 4874.900000095367
+        },
+        {
+          "start": 4875.5,
+          "end": 4885.299999952316,
+          "scriptingStart": 4875.5,
+          "scriptingEnd": 4884.700000047684,
+          "layoutStart": 4884.700000047684,
+          "layoutEnd": 4885.299999952316
+        },
+        {
+          "start": 4886,
+          "end": 4895.900000095367,
+          "scriptingStart": 4886,
+          "scriptingEnd": 4895.100000143051,
+          "layoutStart": 4895.100000143051,
+          "layoutEnd": 4895.900000095367
+        },
+        {
+          "start": 4901.400000095367,
+          "end": 4910.700000047684,
+          "scriptingStart": 4901.400000095367,
+          "scriptingEnd": 4910,
+          "layoutStart": 4910,
+          "layoutEnd": 4910.700000047684
+        },
+        {
+          "start": 4911.299999952316,
+          "end": 4920.400000095367,
+          "scriptingStart": 4911.299999952316,
+          "scriptingEnd": 4919.700000047684,
+          "layoutStart": 4919.700000047684,
+          "layoutEnd": 4920.400000095367
+        },
+        {
+          "start": 4921.100000143051,
+          "end": 4930.100000143051,
+          "scriptingStart": 4921.100000143051,
+          "scriptingEnd": 4929.5,
+          "layoutStart": 4929.5,
+          "layoutEnd": 4930.100000143051
+        },
+        {
+          "start": 4930.700000047684,
+          "end": 4940.200000047684,
+          "scriptingStart": 4930.700000047684,
+          "scriptingEnd": 4939.5,
+          "layoutStart": 4939.5,
+          "layoutEnd": 4940.200000047684
+        },
+        {
+          "start": 4940.799999952316,
+          "end": 4950.200000047684,
+          "scriptingStart": 4940.799999952316,
+          "scriptingEnd": 4949.5,
+          "layoutStart": 4949.5,
+          "layoutEnd": 4950.200000047684
+        },
+        {
+          "start": 4950.799999952316,
+          "end": 4960.100000143051,
+          "scriptingStart": 4950.799999952316,
+          "scriptingEnd": 4959.400000095367,
+          "layoutStart": 4959.400000095367,
+          "layoutEnd": 4960.100000143051
+        },
+        {
+          "start": 4960.799999952316,
+          "end": 4970.299999952316,
+          "scriptingStart": 4960.799999952316,
+          "scriptingEnd": 4969.700000047684,
+          "layoutStart": 4969.700000047684,
+          "layoutEnd": 4970.299999952316
+        },
+        {
+          "start": 4971,
+          "end": 4981.400000095367,
+          "scriptingStart": 4971,
+          "scriptingEnd": 4980.700000047684,
+          "layoutStart": 4980.700000047684,
+          "layoutEnd": 4981.400000095367
+        },
+        {
+          "start": 4982.100000143051,
+          "end": 4991.400000095367,
+          "scriptingStart": 4982.100000143051,
+          "scriptingEnd": 4990.700000047684,
+          "layoutStart": 4990.700000047684,
+          "layoutEnd": 4991.400000095367
+        },
+        {
+          "start": 4992,
+          "end": 5001.200000047684,
+          "scriptingStart": 4992,
+          "scriptingEnd": 5000.600000143051,
+          "layoutStart": 5000.600000143051,
+          "layoutEnd": 5001.200000047684
+        },
+        {
+          "start": 5001.799999952316,
+          "end": 5011.400000095367,
+          "scriptingStart": 5001.799999952316,
+          "scriptingEnd": 5010.700000047684,
+          "layoutStart": 5010.700000047684,
+          "layoutEnd": 5011.400000095367
+        },
+        {
+          "start": 5012.100000143051,
+          "end": 5021.5,
+          "scriptingStart": 5012.100000143051,
+          "scriptingEnd": 5020.600000143051,
+          "layoutStart": 5020.600000143051,
+          "layoutEnd": 5021.5
+        },
+        {
+          "start": 5022.299999952316,
+          "end": 5032.200000047684,
+          "scriptingStart": 5022.299999952316,
+          "scriptingEnd": 5031.400000095367,
+          "layoutStart": 5031.400000095367,
+          "layoutEnd": 5032.200000047684
+        },
+        {
+          "start": 5032.900000095367,
+          "end": 5042.5,
+          "scriptingStart": 5032.900000095367,
+          "scriptingEnd": 5041.799999952316,
+          "layoutStart": 5041.799999952316,
+          "layoutEnd": 5042.5
+        },
+        {
+          "start": 5043.200000047684,
+          "end": 5052.100000143051,
+          "scriptingStart": 5043.200000047684,
+          "scriptingEnd": 5051.5,
+          "layoutStart": 5051.5,
+          "layoutEnd": 5052.100000143051
+        },
+        {
+          "start": 5052.799999952316,
+          "end": 5063,
+          "scriptingStart": 5052.799999952316,
+          "scriptingEnd": 5062.200000047684,
+          "layoutStart": 5062.200000047684,
+          "layoutEnd": 5063
+        },
+        {
+          "start": 5063.799999952316,
+          "end": 5073.600000143051,
+          "scriptingStart": 5063.799999952316,
+          "scriptingEnd": 5073,
+          "layoutStart": 5073,
+          "layoutEnd": 5073.600000143051
+        },
+        {
+          "start": 5074.200000047684,
+          "end": 5084.400000095367,
+          "scriptingStart": 5074.200000047684,
+          "scriptingEnd": 5083.700000047684,
+          "layoutStart": 5083.700000047684,
+          "layoutEnd": 5084.400000095367
+        },
+        {
+          "start": 5085.200000047684,
+          "end": 5094.799999952316,
+          "scriptingStart": 5085.200000047684,
+          "scriptingEnd": 5094.100000143051,
+          "layoutStart": 5094.100000143051,
+          "layoutEnd": 5094.799999952316
+        }
+      ],
+      "max": 12.699999809265137,
+      "min": 8.899999856948853,
+      "median": 9.400000095367432,
+      "mean": 9.54000001192093,
+      "stdDev": 0.5364699354182628,
+      "meanLayout": 0.7080000138282776,
+      "meanScripting": 8.830999999046325,
+      "benchmarkName": "Update view styles",
+      "benchmarkMetadata": {
+        "description": "Update many View nodes with style changes only, without prop churn.",
+        "intent": "update-style",
+        "layer": "Layer 1",
+        "nodeCount": 360,
+        "primitive": "View",
+        "changedPropCountPerNode": 0,
+        "changedStyleCountPerNode": 5
+      },
+      "benchmarkProfile": [
+        {
+          "avgTime": 0.018988919660985634,
+          "calls": 36100,
+          "label": "View.render",
+          "maxTime": 1.7000000476837158,
+          "totalTime": 685.4999997615814
+        },
+        {
+          "avgTime": 0.016903047152173157,
+          "calls": 36100,
+          "label": "createElement.total",
+          "maxTime": 1.5999999046325684,
+          "totalTime": 610.2000021934509
+        },
+        {
+          "avgTime": 0.01519667591744843,
+          "calls": 36100,
+          "label": "createElement.createDOMProps",
+          "maxTime": 1.5999999046325684,
+          "totalTime": 548.6000006198883
+        },
+        {
+          "avgTime": 0.014612188438299291,
+          "calls": 36100,
+          "label": "createDOMProps.total",
+          "maxTime": 1.5999999046325684,
+          "totalTime": 527.5000026226044
+        },
+        {
+          "avgTime": 0.009869806376850835,
+          "calls": 36100,
+          "label": "createDOMProps.styleProps",
+          "maxTime": 1.5999999046325684,
+          "totalTime": 356.3000102043152
+        },
+        {
+          "avgTime": 0.009387811854935748,
+          "calls": 36100,
+          "label": "createDOMProps.StyleSheet",
+          "maxTime": 1.5999999046325684,
+          "totalTime": 338.90000796318054
+        },
+        {
+          "avgTime": 0.008681440630778052,
+          "calls": 36100,
+          "label": "StyleSheet.resolve",
+          "maxTime": 1.5999999046325684,
+          "totalTime": 313.40000677108765
+        },
+        {
+          "avgTime": 0.005166205204094546,
+          "calls": 36100,
+          "label": "StyleSheet.customStyleq",
+          "maxTime": 1.5,
+          "totalTime": 186.5000078678131
+        },
+        {
+          "avgTime": 0.0027423821657978596,
+          "calls": 36100,
+          "label": "StyleSheet.inline",
+          "maxTime": 0.5999999046325684,
+          "totalTime": 98.99999618530273
+        },
+        {
+          "avgTime": 0.0005973932209608781,
+          "calls": 138100,
+          "label": "StyleSheet.customStyleq.preprocess",
+          "maxTime": 1.5,
+          "totalTime": 82.50000381469727
+        },
+        {
+          "avgTime": 0.0008227147488052495,
+          "calls": 36100,
+          "label": "StyleSheet.customStyleq.cacheHit",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 29.700002431869507
+        },
+        {
+          "avgTime": 0.0003324099194640268,
+          "calls": 36100,
+          "label": "createElement.React.createElement",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 11.999998092651367
+        },
+        {
+          "avgTime": 0.0003019389947695745,
+          "calls": 36100,
+          "label": "createDOMProps.accessibilityProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 10.89999771118164
+        },
+        {
+          "avgTime": 0.00028808865850982245,
+          "calls": 36100,
+          "label": "createDOMProps.focusProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 10.40000057220459
+        },
+        {
+          "avgTime": 0.0002825484579619939,
+          "calls": 36100,
+          "label": "createDOMProps.propsToAriaRole",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 10.199999332427979
+        },
+        {
+          "avgTime": 0.00027423820337100043,
+          "calls": 36100,
+          "label": "View.pickProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 9.899999141693115
+        },
+        {
+          "avgTime": 0.00027146817574540664,
+          "calls": 36100,
+          "label": "createDOMProps.tvProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 9.80000114440918
+        },
+        {
+          "avgTime": 0.0002714681427234428,
+          "calls": 36100,
+          "label": "createDOMProps.otherProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 9.799999952316284
+        },
+        {
+          "avgTime": 0.00026315791455002043,
+          "calls": 36100,
+          "label": "createElement.propsToAccessibilityComponent",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 9.500000715255737
+        },
+        {
+          "avgTime": 0.0002548476335414559,
+          "calls": 36100,
+          "label": "createDOMProps.dataSetProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 9.199999570846558
+        },
+        {
+          "avgTime": 0.0002465374383899974,
+          "calls": 36100,
+          "label": "StyleSheet.localizeStyle",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 8.900001525878906
+        }
+      ],
+      "libraryName": "react-native-web",
+      "libraryVersion": "",
+      "run": 1
+    },
+    {
+      "startTime": 5135.700000047684,
+      "endTime": 7152.600000143051,
+      "runTime": 2016.9000000953674,
+      "sampleCount": 100,
+      "samples": [
+        {
+          "start": 5135.700000047684,
+          "end": 5157.299999952316,
+          "scriptingStart": 5135.700000047684,
+          "scriptingEnd": 5154.299999952316,
+          "layoutStart": 5154.299999952316,
+          "layoutEnd": 5157.299999952316
+        },
+        {
+          "start": 5158.900000095367,
+          "end": 5176,
+          "scriptingStart": 5158.900000095367,
+          "scriptingEnd": 5176,
+          "layoutStart": 5176,
+          "layoutEnd": 5176
+        },
+        {
+          "start": 5176.299999952316,
+          "end": 5194.600000143051,
+          "scriptingStart": 5176.299999952316,
+          "scriptingEnd": 5193.100000143051,
+          "layoutStart": 5193.100000143051,
+          "layoutEnd": 5194.600000143051
+        },
+        {
+          "start": 5195.799999952316,
+          "end": 5216.100000143051,
+          "scriptingStart": 5195.799999952316,
+          "scriptingEnd": 5212.299999952316,
+          "layoutStart": 5212.299999952316,
+          "layoutEnd": 5216.100000143051
+        },
+        {
+          "start": 5217.400000095367,
+          "end": 5235.600000143051,
+          "scriptingStart": 5217.400000095367,
+          "scriptingEnd": 5233.900000095367,
+          "layoutStart": 5233.900000095367,
+          "layoutEnd": 5235.600000143051
+        },
+        {
+          "start": 5236.700000047684,
+          "end": 5256.600000143051,
+          "scriptingStart": 5236.700000047684,
+          "scriptingEnd": 5253.100000143051,
+          "layoutStart": 5253.100000143051,
+          "layoutEnd": 5256.600000143051
+        },
+        {
+          "start": 5257.799999952316,
+          "end": 5276.700000047684,
+          "scriptingStart": 5257.799999952316,
+          "scriptingEnd": 5275.299999952316,
+          "layoutStart": 5275.299999952316,
+          "layoutEnd": 5276.700000047684
+        },
+        {
+          "start": 5277.799999952316,
+          "end": 5298,
+          "scriptingStart": 5277.799999952316,
+          "scriptingEnd": 5294.299999952316,
+          "layoutStart": 5294.299999952316,
+          "layoutEnd": 5298
+        },
+        {
+          "start": 5299.200000047684,
+          "end": 5317.700000047684,
+          "scriptingStart": 5299.200000047684,
+          "scriptingEnd": 5316,
+          "layoutStart": 5316,
+          "layoutEnd": 5317.700000047684
+        },
+        {
+          "start": 5319.100000143051,
+          "end": 5339.700000047684,
+          "scriptingStart": 5319.100000143051,
+          "scriptingEnd": 5336.100000143051,
+          "layoutStart": 5336.100000143051,
+          "layoutEnd": 5339.700000047684
+        },
+        {
+          "start": 5340.900000095367,
+          "end": 5358.799999952316,
+          "scriptingStart": 5340.900000095367,
+          "scriptingEnd": 5357.299999952316,
+          "layoutStart": 5357.299999952316,
+          "layoutEnd": 5358.799999952316
+        },
+        {
+          "start": 5359.900000095367,
+          "end": 5382.5,
+          "scriptingStart": 5359.900000095367,
+          "scriptingEnd": 5378.5,
+          "layoutStart": 5378.5,
+          "layoutEnd": 5382.5
+        },
+        {
+          "start": 5383.600000143051,
+          "end": 5401.200000047684,
+          "scriptingStart": 5383.600000143051,
+          "scriptingEnd": 5399.700000047684,
+          "layoutStart": 5399.700000047684,
+          "layoutEnd": 5401.200000047684
+        },
+        {
+          "start": 5402.200000047684,
+          "end": 5424,
+          "scriptingStart": 5402.200000047684,
+          "scriptingEnd": 5420.100000143051,
+          "layoutStart": 5420.100000143051,
+          "layoutEnd": 5424
+        },
+        {
+          "start": 5425.200000047684,
+          "end": 5443.5,
+          "scriptingStart": 5425.200000047684,
+          "scriptingEnd": 5442.100000143051,
+          "layoutStart": 5442.100000143051,
+          "layoutEnd": 5443.5
+        },
+        {
+          "start": 5444.600000143051,
+          "end": 5464.600000143051,
+          "scriptingStart": 5444.600000143051,
+          "scriptingEnd": 5460.900000095367,
+          "layoutStart": 5460.900000095367,
+          "layoutEnd": 5464.600000143051
+        },
+        {
+          "start": 5465.799999952316,
+          "end": 5483.100000143051,
+          "scriptingStart": 5465.799999952316,
+          "scriptingEnd": 5481.600000143051,
+          "layoutStart": 5481.600000143051,
+          "layoutEnd": 5483.100000143051
+        },
+        {
+          "start": 5484.100000143051,
+          "end": 5505,
+          "scriptingStart": 5484.100000143051,
+          "scriptingEnd": 5501.5,
+          "layoutStart": 5501.5,
+          "layoutEnd": 5505
+        },
+        {
+          "start": 5506.100000143051,
+          "end": 5523.900000095367,
+          "scriptingStart": 5506.100000143051,
+          "scriptingEnd": 5522.5,
+          "layoutStart": 5522.5,
+          "layoutEnd": 5523.900000095367
+        },
+        {
+          "start": 5524.900000095367,
+          "end": 5544.400000095367,
+          "scriptingStart": 5524.900000095367,
+          "scriptingEnd": 5540.900000095367,
+          "layoutStart": 5540.900000095367,
+          "layoutEnd": 5544.400000095367
+        },
+        {
+          "start": 5545.5,
+          "end": 5562.900000095367,
+          "scriptingStart": 5545.5,
+          "scriptingEnd": 5561.299999952316,
+          "layoutStart": 5561.299999952316,
+          "layoutEnd": 5562.900000095367
+        },
+        {
+          "start": 5563.900000095367,
+          "end": 5583,
+          "scriptingStart": 5563.900000095367,
+          "scriptingEnd": 5579.700000047684,
+          "layoutStart": 5579.700000047684,
+          "layoutEnd": 5583
+        },
+        {
+          "start": 5584,
+          "end": 5602.600000143051,
+          "scriptingStart": 5584,
+          "scriptingEnd": 5600.900000095367,
+          "layoutStart": 5600.900000095367,
+          "layoutEnd": 5602.600000143051
+        },
+        {
+          "start": 5603.700000047684,
+          "end": 5624.600000143051,
+          "scriptingStart": 5603.700000047684,
+          "scriptingEnd": 5620.900000095367,
+          "layoutStart": 5620.900000095367,
+          "layoutEnd": 5624.600000143051
+        },
+        {
+          "start": 5625.600000143051,
+          "end": 5643,
+          "scriptingStart": 5625.600000143051,
+          "scriptingEnd": 5641.5,
+          "layoutStart": 5641.5,
+          "layoutEnd": 5643
+        },
+        {
+          "start": 5644,
+          "end": 5663.600000143051,
+          "scriptingStart": 5644,
+          "scriptingEnd": 5660.100000143051,
+          "layoutStart": 5660.100000143051,
+          "layoutEnd": 5663.600000143051
+        },
+        {
+          "start": 5664.700000047684,
+          "end": 5682.5,
+          "scriptingStart": 5664.700000047684,
+          "scriptingEnd": 5681.200000047684,
+          "layoutStart": 5681.200000047684,
+          "layoutEnd": 5682.5
+        },
+        {
+          "start": 5683.400000095367,
+          "end": 5703.900000095367,
+          "scriptingStart": 5683.400000095367,
+          "scriptingEnd": 5700.400000095367,
+          "layoutStart": 5700.400000095367,
+          "layoutEnd": 5703.900000095367
+        },
+        {
+          "start": 5705.100000143051,
+          "end": 5722.5,
+          "scriptingStart": 5705.100000143051,
+          "scriptingEnd": 5721,
+          "layoutStart": 5721,
+          "layoutEnd": 5722.5
+        },
+        {
+          "start": 5723.5,
+          "end": 5742.5,
+          "scriptingStart": 5723.5,
+          "scriptingEnd": 5739.100000143051,
+          "layoutStart": 5739.100000143051,
+          "layoutEnd": 5742.5
+        },
+        {
+          "start": 5743.5,
+          "end": 5760.799999952316,
+          "scriptingStart": 5743.5,
+          "scriptingEnd": 5759.100000143051,
+          "layoutStart": 5759.100000143051,
+          "layoutEnd": 5760.799999952316
+        },
+        {
+          "start": 5762,
+          "end": 5785.600000143051,
+          "scriptingStart": 5762,
+          "scriptingEnd": 5781.5,
+          "layoutStart": 5781.5,
+          "layoutEnd": 5785.600000143051
+        },
+        {
+          "start": 5786.900000095367,
+          "end": 5805,
+          "scriptingStart": 5786.900000095367,
+          "scriptingEnd": 5803.400000095367,
+          "layoutStart": 5803.400000095367,
+          "layoutEnd": 5805
+        },
+        {
+          "start": 5806.299999952316,
+          "end": 5827.799999952316,
+          "scriptingStart": 5806.299999952316,
+          "scriptingEnd": 5823.900000095367,
+          "layoutStart": 5823.900000095367,
+          "layoutEnd": 5827.799999952316
+        },
+        {
+          "start": 5828.900000095367,
+          "end": 5846.100000143051,
+          "scriptingStart": 5828.900000095367,
+          "scriptingEnd": 5844.700000047684,
+          "layoutStart": 5844.700000047684,
+          "layoutEnd": 5846.100000143051
+        },
+        {
+          "start": 5847.100000143051,
+          "end": 5866.700000047684,
+          "scriptingStart": 5847.100000143051,
+          "scriptingEnd": 5863,
+          "layoutStart": 5863,
+          "layoutEnd": 5866.700000047684
+        },
+        {
+          "start": 5867.700000047684,
+          "end": 5886,
+          "scriptingStart": 5867.700000047684,
+          "scriptingEnd": 5884.400000095367,
+          "layoutStart": 5884.400000095367,
+          "layoutEnd": 5886
+        },
+        {
+          "start": 5890.100000143051,
+          "end": 5909.799999952316,
+          "scriptingStart": 5890.100000143051,
+          "scriptingEnd": 5906.299999952316,
+          "layoutStart": 5906.299999952316,
+          "layoutEnd": 5909.799999952316
+        },
+        {
+          "start": 5910.799999952316,
+          "end": 5928.299999952316,
+          "scriptingStart": 5910.799999952316,
+          "scriptingEnd": 5926.799999952316,
+          "layoutStart": 5926.799999952316,
+          "layoutEnd": 5928.299999952316
+        },
+        {
+          "start": 5929.299999952316,
+          "end": 5948.700000047684,
+          "scriptingStart": 5929.299999952316,
+          "scriptingEnd": 5945,
+          "layoutStart": 5945,
+          "layoutEnd": 5948.700000047684
+        },
+        {
+          "start": 5949.700000047684,
+          "end": 5967.600000143051,
+          "scriptingStart": 5949.700000047684,
+          "scriptingEnd": 5965.900000095367,
+          "layoutStart": 5965.900000095367,
+          "layoutEnd": 5967.600000143051
+        },
+        {
+          "start": 5968.700000047684,
+          "end": 5989.799999952316,
+          "scriptingStart": 5968.700000047684,
+          "scriptingEnd": 5986.299999952316,
+          "layoutStart": 5986.299999952316,
+          "layoutEnd": 5989.799999952316
+        },
+        {
+          "start": 5990.799999952316,
+          "end": 6008.900000095367,
+          "scriptingStart": 5990.799999952316,
+          "scriptingEnd": 6007.5,
+          "layoutStart": 6007.5,
+          "layoutEnd": 6008.900000095367
+        },
+        {
+          "start": 6010.100000143051,
+          "end": 6030.799999952316,
+          "scriptingStart": 6010.100000143051,
+          "scriptingEnd": 6027.100000143051,
+          "layoutStart": 6027.100000143051,
+          "layoutEnd": 6030.799999952316
+        },
+        {
+          "start": 6032.100000143051,
+          "end": 6050.799999952316,
+          "scriptingStart": 6032.100000143051,
+          "scriptingEnd": 6049.100000143051,
+          "layoutStart": 6049.100000143051,
+          "layoutEnd": 6050.799999952316
+        },
+        {
+          "start": 6051.900000095367,
+          "end": 6072.200000047684,
+          "scriptingStart": 6051.900000095367,
+          "scriptingEnd": 6068.400000095367,
+          "layoutStart": 6068.400000095367,
+          "layoutEnd": 6072.200000047684
+        },
+        {
+          "start": 6073.5,
+          "end": 6091.299999952316,
+          "scriptingStart": 6073.5,
+          "scriptingEnd": 6089.900000095367,
+          "layoutStart": 6089.900000095367,
+          "layoutEnd": 6091.299999952316
+        },
+        {
+          "start": 6092.299999952316,
+          "end": 6114,
+          "scriptingStart": 6092.299999952316,
+          "scriptingEnd": 6110.100000143051,
+          "layoutStart": 6110.100000143051,
+          "layoutEnd": 6114
+        },
+        {
+          "start": 6115.100000143051,
+          "end": 6134.200000047684,
+          "scriptingStart": 6115.100000143051,
+          "scriptingEnd": 6132.400000095367,
+          "layoutStart": 6132.400000095367,
+          "layoutEnd": 6134.200000047684
+        },
+        {
+          "start": 6135.299999952316,
+          "end": 6154.600000143051,
+          "scriptingStart": 6135.299999952316,
+          "scriptingEnd": 6151.200000047684,
+          "layoutStart": 6151.200000047684,
+          "layoutEnd": 6154.600000143051
+        },
+        {
+          "start": 6155.700000047684,
+          "end": 6172.5,
+          "scriptingStart": 6155.700000047684,
+          "scriptingEnd": 6171.200000047684,
+          "layoutStart": 6171.200000047684,
+          "layoutEnd": 6172.5
+        },
+        {
+          "start": 6173.5,
+          "end": 6192.5,
+          "scriptingStart": 6173.5,
+          "scriptingEnd": 6188.900000095367,
+          "layoutStart": 6188.900000095367,
+          "layoutEnd": 6192.5
+        },
+        {
+          "start": 6193.400000095367,
+          "end": 6212.100000143051,
+          "scriptingStart": 6193.400000095367,
+          "scriptingEnd": 6210.5,
+          "layoutStart": 6210.5,
+          "layoutEnd": 6212.100000143051
+        },
+        {
+          "start": 6213.200000047684,
+          "end": 6233.700000047684,
+          "scriptingStart": 6213.200000047684,
+          "scriptingEnd": 6229.700000047684,
+          "layoutStart": 6229.700000047684,
+          "layoutEnd": 6233.700000047684
+        },
+        {
+          "start": 6234.600000143051,
+          "end": 6253.400000095367,
+          "scriptingStart": 6234.600000143051,
+          "scriptingEnd": 6252,
+          "layoutStart": 6252,
+          "layoutEnd": 6253.400000095367
+        },
+        {
+          "start": 6254.400000095367,
+          "end": 6274,
+          "scriptingStart": 6254.400000095367,
+          "scriptingEnd": 6270.200000047684,
+          "layoutStart": 6270.200000047684,
+          "layoutEnd": 6274
+        },
+        {
+          "start": 6275,
+          "end": 6292.400000095367,
+          "scriptingStart": 6275,
+          "scriptingEnd": 6290.700000047684,
+          "layoutStart": 6290.700000047684,
+          "layoutEnd": 6292.400000095367
+        },
+        {
+          "start": 6293.600000143051,
+          "end": 6313.799999952316,
+          "scriptingStart": 6293.600000143051,
+          "scriptingEnd": 6310.400000095367,
+          "layoutStart": 6310.400000095367,
+          "layoutEnd": 6313.799999952316
+        },
+        {
+          "start": 6314.799999952316,
+          "end": 6334.299999952316,
+          "scriptingStart": 6314.799999952316,
+          "scriptingEnd": 6332.700000047684,
+          "layoutStart": 6332.700000047684,
+          "layoutEnd": 6334.299999952316
+        },
+        {
+          "start": 6335.299999952316,
+          "end": 6354.799999952316,
+          "scriptingStart": 6335.299999952316,
+          "scriptingEnd": 6351,
+          "layoutStart": 6351,
+          "layoutEnd": 6354.799999952316
+        },
+        {
+          "start": 6355.799999952316,
+          "end": 6374.299999952316,
+          "scriptingStart": 6355.799999952316,
+          "scriptingEnd": 6372.5,
+          "layoutStart": 6372.5,
+          "layoutEnd": 6374.299999952316
+        },
+        {
+          "start": 6375.400000095367,
+          "end": 6394.5,
+          "scriptingStart": 6375.400000095367,
+          "scriptingEnd": 6391.100000143051,
+          "layoutStart": 6391.100000143051,
+          "layoutEnd": 6394.5
+        },
+        {
+          "start": 6395.600000143051,
+          "end": 6412.5,
+          "scriptingStart": 6395.600000143051,
+          "scriptingEnd": 6411.100000143051,
+          "layoutStart": 6411.100000143051,
+          "layoutEnd": 6412.5
+        },
+        {
+          "start": 6413.299999952316,
+          "end": 6435.200000047684,
+          "scriptingStart": 6413.299999952316,
+          "scriptingEnd": 6431.200000047684,
+          "layoutStart": 6431.200000047684,
+          "layoutEnd": 6435.200000047684
+        },
+        {
+          "start": 6436.400000095367,
+          "end": 6453.100000143051,
+          "scriptingStart": 6436.400000095367,
+          "scriptingEnd": 6451.600000143051,
+          "layoutStart": 6451.600000143051,
+          "layoutEnd": 6453.100000143051
+        },
+        {
+          "start": 6454.100000143051,
+          "end": 6473,
+          "scriptingStart": 6454.100000143051,
+          "scriptingEnd": 6469.700000047684,
+          "layoutStart": 6469.700000047684,
+          "layoutEnd": 6473
+        },
+        {
+          "start": 6474,
+          "end": 6490.5,
+          "scriptingStart": 6474,
+          "scriptingEnd": 6489.200000047684,
+          "layoutStart": 6489.200000047684,
+          "layoutEnd": 6490.5
+        },
+        {
+          "start": 6491.5,
+          "end": 6510.200000047684,
+          "scriptingStart": 6491.5,
+          "scriptingEnd": 6506.700000047684,
+          "layoutStart": 6506.700000047684,
+          "layoutEnd": 6510.200000047684
+        },
+        {
+          "start": 6511.200000047684,
+          "end": 6529.799999952316,
+          "scriptingStart": 6511.200000047684,
+          "scriptingEnd": 6528.299999952316,
+          "layoutStart": 6528.299999952316,
+          "layoutEnd": 6529.799999952316
+        },
+        {
+          "start": 6530.799999952316,
+          "end": 6549.900000095367,
+          "scriptingStart": 6530.799999952316,
+          "scriptingEnd": 6546.400000095367,
+          "layoutStart": 6546.400000095367,
+          "layoutEnd": 6549.900000095367
+        },
+        {
+          "start": 6551,
+          "end": 6568.700000047684,
+          "scriptingStart": 6551,
+          "scriptingEnd": 6567.299999952316,
+          "layoutStart": 6567.299999952316,
+          "layoutEnd": 6568.700000047684
+        },
+        {
+          "start": 6569.700000047684,
+          "end": 6588.900000095367,
+          "scriptingStart": 6569.700000047684,
+          "scriptingEnd": 6585.299999952316,
+          "layoutStart": 6585.299999952316,
+          "layoutEnd": 6588.900000095367
+        },
+        {
+          "start": 6589.900000095367,
+          "end": 6606.799999952316,
+          "scriptingStart": 6589.900000095367,
+          "scriptingEnd": 6605.200000047684,
+          "layoutStart": 6605.200000047684,
+          "layoutEnd": 6606.799999952316
+        },
+        {
+          "start": 6607.799999952316,
+          "end": 6628.5,
+          "scriptingStart": 6607.799999952316,
+          "scriptingEnd": 6625,
+          "layoutStart": 6625,
+          "layoutEnd": 6628.5
+        },
+        {
+          "start": 6629.5,
+          "end": 6646.200000047684,
+          "scriptingStart": 6629.5,
+          "scriptingEnd": 6644.900000095367,
+          "layoutStart": 6644.900000095367,
+          "layoutEnd": 6646.200000047684
+        },
+        {
+          "start": 6647.100000143051,
+          "end": 6666.400000095367,
+          "scriptingStart": 6647.100000143051,
+          "scriptingEnd": 6662.900000095367,
+          "layoutStart": 6662.900000095367,
+          "layoutEnd": 6666.400000095367
+        },
+        {
+          "start": 6667.400000095367,
+          "end": 6684.299999952316,
+          "scriptingStart": 6667.400000095367,
+          "scriptingEnd": 6682.700000047684,
+          "layoutStart": 6682.700000047684,
+          "layoutEnd": 6684.299999952316
+        },
+        {
+          "start": 6685.200000047684,
+          "end": 6703.900000095367,
+          "scriptingStart": 6685.200000047684,
+          "scriptingEnd": 6700.5,
+          "layoutStart": 6700.5,
+          "layoutEnd": 6703.900000095367
+        },
+        {
+          "start": 6704.900000095367,
+          "end": 6722.900000095367,
+          "scriptingStart": 6704.900000095367,
+          "scriptingEnd": 6721.5,
+          "layoutStart": 6721.5,
+          "layoutEnd": 6722.900000095367
+        },
+        {
+          "start": 6723.900000095367,
+          "end": 6743,
+          "scriptingStart": 6723.900000095367,
+          "scriptingEnd": 6739.5,
+          "layoutStart": 6739.5,
+          "layoutEnd": 6743
+        },
+        {
+          "start": 6744.100000143051,
+          "end": 6762.100000143051,
+          "scriptingStart": 6744.100000143051,
+          "scriptingEnd": 6760.5,
+          "layoutStart": 6760.5,
+          "layoutEnd": 6762.100000143051
+        },
+        {
+          "start": 6763,
+          "end": 6782.100000143051,
+          "scriptingStart": 6763,
+          "scriptingEnd": 6778.799999952316,
+          "layoutStart": 6778.799999952316,
+          "layoutEnd": 6782.100000143051
+        },
+        {
+          "start": 6783.100000143051,
+          "end": 6800.299999952316,
+          "scriptingStart": 6783.100000143051,
+          "scriptingEnd": 6798.799999952316,
+          "layoutStart": 6798.799999952316,
+          "layoutEnd": 6800.299999952316
+        },
+        {
+          "start": 6801.5,
+          "end": 6822.400000095367,
+          "scriptingStart": 6801.5,
+          "scriptingEnd": 6818.299999952316,
+          "layoutStart": 6818.299999952316,
+          "layoutEnd": 6822.400000095367
+        },
+        {
+          "start": 6823.5,
+          "end": 6842.299999952316,
+          "scriptingStart": 6823.5,
+          "scriptingEnd": 6840.700000047684,
+          "layoutStart": 6840.700000047684,
+          "layoutEnd": 6842.299999952316
+        },
+        {
+          "start": 6843.299999952316,
+          "end": 6862.700000047684,
+          "scriptingStart": 6843.299999952316,
+          "scriptingEnd": 6859.100000143051,
+          "layoutStart": 6859.100000143051,
+          "layoutEnd": 6862.700000047684
+        },
+        {
+          "start": 6863.700000047684,
+          "end": 6882.600000143051,
+          "scriptingStart": 6863.700000047684,
+          "scriptingEnd": 6881,
+          "layoutStart": 6881,
+          "layoutEnd": 6882.600000143051
+        },
+        {
+          "start": 6883.799999952316,
+          "end": 6904,
+          "scriptingStart": 6883.799999952316,
+          "scriptingEnd": 6900.400000095367,
+          "layoutStart": 6900.400000095367,
+          "layoutEnd": 6904
+        },
+        {
+          "start": 6905.100000143051,
+          "end": 6922.5,
+          "scriptingStart": 6905.100000143051,
+          "scriptingEnd": 6920.900000095367,
+          "layoutStart": 6920.900000095367,
+          "layoutEnd": 6922.5
+        },
+        {
+          "start": 6923.5,
+          "end": 6943.900000095367,
+          "scriptingStart": 6923.5,
+          "scriptingEnd": 6940.600000143051,
+          "layoutStart": 6940.600000143051,
+          "layoutEnd": 6943.900000095367
+        },
+        {
+          "start": 6945.100000143051,
+          "end": 6962.299999952316,
+          "scriptingStart": 6945.100000143051,
+          "scriptingEnd": 6961,
+          "layoutStart": 6961,
+          "layoutEnd": 6962.299999952316
+        },
+        {
+          "start": 6963.400000095367,
+          "end": 6983,
+          "scriptingStart": 6963.400000095367,
+          "scriptingEnd": 6979.299999952316,
+          "layoutStart": 6979.299999952316,
+          "layoutEnd": 6983
+        },
+        {
+          "start": 6984.5,
+          "end": 7006.100000143051,
+          "scriptingStart": 6984.5,
+          "scriptingEnd": 7004.400000095367,
+          "layoutStart": 7004.400000095367,
+          "layoutEnd": 7006.100000143051
+        },
+        {
+          "start": 7007.200000047684,
+          "end": 7028.5,
+          "scriptingStart": 7007.200000047684,
+          "scriptingEnd": 7024.900000095367,
+          "layoutStart": 7024.900000095367,
+          "layoutEnd": 7028.5
+        },
+        {
+          "start": 7029.700000047684,
+          "end": 7047.5,
+          "scriptingStart": 7029.700000047684,
+          "scriptingEnd": 7046.200000047684,
+          "layoutStart": 7046.200000047684,
+          "layoutEnd": 7047.5
+        },
+        {
+          "start": 7048.5,
+          "end": 7068.299999952316,
+          "scriptingStart": 7048.5,
+          "scriptingEnd": 7064.600000143051,
+          "layoutStart": 7064.600000143051,
+          "layoutEnd": 7068.299999952316
+        },
+        {
+          "start": 7069.299999952316,
+          "end": 7086.100000143051,
+          "scriptingStart": 7069.299999952316,
+          "scriptingEnd": 7084.600000143051,
+          "layoutStart": 7084.600000143051,
+          "layoutEnd": 7086.100000143051
+        },
+        {
+          "start": 7087.299999952316,
+          "end": 7108.299999952316,
+          "scriptingStart": 7087.299999952316,
+          "scriptingEnd": 7104.900000095367,
+          "layoutStart": 7104.900000095367,
+          "layoutEnd": 7108.299999952316
+        },
+        {
+          "start": 7109.400000095367,
+          "end": 7128.200000047684,
+          "scriptingStart": 7109.400000095367,
+          "scriptingEnd": 7126.600000143051,
+          "layoutStart": 7126.600000143051,
+          "layoutEnd": 7128.200000047684
+        },
+        {
+          "start": 7132.900000095367,
+          "end": 7152.600000143051,
+          "scriptingStart": 7132.900000095367,
+          "scriptingEnd": 7149,
+          "layoutStart": 7149,
+          "layoutEnd": 7152.600000143051
+        }
+      ],
+      "max": 23.600000143051147,
+      "min": 16.5,
+      "median": 18.950000047683716,
+      "mean": 19.03899999141693,
+      "stdDev": 1.4943824933823484,
+      "meanLayout": 2.551999988555908,
+      "meanScripting": 16.487000002861024,
+      "benchmarkName": "Update view props",
+      "benchmarkMetadata": {
+        "description": "Update many View nodes with changing DOM-like props and light style changes.",
+        "intent": "update-props",
+        "layer": "Layer 1",
+        "nodeCount": 360,
+        "primitive": "View",
+        "changedPropCountPerNode": 6,
+        "changedStyleCountPerNode": 2
+      },
+      "benchmarkProfile": [
+        {
+          "avgTime": 0.018253814142388542,
+          "calls": 72100,
+          "label": "View.render",
+          "maxTime": 2.3000001907348633,
+          "totalTime": 1316.099999666214
+        },
+        {
+          "avgTime": 0.01581553398653472,
+          "calls": 72100,
+          "label": "createElement.total",
+          "maxTime": 2.3000001907348633,
+          "totalTime": 1140.3000004291534
+        },
+        {
+          "avgTime": 0.013972260740362159,
+          "calls": 72100,
+          "label": "createElement.createDOMProps",
+          "maxTime": 2.3000001907348633,
+          "totalTime": 1007.3999993801117
+        },
+        {
+          "avgTime": 0.01340915393234126,
+          "calls": 72100,
+          "label": "createDOMProps.total",
+          "maxTime": 2.3000001907348633,
+          "totalTime": 966.7999985218048
+        },
+        {
+          "avgTime": 0.008418862670866693,
+          "calls": 72100,
+          "label": "createDOMProps.styleProps",
+          "maxTime": 1.8999998569488525,
+          "totalTime": 606.9999985694885
+        },
+        {
+          "avgTime": 0.007886269049571721,
+          "calls": 72100,
+          "label": "createDOMProps.StyleSheet",
+          "maxTime": 1.8999998569488525,
+          "totalTime": 568.5999984741211
+        },
+        {
+          "avgTime": 0.007180305132422798,
+          "calls": 72100,
+          "label": "StyleSheet.resolve",
+          "maxTime": 1.8999998569488525,
+          "totalTime": 517.7000000476837
+        },
+        {
+          "avgTime": 0.004002773953542299,
+          "calls": 72100,
+          "label": "StyleSheet.customStyleq",
+          "maxTime": 1,
+          "totalTime": 288.6000020503998
+        },
+        {
+          "avgTime": 0.0024798890886293537,
+          "calls": 72100,
+          "label": "StyleSheet.inline",
+          "maxTime": 1.8999998569488525,
+          "totalTime": 178.8000032901764
+        },
+        {
+          "avgTime": 0.0006524985634958792,
+          "calls": 174100,
+          "label": "StyleSheet.customStyleq.preprocess",
+          "maxTime": 0.7999999523162842,
+          "totalTime": 113.59999990463257
+        },
+        {
+          "avgTime": 0.0008585298673124486,
+          "calls": 72100,
+          "label": "StyleSheet.customStyleq.cacheHit",
+          "maxTime": 0.9000000953674316,
+          "totalTime": 61.90000343322754
+        },
+        {
+          "avgTime": 0.0003925104048645612,
+          "calls": 72100,
+          "label": "View.pickProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 28.300000190734863
+        },
+        {
+          "avgTime": 0.000334257993552622,
+          "calls": 72100,
+          "label": "createElement.React.createElement",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 24.100001335144043
+        },
+        {
+          "avgTime": 0.00032732314772480236,
+          "calls": 72100,
+          "label": "createDOMProps.accessibilityProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 23.599998950958252
+        },
+        {
+          "avgTime": 0.00029681000068019066,
+          "calls": 72100,
+          "label": "createDOMProps.focusProps",
+          "maxTime": 0.7999999523162842,
+          "totalTime": 21.400001049041748
+        },
+        {
+          "avgTime": 0.0002787794782450725,
+          "calls": 72100,
+          "label": "createDOMProps.dataSetProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 20.100000381469727
+        },
+        {
+          "avgTime": 0.0002732316234075411,
+          "calls": 72100,
+          "label": "createDOMProps.tvProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 19.700000047683716
+        },
+        {
+          "avgTime": 0.0002649098428046323,
+          "calls": 72100,
+          "label": "createDOMProps.otherProps",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 19.09999966621399
+        },
+        {
+          "avgTime": 0.00026352287826855535,
+          "calls": 72100,
+          "label": "createElement.propsToAccessibilityComponent",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 18.999999523162842
+        },
+        {
+          "avgTime": 0.00025381414635667525,
+          "calls": 72100,
+          "label": "StyleSheet.localizeStyle",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 18.299999952316284
+        },
+        {
+          "avgTime": 0.0002510401610693224,
+          "calls": 72100,
+          "label": "createDOMProps.propsToAriaRole",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 18.099995613098145
+        },
+        {
+          "avgTime": 0.0002888888981607225,
+          "calls": 36000,
+          "label": "createElement.localeProvider",
+          "maxTime": 0.10000014305114746,
+          "totalTime": 10.40000033378601
+        }
+      ],
+      "libraryName": "react-native-web",
+      "libraryVersion": "",
+      "run": 1
+    }
+  ]
+}

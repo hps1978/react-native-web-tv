@@ -1,0 +1,91 @@
+{
+  "baseline": "layer1-matrix-2026-03-31-createDOMProps-styleInput-opt",
+  "generatedAt": "2026-03-31T19:42:50.458Z",
+  "savedAt": "2026-03-31T20:13:16.213Z",
+  "config": {
+    "enabled": true,
+    "libraryName": "react-native-web",
+    "profile": true,
+    "repeat": 1,
+    "benchmarkNames": [
+      "Update host styles",
+      "Update host DOM props",
+      "Update host accessibility props",
+      "Update host props",
+      "Update view styles",
+      "Update view props"
+    ]
+  },
+  "environment": {
+    "browser": "chromium",
+    "mode": "headless"
+  },
+  "benchmarks": [
+    {
+      "benchmarkName": "Update host accessibility props",
+      "libraryName": "react-native-web",
+      "libraryVersion": "",
+      "mean": 6.5849999952316285,
+      "meanLayout": 0.01200000286102295,
+      "meanScripting": 6.5729999923706055,
+      "jsShare": 99.817767610179,
+      "layoutShare": 0.18223238982099418,
+      "stdDev": 0.452189127583674
+    },
+    {
+      "benchmarkName": "Update host DOM props",
+      "libraryName": "react-native-web",
+      "libraryVersion": "",
+      "mean": 7.5969999885559085,
+      "meanLayout": 0.5109999942779541,
+      "meanScripting": 7.085999994277954,
+      "jsShare": 93.27366072070919,
+      "layoutShare": 6.726339279290805,
+      "stdDev": 0.60157378263441
+    },
+    {
+      "benchmarkName": "Update host props",
+      "libraryName": "react-native-web",
+      "libraryVersion": "",
+      "mean": 11.102000005245209,
+      "meanLayout": 2.0170000171661377,
+      "meanScripting": 9.08499998807907,
+      "jsShare": 81.8321021778671,
+      "layoutShare": 18.167897822132893,
+      "stdDev": 1.0924266593173084
+    },
+    {
+      "benchmarkName": "Update host styles",
+      "libraryName": "react-native-web",
+      "libraryVersion": "",
+      "mean": 8.516000010967254,
+      "meanLayout": 0.58,
+      "meanScripting": 7.936000010967255,
+      "jsShare": 93.18929075560062,
+      "layoutShare": 6.8107092443993915,
+      "stdDev": 0.8515538851946576
+    },
+    {
+      "benchmarkName": "Update view props",
+      "libraryName": "react-native-web",
+      "libraryVersion": "",
+      "mean": 18.49699999809265,
+      "meanLayout": 2.537999999523163,
+      "meanScripting": 15.958999998569489,
+      "jsShare": 86.27885603187072,
+      "layoutShare": 13.721143968129281,
+      "stdDev": 1.5380802936106803
+    },
+    {
+      "benchmarkName": "Update view styles",
+      "libraryName": "react-native-web",
+      "libraryVersion": "",
+      "mean": 8.985999982357026,
+      "meanLayout": 0.686999979019165,
+      "meanScripting": 8.29900000333786,
+      "jsShare": 92.35477431150666,
+      "layoutShare": 7.6452256884933245,
+      "stdDev": 0.5280189268466048
+    }
+  ]
+}
