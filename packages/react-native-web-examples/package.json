@@ -3,8 +3,8 @@
   "name": "react-native-web-tv-examples",
   "version": "0.21.2-tv.10",
   "scripts": {
-    "build": "webpack --config webpack.config.js --mode production",
-    "dev": "webpack serve --config webpack.config.js --mode development",
+    "build": "webpack-cli --config webpack.config.js --mode production",
+    "dev": "webpack-cli serve --config webpack.config.js --mode development",
     "serve:webpack": "npx serve -s dist -l 8080"
   },
   "dependencies": {

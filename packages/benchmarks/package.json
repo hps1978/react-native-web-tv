@@ -5,7 +5,13 @@
   "scripts": {
     "clean": "del-cli ./dist",
     "build": "NODE_ENV=production npm run dev",
-    "dev": "npm run clean && mkdir -p dist && cp -f index.html dist/index.html && webpack --config ./webpack.config.js"
+    "dev": "npm run clean && mkdir -p dist && cp -f index.html dist/index.html && webpack --config ./webpack.config.js",
+    "verify": "npm run build",
+    "postinstall": "npm run patch:apply",
+    "patch:apply": "patch-package --patch-dir ./patches",
+    "patch:create:rnw": "node ./scripts/createPackagePatch.mjs --package react-native-web-tv --source ../react-native-web --installed ./node_modules/react-native-web-tv --patch-dir ./patches",
+    "patch:create:plugin": "node ./scripts/createPackagePatch.mjs --package babel-plugin-react-native-web-tv --source ../babel-plugin-react-native-web --installed ./node_modules/babel-plugin-react-native-web-tv --patch-dir ./patches",
+    "patch:create": "npm run patch:create:rnw && npm run patch:create:plugin"
   },
   "dependencies": {
     "classnames": "^2.3.1",
@@ -13,12 +19,13 @@
     "prop-types": "^15.6.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "react-native-web-tv": "0.21.2-tv.9"
+    "react-native-web-tv": "file:../react-native-web"
   },
   "devDependencies": {
     "babel-loader": "^8.2.5",
-    "babel-plugin-react-native-web-tv": "0.21.2-tv.9",
+    "babel-plugin-react-native-web-tv": "file:../babel-plugin-react-native-web",
     "css-loader": "^6.7.1",
+    "patch-package": "^8.0.0",
     "style-loader": "^3.3.1",
     "url-loader": "^4.1.1",
     "webpack": "^5.76.0",
