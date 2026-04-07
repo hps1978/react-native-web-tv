@@ -19,6 +19,30 @@ function parseArgs(argv) {
   return args;
 }
 
+function parseListArg(value) {
+  if (!value) {
+    return [];
+  }
+
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function validatePattern(pattern) {
+  if (pattern.includes('..')) {
+    throw new Error(`Pattern must not contain '..': ${pattern}`);
+  }
+}
+
+function buildExclusionPathspecs(packageName, excludePatterns) {
+  return excludePatterns.map((pattern) => {
+    const fullPath = path.posix.join('node_modules', packageName, pattern);
+    return `:!${fullPath}`;
+  });
+}
+
 function ensureDirectory(dir) {
   fs.mkdirSync(dir, { recursive: true });
 }
@@ -47,6 +71,10 @@ function copyDirectory(sourceDir, targetDir) {
   });
 }
 
+function quotePathspec(pathspec) {
+  return `'${pathspec.replace(/'/g, "'\\''")}'`;
+}
+
 function main() {
   const args = parseArgs(process.argv);
   const packageName = args.package;
@@ -55,11 +83,25 @@ function main() {
   const patchDir = args['patch-dir']
     ? path.resolve(args['patch-dir'])
     : path.resolve('patches');
+  const includePaths = parseListArg(args.include);
+  const excludePatterns = parseListArg(args.exclude);
 
   if (!packageName || !sourceDir || !installedDir) {
     console.error(
-      'Usage: node ./scripts/createPackagePatch.mjs --package <name> --source <dir> --installed <dir> --patch-dir <dir>'
+      'Usage: node ./scripts/createPackagePatch.mjs --package <name> --source <dir> --installed <dir> --patch-dir <dir> [--include <path1,path2,...>] [--exclude <pattern1,pattern2,...>]'
     );
+    process.exit(1);
+  }
+
+  if (includePaths.length > 0 && excludePatterns.length > 0) {
+    console.error('Cannot use --include and --exclude together');
+    process.exit(1);
+  }
+
+  try {
+    excludePatterns.forEach(validatePattern);
+  } catch (error) {
+    console.error(error.message);
     process.exit(1);
   }
 
@@ -96,16 +138,30 @@ function main() {
     fs.rmSync(baselinePath, { recursive: true, force: true });
     copyDirectory(installedDir, baselinePath);
 
+    let pathspecs = [path.posix.join('node_modules', packageName)];
+
+    if (includePaths.length > 0) {
+      pathspecs = includePaths.map((includePath) =>
+        path.posix.join('node_modules', packageName, includePath)
+      );
+    } else if (excludePatterns.length > 0) {
+      const exclusions = buildExclusionPathspecs(packageName, excludePatterns);
+      pathspecs = [...pathspecs, ...exclusions];
+    }
+
     const diffOutput = run(
-      `git diff --binary -- node_modules/${packageName}`,
+      `git diff --binary -- ${pathspecs.map(quotePathspec).join(' ')}`,
       repoDir
     );
 
     if (!diffOutput) {
       if (fs.existsSync(patchFile)) {
-        fs.rmSync(patchFile);
+        console.log(
+          `No changes detected for ${packageName}; keeping existing patch at ${patchFile}.`
+        );
+      } else {
+        console.log(`No changes detected for ${packageName}; no patch generated.`);
       }
-      console.log(`No changes detected for ${packageName}; no patch generated.`);
       return;
     }
 

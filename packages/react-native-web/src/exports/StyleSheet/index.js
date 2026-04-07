@@ -15,76 +15,93 @@ import { styleq } from 'styleq';
 import { validate } from './validate';
 import canUseDOM from '../../modules/canUseDom';
 
+type PrecompiledStyleMap = {
+  __rnwTvStatic?: { [key: string]: mixed }
+};
+type PrecompiledStyleEntry = {
+  compiledStyle: Object,
+  compiledOrderedRules: Array<[Array<string>, number]>
+};
+
 const staticStyleMap: WeakMap<Object, Object> = new WeakMap();
-const insertedInlinePrecompiledRules: WeakSet<Object> = new WeakSet();
-const insertedInlinePrecompiledRuleIds: Set<string> = new Set();
+const insertedPrecompiledStyleIds: Set<string> = new Set();
 const sheet = createSheet();
 
 const defaultPreprocessOptions = { shadow: true, textShadow: true };
 
-function createStyleqResolver(isRTL, preprocessOptions) {
+function toPrecompiledStyleEntry(value: mixed): PrecompiledStyleEntry | null {
+  if (value == null || typeof value !== 'object') {
+    return null;
+  }
+
+  const entry: PrecompiledStyleEntry = (value: any);
+  if (
+    entry.compiledStyle != null &&
+    Array.isArray(entry.compiledOrderedRules)
+  ) {
+    return entry;
+  }
+
+  return null;
+}
+
+function getInlinePrecompiledStyleEntry(
+  style: mixed
+): PrecompiledStyleEntry | null {
+  if (style == null || typeof style !== 'object') {
+    return null;
+  }
+
+  return toPrecompiledStyleEntry(((style: any).__rnwTvStatic: mixed));
+}
+
+function getInlinePrecompiledStyleId(style: mixed): string | null {
+  if (style == null || typeof style !== 'object') {
+    return null;
+  }
+
+  const precompiledStyle = ((style: any).__rnwTvStatic: mixed);
+  if (
+    precompiledStyle != null &&
+    typeof precompiledStyle === 'object' &&
+    typeof precompiledStyle.__rnwTvStaticId === 'string'
+  ) {
+    return precompiledStyle.__rnwTvStaticId;
+  }
+
+  return null;
+}
+
+function customStyleq(styles, options: Options = {}) {
+  const { writingDirection, ...preprocessOptions } = options;
+  const isRTL = writingDirection === 'rtl';
   return styleq.factory({
     transform(style) {
-      const inlinePrecompiled =
-        style != null ? style.__rnwTvStaticPreview : null;
-      if (
-        inlinePrecompiled != null &&
-        inlinePrecompiled.compiledStyle != null &&
-        Array.isArray(inlinePrecompiled.compiledOrderedRules)
-      ) {
-        const inlinePrecompiledId = inlinePrecompiled.__rnwTvStaticPreviewId;
-        const hasStableInlinePrecompiledId =
-          typeof inlinePrecompiledId === 'string' &&
-          inlinePrecompiledId.length > 0;
-        const hasInsertedInlinePrecompiledRules = hasStableInlinePrecompiledId
-          ? insertedInlinePrecompiledRuleIds.has(inlinePrecompiledId)
-          : insertedInlinePrecompiledRules.has(inlinePrecompiled);
-
-        if (!hasInsertedInlinePrecompiledRules) {
-          insertRules(inlinePrecompiled.compiledOrderedRules);
-          if (hasStableInlinePrecompiledId) {
-            insertedInlinePrecompiledRuleIds.add(inlinePrecompiledId);
-          } else {
-            insertedInlinePrecompiledRules.add(inlinePrecompiled);
+      const precompiledEntry = getInlinePrecompiledStyleEntry(style);
+      if (precompiledEntry != null) {
+        const precompiledStyleId = getInlinePrecompiledStyleId(style);
+        if (
+          precompiledStyleId == null ||
+          !insertedPrecompiledStyleIds.has(precompiledStyleId)
+        ) {
+          insertRules(precompiledEntry.compiledOrderedRules);
+          if (precompiledStyleId != null) {
+            insertedPrecompiledStyleIds.add(precompiledStyleId);
           }
         }
-        return localizeStyle(inlinePrecompiled.compiledStyle, isRTL);
+        return localizeStyle(precompiledEntry.compiledStyle, isRTL);
       }
 
       const compiledStyle = staticStyleMap.get(style);
       if (compiledStyle != null) {
         return localizeStyle(compiledStyle, isRTL);
       }
-      return preprocess(style, preprocessOptions);
+      return preprocess(style, {
+        ...defaultPreprocessOptions,
+        ...preprocessOptions
+      });
     }
-  });
-}
-
-const defaultLtrStyleqResolver = createStyleqResolver(
-  false,
-  defaultPreprocessOptions
-);
-const defaultRtlStyleqResolver = createStyleqResolver(
-  true,
-  defaultPreprocessOptions
-);
-
-function customStyleq(styles, options: Options = {}) {
-  const { writingDirection, ...preprocessOptions } = options;
-  const isRTL = writingDirection === 'rtl';
-  const hasCustomPreprocessOptions =
-    preprocessOptions.shadow != null || preprocessOptions.textShadow != null;
-
-  if (!hasCustomPreprocessOptions) {
-    const resolver = isRTL ? defaultRtlStyleqResolver : defaultLtrStyleqResolver;
-    return resolver(styles);
-  }
-
-  const mergedPreprocessOptions = {
-    ...defaultPreprocessOptions,
-    ...preprocessOptions
-  };
-  return createStyleqResolver(isRTL, mergedPreprocessOptions)(styles);
+  })(styles);
 }
 
 function insertRules(compiledOrderedRules) {
@@ -111,23 +128,68 @@ function compileAndInsertReset(style, key) {
   return compiledStyle;
 }
 
-function getPrecompiledStyleEntry(precompiledStyles, key) {
+function getPrecompiledStyleEntry(
+  precompiledStyles: ?PrecompiledStyleMap,
+  key: string
+): PrecompiledStyleEntry | null {
   if (precompiledStyles == null) {
     return null;
   }
-  const previewPayload = precompiledStyles.__rnwTvStaticPreview;
+  const previewPayload = precompiledStyles.__rnwTvStatic;
   if (previewPayload == null) {
     return null;
   }
-  const entry = previewPayload[key];
-  if (
-    entry != null &&
-    entry.compiledStyle != null &&
-    Array.isArray(entry.compiledOrderedRules)
-  ) {
-    return entry;
+  return toPrecompiledStyleEntry(previewPayload[key]);
+}
+
+function createWithPrecompiled<T: Object>(
+  styles: T,
+  precompiledStyles?: PrecompiledStyleMap
+): $ReadOnly<T> {
+  const sourceStyles = styles || {};
+  const previewPayload =
+    precompiledStyles != null ? precompiledStyles.__rnwTvStatic : null;
+
+  const keys = new Set(Object.keys(sourceStyles));
+  if (previewPayload != null && typeof previewPayload === 'object') {
+    Object.keys(previewPayload).forEach((key) => {
+      keys.add(key);
+    });
   }
-  return null;
+
+  const result = {};
+
+  keys.forEach((key) => {
+    const styleObj = sourceStyles[key];
+    const precompiledEntry = getPrecompiledStyleEntry(precompiledStyles, key);
+
+    if (precompiledEntry != null) {
+      insertRules(precompiledEntry.compiledOrderedRules);
+      result[key] = precompiledEntry.compiledStyle;
+      if (styleObj != null) {
+        staticStyleMap.set(styleObj, precompiledEntry.compiledStyle);
+      }
+      return;
+    }
+
+    if (styleObj != null && styleObj.$$css !== true) {
+      let compiledStyles;
+      if (key.indexOf('$raw') > -1) {
+        compiledStyles = compileAndInsertReset(styleObj, key.split('$raw')[0]);
+      } else {
+        if (process.env.NODE_ENV !== 'production') {
+          validate(styleObj);
+          sourceStyles[key] = Object.freeze(styleObj);
+        }
+        compiledStyles = compileAndInsertAtomic(styleObj);
+      }
+      staticStyleMap.set(styleObj, compiledStyles);
+    }
+
+    result[key] = sourceStyles[key];
+  });
+
+  return ((result: any): $ReadOnly<T>);
 }
 
 /* ----- API ----- */
@@ -145,17 +207,9 @@ const absoluteFill = create({ x: { ...absoluteFillObject } }).x;
 /**
  * create
  */
-function create<T: Object>(styles: T, precompiledStyles?: any): $ReadOnly<T> {
+function create<T: Object>(styles: T): $ReadOnly<T> {
   Object.keys(styles).forEach((key) => {
     const styleObj = styles[key];
-    const precompiledEntry = getPrecompiledStyleEntry(precompiledStyles, key);
-
-    if (precompiledEntry != null && styleObj != null) {
-      insertRules(precompiledEntry.compiledOrderedRules);
-      staticStyleMap.set(styleObj, precompiledEntry.compiledStyle);
-      return;
-    }
-
     // Only compile at runtime if the style is not already compiled
     if (styleObj != null && styleObj.$$css !== true) {
       let compiledStyles;
@@ -247,6 +301,7 @@ function StyleSheet(styles: any, options?: Options = {}): StyleProps {
 StyleSheet.absoluteFill = absoluteFill;
 StyleSheet.absoluteFillObject = absoluteFillObject;
 StyleSheet.create = create;
+StyleSheet.createWithPrecompiled = createWithPrecompiled;
 StyleSheet.compose = compose;
 StyleSheet.flatten = flatten;
 StyleSheet.getSheet = getSheet;
@@ -263,6 +318,7 @@ export type IStyleSheet = {
   absoluteFill: Object,
   absoluteFillObject: Object,
   create: typeof create,
+  createWithPrecompiled: typeof createWithPrecompiled,
   compose: typeof compose,
   flatten: typeof flatten,
   getSheet: typeof getSheet,

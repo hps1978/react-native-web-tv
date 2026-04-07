@@ -50,7 +50,7 @@ module.exports = {
                   [
                     staticStylePropPlugin,
                     {
-                      target: 'react-native-web',
+                      target: 'react-native-web-tv',
                       transpileStaticStyleProps: true
                     }
                   ]

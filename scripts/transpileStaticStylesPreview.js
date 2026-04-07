@@ -36,10 +36,12 @@ if (!fs.existsSync(inputFile)) {
   process.exit(1);
 }
 
-const defaultOutput = path.join(rootDir, 'tmp', 'transpiled-static-styles-preview.js');
-const outputFile = outputArg
-  ? path.resolve(rootDir, outputArg)
-  : defaultOutput;
+const defaultOutput = path.join(
+  rootDir,
+  'tmp',
+  'transpiled-static-styles-preview.js'
+);
+const outputFile = outputArg ? path.resolve(rootDir, outputArg) : defaultOutput;
 
 const result = babel.transformFileSync(inputFile, {
   configFile: false,
@@ -72,8 +74,10 @@ fs.writeFileSync(outputFile, result.code, 'utf8');
 console.log(`Wrote transpiled preview: ${path.relative(rootDir, outputFile)}`);
 if (mode === 'replace') {
   console.log(
-    'Replace mode: first StyleSheet.create argument is compiled styles; look for "$$css" and "__rnwTvStaticPreview".'
+    'Replace mode: first StyleSheet.create argument is compiled styles; look for "$$css" and "__rnwTvStatic".'
   );
 } else {
-  console.log('Preview mode: look for "__rnwTvStaticPreview" next to StyleSheet.create.');
+  console.log(
+    'Preview mode: look for "__rnwTvStatic" next to StyleSheet.create.'
+  );
 }

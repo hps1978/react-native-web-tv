@@ -9,26 +9,22 @@ const loadStaticStyleCompiler = () => {
     return staticStyleCompiler;
   }
 
-  // Load vendored and transpiled RNW compiler.
-  // The vendor/ directory is populated during `npm run build` and
-  // contains transpiled (Flow-stripped, CommonJS) copies of RNW source.
   try {
     // eslint-disable-next-line global-require
     const {
       preprocess
-    } = require('../vendor/rnw-compiler/StyleSheet/preprocess.js');
+    } = require('../vendor/rnw-compiler/src/exports/StyleSheet/preprocess');
     // eslint-disable-next-line global-require
     const {
       atomic,
       classic
-    } = require('../vendor/rnw-compiler/StyleSheet/compiler/index.js');
+    } = require('../vendor/rnw-compiler/src/exports/StyleSheet/compiler');
 
     staticStyleCompiler = { preprocess, atomic, classic };
     return staticStyleCompiler;
-  } catch (err) {
+  } catch (error) {
     throw new Error(
-      'Unable to load vendored RNW compiler. Did you run `npm run build` in babel-plugin-react-native-web? ' +
-        `Original error: ${err.message}`
+      `Unable to load vendored static style compiler for babel-plugin-react-native-web-tv. Run the sync and build scripts for the plugin package. Original error: ${error.message}`
     );
   }
 };
@@ -208,12 +204,12 @@ const createInlinePrecompiledStyleAst = (
 
   const previewPayload = {
     ...compiled,
-    __rnwTvStaticPreviewId: createInlinePrecompiledId(styleKey, compiled)
+    __rnwTvStaticId: createInlinePrecompiledId(styleKey, compiled)
   };
 
   return t.objectExpression([
     t.objectProperty(
-      t.identifier('__rnwTvStaticPreview'),
+      t.identifier('__rnwTvStatic'),
       objectToAst(t, previewPayload)
     )
   ]);
@@ -407,31 +403,95 @@ const createStaticStylePreviewArg = (t, stylesNode) => {
 
   return t.objectExpression([
     t.objectProperty(
-      t.identifier('__rnwTvStaticPreview'),
+      t.identifier('__rnwTvStatic'),
       objectToAst(t, payload.precompiled)
     )
   ]);
 };
 
-const createReplacedStylesAst = (t, stylesNode) => {
-  const stylesObject = evalStaticNode(stylesNode);
-  if (stylesObject == null || typeof stylesObject !== 'object') {
+const getObjectPropertyKeyName = (t, property) => {
+  if (!t.isObjectProperty(property) || property.computed) {
+    return null;
+  }
+  if (t.isIdentifier(property.key)) {
+    return property.key.name;
+  }
+  if (t.isStringLiteral(property.key)) {
+    return property.key.value;
+  }
+  return null;
+};
+
+const shouldEmitLeanStaticCreate = () =>
+  process.env.NODE_ENV === 'production' ||
+  process.env.BABEL_ENV === 'production';
+
+const createStaticStyleCreateArgs = (t, stylesNode, options = {}) => {
+  if (!t.isObjectExpression(stylesNode)) {
     return null;
   }
 
-  const payload = buildStaticStylePayload(stylesObject);
-  if (payload == null) {
+  const lean = options.lean === true;
+  const previewPayload = {};
+  const dynamicProperties = [];
+
+  stylesNode.properties.forEach((property) => {
+    if (!t.isObjectProperty(property) || property.computed) {
+      dynamicProperties.push(t.cloneNode(property, true));
+      return;
+    }
+
+    const styleKey = getObjectPropertyKeyName(t, property);
+    if (styleKey == null) {
+      dynamicProperties.push(t.cloneNode(property, true));
+      return;
+    }
+
+    const staticStyleObject = evalStaticNode(property.value);
+    if (
+      staticStyleObject == null ||
+      typeof staticStyleObject !== 'object' ||
+      Array.isArray(staticStyleObject)
+    ) {
+      dynamicProperties.push(t.cloneNode(property, true));
+      return;
+    }
+
+    const compiled = compileSingleStaticStyle(staticStyleObject, styleKey);
+    if (compiled == null) {
+      dynamicProperties.push(t.cloneNode(property, true));
+      return;
+    }
+
+    previewPayload[styleKey] = {
+      ...compiled,
+      __rnwTvStaticId: createInlinePrecompiledId(styleKey, compiled)
+    };
+
+    if (!lean) {
+      dynamicProperties.push(t.cloneNode(property, true));
+    }
+  });
+
+  const precompiledKeys = Object.keys(previewPayload);
+  if (precompiledKeys.length === 0) {
     return null;
   }
+
+  const stylesArg = lean
+    ? t.objectExpression(dynamicProperties)
+    : t.cloneNode(stylesNode, true);
+
+  const precompiledArg = t.objectExpression([
+    t.objectProperty(
+      t.identifier('__rnwTvStatic'),
+      objectToAst(t, previewPayload)
+    )
+  ]);
 
   return {
-    stylesAst: objectToAst(t, payload.replacedStyles),
-    precompiledAst: t.objectExpression([
-      t.objectProperty(
-        t.identifier('__rnwTvStaticPreview'),
-        objectToAst(t, payload.precompiled)
-      )
-    ])
+    stylesArg,
+    precompiledArg
   };
 };
 
@@ -626,9 +686,25 @@ module.exports = function ({ types: t }) {
         }
 
         if (state.opts.extractStaticStylesReplace === true) {
-          const replaced = createReplacedStylesAst(t, node.arguments[0]);
-          if (replaced != null) {
-            node.arguments = [replaced.stylesAst, replaced.precompiledAst];
+          const transformed = createStaticStyleCreateArgs(
+            t,
+            node.arguments[0],
+            {
+              lean: shouldEmitLeanStaticCreate()
+            }
+          );
+          if (transformed != null) {
+            node.arguments = [
+              transformed.stylesArg,
+              transformed.precompiledArg
+            ];
+            if (
+              t.isMemberExpression(node.callee) &&
+              !node.callee.computed &&
+              t.isIdentifier(node.callee.property, { name: 'create' })
+            ) {
+              node.callee.property = t.identifier('createWithPrecompiled');
+            }
           }
           return;
         }

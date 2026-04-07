@@ -93,6 +93,60 @@ describe('StyleSheet', () => {
     });
   });
 
+  describe('createWithPrecompiled', () => {
+    test('supports static-only precompiled styles', () => {
+      const styles = StyleSheet.createWithPrecompiled(
+        {},
+        {
+          __rnwTvStatic: {
+            root: {
+              compiledStyle: {
+                $$css: true,
+                color: 'precompiled-color-red'
+              },
+              compiledOrderedRules: [
+                [['.precompiled-color-red{color:rgba(255,0,0,1.00);}'], 3]
+              ]
+            }
+          }
+        }
+      );
+
+      expect(StyleSheet(styles.root)).toEqual(['precompiled-color-red', null]);
+    });
+
+    test('supports mixed precompiled and runtime-compiled styles', () => {
+      const getDynamicOpacity = () => (Date.now() > 0 ? 0.5 : 1);
+      const dynamicOpacity = getDynamicOpacity();
+
+      const styles = StyleSheet.createWithPrecompiled(
+        {
+          root: { color: 'red' },
+          dynamic: { opacity: dynamicOpacity }
+        },
+        {
+          __rnwTvStatic: {
+            root: {
+              compiledStyle: {
+                $$css: true,
+                color: 'precompiled-color-red'
+              },
+              compiledOrderedRules: [
+                [['.precompiled-color-red{color:rgba(255,0,0,1.00);}'], 3]
+              ]
+            }
+          }
+        }
+      );
+
+      expect(StyleSheet(styles.root)).toEqual(['precompiled-color-red', null]);
+
+      const [dynamicClassName, dynamicInline] = StyleSheet(styles.dynamic);
+      expect(dynamicClassName.length).toBeGreaterThan(0);
+      expect(dynamicInline).toBe(null);
+    });
+  });
+
   describe('flatten', () => {
     test('should merge style objects', () => {
       const style = StyleSheet.flatten([{ opacity: 1 }, { order: 2 }]);
@@ -191,6 +245,74 @@ describe('StyleSheet', () => {
           null,
         ]
       `);
+    });
+
+    test('transforms branch-static inline precompiled payloads to className', () => {
+      expect(
+        StyleSheet([
+          {
+            __rnwTvStatic: {
+              __rnwTvStaticId: 'rnwtv_branch_static_inline_red',
+              compiledStyle: {
+                $$css: true,
+                color: 'branch-static-inline-red'
+              },
+              compiledOrderedRules: [
+                [['.branch-static-inline-red{color:rgba(255,0,0,1.00);}'], 3]
+              ]
+            }
+          }
+        ])
+      ).toEqual(['branch-static-inline-red', null]);
+    });
+
+    test('dedupes branch-static inline precompiled rule insertion by stable id', () => {
+      const first = {
+        __rnwTvStatic: {
+          __rnwTvStaticId: 'rnwtv_branch_static_dedupe_green',
+          compiledStyle: {
+            $$css: true,
+            backgroundColor: 'branch-static-inline-green'
+          },
+          compiledOrderedRules: [
+            [
+              [
+                '.branch-static-inline-green{background-color:rgba(0,255,0,1.00);}'
+              ],
+              3
+            ]
+          ]
+        }
+      };
+      const second = {
+        __rnwTvStatic: {
+          __rnwTvStaticId: 'rnwtv_branch_static_dedupe_green',
+          compiledStyle: {
+            $$css: true,
+            backgroundColor: 'branch-static-inline-green'
+          },
+          compiledOrderedRules: [
+            [
+              [
+                '.branch-static-inline-green{background-color:rgba(0,255,0,1.00);}'
+              ],
+              3
+            ]
+          ]
+        }
+      };
+
+      expect(StyleSheet([first])).toEqual(['branch-static-inline-green', null]);
+      expect(StyleSheet([second])).toEqual([
+        'branch-static-inline-green',
+        null
+      ]);
+
+      const matches =
+        StyleSheet.getSheet().textContent.match(
+          /branch-static-inline-green/g
+        ) || [];
+      expect(matches).toHaveLength(1);
     });
 
     test('transforms array of compiled objects to className', () => {

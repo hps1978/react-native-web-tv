@@ -5,10 +5,24 @@
   "name": "babel-plugin-react-native-web-tv",
   "version": "0.21.2-tv.10",
   "description": "Babel plugin for React Native Web for TV",
-  "main": "index.js",
+  "main": "dist/src/index.js",
+  "files": [
+    "LICENSE",
+    "README.md",
+    "dist"
+  ],
   "scripts": {
-    "build": "node scripts/buildVendoredCompiler.js",
-    "prepublishOnly": "npm run build"
+    "clean": "del-cli ./dist",
+    "build:src": "cross-env BABEL_ENV=commonjs babel src --config-file ../../configs/babel.config.js --out-dir dist/src --ignore \"**/__tests__\"",
+    "build:vendor": "cross-env BABEL_ENV=commonjs babel vendor --config-file ../../configs/babel.config.js --out-dir dist/vendor",
+    "build": "npm-run-all clean build:src build:vendor",
+    "sync:static-style-compiler": "node ./scripts/syncStaticStyleCompiler.js",
+    "verify:static-style-compiler": "node ./scripts/verifyStaticStyleCompiler.js"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.18.6",
+    "@react-native/normalize-colors": "^0.74.1",
+    "inline-style-prefixer": "^7.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.23.0",
