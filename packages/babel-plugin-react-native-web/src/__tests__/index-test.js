@@ -1,4 +1,5 @@
 const plugin = require('../index');
+const runtimePlugin = require('../../dist/src/index');
 const pluginTester = require('babel-plugin-tester').default;
 const babel = require('@babel/core');
 
@@ -107,7 +108,7 @@ describe('static style replace mode', () => {
       parserOpts: {
         plugins: ['jsx']
       },
-      plugins: [[plugin, pluginOptions]]
+      plugins: [[runtimePlugin, pluginOptions]]
     }).code;
 
   test('rewrites StyleSheet.create to createWithPrecompiled', () => {
@@ -116,11 +117,11 @@ describe('static style replace mode', () => {
 const styles = StyleSheet.create({
   root: { marginLeft: 12, color: 'red' }
 });`,
-      { extractStaticStylesReplace: true }
+      { transpileStyles: true }
     );
 
     expect(output).toContain('StyleSheet.createWithPrecompiled(');
-    expect(output).toContain('__rnwTvStatic');
+    expect(output).toContain('__rnwMeta');
   });
 
   test('preserves mixed dynamic styles while precompiling static keys', () => {
@@ -131,13 +132,13 @@ const styles = StyleSheet.create({
   root: { marginLeft: 12, color: 'red' },
   dynamic: isFocused ? { opacity: 1 } : { opacity: 0.5 }
 });`,
-      { extractStaticStylesReplace: true }
+      { transpileStyles: true }
     );
 
     expect(output).toContain('StyleSheet.createWithPrecompiled(');
     expect(output).toContain('dynamic: isFocused ?');
-    expect(output).toContain('__rnwTvStatic');
-    expect(output).toContain('"root"');
+    expect(output).toContain('__rnwMeta');
+    expect(output).toContain('root:');
   });
 
   test('transpiles complex style prop arrays with static object literals and keeps dynamic values', () => {
@@ -161,10 +162,10 @@ export default function Example({ isFocused, isCompact }) {
     />
   );
 }`,
-      { transpileStaticStyleProps: true }
+      { transpileStyles: true }
     );
 
-    expect(output).toContain('__rnwTvStatic');
+    expect(output).toContain('__rnwMeta');
     expect(output).toContain('dynamicOpacity');
     expect(output).toContain('externalStyle');
     expect(output).toContain('isFocused &&');
@@ -188,10 +189,10 @@ export default function Example({ palette, state, emphasis }) {
     />
   );
 }`,
-      { transpileStaticStyleProps: true }
+      { transpileStyles: true }
     );
 
-    expect(output).toContain('__rnwTvStatic');
+    expect(output).toContain('__rnwMeta');
     expect(output).toContain('runtimeColor');
     expect(output).toContain('emphasis &&');
     expect(output).toContain('style={[');
@@ -209,12 +210,11 @@ export default function Example({ isFocused }) {
     />
   );
 }`,
-      { transpileStaticStyleProps: true }
+      { transpileStyles: true }
     );
 
     expect(output).toContain('isFocused ?');
-    expect(output).toContain('__rnwTvStaticId');
-    expect((output.match(/__rnwTvStatic:/g) || []).length).toBe(2);
+    expect((output.match(/__rnwMeta:/g) || []).length).toBe(2);
   });
 
   test('transpiles referenced static branches to inline payloads', () => {
@@ -230,12 +230,237 @@ const variants = {
 export default function Example({ isFocused }) {
   return <View style={isFocused ? variants.focused : variants.idle} />;
 }`,
-      { transpileStaticStyleProps: true }
+      { transpileStyles: true }
     );
 
     expect(output).toContain('isFocused ?');
-    expect(output).toContain('__rnwTvStaticId');
     expect(output).not.toContain('variants.focused');
     expect(output).not.toContain('variants.idle');
+  });
+
+  test('transpiles StyleSheet.flatten argument objects with __rnwMeta', () => {
+    const output = transform(
+      `import { StyleSheet } from 'react-native-web-tv';
+const dynamicOpacity = Math.random() > 0.5 ? 1 : 0.35;
+const style = StyleSheet.flatten([
+  { padding: 8, backgroundColor: 'red' },
+  { opacity: dynamicOpacity }
+]);`,
+      { transpileStyles: true }
+    );
+
+    expect(output).toContain('StyleSheet.flatten([');
+    expect(output).toContain('__rnwMeta');
+    expect(output).toContain('opacity: dynamicOpacity');
+  });
+
+  test('preserves mixed segment order for static and dynamic object keys', () => {
+    const output = transform(
+      `import React from 'react';
+import { View } from 'react-native-web-tv';
+
+export default function Example({ dynamicLeft }) {
+  return (
+    <View
+      style={{
+        position: 'absolute',
+        left: dynamicLeft,
+        backgroundColor: 'red'
+      }}
+    />
+  );
+}`,
+      { transpileStyles: true }
+    );
+
+    const normalized = output.replace(/\s+/g, '');
+    const firstStaticIndex = normalized.indexOf('"k":0,"sk":["position"]');
+    const dynamicIndex = normalized.indexOf('"k":1,"sk":["left"]');
+    const secondStaticIndex = normalized.indexOf(
+      '"k":0,"sk":["backgroundColor"]'
+    );
+
+    expect(firstStaticIndex).toBeGreaterThan(-1);
+    expect(dynamicIndex).toBeGreaterThan(-1);
+    expect(secondStaticIndex).toBeGreaterThan(-1);
+    expect(firstStaticIndex).toBeLessThan(dynamicIndex);
+    expect(dynamicIndex).toBeLessThan(secondStaticIndex);
+  });
+
+  test('splits mixed style objects in source order', () => {
+    const output = transform(
+      `import React from 'react';
+import { View } from 'react-native-web-tv';
+
+export default function Example({ dynamicLeft }) {
+  return (
+    <View
+      style={{
+        position: 'absolute',
+        left: dynamicLeft,
+        backgroundColor: 'red'
+      }}
+    />
+  );
+}`,
+      { transpileStyles: true }
+    );
+
+    expect(output).toContain('__rnwMeta');
+    expect(output).toContain('left: dynamicLeft');
+    expect(output).toContain('segments:');
+  });
+
+  test('keeps transformed arrays flat when mixed object splits inside arrays', () => {
+    const output = transform(
+      `import React from 'react';
+import { View } from 'react-native-web-tv';
+
+const externalStyle = { borderWidth: 2 };
+
+export default function Example({ dynamicLeft }) {
+  return (
+    <View
+      style={[
+        {
+          position: 'absolute',
+          left: dynamicLeft,
+          backgroundColor: 'red'
+        },
+        externalStyle
+      ]}
+    />
+  );
+}`,
+      { transpileStyles: true }
+    );
+
+    expect(output).toContain('style={[');
+    expect(output).toContain('externalStyle');
+    expect(output).not.toContain('style={[[{');
+  });
+
+  test('does not re-annotate objects that already contain __rnwMeta', () => {
+    const output = transform(
+      `import React from 'react';
+import { View } from 'react-native-web-tv';
+
+export default function Example() {
+  return (
+    <View
+      style={{
+        color: 'red',
+        __rnwMeta: {
+          segments: [
+            {
+              k: 0,
+              sk: ['color'],
+              cs: { $$css: true, color: 'existing-color-class' },
+              cr: [[['.existing-color-class{color:rgba(255,0,0,1.00);}'], 3]]
+            }
+          ]
+        }
+      }}
+    />
+  );
+}`,
+      { transpileStyles: true }
+    );
+
+    expect((output.match(/__rnwMeta/g) || []).length).toBe(1);
+    expect(output).toContain('existing-color-class');
+  });
+
+  test('keeps spread-based create style entries on runtime path', () => {
+    const output = transform(
+      `import { StyleSheet } from 'react-native-web-tv';
+const base = { width: '100%', height: '100%' };
+const styles = StyleSheet.create({
+  safe: { marginLeft: 12, color: 'red' },
+  withSpread: {
+    ...base,
+    maxHeight: 42,
+    maxWidth: 42
+  }
+});`,
+      { transpileStyles: true }
+    );
+
+    expect(output).toContain('StyleSheet.createWithPrecompiled(');
+    expect(output).toContain('safe:');
+    expect(output).toContain('__rnwMeta');
+    expect(output).toContain('withSpread: {');
+    expect(output).toContain('...base');
+    expect(output).toContain('__rnwMeta: undefined');
+  });
+
+  test('shadows inherited metadata for inline object expressions containing spread', () => {
+    const output = transform(
+      `import React from 'react';
+import { View } from 'react-native-web-tv';
+
+const base = { width: '100%', height: '100%' };
+
+export default function Example() {
+  return <View style={{ ...base, maxHeight: 42, maxWidth: 42 }} />;
+}`,
+      { transpileStyles: true }
+    );
+
+    expect(output).toContain('...base');
+    expect(output).toContain('maxHeight: 42');
+    expect(output).toContain('maxWidth: 42');
+    expect(output).toContain('__rnwMeta: undefined');
+  });
+
+  test('keeps StyleSheet.create for spread-only style maps', () => {
+    const output = transform(
+      `import { StyleSheet } from 'react-native-web-tv';
+const base = { width: '100%', height: '100%' };
+const styles = StyleSheet.create({
+  withSpread: {
+    ...base,
+    maxHeight: 42,
+    maxWidth: 42
+  }
+});`,
+      { transpileStyles: true }
+    );
+
+    expect(output).toContain('StyleSheet.create({');
+    expect(output).not.toContain('StyleSheet.createWithPrecompiled(');
+    expect(output).toContain('__rnwMeta: undefined');
+  });
+
+  test('keeps __rnwMeta shadow as the last key for multi-spread objects', () => {
+    const output = transform(
+      `import { StyleSheet } from 'react-native-web-tv';
+const baseA = { alignItems: 'center' };
+const baseB = { width: '100%' };
+const styles = StyleSheet.create({
+  backButton: {
+    ...baseA,
+    ...baseB,
+    position: 'absolute',
+    paddingHorizontal: 12,
+    flexDirection: 'row'
+  }
+});`,
+      { transpileStyles: true }
+    );
+
+    const backButtonStart = output.indexOf('backButton: {');
+    const backButtonEnd = output.indexOf('\n  }', backButtonStart);
+    const backButtonBlock = output.slice(backButtonStart, backButtonEnd);
+
+    expect(backButtonBlock).toContain('...baseA');
+    expect(backButtonBlock).toContain('...baseB');
+    expect(backButtonBlock).toContain('__rnwMeta: undefined');
+
+    const metaIndex = backButtonBlock.lastIndexOf('__rnwMeta: undefined');
+    const flexDirectionIndex = backButtonBlock.lastIndexOf(
+      "flexDirection: 'row'"
+    );
+    expect(metaIndex).toBeGreaterThan(flexDirectionIndex);
   });
 });

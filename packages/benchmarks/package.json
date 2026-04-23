@@ -5,8 +5,11 @@
   "scripts": {
     "clean": "del-cli ./dist",
     "build": "NODE_ENV=production npm run dev",
-    "build:no-transpile": "BENCH_STATIC_STYLE_PROP_TRANSPILE=false NODE_ENV=production npm run dev",
-    "build:transpile": "BENCH_STATIC_STYLE_PROP_TRANSPILE=true NODE_ENV=production npm run dev",
+    "build:no-transpile": "BENCH_TRANSPILE_STYLES=false NODE_ENV=production npm run dev",
+    "build:transpile": "BENCH_TRANSPILE_STYLES=true NODE_ENV=production npm run dev",
+    "build:transpile-props": "npm run build:transpile",
+    "build:transpile-create": "npm run build:transpile",
+    "build:transpile-both": "npm run build:transpile",
     "dev": "npm run clean && mkdir -p dist && cp -f index.html dist/index.html && webpack --config ./webpack.config.js",
     "verify": "npm run build",
     "postinstall": "npm run patch:apply",

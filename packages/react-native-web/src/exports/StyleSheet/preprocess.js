@@ -188,7 +188,9 @@ export const preprocess = <T: {| [key: string]: any |}>(
       originalProp === 'shadowRadius' ||
       originalProp === 'textShadowColor' ||
       originalProp === 'textShadowOffset' ||
-      originalProp === 'textShadowRadius'
+      originalProp === 'textShadowRadius' ||
+      // Ignore internal RNW metadata marker
+      originalProp === '__rnwMeta'
     ) {
       continue;
     }

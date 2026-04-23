@@ -15,61 +15,92 @@ import { styleq } from 'styleq';
 import { validate } from './validate';
 import canUseDOM from '../../modules/canUseDom';
 
-type PrecompiledStyleMap = {
-  __rnwTvStatic?: { [key: string]: mixed }
+/**
+ * __rnwMeta segment shapes (compact field names for bundle size).
+ * k  = kind: 0 (static) | 1 (dynamic)
+ * sk = sourceKeys: authored property names covered by this segment
+ * cs = compiledStyle: compiled token object (static segments only)
+ * cr = compiledOrderedRules: CSS rule tuples (static segments only)
+ *
+ * NOTE: __rnwMeta is a reserved internal key. Do not use this property name
+ * in application style objects. SSR is not supported by this metadata path.
+ */
+type RnwMetaStaticSegment = {
+  k: 0,
+  sk: Array<string>,
+  cs: Object,
+  cr: Array<[Array<string>, number]>
 };
-type PrecompiledStyleEntry = {
-  compiledStyle: Object,
-  compiledOrderedRules: Array<[Array<string>, number]>
+type RnwMetaDynamicSegment = {
+  k: 1,
+  sk: Array<string>
+};
+type RnwMetaSegment = RnwMetaStaticSegment | RnwMetaDynamicSegment;
+type RnwMeta = {
+  segments: Array<RnwMetaSegment> | null,
+  hydrated?: boolean
 };
 
 const staticStyleMap: WeakMap<Object, Object> = new WeakMap();
-const insertedPrecompiledStyleIds: Set<string> = new Set();
 const sheet = createSheet();
+const RNW_META_SEGMENT_STATIC = 0;
+const RNW_META_SEGMENT_DYNAMIC = 1;
 
 const defaultPreprocessOptions = { shadow: true, textShadow: true };
 
-function toPrecompiledStyleEntry(value: mixed): PrecompiledStyleEntry | null {
-  if (value == null || typeof value !== 'object') {
+/**
+ * Eagerly hydrate a style object's __rnwMeta segments into staticStyleMap.
+ * Returns the compiled style, or null if the object has no metadata.
+ * Idempotent: skips if already cached.
+ */
+function hydrateObjectMeta(styleObj: Object): Object | null {
+  // Idempotency: already cached
+  const cached = staticStyleMap.get(styleObj);
+  if (cached != null) {
+    return cached;
+  }
+
+  const meta: RnwMeta = (styleObj.__rnwMeta: any);
+  if (meta == null || !Array.isArray(meta.segments)) {
     return null;
   }
 
-  const entry: PrecompiledStyleEntry = (value: any);
-  if (
-    entry.compiledStyle != null &&
-    Array.isArray(entry.compiledOrderedRules)
-  ) {
-    return entry;
+  const compiledAccumulator = {};
+
+  for (let i = 0; i < meta.segments.length; i++) {
+    const segment = meta.segments[i];
+    if (segment.k === RNW_META_SEGMENT_STATIC) {
+      if (segment.cs != null && typeof segment.cs === 'object') {
+        insertRules(segment.cr);
+        Object.assign(compiledAccumulator, segment.cs);
+      }
+    } else if (segment.k === RNW_META_SEGMENT_DYNAMIC) {
+      // Compile only the dynamic keys from the current authored object values
+      const dynamicSlice = {};
+      for (let j = 0; j < segment.sk.length; j++) {
+        const sourceKey = segment.sk[j];
+        if (sourceKey === '__rnwMeta') {
+          continue;
+        }
+        dynamicSlice[sourceKey] = styleObj[sourceKey];
+      }
+      if (Object.keys(dynamicSlice).length > 0) {
+        const compiledDynamic = compileAndInsertAtomic(dynamicSlice);
+        Object.assign(compiledAccumulator, compiledDynamic);
+      }
+    }
   }
 
-  return null;
-}
+  staticStyleMap.set(styleObj, compiledAccumulator);
 
-function getInlinePrecompiledStyleEntry(
-  style: mixed
-): PrecompiledStyleEntry | null {
-  if (style == null || typeof style !== 'object') {
-    return null;
+  // Free segment payload after hydration
+  if (process.env.NODE_ENV !== 'production') {
+    styleObj.__rnwMeta = { hydrated: true };
+  } else {
+    meta.segments = null;
   }
 
-  return toPrecompiledStyleEntry(((style: any).__rnwTvStatic: mixed));
-}
-
-function getInlinePrecompiledStyleId(style: mixed): string | null {
-  if (style == null || typeof style !== 'object') {
-    return null;
-  }
-
-  const precompiledStyle = ((style: any).__rnwTvStatic: mixed);
-  if (
-    precompiledStyle != null &&
-    typeof precompiledStyle === 'object' &&
-    typeof precompiledStyle.__rnwTvStaticId === 'string'
-  ) {
-    return precompiledStyle.__rnwTvStaticId;
-  }
-
-  return null;
+  return compiledAccumulator;
 }
 
 function customStyleq(styles, options: Options = {}) {
@@ -77,25 +108,25 @@ function customStyleq(styles, options: Options = {}) {
   const isRTL = writingDirection === 'rtl';
   return styleq.factory({
     transform(style) {
-      const precompiledEntry = getInlinePrecompiledStyleEntry(style);
-      if (precompiledEntry != null) {
-        const precompiledStyleId = getInlinePrecompiledStyleId(style);
-        if (
-          precompiledStyleId == null ||
-          !insertedPrecompiledStyleIds.has(precompiledStyleId)
-        ) {
-          insertRules(precompiledEntry.compiledOrderedRules);
-          if (precompiledStyleId != null) {
-            insertedPrecompiledStyleIds.add(precompiledStyleId);
-          }
-        }
-        return localizeStyle(precompiledEntry.compiledStyle, isRTL);
-      }
-
+      // 1. Cache hit: already hydrated via create() or createWithPrecompiled()
       const compiledStyle = staticStyleMap.get(style);
       if (compiledStyle != null) {
         return localizeStyle(compiledStyle, isRTL);
       }
+
+      // 2. Inline __rnwMeta: hydrate segments now (e.g. inline JSX style prop)
+      if (
+        style != null &&
+        typeof style === 'object' &&
+        style.__rnwMeta != null
+      ) {
+        const hydrated = hydrateObjectMeta(style);
+        if (hydrated != null) {
+          return localizeStyle(hydrated, isRTL);
+        }
+      }
+
+      // 3. Fallback: runtime preprocess (plain dynamic style objects)
       return preprocess(style, {
         ...defaultPreprocessOptions,
         ...preprocessOptions
@@ -105,10 +136,20 @@ function customStyleq(styles, options: Options = {}) {
 }
 
 function insertRules(compiledOrderedRules) {
+  if (!Array.isArray(compiledOrderedRules)) {
+    return;
+  }
+
   compiledOrderedRules.forEach(([rules, order]) => {
+    if (!Array.isArray(rules)) {
+      return;
+    }
+
     if (sheet != null) {
       rules.forEach((rule) => {
-        sheet.insert(rule, order);
+        if (typeof rule === 'string') {
+          sheet.insert(rule, order);
+        }
       });
     }
   });
@@ -128,51 +169,39 @@ function compileAndInsertReset(style, key) {
   return compiledStyle;
 }
 
-function getPrecompiledStyleEntry(
-  precompiledStyles: ?PrecompiledStyleMap,
-  key: string
-): PrecompiledStyleEntry | null {
-  if (precompiledStyles == null) {
-    return null;
-  }
-  const previewPayload = precompiledStyles.__rnwTvStatic;
-  if (previewPayload == null) {
-    return null;
-  }
-  return toPrecompiledStyleEntry(previewPayload[key]);
-}
-
-function createWithPrecompiled<T: Object>(
-  styles: T,
-  precompiledStyles?: PrecompiledStyleMap
-): $ReadOnly<T> {
+/**
+ * createWithPrecompiled
+ * Single-argument form. The argument is an object whose values are authored
+ * style objects, each optionally carrying a __rnwMeta property with
+ * pre-compiled segment data generated by the Babel plugin.
+ *
+ * For style keys with __rnwMeta segments: eager hydration into staticStyleMap.
+ * For style keys without __rnwMeta: compiled at runtime like create().
+ */
+function createWithPrecompiled<T: Object>(styles: T): $ReadOnly<T> {
   const sourceStyles = styles || {};
-  const previewPayload =
-    precompiledStyles != null ? precompiledStyles.__rnwTvStatic : null;
-
-  const keys = new Set(Object.keys(sourceStyles));
-  if (previewPayload != null && typeof previewPayload === 'object') {
-    Object.keys(previewPayload).forEach((key) => {
-      keys.add(key);
-    });
-  }
-
   const result = {};
 
-  keys.forEach((key) => {
+  Object.keys(sourceStyles).forEach((key) => {
     const styleObj = sourceStyles[key];
-    const precompiledEntry = getPrecompiledStyleEntry(precompiledStyles, key);
 
-    if (precompiledEntry != null) {
-      insertRules(precompiledEntry.compiledOrderedRules);
-      result[key] = precompiledEntry.compiledStyle;
-      if (styleObj != null) {
-        staticStyleMap.set(styleObj, precompiledEntry.compiledStyle);
-      }
+    if (styleObj == null || typeof styleObj !== 'object') {
+      result[key] = styleObj;
       return;
     }
 
-    if (styleObj != null && styleObj.$$css !== true) {
+    // Idempotency: already in cache, skip all work
+    if (staticStyleMap.has(styleObj)) {
+      result[key] = styleObj;
+      return;
+    }
+
+    const meta = styleObj.__rnwMeta;
+    if (meta != null && Array.isArray(meta.segments)) {
+      // Eager hydration via segment data
+      hydrateObjectMeta(styleObj);
+    } else if (styleObj.$$css !== true) {
+      // No metadata: compile at runtime, same as create()
       let compiledStyles;
       if (key.indexOf('$raw') > -1) {
         compiledStyles = compileAndInsertReset(styleObj, key.split('$raw')[0]);
@@ -255,18 +284,113 @@ function compose(style1: any, style2: any): any {
 
 /**
  * flatten
+ * Merges style inputs left-to-right (last-write-wins).
+ * Pure upstream RNW behavior: compiles raw styles but does not handle precompiled metadata.
+ *
+ * For precompiled styles (with __rnwMeta segments), use flattenPrecompiled().
  */
 function flatten(...styles: any): { [key: string]: any } {
   const flatArray = styles.flat(Infinity);
-  const result = {};
+  const authoredAccumulator: { [key: string]: any } = {};
+
   for (let i = 0; i < flatArray.length; i++) {
     const style = flatArray[i];
-    if (style != null && typeof style === 'object') {
-      // $FlowFixMe
-      Object.assign(result, style);
+    if (style == null || typeof style !== 'object') {
+      continue;
+    }
+
+    // Merge all authored keys (skipping internal __rnwMeta marker)
+    const styleKeys = Object.keys(style);
+    for (let j = 0; j < styleKeys.length; j++) {
+      const k = styleKeys[j];
+      if (k !== '__rnwMeta') {
+        authoredAccumulator[k] = style[k];
+      }
     }
   }
-  return result;
+
+  return authoredAccumulator;
+}
+
+/**
+ * flattenPrecompiled
+ * Merges precompiled style inputs (with optional __rnwMeta segments from Babel plugin).
+ * Follows the same pattern as createWithPrecompiled(): eager hydration of segments,
+ * fallback to runtime compilation for non-precompiled inputs.
+ *
+ * Each input is resolved to its compiled form with minimal work:
+ *   - staticStyleMap hit  → O(1), no compile
+ *   - __rnwMeta segments  → hydrate once, O(1) thereafter
+ *   - raw dynamic object  → compile only that object's keys
+ *
+ * Returns the authored accumulator with __rnwMeta metadata set.
+ * The result is cached in staticStyleMap for direct style-prop usage.
+ */
+function flattenPrecompiled(...styles: any): { [key: string]: any } {
+  const flatArray = styles.flat(Infinity);
+
+  const authoredAccumulator: { [key: string]: any } = {};
+  const compiledAccumulator: { [key: string]: any } = {};
+  let hasAnyCompiled = false;
+
+  for (let i = 0; i < flatArray.length; i++) {
+    const style = flatArray[i];
+    if (style == null || typeof style !== 'object') {
+      continue;
+    }
+
+    // Merge authored keys into visible output (excluding internal __rnwMeta)
+    const styleKeys = Object.keys(style);
+    for (let j = 0; j < styleKeys.length; j++) {
+      const k = styleKeys[j];
+      if (k !== '__rnwMeta') {
+        authoredAccumulator[k] = style[k];
+      }
+    }
+
+    // Resolve compiled form for this input
+    const cached = staticStyleMap.get(style);
+    if (cached != null) {
+      Object.assign(compiledAccumulator, cached);
+      hasAnyCompiled = true;
+      continue;
+    }
+
+    const meta = style.__rnwMeta;
+    if (meta != null && Array.isArray(meta.segments)) {
+      const hydrated = hydrateObjectMeta(style);
+      if (hydrated != null) {
+        Object.assign(compiledAccumulator, hydrated);
+        hasAnyCompiled = true;
+        continue;
+      }
+    }
+
+    if (style.$$css === true) {
+      // Already a compiled token object (legacy path)
+      Object.assign(compiledAccumulator, style);
+      hasAnyCompiled = true;
+      continue;
+    }
+
+    // Raw dynamic object: compile its keys only
+    const compiled = compileAndInsertAtomic(style);
+    Object.assign(compiledAccumulator, compiled);
+    hasAnyCompiled = true;
+  }
+
+  if (!hasAnyCompiled) {
+    // All plain uncompiled objects — return authored merge without caching
+    return authoredAccumulator;
+  }
+
+  // Cache merged compiled result against the authored accumulator
+  staticStyleMap.set(authoredAccumulator, compiledAccumulator);
+
+  // Mark result with metadata to indicate precompiled hydration occurred
+  authoredAccumulator.__rnwMeta = { hydrated: true };
+
+  return authoredAccumulator;
 }
 
 /**
@@ -304,6 +428,7 @@ StyleSheet.create = create;
 StyleSheet.createWithPrecompiled = createWithPrecompiled;
 StyleSheet.compose = compose;
 StyleSheet.flatten = flatten;
+StyleSheet.flattenPrecompiled = flattenPrecompiled;
 StyleSheet.getSheet = getSheet;
 // `hairlineWidth` is not implemented using screen density as browsers may
 // round sub-pixel values down to `0`, causing the line not to be rendered.
@@ -321,6 +446,7 @@ export type IStyleSheet = {
   createWithPrecompiled: typeof createWithPrecompiled,
   compose: typeof compose,
   flatten: typeof flatten,
+  flattenPrecompiled: typeof flattenPrecompiled,
   getSheet: typeof getSheet,
   hairlineWidth: number
 };

@@ -145,24 +145,58 @@ const isUppercaseComponentElement = (t, jsxName) => {
   return true;
 };
 
-const hashString = (input) => {
-  let hash = 2166136261;
-  for (let i = 0; i < input.length; i += 1) {
-    hash ^= input.charCodeAt(i);
-    hash = Math.imul(hash, 16777619);
+const getObjectPropertyKeyName = (t, property) => {
+  if (!t.isObjectProperty(property) || property.computed) {
+    return null;
   }
-  return (hash >>> 0).toString(36);
+  if (t.isIdentifier(property.key)) {
+    return property.key.name;
+  }
+  if (t.isStringLiteral(property.key)) {
+    return property.key.value;
+  }
+  return null;
 };
 
-const createInlinePrecompiledId = (styleKey, compiled) => {
-  const serialized = JSON.stringify({
-    styleKey,
-    compiledStyle: compiled.compiledStyle,
-    compiledOrderedRules: compiled.compiledOrderedRules
+const hasRnwMetaProperty = (t, objectNode) =>
+  t.isObjectExpression(objectNode) &&
+  objectNode.properties.some((property) => {
+    const key = getObjectPropertyKeyName(t, property);
+    return key === '__rnwMeta';
   });
-  return `rnwtv_${hashString(serialized)}`;
+
+const hasSpreadProperty = (t, objectNode) =>
+  t.isObjectExpression(objectNode) &&
+  objectNode.properties.some((property) => t.isSpreadElement(property));
+
+const createMetaShadowedObjectNode = (t, objectNode) => {
+  if (!t.isObjectExpression(objectNode)) {
+    return null;
+  }
+  // Only shadow inherited metadata on spread-based objects.
+  if (!hasSpreadProperty(t, objectNode) || hasRnwMetaProperty(t, objectNode)) {
+    return null;
+  }
+
+  return t.objectExpression([
+    ...objectNode.properties.map((p) => t.cloneNode(p, true)),
+    t.objectProperty(t.identifier('__rnwMeta'), t.identifier('undefined'))
+  ]);
 };
 
+const RNW_META_SEGMENT_STATIC = 0;
+const RNW_META_SEGMENT_DYNAMIC = 1;
+
+const isStyleSheetFlattenCall = (t, node) =>
+  t.isMemberExpression(node.callee) &&
+  !node.callee.computed &&
+  t.isIdentifier(node.callee.object, { name: 'StyleSheet' }) &&
+  t.isIdentifier(node.callee.property, { name: 'flatten' });
+
+/**
+ * Compile a plain static style object for a given style key.
+ * Returns { cs: compiledStyle, cr: compiledOrderedRules } or null.
+ */
 const compileSingleStaticStyle = (styleObject, styleKey = 'style') => {
   let compiler;
   try {
@@ -171,7 +205,6 @@ const compileSingleStaticStyle = (styleObject, styleKey = 'style') => {
     return null;
   }
 
-  let preprocessed = styleObject;
   let compiledStyle;
   let compiledOrderedRules;
 
@@ -181,37 +214,125 @@ const compileSingleStaticStyle = (styleObject, styleKey = 'style') => {
       styleKey.split('$raw')[0]
     );
   } else {
-    preprocessed = compiler.preprocess(styleObject, defaultPreprocessOptions);
+    const preprocessed = compiler.preprocess(
+      styleObject,
+      defaultPreprocessOptions
+    );
     [compiledStyle, compiledOrderedRules] = compiler.atomic(preprocessed);
   }
 
-  return {
-    preprocessed,
-    compiledStyle,
-    compiledOrderedRules
-  };
+  return { cs: compiledStyle, cr: compiledOrderedRules };
 };
 
-const createInlinePrecompiledStyleAst = (
-  t,
-  styleObject,
-  styleKey = 'style'
-) => {
-  const compiled = compileSingleStaticStyle(styleObject, styleKey);
-  if (compiled == null) {
+/**
+ * Build ordered __rnwMeta segments AST for an ObjectExpression node.
+ * Walks properties in authored order, grouping consecutive static keys into
+ * static segments and emitting dynamic segments for non-evaluable keys.
+ * Returns an ArrayExpression AST representing the segments array, or null if
+ * no static keys were found.
+ *
+ * Segment shape (compact field names, documented in plugin README):
+ *   { k: 0, sk: [...], cs: {...}, cr: [...] }
+ *   { k: 1, sk: [...] }
+ */
+const buildSegmentsForObjectNode = (t, objectNode, styleKey = 'style') => {
+  if (!t.isObjectExpression(objectNode)) {
     return null;
   }
 
-  const previewPayload = {
-    ...compiled,
-    __rnwTvStaticId: createInlinePrecompiledId(styleKey, compiled)
+  // Already annotated object: avoid re-compiling internal metadata as style keys.
+  if (hasRnwMetaProperty(t, objectNode)) {
+    return null;
+  }
+
+  const segments = [];
+  let staticKeys = [];
+  let staticValues = {};
+  let hasAnyStatic = false;
+  let hasUnsupportedProperty = false;
+
+  const flushStaticGroup = () => {
+    if (staticKeys.length === 0) return;
+    const compiled = compileSingleStaticStyle(staticValues, styleKey);
+    if (compiled != null) {
+      segments.push({
+        k: RNW_META_SEGMENT_STATIC,
+        sk: staticKeys,
+        cs: compiled.cs,
+        cr: compiled.cr
+      });
+      hasAnyStatic = true;
+    }
+    staticKeys = [];
+    staticValues = {};
   };
+
+  objectNode.properties.forEach((property) => {
+    if (hasUnsupportedProperty) {
+      return;
+    }
+
+    // Only handle plain non-computed object properties as static candidates
+    if (t.isObjectProperty(property) && !property.computed) {
+      const key = getObjectPropertyKeyName(t, property);
+      if (key != null) {
+        if (key === '__rnwMeta') {
+          flushStaticGroup();
+          return;
+        }
+        const staticValue = evalStaticNode(property.value);
+        if (staticValue !== undefined) {
+          staticKeys.push(key);
+          staticValues[key] = staticValue;
+          return;
+        }
+        // Non-evaluable property: flush static group, emit dynamic segment
+        flushStaticGroup();
+        segments.push({ k: RNW_META_SEGMENT_DYNAMIC, sk: [key] });
+        return;
+      }
+    }
+    // Spread/computed/object methods cannot be represented safely; bail out
+    // so the full object remains on the runtime path.
+    hasUnsupportedProperty = true;
+  });
+
+  if (hasUnsupportedProperty) {
+    return null;
+  }
+
+  flushStaticGroup();
+
+  if (!hasAnyStatic) {
+    return null; // Nothing benefited from pre-compilation
+  }
 
   return t.objectExpression([
     t.objectProperty(
-      t.identifier('__rnwTvStatic'),
-      objectToAst(t, previewPayload)
+      t.identifier('segments'),
+      t.arrayExpression(segments.map((seg) => objectToAst(t, seg)))
     )
+  ]);
+};
+
+/**
+ * Annotate an ObjectExpression AST node with a __rnwMeta property containing
+ * ordered segments. Returns a new ObjectExpression with __rnwMeta appended,
+ * or null if no static segments could be derived.
+ */
+const annotateObjectNodeWithMeta = (t, objectNode, styleKey = 'style') => {
+  if (hasRnwMetaProperty(t, objectNode)) {
+    return null;
+  }
+
+  const metaAst = buildSegmentsForObjectNode(t, objectNode, styleKey);
+  if (metaAst == null) {
+    return null;
+  }
+
+  return t.objectExpression([
+    ...objectNode.properties.map((p) => t.cloneNode(p, true)),
+    t.objectProperty(t.identifier('__rnwMeta'), metaAst)
   ]);
 };
 
@@ -289,13 +410,26 @@ const transformStyleExpressionNode = (t, path, node) => {
   }
 
   if (t.isArrayExpression(node)) {
-    return t.arrayExpression(
-      node.elements.map((element) =>
-        element == null
-          ? element
-          : transformStyleExpressionNode(t, path, element)
-      )
-    );
+    const transformedElements = [];
+
+    node.elements.forEach((element) => {
+      if (element == null) {
+        transformedElements.push(element);
+        return;
+      }
+
+      const transformedElement = transformStyleExpressionNode(t, path, element);
+      if (t.isArrayExpression(transformedElement)) {
+        transformedElement.elements.forEach((nestedElement) => {
+          transformedElements.push(nestedElement);
+        });
+        return;
+      }
+
+      transformedElements.push(transformedElement);
+    });
+
+    return t.arrayExpression(transformedElements);
   }
 
   if (t.isLogicalExpression(node) && node.operator === '&&') {
@@ -315,183 +449,93 @@ const transformStyleExpressionNode = (t, path, node) => {
   }
 
   if (t.isObjectExpression(node)) {
-    const staticStyleObject = evalStaticNode(node);
-    if (
-      staticStyleObject != null &&
-      typeof staticStyleObject === 'object' &&
-      !Array.isArray(staticStyleObject)
-    ) {
-      const transformed = createInlinePrecompiledStyleAst(t, staticStyleObject);
-      if (transformed != null) {
-        return transformed;
-      }
-    }
-    return node;
+    return (
+      annotateObjectNodeWithMeta(t, node) ||
+      createMetaShadowedObjectNode(t, node) ||
+      node
+    );
   }
 
   const resolvedReference = resolveStaticStyleFromReference(t, path, node);
   if (resolvedReference != null) {
-    const transformed = createInlinePrecompiledStyleAst(
-      t,
-      resolvedReference.styleObject,
-      resolvedReference.styleKey
-    );
-    if (transformed != null) {
-      return transformed;
+    // Build a new ObjectExpression for the resolved static object and annotate it
+    const resolvedNode = objectToAst(t, resolvedReference.styleObject);
+    if (t.isObjectExpression(resolvedNode)) {
+      return (
+        annotateObjectNodeWithMeta(
+          t,
+          resolvedNode,
+          resolvedReference.styleKey
+        ) || node
+      );
     }
   }
 
   return node;
 };
 
-const buildStaticStylePayload = (stylesObject) => {
-  let compiler;
-  try {
-    compiler = loadStaticStyleCompiler();
-  } catch (error) {
-    return null;
-  }
-
-  const precompiled = {};
-  const replacedStyles = {};
-  const styleKeys = Object.keys(stylesObject);
-  for (const styleKey of styleKeys) {
-    const styleValue = stylesObject[styleKey];
-    if (
-      styleValue == null ||
-      typeof styleValue !== 'object' ||
-      Array.isArray(styleValue)
-    ) {
-      return null;
-    }
-
-    let preprocessed = styleValue;
-    let compiledStyle;
-    let compiledOrderedRules;
-
-    if (styleKey.indexOf('$raw') > -1) {
-      [compiledStyle, compiledOrderedRules] = compiler.classic(
-        styleValue,
-        styleKey.split('$raw')[0]
-      );
-    } else {
-      preprocessed = compiler.preprocess(styleValue, defaultPreprocessOptions);
-      [compiledStyle, compiledOrderedRules] = compiler.atomic(preprocessed);
-    }
-
-    precompiled[styleKey] = {
-      preprocessed,
-      compiledStyle,
-      compiledOrderedRules
-    };
-    replacedStyles[styleKey] = compiledStyle;
-  }
-
-  return { precompiled, replacedStyles };
-};
-
-const createStaticStylePreviewArg = (t, stylesNode) => {
-  const stylesObject = evalStaticNode(stylesNode);
-  if (stylesObject == null || typeof stylesObject !== 'object') {
-    return null;
-  }
-
-  const payload = buildStaticStylePayload(stylesObject);
-  if (payload == null) {
-    return null;
-  }
-
-  return t.objectExpression([
-    t.objectProperty(
-      t.identifier('__rnwTvStatic'),
-      objectToAst(t, payload.precompiled)
-    )
-  ]);
-};
-
-const getObjectPropertyKeyName = (t, property) => {
-  if (!t.isObjectProperty(property) || property.computed) {
-    return null;
-  }
-  if (t.isIdentifier(property.key)) {
-    return property.key.name;
-  }
-  if (t.isStringLiteral(property.key)) {
-    return property.key.value;
-  }
-  return null;
-};
-
-const shouldEmitLeanStaticCreate = () =>
-  process.env.NODE_ENV === 'production' ||
-  process.env.BABEL_ENV === 'production';
-
-const createStaticStyleCreateArgs = (t, stylesNode, options = {}) => {
+/**
+ * For each style key in a StyleSheet.create({...}) call:
+ * - If the value is a static ObjectExpression: annotate with __rnwMeta segments.
+ * - If the value is a mixed ObjectExpression: annotate with ordered segments.
+ * - If not statically evaluable: leave as-is (runtime compile path).
+ *
+ * Returns transformed create argument metadata, or null if nothing changed.
+ */
+const createStaticStyleCreateArgs = (t, stylesNode) => {
   if (!t.isObjectExpression(stylesNode)) {
     return null;
   }
 
-  const lean = options.lean === true;
-  const previewPayload = {};
-  const dynamicProperties = [];
+  const newProperties = [];
+  let anyAnnotated = false;
+  let anyMutated = false;
 
   stylesNode.properties.forEach((property) => {
     if (!t.isObjectProperty(property) || property.computed) {
-      dynamicProperties.push(t.cloneNode(property, true));
+      newProperties.push(t.cloneNode(property, true));
       return;
     }
 
     const styleKey = getObjectPropertyKeyName(t, property);
     if (styleKey == null) {
-      dynamicProperties.push(t.cloneNode(property, true));
+      newProperties.push(t.cloneNode(property, true));
       return;
     }
 
-    const staticStyleObject = evalStaticNode(property.value);
-    if (
-      staticStyleObject == null ||
-      typeof staticStyleObject !== 'object' ||
-      Array.isArray(staticStyleObject)
-    ) {
-      dynamicProperties.push(t.cloneNode(property, true));
+    // Only annotate ObjectExpression values (not ternaries, calls, etc.)
+    if (!t.isObjectExpression(property.value)) {
+      newProperties.push(t.cloneNode(property, true));
       return;
     }
 
-    const compiled = compileSingleStaticStyle(staticStyleObject, styleKey);
-    if (compiled == null) {
-      dynamicProperties.push(t.cloneNode(property, true));
-      return;
-    }
-
-    previewPayload[styleKey] = {
-      ...compiled,
-      __rnwTvStaticId: createInlinePrecompiledId(styleKey, compiled)
-    };
-
-    if (!lean) {
-      dynamicProperties.push(t.cloneNode(property, true));
+    const annotated = annotateObjectNodeWithMeta(t, property.value, styleKey);
+    if (annotated != null) {
+      anyAnnotated = true;
+      anyMutated = true;
+      newProperties.push(
+        t.objectProperty(t.cloneNode(property.key, true), annotated)
+      );
+    } else {
+      const shadowed = createMetaShadowedObjectNode(t, property.value);
+      if (shadowed != null) {
+        anyMutated = true;
+        newProperties.push(
+          t.objectProperty(t.cloneNode(property.key, true), shadowed)
+        );
+      } else {
+        newProperties.push(t.cloneNode(property, true));
+      }
     }
   });
 
-  const precompiledKeys = Object.keys(previewPayload);
-  if (precompiledKeys.length === 0) {
+  if (!anyMutated) {
     return null;
   }
 
-  const stylesArg = lean
-    ? t.objectExpression(dynamicProperties)
-    : t.cloneNode(stylesNode, true);
-
-  const precompiledArg = t.objectExpression([
-    t.objectProperty(
-      t.identifier('__rnwTvStatic'),
-      objectToAst(t, previewPayload)
-    )
-  ]);
-
   return {
-    stylesArg,
-    precompiledArg
+    stylesArg: t.objectExpression(newProperties),
+    hasPrecompiledEntries: anyAnnotated
   };
 };
 
@@ -681,45 +725,44 @@ module.exports = function ({ types: t }) {
       },
       CallExpression(path, state) {
         const { node } = path;
-        if (!isStyleSheetCreateCall(t, node) || node.arguments.length !== 1) {
-          return;
-        }
 
-        if (state.opts.extractStaticStylesReplace === true) {
-          const transformed = createStaticStyleCreateArgs(
-            t,
-            node.arguments[0],
-            {
-              lean: shouldEmitLeanStaticCreate()
+        if (state.opts.transpileStyles === true) {
+          // Handle StyleSheet.create(...)
+          if (isStyleSheetCreateCall(t, node) && node.arguments.length === 1) {
+            const transformed = createStaticStyleCreateArgs(
+              t,
+              node.arguments[0]
+            );
+            if (transformed != null) {
+              node.arguments = [transformed.stylesArg];
+              if (transformed.hasPrecompiledEntries) {
+                if (
+                  t.isMemberExpression(node.callee) &&
+                  !node.callee.computed &&
+                  t.isIdentifier(node.callee.property, { name: 'create' })
+                ) {
+                  node.callee.property = t.identifier('createWithPrecompiled');
+                }
+              }
             }
-          );
-          if (transformed != null) {
-            node.arguments = [
-              transformed.stylesArg,
-              transformed.precompiledArg
-            ];
-            if (
-              t.isMemberExpression(node.callee) &&
-              !node.callee.computed &&
-              t.isIdentifier(node.callee.property, { name: 'create' })
-            ) {
-              node.callee.property = t.identifier('createWithPrecompiled');
-            }
+            return;
           }
-          return;
-        }
 
-        if (state.opts.extractStaticStylesPreview !== true) {
-          return;
-        }
+          // Handle StyleSheet.flatten([...])
+          if (isStyleSheetFlattenCall(t, node) && node.arguments.length === 1) {
+            const arg = node.arguments[0];
+            const transformedArg = transformStyleExpressionNode(t, path, arg);
+            if (transformedArg !== arg) {
+              node.arguments = [transformedArg];
+            }
+            return;
+          }
 
-        const previewArg = createStaticStylePreviewArg(t, node.arguments[0]);
-        if (previewArg != null) {
-          node.arguments.push(previewArg);
+          return;
         }
       },
       JSXAttribute(path, state) {
-        if (state.opts.transpileStaticStyleProps !== true) {
+        if (state.opts.transpileStyles !== true) {
           return;
         }
 

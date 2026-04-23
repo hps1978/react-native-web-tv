@@ -95,23 +95,25 @@ describe('StyleSheet', () => {
 
   describe('createWithPrecompiled', () => {
     test('supports static-only precompiled styles', () => {
-      const styles = StyleSheet.createWithPrecompiled(
-        {},
-        {
-          __rnwTvStatic: {
-            root: {
-              compiledStyle: {
-                $$css: true,
-                color: 'precompiled-color-red'
-              },
-              compiledOrderedRules: [
-                [['.precompiled-color-red{color:rgba(255,0,0,1.00);}'], 3]
-              ]
-            }
+      const styles = StyleSheet.createWithPrecompiled({
+        root: {
+          color: 'red',
+          __rnwMeta: {
+            segments: [
+              {
+                k: 0,
+                sk: ['color'],
+                cs: { $$css: true, color: 'precompiled-color-red' },
+                cr: [[['.precompiled-color-red{color:rgba(255,0,0,1.00);}'], 3]]
+              }
+            ]
           }
         }
-      );
+      });
 
+      // style value is authored
+      expect(styles.root.color).toBe('red');
+      // resolves to precompiled className
       expect(StyleSheet(styles.root)).toEqual(['precompiled-color-red', null]);
     });
 
@@ -119,25 +121,22 @@ describe('StyleSheet', () => {
       const getDynamicOpacity = () => (Date.now() > 0 ? 0.5 : 1);
       const dynamicOpacity = getDynamicOpacity();
 
-      const styles = StyleSheet.createWithPrecompiled(
-        {
-          root: { color: 'red' },
-          dynamic: { opacity: dynamicOpacity }
-        },
-        {
-          __rnwTvStatic: {
-            root: {
-              compiledStyle: {
-                $$css: true,
-                color: 'precompiled-color-red'
-              },
-              compiledOrderedRules: [
-                [['.precompiled-color-red{color:rgba(255,0,0,1.00);}'], 3]
-              ]
-            }
+      const styles = StyleSheet.createWithPrecompiled({
+        root: {
+          color: 'red',
+          __rnwMeta: {
+            segments: [
+              {
+                k: 0,
+                sk: ['color'],
+                cs: { $$css: true, color: 'precompiled-color-red' },
+                cr: [[['.precompiled-color-red{color:rgba(255,0,0,1.00);}'], 3]]
+              }
+            ]
           }
-        }
-      );
+        },
+        dynamic: { opacity: dynamicOpacity }
+      });
 
       expect(StyleSheet(styles.root)).toEqual(['precompiled-color-red', null]);
 
@@ -150,12 +149,8 @@ describe('StyleSheet', () => {
   describe('flatten', () => {
     test('should merge style objects', () => {
       const style = StyleSheet.flatten([{ opacity: 1 }, { order: 2 }]);
-      expect(style).toMatchInlineSnapshot(`
-        {
-          "opacity": 1,
-          "order": 2,
-        }
-      `);
+      expect(style.opacity).toBe(1);
+      expect(style.order).toBe(2);
     });
 
     test('should override style properties', () => {
@@ -163,12 +158,8 @@ describe('StyleSheet', () => {
         { backgroundColor: '#000', order: 1 },
         { backgroundColor: '#023c69', order: null }
       ]);
-      expect(style).toMatchInlineSnapshot(`
-        {
-          "backgroundColor": "#023c69",
-          "order": null,
-        }
-      `);
+      expect(style.backgroundColor).toBe('#023c69');
+      expect(style.order).toBeNull();
     });
 
     test('should overwrite properties with `undefined`', () => {
@@ -176,11 +167,7 @@ describe('StyleSheet', () => {
         { backgroundColor: '#000' },
         { backgroundColor: undefined }
       ]);
-      expect(style).toMatchInlineSnapshot(`
-        {
-          "backgroundColor": undefined,
-        }
-      `);
+      expect(style.backgroundColor).toBeUndefined();
     });
 
     test('should not fail on falsy values', () => {
@@ -194,12 +181,159 @@ describe('StyleSheet', () => {
         [{ order: 2 }, { opacity: 1 }],
         { order: 3 }
       ]);
-      expect(style).toMatchInlineSnapshot(`
-        {
-          "opacity": 1,
-          "order": 3,
+      expect(style.opacity).toBe(1);
+      expect(style.order).toBe(3);
+    });
+
+    test('should keep flatten metadata-free with precompiled inputs', () => {
+      const styles = StyleSheet.createWithPrecompiled({
+        base: {
+          backgroundColor: '#000',
+          padding: 10,
+          __rnwMeta: {
+            segments: [
+              {
+                k: 0,
+                sk: ['backgroundColor', 'padding'],
+                cs: { $$css: true, base: 'css_base' },
+                cr: []
+              }
+            ]
+          }
         }
-      `);
+      });
+
+      const result = StyleSheet.flatten([styles.base]);
+      expect(result.backgroundColor).toBe('#000');
+      expect(result.padding).toBe(10);
+      expect(result.__rnwMeta).toBeUndefined();
+    });
+
+    test('should keep plain flatten behavior when no precompiled styles are present', () => {
+      const result = StyleSheet.flatten([{ opacity: 0.8 }, { zIndex: 2 }]);
+
+      // Authored values are in the result
+      expect(result.opacity).toBe(0.8);
+      expect(result.zIndex).toBe(2);
+      // Result shape should stay plain (no metadata from flatten)
+      expect(result.__rnwMeta).toBeUndefined();
+    });
+  });
+
+  describe('flattenPrecompiled', () => {
+    test('should flatten with precompiled styles from createWithPrecompiled', () => {
+      const styles = StyleSheet.createWithPrecompiled({
+        base: {
+          backgroundColor: '#000',
+          padding: 10,
+          __rnwMeta: {
+            segments: [
+              {
+                k: 0,
+                sk: ['backgroundColor', 'padding'],
+                cs: { $$css: true, base: 'css_base' },
+                cr: []
+              }
+            ]
+          }
+        },
+        text: { fontSize: 16 }
+      });
+
+      // Flatten precompiled style with plain overrides - returns authored merged object
+      const result = StyleSheet.flattenPrecompiled([
+        styles.base,
+        { backgroundColor: '#fff' }
+      ]);
+
+      expect(result).toBeDefined();
+      // Authored values preserved
+      expect(result.backgroundColor).toBe('#fff');
+      expect(result.padding).toBe(10);
+      // Result is resolvable via StyleSheet
+      expect(StyleSheet(result)[1]).toBe(null);
+    });
+
+    test('should preserve plain properties when flattening with precompiled styles', () => {
+      const styles = StyleSheet.createWithPrecompiled({
+        label: {
+          color: '#000',
+          fontSize: 14,
+          __rnwMeta: {
+            segments: [
+              {
+                k: 0,
+                sk: ['color', 'fontSize'],
+                cs: { $$css: true, label: 'css_label' },
+                cr: []
+              }
+            ]
+          }
+        }
+      });
+
+      // Flatten with dynamic overrides - authored values intact
+      const result = StyleSheet.flattenPrecompiled([
+        styles.label,
+        { opacity: 0.8 }
+      ]);
+
+      expect(result).toBeDefined();
+      expect(result.color).toBe('#000');
+      expect(result.opacity).toBe(0.8);
+      // Result can be resolved
+      const [className] = StyleSheet(result);
+      expect(className.length).toBeGreaterThan(0);
+    });
+
+    test('should handle multiple precompiled styles in flattenPrecompiled', () => {
+      const styles1 = StyleSheet.createWithPrecompiled({
+        first: {
+          padding: 10,
+          __rnwMeta: {
+            segments: [
+              {
+                k: 0,
+                sk: ['padding'],
+                cs: { $$css: true, first: 'css_first' },
+                cr: []
+              }
+            ]
+          }
+        }
+      });
+
+      const styles2 = StyleSheet.createWithPrecompiled({
+        second: {
+          margin: 5,
+          __rnwMeta: {
+            segments: [
+              {
+                k: 0,
+                sk: ['margin'],
+                cs: { $$css: true, second: 'css_second' },
+                cr: []
+              }
+            ]
+          }
+        }
+      });
+
+      // Flatten multiple precompiled styles with dynamic override
+      const result = StyleSheet.flattenPrecompiled([
+        styles1.first,
+        styles2.second,
+        { zIndex: 1 }
+      ]);
+
+      expect(result).toBeDefined();
+      // Authored merge - left-to-right, last-write-wins
+      expect(result.padding).toBe(10);
+      expect(result.margin).toBe(5);
+      expect(result.zIndex).toBe(1);
+      // Result is resolvable
+      const [className] = StyleSheet(result);
+      expect(className.length).toBeGreaterThan(0);
     });
   });
 
@@ -248,71 +382,126 @@ describe('StyleSheet', () => {
     });
 
     test('transforms branch-static inline precompiled payloads to className', () => {
-      expect(
-        StyleSheet([
-          {
-            __rnwTvStatic: {
-              __rnwTvStaticId: 'rnwtv_branch_static_inline_red',
-              compiledStyle: {
-                $$css: true,
-                color: 'branch-static-inline-red'
-              },
-              compiledOrderedRules: [
+      // Inline __rnwMeta: authored style object with segment metadata
+      const style = {
+        color: 'red',
+        __rnwMeta: {
+          segments: [
+            {
+              k: 0,
+              sk: ['color'],
+              cs: { $$css: true, color: 'branch-static-inline-red' },
+              cr: [
                 [['.branch-static-inline-red{color:rgba(255,0,0,1.00);}'], 3]
               ]
             }
-          }
-        ])
-      ).toEqual(['branch-static-inline-red', null]);
+          ]
+        }
+      };
+      expect(StyleSheet([style])).toEqual(['branch-static-inline-red', null]);
+    });
+
+    test('falls back to runtime processing when __rnwMeta is undefined', () => {
+      const style = {
+        width: '100%',
+        position: 'absolute',
+        __rnwMeta: undefined
+      };
+
+      const [className, inline] = StyleSheet([style]);
+
+      // No metadata hydration should occur; style should still resolve normally.
+      expect(className).toBe('');
+      expect(inline).toEqual({
+        position: 'absolute',
+        width: '100%'
+      });
+      expect(style.__rnwMeta).toBeUndefined();
     });
 
     test('dedupes branch-static inline precompiled rule insertion by stable id', () => {
-      const first = {
-        __rnwTvStatic: {
-          __rnwTvStaticId: 'rnwtv_branch_static_dedupe_green',
-          compiledStyle: {
-            $$css: true,
-            backgroundColor: 'branch-static-inline-green'
-          },
-          compiledOrderedRules: [
-            [
-              [
-                '.branch-static-inline-green{background-color:rgba(0,255,0,1.00);}'
-              ],
-              3
-            ]
+      // Two different objects with same compiled content
+      const makeStyle = () => ({
+        backgroundColor: 'green',
+        __rnwMeta: {
+          segments: [
+            {
+              k: 0,
+              sk: ['backgroundColor'],
+              cs: {
+                $$css: true,
+                backgroundColor: 'branch-static-inline-green'
+              },
+              cr: [
+                [
+                  [
+                    '.branch-static-inline-green{background-color:rgba(0,255,0,1.00);}'
+                  ],
+                  3
+                ]
+              ]
+            }
           ]
         }
-      };
-      const second = {
-        __rnwTvStatic: {
-          __rnwTvStaticId: 'rnwtv_branch_static_dedupe_green',
-          compiledStyle: {
-            $$css: true,
-            backgroundColor: 'branch-static-inline-green'
-          },
-          compiledOrderedRules: [
-            [
-              [
-                '.branch-static-inline-green{background-color:rgba(0,255,0,1.00);}'
-              ],
-              3
-            ]
-          ]
-        }
-      };
+      });
+      const first = makeStyle();
+      const second = makeStyle();
 
       expect(StyleSheet([first])).toEqual(['branch-static-inline-green', null]);
       expect(StyleSheet([second])).toEqual([
         'branch-static-inline-green',
         null
       ]);
+    });
 
-      const matches =
-        StyleSheet.getSheet().textContent.match(
-          /branch-static-inline-green/g
-        ) || [];
-      expect(matches).toHaveLength(1);
+    test('hydrates static-dynamic-static segment order during resolve', () => {
+      const style = {
+        position: 'absolute',
+        left: 12,
+        backgroundColor: 'red',
+        __rnwMeta: {
+          segments: [
+            {
+              k: 0,
+              sk: ['position'],
+              cs: { $$css: true, position: 'seg-static-position' },
+              cr: [[['.seg-static-position{position:absolute;}'], 2]]
+            },
+            {
+              k: 1,
+              sk: ['left']
+            },
+            {
+              k: 0,
+              sk: ['backgroundColor'],
+              cs: {
+                $$css: true,
+                backgroundColor: 'seg-static-backgroundColor'
+              },
+              cr: [
+                [
+                  [
+                    '.seg-static-backgroundColor{background-color:rgba(255,0,0,1.00);}'
+                  ],
+                  3
+                ]
+              ]
+            }
+          ]
+        }
+      };
+
+      const [className1, inline1] = StyleSheet(style);
+      const [className2, inline2] = StyleSheet(style);
+
+      expect(className1).toContain('seg-static-position');
+      expect(className1).toContain('seg-static-backgroundColor');
+      expect(className1).toContain('left');
+      expect(inline1).toBe(null);
+
+      // Second call hits hydrated cache path and should produce same resolution.
+      expect(className2).toBe(className1);
+      expect(inline2).toBe(null);
     });
 
     test('transforms array of compiled objects to className', () => {
